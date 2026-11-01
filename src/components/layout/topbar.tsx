@@ -114,8 +114,8 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
         icon: PenLine,
       },
       {
-        label: "Nilai Saya",
-        description: "Rekap transkrip nilai individu",
+        label: "Transkrip Siswa",
+        description: "Pratinjau transkrip & skor per siswa",
         href: "/admin/nilai-saya",
         icon: FileText,
       },
