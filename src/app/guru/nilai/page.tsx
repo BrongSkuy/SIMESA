@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as XLSX from "xlsx";
 import {
   PenLine,
@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { SessionSetup } from "@/components/shared/session-setup";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,6 +162,27 @@ export default function GuruNilaiPage() {
       }
     }
   }, [selectedKelas, selectedMapel, waliClasses, subjects]);
+
+  const mapelOptions = useMemo(() => {
+    const list: { value: string; label: string; sublabel?: string }[] = [];
+    if (isWaliKelas && waliClasses.includes(selectedKelas)) {
+      list.push({
+        value: "Umum",
+        label: "Umum / Semua Mapel",
+        sublabel: "Wali Kelas",
+      });
+    }
+    subjects
+      .filter((s) => s.kelas?.includes(selectedKelas))
+      .forEach((s) => {
+        list.push({
+          value: s.namaMapel,
+          label: s.namaMapel,
+          sublabel: "Mata Pelajaran Diampu",
+        });
+      });
+    return list;
+  }, [isWaliKelas, waliClasses, selectedKelas, subjects]);
 
   const handleLoad = useCallback(async () => {
     if (!selectedKelas || !selectedCriteria) return;
@@ -534,28 +556,14 @@ export default function GuruNilaiPage() {
             <Label className="text-xs font-semibold text-slate-700">
               Mata Pelajaran
             </Label>
-            <Select
+            <SearchableSelect
               value={selectedMapel}
-              onValueChange={(val: string | null) =>
-                val && setSelectedMapel(val)
-              }
-            >
-              <SelectTrigger className="h-9 w-full text-xs">
-                <SelectValue placeholder="Pilih Mapel" />
-              </SelectTrigger>
-              <SelectContent>
-                {isWaliKelas && waliClasses.includes(selectedKelas) && (
-                  <SelectItem value="Umum">Umum / Semua Mapel</SelectItem>
-                )}
-                {subjects
-                  .filter((s) => s.kelas?.includes(selectedKelas))
-                  .map((s, i) => (
-                    <SelectItem key={i} value={s.namaMapel}>
-                      {s.namaMapel}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              onValueChange={(val) => setSelectedMapel(val || "Umum")}
+              options={mapelOptions}
+              placeholder="Pilih atau cari mata pelajaran..."
+              searchPlaceholder="Ketik nama mapel (mis. Matematika, Kejuruan)..."
+              emptyMessage="Mata pelajaran tidak ditemukan"
+            />
           </div>
         </div>
 

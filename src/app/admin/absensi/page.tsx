@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as XLSX from "xlsx";
 import {
   ClipboardCheck,
@@ -22,6 +22,7 @@ import {
   SessionSetup,
   formatTanggalID,
 } from "@/components/shared/session-setup";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -111,6 +112,33 @@ export default function AdminAbsensiPage() {
   const isSunday = tanggal
     ? new Date(`${tanggal}T00:00:00`).getDay() === 0
     : false;
+
+  const mapelOptions = useMemo(() => {
+    const list = [
+      {
+        value: "Umum",
+        label: "Absen Pagi (Wali Kelas)",
+        sublabel: "Wali Kelas",
+      },
+    ];
+    subjects
+      .filter((s) => {
+        if (!s.kelasDiampu) return false;
+        return s.kelasDiampu
+          .split(",")
+          .map((k) => k.trim())
+          .includes(selectedKelas);
+      })
+      .forEach((s) => {
+        list.push({
+          value: s.namaMapel,
+          label: s.namaMapel,
+          sublabel: "Mata Pelajaran",
+        });
+      });
+    return list;
+  }, [subjects, selectedKelas]);
+
   const [historyData, setHistoryData] = useState<{
     dates: string[];
     records: HistoryRecord[];
@@ -606,30 +634,14 @@ export default function AdminAbsensiPage() {
             <Label className="text-xs font-semibold text-slate-700">
               Mata Pelajaran
             </Label>
-            <Select
+            <SearchableSelect
               value={selectedMapel}
               onValueChange={(val) => setSelectedMapel(val || "Umum")}
-            >
-              <SelectTrigger className="h-9 w-full text-xs">
-                <SelectValue placeholder="Pilih Mata Pelajaran" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Umum">Absen Pagi (Wali Kelas)</SelectItem>
-                {subjects
-                  .filter((s) => {
-                    if (!s.kelasDiampu) return false;
-                    return s.kelasDiampu
-                      .split(",")
-                      .map((k) => k.trim())
-                      .includes(selectedKelas);
-                  })
-                  .map((s, i) => (
-                    <SelectItem key={i} value={s.namaMapel}>
-                      {s.namaMapel}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              options={mapelOptions}
+              placeholder="Pilih atau cari mata pelajaran..."
+              searchPlaceholder="Ketik nama mapel (mis. Matematika, Avionic)..."
+              emptyMessage="Mata pelajaran tidak ditemukan"
+            />
           </div>
         </div>
 

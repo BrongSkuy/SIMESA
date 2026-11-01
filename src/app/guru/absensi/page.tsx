@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as XLSX from "xlsx";
 import {
   ClipboardCheck,
@@ -22,6 +22,7 @@ import {
   SessionSetup,
   formatTanggalID,
 } from "@/components/shared/session-setup";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,6 +126,28 @@ export default function GuruAbsensiPage() {
     : false;
   const [isWaliKelas, setIsWaliKelas] = useState(false);
   const [waliClasses, setWaliClasses] = useState<string[]>([]);
+
+  const mapelOptions = useMemo(() => {
+    const list: { value: string; label: string; sublabel?: string }[] = [];
+    if (isWaliKelas && waliClasses.includes(selectedKelas)) {
+      list.push({
+        value: "Umum",
+        label: "Absen Pagi (Wali Kelas)",
+        sublabel: "Wali Kelas",
+      });
+    }
+    subjects
+      .filter((s) => s.kelas?.includes(selectedKelas))
+      .forEach((s) => {
+        list.push({
+          value: s.namaMapel,
+          label: s.namaMapel,
+          sublabel: "Mata Pelajaran Diampu",
+        });
+      });
+    return list;
+  }, [isWaliKelas, waliClasses, selectedKelas, subjects]);
+
   const [historyData, setHistoryData] = useState<{
     dates: string[];
     records: HistoryRecord[];
@@ -665,28 +688,14 @@ export default function GuruAbsensiPage() {
             <Label className="text-xs font-semibold text-slate-700">
               Mata Pelajaran
             </Label>
-            <Select
+            <SearchableSelect
               value={selectedMapel}
-              onValueChange={(val) => setSelectedMapel(val as string)}
-            >
-              <SelectTrigger className="h-9 w-full text-xs">
-                <SelectValue placeholder="Pilih Mapel" />
-              </SelectTrigger>
-              <SelectContent>
-                {isWaliKelas && waliClasses.includes(selectedKelas) && (
-                  <SelectItem value="Umum">
-                    Absen Pagi (Wali Kelas)
-                  </SelectItem>
-                )}
-                {subjects
-                  .filter((s) => s.kelas?.includes(selectedKelas))
-                  .map((s, i) => (
-                    <SelectItem key={i} value={s.namaMapel}>
-                      {s.namaMapel}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              onValueChange={(val) => setSelectedMapel(val || "Umum")}
+              options={mapelOptions}
+              placeholder="Pilih atau cari mata pelajaran..."
+              searchPlaceholder="Ketik nama mapel (mis. Matematika, Fisika)..."
+              emptyMessage="Mata pelajaran tidak ditemukan"
+            />
           </div>
         </div>
 

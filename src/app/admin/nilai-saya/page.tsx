@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { SessionSetup } from "@/components/shared/session-setup";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -239,40 +240,27 @@ export default function AdminNilaiSayaPage() {
             <Label className="text-xs font-semibold text-slate-700">
               Pilih Siswa
             </Label>
-            <Select
-              value={selectedStudent || null}
-              onValueChange={(v) => setSelectedStudent(v || "")}
+            <SearchableSelect
+              value={selectedStudent}
+              onValueChange={(v) => setSelectedStudent(v)}
               disabled={!selectedKelas}
-            >
-              <SelectTrigger className="h-9 w-full text-xs">
-                <SelectValue
-                  placeholder={
-                    !selectedKelas
-                      ? "Pilih kelas terlebih dahulu..."
-                      : "Pilih Siswa..."
-                  }
-                >
-                  {selectedStudent
-                    ? selectedStudentObj
-                      ? `${selectedStudentObj.nis} - ${selectedStudentObj.namaLengkap}`
-                      : "Siswa terpilih"
-                    : undefined}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {students.length === 0 ? (
-                  <SelectItem value="none" disabled>
-                    Tidak ada siswa di kelas ini
-                  </SelectItem>
-                ) : (
-                  students.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {`${s.nis} - ${s.namaLengkap}`}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              placeholder={
+                !selectedKelas
+                  ? "Pilih kelas terlebih dahulu..."
+                  : "Pilih atau cari siswa..."
+              }
+              searchPlaceholder="Ketik nama atau NIS siswa..."
+              emptyMessage={
+                students.length === 0
+                  ? "Tidak ada siswa di kelas ini"
+                  : "Siswa tidak ditemukan"
+              }
+              options={students.map((s) => ({
+                value: s.id,
+                label: `${s.nis} · ${s.namaLengkap}`,
+                sublabel: `NIS: ${s.nis}`,
+              }))}
+            />
           </div>
         </div>
       </SessionSetup>
