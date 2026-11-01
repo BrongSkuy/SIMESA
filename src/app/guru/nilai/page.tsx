@@ -724,20 +724,20 @@ export default function GuruNilaiPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-600">
-                      <th className="px-4 py-3 font-semibold w-12 sticky left-0 bg-slate-50 z-10">
+                    <tr className="border-b border-slate-800 bg-[#091524] text-xs font-semibold text-slate-200">
+                      <th className="px-4 py-3 font-semibold w-12 sticky left-0 bg-[#091524] z-10 text-white border-r border-slate-800">
                         No
                       </th>
-                      <th className="px-4 py-3 font-semibold w-24 sticky left-12 bg-slate-50 z-10">
+                      <th className="px-4 py-3 font-semibold w-24 sticky left-12 bg-[#091524] z-10 text-slate-200 border-r border-slate-800">
                         NIS
                       </th>
-                      <th className="px-4 py-3 font-semibold min-w-[200px] whitespace-nowrap">
+                      <th className="px-4 py-3 font-semibold min-w-[200px] whitespace-nowrap text-white">
                         Nama Siswa
                       </th>
                       {categories.map((cat) => (
                         <th
                           key={cat}
-                          className="px-3 py-3 text-center font-semibold min-w-[120px]"
+                          className="px-3 py-3 text-center font-semibold min-w-[120px] text-slate-200"
                         >
                           <div className="flex items-center justify-center gap-1 group">
                             <span>{cat}</span>
@@ -745,7 +745,7 @@ export default function GuruNilaiPage() {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveCategory(cat)}
-                                className="text-rose-400 opacity-0 group-hover:opacity-100 hover:text-rose-600 transition-opacity"
+                                className="text-rose-400 opacity-0 group-hover:opacity-100 hover:text-rose-400 transition-opacity"
                                 title="Hapus Kategori"
                               >
                                 &times;
@@ -755,7 +755,7 @@ export default function GuruNilaiPage() {
                         </th>
                       ))}
                       {isAkademik && (
-                        <th className="px-4 py-3 text-center font-semibold text-blue-700 bg-blue-50/70 min-w-[110px]">
+                        <th className="px-4 py-3 text-center font-semibold text-blue-300 bg-blue-950/60 border-l border-slate-800 min-w-[110px]">
                           Rata-rata
                         </th>
                       )}

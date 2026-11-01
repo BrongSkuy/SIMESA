@@ -814,13 +814,13 @@ export default function GuruAbsensiPage() {
           <div className="border-b border-slate-200 overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-500 uppercase tracking-wider text-xs">
-                      <th className="px-5 py-3 font-semibold w-14">No</th>
-                      <th className="px-4 py-3 font-semibold w-28">NIS</th>
-                      <th className="px-4 py-3 font-semibold min-w-[220px] whitespace-nowrap">
+                    <tr className="border-b border-slate-800 bg-[#091524] text-slate-200 text-xs font-semibold">
+                      <th className="px-5 py-3 font-semibold w-14 text-white">No</th>
+                      <th className="px-4 py-3 font-semibold w-28 text-slate-300">NIS</th>
+                      <th className="px-4 py-3 font-semibold min-w-[220px] whitespace-nowrap text-white">
                         Nama Siswa
                       </th>
-                      <th className="px-5 py-3 text-center font-semibold">
+                      <th className="px-5 py-3 text-center font-semibold text-slate-200">
                         Status Kehadiran
                       </th>
                     </tr>
@@ -1053,16 +1053,16 @@ export default function GuruAbsensiPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-max text-left border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600">
+                    <thead className="bg-[#091524] border-b border-slate-800 text-xs text-slate-200">
                       <tr>
                         {/* Sticky Left Columns */}
-                        <th className="sticky left-0 z-20 bg-slate-50 px-3 py-3 font-semibold w-12 min-w-[48px] text-center border-r border-slate-200">
+                        <th className="sticky left-0 z-20 bg-[#091524] px-3 py-3 font-semibold w-12 min-w-[48px] text-center border-r border-slate-800 text-white">
                           No
                         </th>
-                        <th className="sticky left-12 z-20 bg-slate-50 px-3 py-3 font-semibold w-24 min-w-[96px] text-center border-r border-slate-200">
+                        <th className="sticky left-12 z-20 bg-[#091524] px-3 py-3 font-semibold w-24 min-w-[96px] text-center border-r border-slate-800 text-slate-300">
                           NIS
                         </th>
-                        <th className="sticky left-[144px] z-20 bg-slate-50 px-4 py-3 font-semibold min-w-[200px] border-r-2 border-slate-300 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.06)]">
+                        <th className="sticky left-[144px] z-20 bg-[#091524] px-4 py-3 font-semibold min-w-[200px] border-r-2 border-slate-700 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.3)] text-white">
                           Nama Siswa
                         </th>
 
@@ -1081,16 +1081,16 @@ export default function GuruAbsensiPage() {
                           return (
                             <th
                               key={date}
-                              className={`px-3 py-2.5 text-center font-semibold whitespace-nowrap border-r border-slate-100 ${
+                              className={`px-3 py-2.5 text-center font-semibold whitespace-nowrap border-r border-slate-800 ${
                                 isWeekend
-                                  ? "bg-amber-50/60 text-amber-900"
-                                  : ""
+                                  ? "bg-amber-950/40 text-amber-300"
+                                  : "text-slate-200"
                               }`}
                             >
                               <div className="text-[10px] text-slate-400 font-normal uppercase">
                                 {dayName}
                               </div>
-                              <div className="text-xs text-slate-700 font-semibold">
+                              <div className="text-xs text-slate-200 font-semibold">
                                 {dayMonth}
                               </div>
                             </th>
@@ -1099,31 +1099,31 @@ export default function GuruAbsensiPage() {
 
                         {/* Summary Columns */}
                         <th
-                          className="px-3 py-2.5 text-center font-bold text-emerald-700 bg-emerald-50/60 border-l-2 border-slate-300 w-12 min-w-[48px]"
+                          className="px-3 py-2.5 text-center font-bold text-emerald-300 bg-emerald-950/50 border-l-2 border-slate-700 w-12 min-w-[48px]"
                           title="Total Hadir"
                         >
                           H
                         </th>
                         <th
-                          className="px-3 py-2.5 text-center font-bold text-amber-700 bg-amber-50/60 border-l border-slate-200 w-12 min-w-[48px]"
+                          className="px-3 py-2.5 text-center font-bold text-amber-300 bg-amber-950/50 border-l border-slate-800 w-12 min-w-[48px]"
                           title="Total Izin"
                         >
                           I
                         </th>
                         <th
-                          className="px-3 py-2.5 text-center font-bold text-indigo-700 bg-indigo-50/60 border-l border-slate-200 w-12 min-w-[48px]"
+                          className="px-3 py-2.5 text-center font-bold text-indigo-300 bg-indigo-950/50 border-l border-slate-800 w-12 min-w-[48px]"
                           title="Total Sakit"
                         >
                           S
                         </th>
                         <th
-                          className="px-3 py-2.5 text-center font-bold text-rose-700 bg-rose-50/60 border-l border-slate-200 w-12 min-w-[48px]"
+                          className="px-3 py-2.5 text-center font-bold text-rose-300 bg-rose-950/50 border-l border-slate-800 w-12 min-w-[48px]"
                           title="Total Alfa"
                         >
                           A
                         </th>
                         <th
-                          className="px-3.5 py-2.5 text-center font-bold text-slate-700 bg-slate-100/80 border-l border-slate-200 min-w-[76px]"
+                          className="px-3.5 py-2.5 text-center font-bold text-slate-200 bg-slate-900 border-l border-slate-800 min-w-[76px]"
                           title="Persentase Kehadiran"
                         >
                           % Hadir
@@ -1253,15 +1253,15 @@ export default function GuruAbsensiPage() {
                           : 0;
 
                       return (
-                        <tfoot className="bg-slate-50 font-semibold text-xs border-t-2 border-slate-300">
+                        <tfoot className="bg-[#091524] font-semibold text-xs border-t-2 border-slate-800 text-white">
                           <tr>
                             <td
                               colSpan={3}
-                              className="sticky left-0 z-20 bg-slate-100 px-4 py-2.5 text-slate-700 border-r-2 border-slate-300 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.06)]"
+                              className="sticky left-0 z-20 bg-[#091524] px-4 py-2.5 text-white border-r-2 border-slate-700 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.3)]"
                             >
                               <div className="flex items-center justify-between">
-                                <span className="font-bold">Total Hadir Harian</span>
-                                <span className="text-[11px] text-slate-500 font-normal">
+                                <span className="font-bold text-white">Total Hadir Harian</span>
+                                <span className="text-[11px] text-slate-400 font-normal">
                                   ({historyData.records.length} Siswa)
                                 </span>
                               </div>
