@@ -27,12 +27,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
-import { Panel } from "@/components/shared/panel";
 import {
   Dialog,
   DialogContent,
@@ -375,6 +372,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Total Siswa"
             value={stats.totalSiswa}
             icon={Users}
@@ -391,6 +389,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Total Guru"
             value={stats.totalGuru}
             icon={GraduationCap}
@@ -401,6 +400,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title={
               stats.isTodayData === false
                 ? "Kehadiran Terakhir"
@@ -424,6 +424,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Status Evaluasi SPK"
             value={
               stats.isSpkPublished
@@ -443,269 +444,275 @@ export default function AdminDashboard() {
       </section>
 
       {/* Baris Grafik & Pintasan (2/3 + 1/3) */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         {/* Kolom Kiri: Visualisasi Grafik Presensi Recharts */}
-        <div className="lg:col-span-2 lg:border-r lg:border-slate-200 lg:pr-8">
-        <Panel
-          title="Grafik Presensi Siswa"
-          description="Rekapitulasi jumlah siswa hadir, izin, sakit, dan alfa"
-          action={
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Toggle Format: Tumpuk vs Berdampingan */}
-              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-medium gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setChartLayout("stacked")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
-                    chartLayout === "stacked"
-                      ? "bg-white text-slate-900 font-semibold shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  )}
-                  title="Tampilan Tumpuk (Rapi, Terpusat & Akumulatif)"
-                >
-                  Tumpuk
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setChartLayout("grouped")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
-                    chartLayout === "grouped"
-                      ? "bg-white text-slate-900 font-semibold shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  )}
-                  title="Tampilan Berdampingan"
-                >
-                  Berdampingan
-                </button>
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group flex flex-col justify-between">
+          <div>
+            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+                  Grafik Presensi Siswa
+                </h3>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+                  Rekapitulasi jumlah siswa hadir, izin, sakit, dan alfa
+                </p>
               </div>
 
-              {/* Filter Rentang Periode */}
-              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-medium gap-0.5">
-                {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Toggle Format: Tumpuk vs Berdampingan */}
+                <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 group-hover:bg-slate-800/90 border border-slate-200/80 group-hover:border-slate-700/80 text-xs font-medium gap-0.5 transition-colors">
                   <button
-                    key={mode}
                     type="button"
-                    onClick={() => setChartMode(mode)}
+                    onClick={() => setChartLayout("stacked")}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg capitalize transition-all text-xs cursor-pointer",
-                      chartMode === mode
-                        ? "bg-white text-slate-900 font-semibold shadow-xs"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                      "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
+                      chartLayout === "stacked"
+                        ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
+                        : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
                     )}
+                    title="Tampilan Tumpuk (Rapi, Terpusat & Akumulatif)"
                   >
-                    {mode}
+                    Tumpuk
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setChartLayout("grouped")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
+                      chartLayout === "grouped"
+                        ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
+                        : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
+                    )}
+                    title="Tampilan Berdampingan"
+                  >
+                    Berdampingan
+                  </button>
+                </div>
+
+                {/* Filter Rentang Periode */}
+                <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 group-hover:bg-slate-800/90 border border-slate-200/80 group-hover:border-slate-700/80 text-xs font-medium gap-0.5 transition-colors">
+                  {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setChartMode(mode)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg capitalize transition-all text-xs cursor-pointer",
+                        chartMode === mode
+                          ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
+                          : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
+                      )}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          }
-          bodyClassName="pt-3 flex flex-col justify-between"
-        >
-          {/* Custom Modern Legend Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 border-b border-slate-100">
-            <div className="flex items-center gap-4 text-xs font-medium text-slate-600">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
-                <span className="text-slate-700">Hadir</span>
+
+            {/* Custom Modern Legend Header */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 pt-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <div className="flex items-center gap-4 text-xs font-medium text-slate-600 group-hover:text-slate-300 transition-colors">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
+                  <span>Hadir</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />
+                  <span>Izin</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#6366F1]" />
+                  <span>Sakit</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />
+                  <span>Alfa</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />
-                <span className="text-slate-700">Izin</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#6366F1]" />
-                <span className="text-slate-700">Sakit</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />
-                <span className="text-slate-700">Alfa</span>
-              </div>
+              <span className="text-[11px] text-slate-400 group-hover:text-slate-400 font-normal transition-colors">
+                {chartLayout === "stacked"
+                  ? "Format tumpuk: total presensi per tanggal"
+                  : "Format berdampingan: perbandingan kategori"}
+              </span>
             </div>
-            <span className="text-[11px] text-slate-400 font-normal">
-              {chartLayout === "stacked"
-                ? "Format tumpuk: total presensi per tanggal"
-                : "Format berdampingan: perbandingan kategori"}
-            </span>
+
+            <div className="h-72 w-full pt-1">
+              {chartSeries.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartSeries}
+                    margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
+                    barGap={chartLayout === "grouped" ? 2 : 0}
+                    barCategoryGap={chartLayout === "grouped" ? "24%" : "32%"}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.18)" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: "#94A3B8" }}
+                      axisLine={{ stroke: "#94A3B8", strokeOpacity: 0.3 }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#94A3B8" }}
+                      axisLine={false}
+                      tickLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip content={<CustomPresensiTooltip />} cursor={{ fill: "rgba(148, 163, 184, 0.1)" }} />
+                    <Bar
+                      dataKey="hadir"
+                      name="Hadir"
+                      fill="#10B981"
+                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                    />
+                    <Bar
+                      dataKey="izin"
+                      name="Izin"
+                      fill="#F59E0B"
+                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                    />
+                    <Bar
+                      dataKey="sakit"
+                      name="Sakit"
+                      fill="#6366F1"
+                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                    />
+                    <Bar
+                      dataKey="alfa"
+                      name="Alfa"
+                      fill="#F43F5E"
+                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-lg border border-dashed border-slate-200 group-hover:border-slate-700 bg-slate-50 group-hover:bg-slate-900/50 text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                  Belum ada data presensi yang dicatat pada rentang periode ini.
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="h-72 w-full pt-1">
-            {chartSeries.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartSeries}
-                  margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
-                  barGap={chartLayout === "grouped" ? 2 : 0}
-                  barCategoryGap={chartLayout === "grouped" ? "24%" : "32%"}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={{ stroke: "#E2E8F0" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                    axisLine={false}
-                    tickLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip content={<CustomPresensiTooltip />} cursor={{ fill: "#F8FAFC" }} />
-                  <Bar
-                    dataKey="hadir"
-                    name="Hadir"
-                    fill="#10B981"
-                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
-                  />
-                  <Bar
-                    dataKey="izin"
-                    name="Izin"
-                    fill="#F59E0B"
-                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
-                  />
-                  <Bar
-                    dataKey="sakit"
-                    name="Sakit"
-                    fill="#6366F1"
-                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
-                  />
-                  <Bar
-                    dataKey="alfa"
-                    name="Alfa"
-                    fill="#F43F5E"
-                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 text-xs text-slate-500">
-                Belum ada data presensi yang dicatat pada rentang periode ini.
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-1">
+          <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 group-hover:text-slate-400 gap-1 transition-colors">
             <span>
               Rata-rata presensi semester:{" "}
-              <strong className="text-slate-800 font-semibold tabular-nums">
+              <strong className="text-slate-800 group-hover:text-white font-semibold tabular-nums transition-colors">
                 {stats.avgAttendance ?? stats.kehadiranHariIni}%
               </strong>
             </span>
-            <span className="text-slate-400">
+            <span className="text-slate-400 group-hover:text-slate-500 transition-colors">
               Pembaruan data otomatis berdasarkan catatan guru
             </span>
           </div>
-        </Panel>
         </div>
 
         {/* Kolom Kanan: Pintasan Aksi & Status Kesiapan SPK */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <div className="pb-3.5 border-b border-slate-100">
-              <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group">
+            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <h3 className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
                 Pintasan Menu
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                 Akses cepat pengelolaan data harian
               </p>
             </div>
-            <div className="divide-y divide-slate-100 pt-1">
+            <div className="divide-y divide-slate-100 group-hover:divide-slate-800/80 pt-1 transition-colors">
               <Link
                 href="/admin/siswa"
-                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
+                className="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-slate-800/60 transition-all group/item"
               >
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] border border-blue-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 group-hover:bg-blue-500/15 text-[#1e3a8a] group-hover:text-blue-400 border border-blue-100 group-hover:border-blue-500/30 flex items-center justify-center shrink-0 shadow-xs group-hover/item:scale-105 transition-all">
                     <Upload className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-slate-900 group-hover:text-[#1e3a8a] transition-colors">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-white group-hover/item:text-blue-300 transition-colors">
                       Kelola Data Siswa
                     </span>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Input biodata, foto profil, dan impor berkas Excel
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-300 group-hover/item:translate-x-1 transition-all" />
               </Link>
 
               <Link
                 href="/admin/spk"
-                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
+                className="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-slate-800/60 transition-all group/item"
               >
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 group-hover:bg-amber-500/15 text-amber-700 group-hover:text-amber-400 border border-amber-100 group-hover:border-amber-500/30 flex items-center justify-center shrink-0 shadow-xs group-hover/item:scale-105 transition-all">
                     <SlidersHorizontal className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-white group-hover/item:text-amber-300 transition-colors">
                       Atur Kriteria SPK
                     </span>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Bobot parameter metode SAW
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-300 group-hover/item:translate-x-1 transition-all" />
               </Link>
 
               <Link
                 href="/admin/leaderboard"
-                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
+                className="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-slate-800/60 transition-all group/item"
               >
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 group-hover:bg-emerald-500/15 text-emerald-700 group-hover:text-emerald-400 border border-emerald-100 group-hover:border-emerald-500/30 flex items-center justify-center shrink-0 shadow-xs group-hover/item:scale-105 transition-all">
                     <Trophy className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-white group-hover/item:text-emerald-300 transition-colors">
                       Peringkat Siswa
                     </span>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Hasil evaluasi prestasi akademik
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-300 group-hover/item:translate-x-1 transition-all" />
               </Link>
             </div>
           </div>
 
           {/* Panel Status Validasi SPK Nyata */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
-              <Info className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-semibold text-slate-900">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-3 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <Info className="w-4 h-4 text-blue-600 group-hover:text-blue-400 transition-colors" />
+              <span className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
                 Status Kesiapan Data SPK
               </span>
             </div>
             <div className="space-y-3 text-xs">
-              <div className="flex items-start gap-2.5 text-slate-600">
+              <div className="flex items-start gap-2.5 text-slate-600 group-hover:text-slate-300 transition-colors">
                 <div className="mt-0.5 shrink-0">
                   {spkValid ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 group-hover:text-emerald-400 transition-colors" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-amber-600" />
+                    <AlertCircle className="w-4 h-4 text-amber-600 group-hover:text-amber-400 transition-colors" />
                   )}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800">
+                  <p className="font-semibold text-slate-800 group-hover:text-white transition-colors">
                     {spkValid
                       ? "Parameter Pembobotan Valid"
                       : "Verifikasi Pembobotan Dibutuhkan"}
                   </p>
-                  <p className="text-slate-500 mt-0.5 leading-relaxed">
+                  <p className="text-slate-500 group-hover:text-slate-400 mt-0.5 leading-relaxed transition-colors">
                     {spkValid
                       ? "Total bobot seluruh kriteria bernilai 1.0 (100%). Perhitungan SAW dapat diandalkan."
                       : "Pastikan total bobot kriteria berjumlah 1.0 agar hasil perhitungan normalisasi akurat."}
@@ -713,13 +720,13 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-slate-500 font-medium">
+              <div className="pt-3 border-t border-slate-100 group-hover:border-slate-800/80 flex items-center justify-between transition-colors">
+                <span className="text-slate-500 group-hover:text-slate-400 font-medium transition-colors">
                   {stats.isSpkPublished ? "Hasil telah dipublikasikan" : "Status draf internal"}
                 </span>
                 <Link
                   href="/admin/spk"
-                  className="text-blue-600 hover:text-blue-800 font-semibold"
+                  className="text-blue-600 group-hover:text-blue-400 font-semibold transition-colors"
                 >
                   Konfigurasi kriteria →
                 </Link>
@@ -777,18 +784,21 @@ export default function AdminDashboard() {
               {leaderboard.length > 0 ? (
                 leaderboard.slice(0, 5).map((entry) => {
                   return (
-                    <tr key={entry.studentId} className="hover:bg-slate-50/75 transition-colors">
+                    <tr
+                      key={entry.studentId}
+                      className="transition-colors duration-150 hover:bg-[#091524] hover:text-white group/row cursor-pointer"
+                    >
                       <td className="py-3 px-4 text-center">
                         <span
                           className={cn(
-                            "inline-flex items-center justify-center w-7 h-7 rounded-xl text-xs font-bold",
+                            "inline-flex items-center justify-center w-7 h-7 rounded-xl text-xs font-bold transition-all",
                             entry.rank === 1
-                              ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300/60"
+                              ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300/60 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:ring-amber-500/40"
                               : entry.rank === 2
-                                ? "bg-slate-200 text-slate-800 ring-1 ring-slate-300"
+                                ? "bg-slate-200 text-slate-800 ring-1 ring-slate-300 group-hover/row:bg-slate-700 group-hover/row:text-slate-200 group-hover/row:ring-slate-600"
                                 : entry.rank === 3
-                                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-                                  : "bg-slate-100 text-slate-600"
+                                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-400 group-hover/row:ring-amber-500/30"
+                                  : "bg-slate-100 text-slate-600 group-hover/row:bg-slate-800 group-hover/row:text-slate-300"
                           )}
                         >
                           {entry.rank}
@@ -796,32 +806,32 @@ export default function AdminDashboard() {
                       </td>
 
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-900">
+                        <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
                           {entry.namaLengkap}
                         </div>
-                        <div className="text-xs text-slate-500 tabular-nums">
+                        <div className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                           NIS: {entry.nis}
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-slate-700 font-medium">
+                      <td className="py-3 px-4 text-slate-700 group-hover/row:text-slate-300 font-medium transition-colors">
                         {entry.kelas}
                       </td>
 
                       <td className="py-3 px-4 tabular-nums">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/40 transition-colors">
                           {getStudentAttendancePct(entry)}
                         </span>
                       </td>
 
                       <td className="py-3 px-4 tabular-nums">
                         <div className="flex items-center gap-3">
-                          <span className="font-bold text-slate-900 w-14">
+                          <span className="font-bold text-slate-900 group-hover/row:text-white w-14 transition-colors">
                             {Number(entry.rawScore).toFixed(4)}
                           </span>
-                          <div className="w-28 bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/80">
+                          <div className="w-28 bg-slate-100 group-hover/row:bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-200/80 group-hover/row:border-slate-700 transition-colors">
                             <div
-                              className="bg-[#1e3a8a] h-full rounded-full transition-all duration-300"
+                              className="bg-[#1e3a8a] group-hover/row:bg-blue-400 h-full rounded-full transition-all duration-300"
                               style={{
                                 width: `${Math.min(
                                   100,
@@ -837,7 +847,7 @@ export default function AdminDashboard() {
                         <button
                           type="button"
                           onClick={() => setSelectedStudent(entry)}
-                          className="text-blue-600 hover:text-blue-800 font-semibold text-xs px-3 py-1.5 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all cursor-pointer"
+                          className="text-blue-600 group-hover/row:text-blue-300 font-semibold text-xs px-3 py-1.5 rounded-xl hover:bg-blue-50 group-hover/row:hover:bg-blue-500/20 border border-transparent hover:border-blue-100 group-hover/row:border-blue-400/30 transition-all cursor-pointer"
                         >
                           Lihat Nilai
                         </button>
