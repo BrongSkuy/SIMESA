@@ -141,14 +141,15 @@ const CustomPresensiTooltip = ({ active, payload, label }: CustomTooltipProps) =
 };
 
 export default function AdminDashboard() {
+  const [loadingStats, setLoadingStats] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalSiswa: 0,
     totalGuru: 0,
     totalKelas: 0,
     totalCriteria: 5,
     kehadiranHariIni: 0,
-    tahunAjaran: "2025/2026-Genap",
-    semesterDisplay: "Semester Genap 2025/2026",
+    tahunAjaran: "2024/2025-Ganjil",
+    semesterDisplay: "Semester Ganjil 2024/2025",
   });
 
   const [leaderboard, setLeaderboard] = useState<SpkLeaderboardEntry[]>([]);
@@ -165,7 +166,8 @@ export default function AdminDashboard() {
       .then((d) => {
         if (d && !d.error) setStats(d);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoadingStats(false));
 
     fetch("/api/spk/criteria")
       .then((r) => r.json())
@@ -332,7 +334,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Dark Executive Hero & KPI Command Strip */}
-      <section className="rounded-xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
+      <section className="rounded-2xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
         {/* Header Info Row */}
         <div className="p-5 sm:p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
           <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
@@ -340,9 +342,13 @@ export default function AdminDashboard() {
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                 Beranda Administrator
               </h1>
-              <span className="inline-flex items-center rounded-sm bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300 border border-blue-500/30">
-                {stats.semesterDisplay || "Semester Genap 2025/2026"}
-              </span>
+              {loadingStats ? (
+                <div className="h-6 w-44 rounded-full bg-blue-500/20 animate-pulse border border-blue-500/30" />
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300 border border-blue-500/30">
+                  {stats.semesterDisplay || "Semester Ganjil 2024/2025"}
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
               Ringkasan data presensi harian siswa, tenaga pendidik, dan evaluasi SPK metode SAW.
@@ -350,16 +356,16 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="inline-flex items-center bg-slate-900/90 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-300">
+            <div className="inline-flex items-center bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-slate-300 shadow-xs">
               <Calendar className="w-3.5 h-3.5 text-slate-400 mr-2" />
               <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
             </div>
             <button
               type="button"
               onClick={handleExportReport}
-              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 border border-blue-500 rounded-md px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-colors"
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-500/80 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md transition-all cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 mr-1.5 text-blue-100" />
+              <Download className="w-3.5 h-3.5 mr-2 text-blue-100" />
               Ekspor Laporan
             </button>
           </div>
@@ -446,15 +452,15 @@ export default function AdminDashboard() {
           action={
             <div className="flex flex-wrap items-center gap-2">
               {/* Toggle Format: Tumpuk vs Berdampingan */}
-              <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
+              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-medium gap-0.5">
                 <button
                   type="button"
                   onClick={() => setChartLayout("stacked")}
                   className={cn(
-                    "px-2.5 py-1.5 transition-colors",
+                    "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
                     chartLayout === "stacked"
-                      ? "bg-[#1e3a8a] text-white font-semibold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-white text-slate-900 font-semibold shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                   )}
                   title="Tampilan Tumpuk (Rapi, Terpusat & Akumulatif)"
                 >
@@ -464,10 +470,10 @@ export default function AdminDashboard() {
                   type="button"
                   onClick={() => setChartLayout("grouped")}
                   className={cn(
-                    "px-2.5 py-1.5 transition-colors",
+                    "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
                     chartLayout === "grouped"
-                      ? "bg-[#1e3a8a] text-white font-semibold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-white text-slate-900 font-semibold shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                   )}
                   title="Tampilan Berdampingan"
                 >
@@ -476,17 +482,17 @@ export default function AdminDashboard() {
               </div>
 
               {/* Filter Rentang Periode */}
-              <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
+              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-medium gap-0.5">
                 {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
                   <button
                     key={mode}
                     type="button"
                     onClick={() => setChartMode(mode)}
                     className={cn(
-                      "px-3 py-1.5 capitalize transition-colors",
+                      "px-3 py-1.5 rounded-lg capitalize transition-all text-xs cursor-pointer",
                       chartMode === mode
-                        ? "bg-[#1e3a8a] text-white font-semibold"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        ? "bg-white text-slate-900 font-semibold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
                     )}
                   >
                     {mode}
@@ -604,17 +610,22 @@ export default function AdminDashboard() {
 
         {/* Kolom Kanan: Pintasan Aksi & Status Kesiapan SPK */}
         <div className="space-y-6">
-          <Panel
-            title="Pintasan Menu"
-            description="Akses cepat pengelolaan data harian"
-          >
-            <div className="divide-y divide-slate-100">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+            <div className="pb-3.5 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-900 tracking-tight">
+                Pintasan Menu
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Akses cepat pengelolaan data harian
+              </p>
+            </div>
+            <div className="divide-y divide-slate-100 pt-1">
               <Link
                 href="/admin/siswa"
-                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
+                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-md bg-blue-50 text-[#1e3a8a] flex items-center justify-center shrink-0">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] border border-blue-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                     <Upload className="w-4 h-4" />
                   </div>
                   <div>
@@ -622,19 +633,19 @@ export default function AdminDashboard() {
                       Kelola Data Siswa
                     </span>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Input biodata dan impor berkas Excel
+                      Input biodata, foto profil, dan impor berkas Excel
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               <Link
                 href="/admin/spk"
-                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
+                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                     <SlidersHorizontal className="w-4 h-4" />
                   </div>
                   <div>
@@ -646,15 +657,15 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               <Link
                 href="/admin/leaderboard"
-                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
+                className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-slate-50/80 transition-all group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                     <Trophy className="w-4 h-4" />
                   </div>
                   <div>
@@ -666,25 +677,22 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
-          </Panel>
+          </div>
 
           {/* Panel Status Validasi SPK Nyata */}
-          <Panel
-            title={
-              <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-semibold text-slate-900">
-                  Status Kesiapan Data SPK
-                </span>
-              </div>
-            }
-          >
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100">
+              <Info className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-semibold text-slate-900">
+                Status Kesiapan Data SPK
+              </span>
+            </div>
             <div className="space-y-3 text-xs">
-              <div className="flex items-start gap-2 text-slate-600">
-                <div className="mt-0.5">
+              <div className="flex items-start gap-2.5 text-slate-600">
+                <div className="mt-0.5 shrink-0">
                   {spkValid ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   ) : (
@@ -706,39 +714,44 @@ export default function AdminDashboard() {
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-slate-500">
+                <span className="text-slate-500 font-medium">
                   {stats.isSpkPublished ? "Hasil telah dipublikasikan" : "Status draf internal"}
                 </span>
                 <Link
                   href="/admin/spk"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-600 hover:text-blue-800 font-semibold"
                 >
                   Konfigurasi kriteria →
                 </Link>
               </div>
             </div>
-          </Panel>
+          </div>
         </div>
       </section>
 
       {/* Tabel 5 Siswa Peringkat Teratas (SPK SAW) */}
-      <Panel
-        title="5 Siswa Peringkat Teratas (Evaluasi SPK SAW)"
-        description="Hasil pembobotan gabungan antara presensi kehadiran, nilai mata pelajaran, dan kriteria evaluasi"
-        action={
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
+              5 Siswa Peringkat Teratas (Evaluasi SPK SAW)
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Hasil pembobotan gabungan antara presensi kehadiran, nilai mata pelajaran, dan kriteria evaluasi
+            </p>
+          </div>
           <Link
             href="/admin/leaderboard"
-            className="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+            className="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors shrink-0"
           >
             Lihat Semua Peringkat
             <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Link>
-        }
-        bodyClassName="p-0"
-      >
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-slate-200/80 text-left text-sm">
+            <thead className="bg-slate-50/80">
               <tr>
                 <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600 w-16 text-center">
                   Peringkat
@@ -768,13 +781,13 @@ export default function AdminDashboard() {
                       <td className="py-3 px-4 text-center">
                         <span
                           className={cn(
-                            "inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-semibold",
+                            "inline-flex items-center justify-center w-7 h-7 rounded-xl text-xs font-bold",
                             entry.rank === 1
-                              ? "bg-amber-100 text-amber-800 font-bold"
+                              ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300/60"
                               : entry.rank === 2
-                                ? "bg-slate-200 text-slate-800 font-bold"
+                                ? "bg-slate-200 text-slate-800 ring-1 ring-slate-300"
                                 : entry.rank === 3
-                                  ? "bg-amber-50 text-amber-700 font-bold"
+                                  ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
                                   : "bg-slate-100 text-slate-600"
                           )}
                         >
@@ -791,24 +804,24 @@ export default function AdminDashboard() {
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-slate-700">
+                      <td className="py-3 px-4 text-slate-700 font-medium">
                         {entry.kelas}
                       </td>
 
                       <td className="py-3 px-4 tabular-nums">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                           {getStudentAttendancePct(entry)}
                         </span>
                       </td>
 
                       <td className="py-3 px-4 tabular-nums">
                         <div className="flex items-center gap-3">
-                          <span className="font-semibold text-slate-900 w-12">
+                          <span className="font-bold text-slate-900 w-14">
                             {Number(entry.rawScore).toFixed(4)}
                           </span>
-                          <div className="w-28 bg-slate-100 h-2 rounded-xs overflow-hidden border border-slate-200">
+                          <div className="w-28 bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/80">
                             <div
-                              className="bg-[#1e3a8a] h-full rounded-xs transition-all duration-300"
+                              className="bg-[#1e3a8a] h-full rounded-full transition-all duration-300"
                               style={{
                                 width: `${Math.min(
                                   100,
@@ -824,7 +837,7 @@ export default function AdminDashboard() {
                         <button
                           type="button"
                           onClick={() => setSelectedStudent(entry)}
-                          className="text-blue-600 hover:text-blue-800 font-medium text-xs px-2.5 py-1 rounded hover:bg-blue-50 transition-colors"
+                          className="text-blue-600 hover:text-blue-800 font-semibold text-xs px-3 py-1.5 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all cursor-pointer"
                         >
                           Lihat Nilai
                         </button>
@@ -842,7 +855,7 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
-      </Panel>
+      </div>
 
       {/* Modal Detail Perhitungan Kriteria Siswa */}
       <Dialog
@@ -851,7 +864,7 @@ export default function AdminDashboard() {
           if (!open) setSelectedStudent(null);
         }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-200/80">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-slate-900">
               Rincian Penilaian Siswa
@@ -863,7 +876,7 @@ export default function AdminDashboard() {
 
           {selectedStudent && (
             <div className="space-y-4 pt-2">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-semibold text-slate-900">
                     {selectedStudent.namaLengkap}
@@ -884,13 +897,13 @@ export default function AdminDashboard() {
                 <h5 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                   Daftar Kriteria Penilaian
                 </h5>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="border border-slate-200/80 rounded-xl overflow-hidden">
                   <table className="min-w-full divide-y divide-slate-200 text-xs text-left">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="py-2 px-3 font-semibold text-slate-600">Kriteria</th>
-                        <th className="py-2 px-3 font-semibold text-slate-600 text-right">Nilai Input</th>
-                        <th className="py-2 px-3 font-semibold text-slate-600 text-right">Normalisasi</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600">Kriteria</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Nilai Input</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Normalisasi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
@@ -906,16 +919,16 @@ export default function AdminDashboard() {
 
                         return (
                           <tr key={crit.id}>
-                            <td className="py-2 px-3 text-slate-800">
-                              <span className="font-medium">{crit.namaKriteria}</span>
+                            <td className="py-2.5 px-3 text-slate-800">
+                              <span className="font-semibold">{crit.namaKriteria}</span>
                               <span className="text-slate-400 text-xs block">
                                 Bobot: {crit.bobot} ({crit.tipe})
                               </span>
                             </td>
-                            <td className="py-2 px-3 text-right font-medium text-slate-700 tabular-nums">
+                            <td className="py-2.5 px-3 text-right font-medium text-slate-700 tabular-nums">
                               {typeof rawVal === "number" ? rawVal.toFixed(1) : rawVal}
                             </td>
-                            <td className="py-2 px-3 text-right font-medium text-blue-700 tabular-nums">
+                            <td className="py-2.5 px-3 text-right font-bold text-blue-700 tabular-nums">
                               {typeof normVal === "number" ? normVal.toFixed(4) : normVal}
                             </td>
                           </tr>
@@ -926,7 +939,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200/60 flex items-center justify-between text-xs">
+              <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/60 flex items-center justify-between text-xs">
                 <span className="text-blue-900 font-medium">Nilai Preferensi Akhir (V):</span>
                 <span className="text-sm font-bold text-blue-900 tabular-nums">
                   {Number(selectedStudent.rawScore).toFixed(4)}
