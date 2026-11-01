@@ -189,17 +189,20 @@ function getRoleMeta(role: UserRole) {
     case "ADMIN":
       return {
         label: "Administrator",
-        subtitle: "Sistem Administrasi Sekolah",
+        subtitle:
+          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
       };
     case "GURU":
       return {
         label: "Guru Pengajar",
-        subtitle: "Portal Akademik Guru",
+        subtitle:
+          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
       };
     case "SISWA":
       return {
         label: "Siswa",
-        subtitle: "Portal Akademik Siswa",
+        subtitle:
+          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
       };
   }
 }
@@ -221,7 +224,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0a192f] via-[#1e3a8a] to-[#0f172a] border-b border-blue-900/80 text-white shadow-md">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-md backdrop-blur-md">
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex items-center justify-between h-20 gap-4">
           {/* Sisi Kiri: Tombol Menu Mobile & Brand Sekolah */}
@@ -236,7 +239,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
             </button>
 
             <Link href={homeHref} className="flex items-center space-x-3.5 group py-1">
-              <div className="relative h-12 w-12 sm:h-13 sm:w-13 flex items-center justify-center shrink-0 drop-shadow-sm">
+              <div className="relative h-12 w-12 sm:h-13 sm:w-13 flex items-center justify-center shrink-0 drop-shadow-sm ring-1 ring-white/15 rounded-full p-0.5 bg-white/5">
                 <Image
                   src="/logo.png?v=2"
                   alt="Logo SMK Penerbangan Dirgantara"
@@ -251,11 +254,11 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-wide text-white uppercase drop-shadow-xs">
                     SIMESA
                   </span>
-                  <span className="hidden sm:inline-block text-xs font-semibold text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-sm bg-amber-400/10 tracking-wide">
+                  <span className="hidden sm:inline-flex items-center text-[11px] font-semibold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2.5 py-0.5 rounded-full tracking-wide shadow-xs">
                     SMK Penerbangan Dirgantara
                   </span>
                 </div>
-                <p className="text-xs text-blue-200/90 mt-1 font-medium leading-none">
+                <p className="text-[11px] sm:text-xs text-blue-200/90 mt-1 font-medium leading-none">
                   {roleMeta.subtitle}
                 </p>
               </div>
@@ -269,10 +272,10 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/admin"
                   className={cn(
-                    "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all",
                     pathname === "/admin"
-                      ? "text-white bg-white/20 font-semibold shadow-xs"
-                      : "text-blue-100/85 hover:text-white hover:bg-white/10"
+                      ? "text-white bg-white/12 border border-white/15 font-semibold shadow-xs"
+                      : "text-blue-100/80 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <LayoutDashboard className="w-4 h-4 text-blue-200" />
@@ -290,19 +293,20 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none cursor-pointer",
+                          "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all focus:outline-none cursor-pointer",
                           groupActive
-                            ? "text-white bg-white/20 font-semibold shadow-xs"
-                            : "text-blue-100/85 hover:text-white hover:bg-white/10"
+                            ? "text-white bg-white/12 border border-white/15 font-semibold shadow-xs"
+                            : "text-blue-100/80 hover:text-white hover:bg-white/10"
                         )}
                       >
                         <GroupIcon className="w-4 h-4 text-blue-200" />
                         {group.label}
-                        <ChevronDown className="w-3.5 h-3.5 text-blue-200 group-hover:text-white transition-transform duration-150" />
+                        <ChevronDown className="w-3.5 h-3.5 text-blue-200 group-hover:text-white group-hover:rotate-180 transition-transform duration-200" />
                       </button>
 
+                      {/* Dropdown Container dengan Invisible Bridge */}
                       <div className="absolute left-0 top-full pt-2 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
-                        <div className="rounded-xl bg-white p-2 shadow-xl border border-slate-200 text-slate-800">
+                        <div className="rounded-2xl bg-white/98 backdrop-blur-lg p-2 shadow-2xl border border-slate-200/90 text-slate-800">
                           <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
                             {group.sectionTitle}
                           </div>
@@ -314,7 +318,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                  "flex items-start gap-3 p-2 rounded-lg transition-colors",
+                                  "flex items-start gap-3 p-2 rounded-xl transition-colors",
                                   item.dividerBefore &&
                                     "border-t border-slate-100 mt-1 pt-2",
                                   active
@@ -322,7 +326,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                                     : "hover:bg-slate-50 text-slate-700"
                                 )}
                               >
-                                <div className="p-1.5 rounded-md bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
+                                <div className="p-1.5 rounded-lg bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
                                   <ItemIcon className="w-4 h-4" />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -357,10 +361,10 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
+                        "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all",
                         active
-                          ? "text-white bg-white/20 font-semibold shadow-xs"
-                          : "text-blue-100/85 hover:text-white hover:bg-white/10"
+                          ? "text-white bg-white/12 border border-white/15 font-semibold shadow-xs"
+                          : "text-blue-100/80 hover:text-white hover:bg-white/10"
                       )}
                     >
                       <ItemIcon className="w-4 h-4 text-blue-200" />
@@ -372,18 +376,24 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
             )}
           </nav>
 
-          {/* Sisi Kanan: Profil Pengguna */}
+          {/* Sisi Kanan: Tahun Ajaran & Profil Pengguna */}
           <div className="flex items-center gap-3">
+            {/* Badge Konteks Tahun Ajaran */}
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-blue-200/90 font-medium">
+              <CalendarCheck className="w-3.5 h-3.5 text-amber-300" />
+              <span>T.A. 2024/2025 • Ganjil</span>
+            </div>
+
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <button
                     type="button"
-                    className="flex items-center space-x-3 px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
+                    className="flex items-center space-x-3 px-2.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
                   />
                 }
               >
-                <div className="w-10 h-10 rounded-lg bg-white/10 text-white border border-white/25 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 ring-1 ring-white/15 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
                   {user.image ? (
                     <img
                       src={user.image}
@@ -398,8 +408,9 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   <div className="text-sm font-semibold text-white max-w-[170px] truncate">
                     {user.nama}
                   </div>
-                  <div className="text-xs text-blue-200/90 mt-0.5 font-medium">
-                    {roleMeta.label}
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{roleMeta.label}</span>
                   </div>
                 </div>
                 <ChevronDown className="w-4 h-4 text-blue-200" />

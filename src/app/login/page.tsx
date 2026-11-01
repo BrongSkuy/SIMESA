@@ -178,7 +178,7 @@ export default function LoginPage() {
             SIMESA
           </h1>
           <p className="text-base xl:text-lg font-semibold text-blue-100 mt-3">
-            Sistem Informasi Sekolah Terpadu
+            Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi
           </p>
           <p className="text-sm font-normal text-blue-200/80 mt-1">
             SMK Penerbangan Dirgantara

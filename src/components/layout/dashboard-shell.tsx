@@ -92,7 +92,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
               <span className="mx-2 text-slate-300">·</span>
               <span>SMK Penerbangan Dirgantara</span>
               <span className="mx-2 text-slate-300">·</span>
-              <span>Sistem Informasi Sekolah Terpadu</span>
+              <span>Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi</span>
             </div>
             <span>
               &copy; {new Date().getFullYear()} SIMESA. Hak Cipta Dilindungi.
