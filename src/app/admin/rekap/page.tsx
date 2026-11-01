@@ -53,7 +53,7 @@ interface ClassData {
 const CHART_COLORS: Record<string, string> = {
   Hadir: "#10B981",
   Izin: "#F59E0B",
-  Sakit: "#3B82F6",
+  Sakit: "#6366F1",
   Alfa: "#F43F5E",
 };
 

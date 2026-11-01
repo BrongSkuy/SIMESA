@@ -352,7 +352,7 @@ export default function SiswaAbsensiPage() {
           <span>Izin</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#1e3a8a]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#6366F1]" />
           <span>Sakit</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -586,7 +586,7 @@ export default function SiswaAbsensiPage() {
                       <Bar
                         dataKey="sakit"
                         name="Sakit"
-                        fill="#3B82F6"
+                        fill="#6366F1"
                         radius={[4, 4, 0, 0]}
                       />
                       <Bar

@@ -90,6 +90,55 @@ interface SpkCriteriaItem {
 }
 
 type ChartMode = "harian" | "mingguan" | "bulanan";
+type ChartLayout = "stacked" | "grouped";
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    color: string;
+    dataKey: string;
+  }>;
+  label?: string;
+}
+
+const CustomPresensiTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (!active || !payload || !payload.length) return null;
+  const total = payload.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
+
+  return (
+    <div className="rounded-md border border-slate-200 bg-white p-3 shadow-lg text-xs min-w-[190px] pointer-events-none">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+        <span className="font-semibold text-slate-800">{label}</span>
+        <span className="text-[11px] font-medium text-slate-500 tabular-nums">
+          Total: <strong className="text-slate-900 font-semibold">{total}</strong> Siswa
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {payload.map((entry) => {
+          const val = Number(entry.value) || 0;
+          const pct = total > 0 ? ((val / total) * 100).toFixed(0) : "0";
+          return (
+            <div key={entry.dataKey} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-slate-600 font-medium">{entry.name}</span>
+              </div>
+              <div className="flex items-center gap-1.5 tabular-nums">
+                <span className="font-semibold text-slate-900">{val}</span>
+                <span className="text-[10px] text-slate-400">({pct}%)</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -106,6 +155,7 @@ export default function AdminDashboard() {
   const [criteriaList, setCriteriaList] = useState<SpkCriteriaItem[]>([]);
   const [spkValid, setSpkValid] = useState<boolean>(true);
   const [chartMode, setChartMode] = useState<ChartMode>("harian");
+  const [chartLayout, setChartLayout] = useState<ChartLayout>("stacked");
   const [selectedStudent, setSelectedStudent] =
     useState<SpkLeaderboardEntry | null>(null);
 
@@ -375,64 +425,141 @@ export default function AdminDashboard() {
           title="Grafik Presensi Siswa"
           description="Rekapitulasi jumlah siswa hadir, izin, sakit, dan alfa"
           action={
-            <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
-              {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Toggle Format: Tumpuk vs Berdampingan */}
+              <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
                 <button
-                  key={mode}
                   type="button"
-                  onClick={() => setChartMode(mode)}
+                  onClick={() => setChartLayout("stacked")}
                   className={cn(
-                    "px-3 py-1.5 capitalize transition-colors",
-                    chartMode === mode
+                    "px-2.5 py-1.5 transition-colors",
+                    chartLayout === "stacked"
                       ? "bg-[#1e3a8a] text-white font-semibold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
+                  title="Tampilan Tumpuk (Rapi, Terpusat & Akumulatif)"
                 >
-                  {mode}
+                  Tumpuk
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setChartLayout("grouped")}
+                  className={cn(
+                    "px-2.5 py-1.5 transition-colors",
+                    chartLayout === "grouped"
+                      ? "bg-[#1e3a8a] text-white font-semibold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  )}
+                  title="Tampilan Berdampingan"
+                >
+                  Berdampingan
+                </button>
+              </div>
+
+              {/* Filter Rentang Periode */}
+              <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
+                {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setChartMode(mode)}
+                    className={cn(
+                      "px-3 py-1.5 capitalize transition-colors",
+                      chartMode === mode
+                        ? "bg-[#1e3a8a] text-white font-semibold"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    )}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
             </div>
           }
-          bodyClassName="pt-4 flex flex-col justify-between"
+          bodyClassName="pt-3 flex flex-col justify-between"
         >
-          <div className="h-72 w-full pt-2">
+          {/* Custom Modern Legend Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 border-b border-slate-100">
+            <div className="flex items-center gap-4 text-xs font-medium text-slate-600">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
+                <span className="text-slate-700">Hadir</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />
+                <span className="text-slate-700">Izin</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#6366F1]" />
+                <span className="text-slate-700">Sakit</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />
+                <span className="text-slate-700">Alfa</span>
+              </div>
+            </div>
+            <span className="text-[11px] text-slate-400 font-normal">
+              {chartLayout === "stacked"
+                ? "Format tumpuk: total presensi per tanggal"
+                : "Format berdampingan: perbandingan kategori"}
+            </span>
+          </div>
+
+          <div className="h-72 w-full pt-1">
             {chartSeries.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartSeries}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
+                  barGap={chartLayout === "grouped" ? 2 : 0}
+                  barCategoryGap={chartLayout === "grouped" ? "24%" : "32%"}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 12, fill: "#64748B" }}
-                    axisLine={{ stroke: "#CBD5E1" }}
+                    tick={{ fontSize: 11, fill: "#64748B" }}
+                    axisLine={{ stroke: "#E2E8F0" }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 12, fill: "#64748B" }}
+                    tick={{ fontSize: 11, fill: "#64748B" }}
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: "8px",
-                      border: "1px solid #E2E8F0",
-                      fontSize: "12px",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
+                  <Tooltip content={<CustomPresensiTooltip />} cursor={{ fill: "#F8FAFC" }} />
+                  <Bar
+                    dataKey="hadir"
+                    name="Hadir"
+                    fill="#10B981"
+                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
                   />
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    wrapperStyle={{ fontSize: "12px", paddingBottom: "12px" }}
+                  <Bar
+                    dataKey="izin"
+                    name="Izin"
+                    fill="#F59E0B"
+                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
                   />
-                  <Bar dataKey="hadir" name="Hadir" fill="#059669" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="izin" name="Izin" fill="#D97706" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="sakit" name="Sakit" fill="#2563EB" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="alfa" name="Alfa" fill="#DC2626" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="sakit"
+                    name="Sakit"
+                    fill="#6366F1"
+                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                  />
+                  <Bar
+                    dataKey="alfa"
+                    name="Alfa"
+                    fill="#F43F5E"
+                    stackId={chartLayout === "stacked" ? "presensi" : undefined}
+                    maxBarSize={chartLayout === "stacked" ? 28 : 12}
+                    radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
