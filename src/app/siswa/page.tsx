@@ -150,87 +150,109 @@ export default function SiswaDashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Ringkasan Akademik Siswa"
-        badge="Portal Siswa"
-        description={`Selamat datang, ${profile.namaLengkap} · Pantau presensi dan capaian evaluasi semester Anda`}
-        icon={LayoutDashboard}
-      >
-        <Link href="/siswa/absensi">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <CalendarCheck className="h-3.5 w-3.5 text-slate-500" /> Riwayat
-            Absensi
-          </Button>
-        </Link>
-        <Link href="/siswa/nilai">
-          <Button size="sm" className="gap-1.5">
-            <ClipboardList className="h-3.5 w-3.5" /> Transkrip Nilai
-          </Button>
-        </Link>
-      </PageHeader>
-
-      {/* Student Profile Banner */}
-      <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 text-base font-bold shrink-0">
-            {initials}
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Siswa Aktif
-              </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200">
-                NIS: {profile.nis}
+      {/* Dark Executive Hero & KPI Command Strip */}
+      <section className="rounded-xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
+        {/* Header Info Row */}
+        <div className="p-5 sm:p-6 lg:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
+          <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+                <LayoutDashboard className="w-5 h-5 text-blue-400 shrink-0" />
+                <span>Ringkasan Akademik Siswa</span>
+              </h1>
+              <span className="inline-flex items-center rounded-sm bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300 border border-blue-500/30">
+                Portal Siswa
               </span>
             </div>
-            <h2 className="text-lg font-bold tracking-tight text-slate-900 mt-1">
-              {profile.namaLengkap}
-            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+              Selamat datang, <strong className="text-slate-200">{profile.namaLengkap}</strong> · Pantau presensi dan capaian evaluasi semester Anda.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link href="/siswa/absensi">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 bg-slate-900/90 border-slate-700/80 text-slate-200 hover:bg-slate-800 hover:text-white"
+              >
+                <CalendarCheck className="h-3.5 w-3.5 text-slate-400" /> Riwayat Absensi
+              </Button>
+            </Link>
+            <Link href="/siswa/nilai">
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500 shadow-xs">
+                <ClipboardList className="h-3.5 w-3.5" /> Transkrip Nilai
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            Kelas {profile.kelas}
-          </span>
-          <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-            Angkatan {profile.angkatan}
-          </span>
-        </div>
-      </div>
+        {/* Student Profile Info Banner inside Dark Hero */}
+        <div className="px-5 py-4 sm:px-7 border-b border-slate-800/80 bg-[#0B182B] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300 text-sm font-bold shrink-0">
+              {initials}
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  Siswa Aktif
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-slate-900/90 text-slate-300 border border-slate-700">
+                  NIS: {profile.nis}
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mt-1">
+                {profile.namaLengkap}
+              </h2>
+            </div>
+          </div>
 
-      {/* KPI Cards - Flat Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
-        <StatCard
-          title="Persentase Kehadiran"
-          value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
-          icon={CalendarCheck}
-          color="emerald"
-          footerLeft="Akumulasi semester aktif"
-          footerRight="Presensi"
-        />
-        <StatCard
-          title="Total Pertemuan Hadir"
-          value={stats?.totalHadir ?? 0}
-          icon={Trophy}
-          color="blue"
-          footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
-          footerRight="Tercatat"
-        />
-        <StatCard
-          title="Ketidakhadiran"
-          value={
-            stats
-              ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
-              : 0
-          }
-          icon={Medal}
-          color="amber"
-          footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
-          footerRight="Rincian"
-        />
-      </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+              Kelas {profile.kelas}
+            </span>
+            <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-slate-900/90 text-slate-300 border border-slate-700">
+              Angkatan {profile.angkatan}
+            </span>
+          </div>
+        </div>
+
+        {/* 3 KPI Cards - Dark Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
+          <StatCard
+            variant="dark"
+            title="Persentase Kehadiran"
+            value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
+            icon={CalendarCheck}
+            color="emerald"
+            footerLeft="Akumulasi semester aktif"
+            footerRight="Presensi"
+          />
+          <StatCard
+            variant="dark"
+            title="Total Pertemuan Hadir"
+            value={stats?.totalHadir ?? 0}
+            icon={Trophy}
+            color="blue"
+            footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
+            footerRight="Tercatat"
+          />
+          <StatCard
+            variant="dark"
+            title="Ketidakhadiran"
+            value={
+              stats
+                ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
+                : 0
+            }
+            icon={Medal}
+            color="amber"
+            footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
+            footerRight="Rincian"
+          />
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
         {/* Attendance Chart */}

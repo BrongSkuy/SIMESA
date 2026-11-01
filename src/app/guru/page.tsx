@@ -73,51 +73,74 @@ export default function GuruDashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Ringkasan Pengajaran Guru"
-        badge="Portal Guru"
-        description={`Selamat bertugas, ${teacherName} · Kelola presensi harian dan penilaian akademik kelas Anda`}
-        icon={LayoutDashboard}
-      >
-        <Link href="/guru/nilai">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <PenLine className="h-3.5 w-3.5 text-slate-500" /> Input Nilai
-          </Button>
-        </Link>
-        <Link href="/guru/absensi">
-          <Button size="sm" className="gap-1.5">
-            <ClipboardCheck className="h-3.5 w-3.5" /> Buka Presensi
-          </Button>
-        </Link>
-      </PageHeader>
+      {/* Dark Executive Hero & KPI Command Strip */}
+      <section className="rounded-xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
+        {/* Header Info Row */}
+        <div className="p-5 sm:p-6 lg:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
+          <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+                <LayoutDashboard className="w-5 h-5 text-blue-400 shrink-0" />
+                <span>Ringkasan Pengajaran Guru</span>
+              </h1>
+              <span className="inline-flex items-center rounded-sm bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300 border border-blue-500/30">
+                Portal Guru
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+              Selamat bertugas, <strong className="text-slate-200">{teacherName}</strong> · Kelola presensi harian dan penilaian akademik kelas Anda.
+            </p>
+          </div>
 
-      {/* KPI Cards - Flat Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
-        <StatCard
-          title="Kelas Diampu"
-          value={data?.totalKelasDiampu ?? 0}
-          icon={Users}
-          color="blue"
-          footerLeft="Rombongan belajar aktif"
-          footerRight="Terjadwal"
-        />
-        <StatCard
-          title="Presensi Hari Ini"
-          value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
-          icon={ClipboardCheck}
-          color="amber"
-          footerLeft="Kelas telah diabsen hari ini"
-          footerRight="Harian"
-        />
-        <StatCard
-          title="Rata-rata Kehadiran"
-          value={data?.rataRataKehadiran ?? "-"}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft="Akumulasi seluruh kelas diampu"
-          footerRight="Optimal"
-        />
-      </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link href="/guru/nilai">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 bg-slate-900/90 border-slate-700/80 text-slate-200 hover:bg-slate-800 hover:text-white"
+              >
+                <PenLine className="h-3.5 w-3.5 text-slate-400" /> Input Nilai
+              </Button>
+            </Link>
+            <Link href="/guru/absensi">
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500 shadow-xs">
+                <ClipboardCheck className="h-3.5 w-3.5" /> Buka Presensi
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* 3 KPI Cards - Dark Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
+          <StatCard
+            variant="dark"
+            title="Kelas Diampu"
+            value={data?.totalKelasDiampu ?? 0}
+            icon={Users}
+            color="blue"
+            footerLeft="Rombongan belajar aktif"
+            footerRight="Terjadwal"
+          />
+          <StatCard
+            variant="dark"
+            title="Presensi Hari Ini"
+            value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
+            icon={ClipboardCheck}
+            color="amber"
+            footerLeft="Kelas telah diabsen hari ini"
+            footerRight="Harian"
+          />
+          <StatCard
+            variant="dark"
+            title="Rata-rata Kehadiran"
+            value={data?.rataRataKehadiran ?? "-"}
+            icon={CheckCircle2}
+            color="emerald"
+            footerLeft="Akumulasi seluruh kelas diampu"
+            footerRight="Optimal"
+          />
+        </div>
+      </section>
 
       {/* Main Content Split: Assigned Classes + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
