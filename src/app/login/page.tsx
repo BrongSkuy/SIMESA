@@ -56,8 +56,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [bgLoaded, setBgLoaded] = useState(true);
 
-  // Pre-fill username from rememberMe if available
+  // Pre-fill username if remembered
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("simesa_remember_user");
@@ -66,7 +67,7 @@ export default function LoginPage() {
         setRememberMe(true);
       }
     } catch {
-      // ignore localStorage errors
+      // ignore
     }
   }, []);
 
@@ -124,193 +125,229 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4 sm:p-6 lg:p-8">
-      {/* Split Dual-Column Card */}
-      <div className="w-full max-w-4xl overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-xl grid grid-cols-1 md:grid-cols-2 min-h-[580px]">
-        {/* Kolom Kiri: Hero & Identitas Institusi (Clean Deep Blue, NO BUBBLES) */}
-        <div className="relative flex flex-col justify-between p-8 sm:p-10 bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 text-white overflow-hidden">
-          {/* Subtle Institutional Architectural Backdrop Texture */}
-          <div
-            className="absolute inset-0 opacity-10 pointer-events-none"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white">
+      {/* Sisi Kiri: Full Screen Hero & Identitas Institusi (Full Bleed, Bebas Bubble) */}
+      <div className="relative hidden lg:flex lg:w-1/2 min-h-screen flex-col justify-between p-12 xl:p-16 bg-gradient-to-br from-[#0a192f] via-[#1e3a8a] to-[#0f172a] text-white overflow-hidden select-none">
+        {/* Background Gedung Sekolah / Backdrop Tekstur */}
+        <div className="absolute inset-0 z-0">
+          {bgLoaded && (
+            <Image
+              src="/school-building.jpg"
+              alt="Gedung Sekolah SMK Penerbangan Dirgantara"
+              fill
+              sizes="50vw"
+              priority
+              className="object-cover opacity-30 mix-blend-luminosity filter contrast-125 brightness-90"
+              onError={() => setBgLoaded(false)}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a192f]/75 via-[#1e3a8a]/70 to-[#0f172a]/95" />
+        </div>
 
-          {/* Top subtle badge */}
-          <div className="relative z-10">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-900/60 text-blue-200 border border-blue-700/50">
-              Portal Akademik &amp; SPK
-            </span>
+        {/* Brand Header Kiri */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="relative h-10 w-10 shrink-0">
+            <Image
+              src="/logo.png?v=2"
+              alt="Logo SMK Penerbangan Dirgantara"
+              fill
+              sizes="40px"
+              unoptimized
+              className="object-contain"
+            />
           </div>
+          <span className="text-sm font-semibold tracking-wide text-white/90">
+            SMK Penerbangan Dirgantara
+          </span>
+        </div>
 
-          {/* Konten Tengah: Logo, SIMESA, & Subtitle */}
-          <div className="relative z-10 flex flex-col items-center text-center my-auto py-8">
-            <div className="relative h-20 w-20 mb-4 rounded-full bg-white/10 p-2 border border-white/20 backdrop-blur-xs flex items-center justify-center shadow-lg">
-              <Image
-                src="/logo.png?v=2"
-                alt="Logo SMK Penerbangan Dirgantara"
-                fill
-                sizes="80px"
-                unoptimized
-                className="object-contain p-1"
-                priority
-              />
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-none">
+        {/* Konten Tengah: Logo Besar, SIMESA, & Subtitle */}
+        <div className="relative z-10 flex flex-col items-center text-center my-auto py-10">
+          <div className="relative h-24 w-24 mb-6 shrink-0 filter drop-shadow-lg">
+            <Image
+              src="/logo.png?v=2"
+              alt="Logo SMK Penerbangan Dirgantara"
+              fill
+              sizes="96px"
+              unoptimized
+              className="object-contain"
+              priority
+            />
+          </div>
+          <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight text-white leading-none">
+            SIMESA
+          </h1>
+          <p className="text-base xl:text-lg font-semibold text-blue-100 mt-3">
+            Sistem Informasi Sekolah Terpadu
+          </p>
+          <p className="text-sm font-normal text-blue-200/80 mt-1">
+            SMK Penerbangan Dirgantara
+          </p>
+        </div>
+
+        {/* Konten Bawah: Slogan & Aksen Garis Emas */}
+        <div className="relative z-10 text-center pt-6">
+          <p className="text-base font-semibold tracking-wide text-white/95 leading-relaxed">
+            Bersama Maju,
+            <br />
+            Meraih Masa Depan
+          </p>
+          <div className="h-1 w-12 bg-amber-400 rounded-full mx-auto mt-3" />
+        </div>
+      </div>
+
+      {/* Sisi Kanan: Formulir Login (Full Height) */}
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-16 xl:p-20 min-h-screen bg-white">
+        {/* Mobile Header (Hanya tampil di layar kecil < lg) */}
+        <div className="flex items-center gap-3.5 pb-6 border-b border-slate-100 mb-6 lg:hidden">
+          <div className="relative h-11 w-11 shrink-0">
+            <Image
+              src="/logo.png?v=2"
+              alt="Logo Sekolah"
+              fill
+              sizes="44px"
+              unoptimized
+              className="object-contain"
+            />
+          </div>
+          <div>
+            <span className="text-base font-bold text-slate-900 block leading-tight">
               SIMESA
-            </h1>
-            <p className="text-sm sm:text-base font-semibold text-blue-100 mt-2">
-              Sistem Informasi Sekolah Terpadu
-            </p>
-            <p className="text-xs font-normal text-blue-200/80 mt-1">
+            </span>
+            <span className="text-xs text-slate-500">
               SMK Penerbangan Dirgantara
-            </p>
-          </div>
-
-          {/* Konten Bawah: Slogan & Aksen Garis Emas */}
-          <div className="relative z-10 text-center pt-4">
-            <p className="text-sm font-semibold tracking-wide text-white/95 leading-relaxed">
-              Bersama Maju,
-              <br />
-              Meraih Masa Depan
-            </p>
-            <div className="h-1 w-10 bg-amber-400 rounded-full mx-auto mt-2.5" />
+            </span>
           </div>
         </div>
 
-        {/* Kolom Kanan: Formulir Login */}
-        <div className="flex flex-col justify-between p-8 sm:p-10 bg-white">
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-                Selamat Datang
-              </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Masuk untuk mengakses sistem
-              </p>
+        {/* Form Container (Tengah Vertikal) */}
+        <div className="w-full max-w-md mx-auto my-auto py-4">
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              Selamat Datang
+            </h2>
+            <p className="text-sm text-slate-500 mt-1.5">
+              Masuk untuk mengakses sistem
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Field 1: NIP atau Username */}
+            <div className="space-y-1.5">
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="NIP atau Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="h-12 rounded-xl pl-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs"
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              {/* Field 1: NIP atau Username */}
-              <div className="space-y-1.5">
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="NIP atau Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="h-11 rounded-xl pl-10 text-sm border-slate-200 bg-white focus-visible:ring-blue-600"
-                  />
-                </div>
-              </div>
-
-              {/* Field 2: Password */}
-              <div className="space-y-1.5">
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-11 rounded-xl pl-10 pr-10 text-sm border-slate-200 bg-white focus-visible:ring-blue-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                    aria-label={
-                      showPassword
-                        ? "Sembunyikan kata sandi"
-                        : "Tampilkan kata sandi"
-                    }
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Baris Opsi: Ingat Saya & Lupa Password */}
-              <div className="flex items-center justify-between text-xs pt-0.5">
-                <label className="flex items-center gap-2 text-slate-600 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span>Ingat saya</span>
-                </label>
+            {/* Field 2: Password */}
+            <div className="space-y-1.5">
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-12 rounded-xl pl-11 pr-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs"
+                />
                 <button
                   type="button"
-                  onClick={() => setForgotModalOpen(true)}
-                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  aria-label={
+                    showPassword
+                      ? "Sembunyikan kata sandi"
+                      : "Tampilkan kata sandi"
+                  }
                 >
-                  Lupa password?
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
-              </div>
-
-              {/* Pesan Error */}
-              {error && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
-                  {error}
-                </div>
-              )}
-
-              {/* Tombol Utama: Masuk */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-11 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer disabled:opacity-50 mt-2"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowRight className="h-4 w-4" />
-                )}
-                <span>{loading ? "Memverifikasi..." : "Masuk"}</span>
-              </button>
-            </form>
-
-            {/* Divider atau */}
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-400 font-medium">
-                  atau
-                </span>
               </div>
             </div>
 
-            {/* Tombol Google */}
+            {/* Baris Opsi: Ingat Saya & Lupa Password */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <label className="flex items-center gap-2 text-slate-600 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span>Ingat saya</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setForgotModalOpen(true)}
+                className="text-blue-600 hover:text-blue-700 hover:underline font-medium cursor-pointer"
+              >
+                Lupa password?
+              </button>
+            </div>
+
+            {/* Pesan Error */}
+            {error && (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
+                {error}
+              </div>
+            )}
+
+            {/* Tombol Utama: Masuk */}
             <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="w-full h-11 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs flex items-center justify-center gap-2.5 transition-colors shadow-2xs cursor-pointer"
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50 mt-3"
             >
-              <GoogleIcon className="h-4 w-4" />
-              <span>Masuk dengan Google</span>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <ArrowRight className="h-5 w-5" />
+              )}
+              <span>{loading ? "Memverifikasi..." : "Masuk"}</span>
             </button>
+          </form>
+
+          {/* Divider atau */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-slate-400 font-medium">
+                atau
+              </span>
+            </div>
           </div>
 
-          {/* Footer Hak Cipta */}
-          <div className="text-center text-xs text-slate-400 pt-6">
-            © 2026 SIMESA, SMK Penerbangan Dirgantara
-          </div>
+          {/* Tombol Google */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm flex items-center justify-center gap-3 transition-colors shadow-2xs cursor-pointer"
+          >
+            <GoogleIcon className="h-4 w-4 shrink-0" />
+            <span>Masuk dengan Google</span>
+          </button>
+        </div>
+
+        {/* Footer Hak Cipta */}
+        <div className="text-center text-xs text-slate-400 pt-6">
+          © 2026 SIMESA, SMK Penerbangan Dirgantara
         </div>
       </div>
 
