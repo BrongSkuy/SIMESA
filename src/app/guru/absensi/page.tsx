@@ -591,19 +591,19 @@ export default function GuruAbsensiPage() {
                 {selectedMapel === "Umum" ? "Wali Kelas" : selectedMapel}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-emerald-600" />
                 Hadir: {summary.hadir}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-amber-600" />
                 Izin: {summary.izin}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-[#1e3a8a]" />
                 Sakit: {summary.sakit}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-rose-600" />
                 Alfa: {summary.alfa}
               </span>
             </div>
@@ -705,7 +705,7 @@ export default function GuruAbsensiPage() {
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2.5">
-                                <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
+                                <div className="h-7 w-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
                                   {getInitials(siswa.namaLengkap)}
                                 </div>
                                 <span className="font-semibold text-slate-800">

@@ -55,27 +55,27 @@ function getInitials(name: string): string {
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-xs ring-1 ring-amber-300">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-100 text-amber-800 font-bold text-xs ring-1 ring-amber-300">
         #1
       </span>
     );
   }
   if (rank === 2) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs ring-1 ring-slate-300">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-200 text-slate-700 font-bold text-xs ring-1 ring-slate-300">
         #2
       </span>
     );
   }
   if (rank === 3) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-800 font-bold text-xs ring-1 ring-orange-300">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-orange-100 text-orange-800 font-bold text-xs ring-1 ring-orange-300">
         #3
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-600 font-semibold text-xs border border-slate-200">
+    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-50 text-slate-600 font-semibold text-xs border border-slate-200">
       #{rank}
     </span>
   );
@@ -195,7 +195,7 @@ export default function SiswaLeaderboardPage() {
                   Validasi Akademik
                 </h4>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
                     ✓
                   </span>
                   <span className="text-slate-700 font-medium">
@@ -203,7 +203,7 @@ export default function SiswaLeaderboardPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
                     ✓
                   </span>
                   <span className="text-slate-700 font-medium">
@@ -211,7 +211,7 @@ export default function SiswaLeaderboardPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-blue-50 border border-blue-200 text-[#1e3a8a] flex items-center justify-center font-bold text-xs">
                     ●
                   </span>
                   <span className="text-slate-900 font-semibold">
@@ -369,14 +369,14 @@ export default function SiswaLeaderboardPage() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2.5">
-                                  <div className="h-7 w-7 rounded-full bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
+                                  <div className="h-7 w-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
                                     {getInitials(entry.namaLengkap)}
                                   </div>
                                   <span className="font-semibold text-slate-800">
                                     {entry.namaLengkap}
                                   </span>
                                   {isMe && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-blue-600 text-white">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
                                       Kamu
                                     </span>
                                   )}
@@ -389,13 +389,13 @@ export default function SiswaLeaderboardPage() {
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                                  <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
                                     <div
-                                      className="bg-blue-600 h-full rounded-full"
+                                      className="bg-[#1e3a8a] h-full rounded-xs"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="font-bold tabular-nums text-blue-600">
+                                  <span className="font-bold tabular-nums text-[#1e3a8a]">
                                     {entry.persentase}
                                   </span>
                                 </div>

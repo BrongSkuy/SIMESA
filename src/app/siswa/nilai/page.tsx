@@ -301,9 +301,9 @@ export default function SiswaNilaiPage() {
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden">
                   <div
-                    className="bg-blue-600 h-full rounded-full transition-all"
+                    className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -372,9 +372,9 @@ export default function SiswaNilaiPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${
                         c.tipe === "Otomatis"
-                          ? "border-blue-200 text-blue-700 bg-blue-50"
+                          ? "border-blue-200 text-[#1e3a8a] bg-blue-50"
                           : "border-indigo-200 text-indigo-700 bg-indigo-50"
                       }`}
                     >

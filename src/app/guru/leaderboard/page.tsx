@@ -257,7 +257,7 @@ export default function GuruLeaderboardPage() {
                   Validasi Akademik
                 </h4>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
                     ✓
                   </span>
                   <span className="text-slate-700 font-medium">
@@ -265,7 +265,7 @@ export default function GuruLeaderboardPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xs">
                     ✓
                   </span>
                   <span className="text-slate-700 font-medium">
@@ -273,7 +273,7 @@ export default function GuruLeaderboardPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs">
-                  <span className="h-5 w-5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold text-xs">
+                  <span className="h-5 w-5 rounded-md bg-blue-50 border border-blue-200 text-[#1e3a8a] flex items-center justify-center font-bold text-xs">
                     ●
                   </span>
                   <span className="text-slate-900 font-semibold">
@@ -427,9 +427,9 @@ export default function GuruLeaderboardPage() {
                                 <span className="font-semibold text-slate-900 tabular-nums">
                                   {entry.rawScore.toFixed(4)}
                                 </span>
-                                <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                                <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
                                   <div
-                                    className="bg-blue-600 h-full rounded-full"
+                                    className="bg-[#1e3a8a] h-full rounded-xs"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>

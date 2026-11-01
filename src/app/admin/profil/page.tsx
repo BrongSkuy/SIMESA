@@ -84,7 +84,7 @@ export default function AdminProfilPage() {
     ((session?.user as Record<string, unknown>)?.appRole as string) || "ADMIN";
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 w-full">
       <PageHeader
         title="Profil & Keamanan Administrator"
         badge="Akun Saya"
@@ -97,7 +97,7 @@ export default function AdminProfilPage() {
         <div className="md:col-span-2 bg-white rounded-lg p-6 border border-slate-200 shadow-xs flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             <div className="flex items-center gap-3.5">
-              <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base shadow-xs shrink-0">
+              <div className="h-12 w-12 rounded-lg bg-[#1e3a8a] flex items-center justify-center text-white font-bold text-base shadow-xs shrink-0">
                 {getInitials(userName)}
               </div>
               <div className="min-w-0">
@@ -123,7 +123,7 @@ export default function AdminProfilPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Peran Akses
                 </p>
-                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-[#1e3a8a] border border-blue-200">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   {appRole}
                 </span>

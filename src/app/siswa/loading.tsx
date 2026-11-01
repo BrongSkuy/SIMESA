@@ -6,13 +6,13 @@ export default function Loading() {
         <div className="h-3.5 w-72 rounded-md bg-slate-200/70" />
       </div>
 
-      <div className="h-24 rounded-xl bg-slate-900/90 border border-slate-800" />
+      <div className="h-24 rounded-xl bg-white border border-slate-200 shadow-xs" />
 
       <div className="grid gap-4 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-32 rounded-xl bg-slate-900/90 border border-slate-800"
+            className="h-32 rounded-xl bg-white border border-slate-200 shadow-xs"
           />
         ))}
       </div>

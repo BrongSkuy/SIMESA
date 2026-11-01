@@ -344,7 +344,7 @@ export default function ManajemenDataPage() {
                     </div>
                   </div>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 w-fit">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                    <span className="w-1.5 h-1.5 rounded-xs bg-emerald-600" />
                     Semester Aktif
                   </span>
                 </div>

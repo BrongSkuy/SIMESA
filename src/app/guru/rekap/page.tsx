@@ -479,30 +479,30 @@ export default function GuruRekapPage() {
                                 {r.nama}
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   {r.hadir}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-full text-xs font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                                   {r.izin}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-full text-xs font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200">
                                   {r.sakit}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-full text-xs font-mono font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                                   {r.alfa}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right whitespace-nowrap pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-14 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                                  <div className="w-14 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
                                     <div
-                                      className="bg-blue-600 h-full rounded-full"
+                                      className="bg-[#1e3a8a] h-full rounded-xs"
                                       style={{
                                         width: `${Math.min(100, Math.max(0, r.persen))}%`,
                                       }}

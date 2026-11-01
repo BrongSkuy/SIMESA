@@ -368,11 +368,11 @@ export default function AdminLeaderboardPage() {
                   Periode: {publishStatus.periode}
                 </span>
                 {publishStatus.isPublished ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <Globe className="h-3 w-3" /> Terpublikasi Resmi
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                     <Lock className="h-3 w-3" /> Mode Draf (Internal Admin)
                   </span>
                 )}
@@ -681,9 +681,9 @@ export default function AdminLeaderboardPage() {
                             <span className="font-semibold text-slate-900 tabular-nums">
                               {entry.rawScore.toFixed(4)}
                             </span>
-                            <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                            <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
                               <div
-                                className="bg-blue-600 h-full rounded-full"
+                                className="bg-[#1e3a8a] h-full rounded-xs"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>

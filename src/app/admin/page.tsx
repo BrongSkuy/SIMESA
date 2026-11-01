@@ -659,9 +659,9 @@ export default function AdminDashboard() {
                           <span className="font-semibold text-slate-900 w-12">
                             {Number(entry.rawScore).toFixed(4)}
                           </span>
-                          <div className="w-28 bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                          <div className="w-28 bg-slate-100 h-2 rounded-xs overflow-hidden border border-slate-200">
                             <div
-                              className="bg-blue-600 h-full rounded-full transition-all duration-300"
+                              className="bg-[#1e3a8a] h-full rounded-xs transition-all duration-300"
                               style={{
                                 width: `${Math.min(
                                   100,

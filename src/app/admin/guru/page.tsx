@@ -474,7 +474,7 @@ export default function AdminGuruPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-semibold flex items-center justify-center text-xs shrink-0">
+                      <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-semibold flex items-center justify-center text-xs shrink-0">
                         {getInitials(guru.namaLengkap)}
                       </div>
                       <div>
@@ -502,15 +502,15 @@ export default function AdminGuruPage() {
                     <span
                       className={
                         guru.status === "aktif"
-                          ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200"
                       }
                     >
                       <span
                         className={
                           guru.status === "aktif"
-                            ? "w-1.5 h-1.5 rounded-full bg-emerald-500"
-                            : "w-1.5 h-1.5 rounded-full bg-slate-400"
+                            ? "w-1.5 h-1.5 rounded-xs bg-emerald-500"
+                            : "w-1.5 h-1.5 rounded-xs bg-slate-400"
                         }
                       />
                       {guru.status === "aktif" ? "Aktif" : "Nonaktif"}

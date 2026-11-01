@@ -372,9 +372,9 @@ export default function AdminRekapPage() {
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-14 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                                  <div className="w-14 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
                                     <div
-                                      className="bg-blue-600 h-full rounded-full"
+                                      className="bg-[#1e3a8a] h-full rounded-xs"
                                       style={{
                                         width: `${Math.min(100, Math.max(0, r.persen))}%`,
                                       }}

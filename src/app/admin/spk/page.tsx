@@ -173,9 +173,9 @@ export default function AdminSpkPage() {
           </div>
         </div>
 
-        <div className="mt-4 w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+        <div className="mt-4 w-full bg-slate-100 h-2 rounded-xs overflow-hidden border border-slate-200">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${
+            className={`h-full rounded-xs transition-all duration-300 ${
               isValid ? "bg-emerald-600" : "bg-amber-500"
             }`}
             style={{ width: `${Math.min(100, Math.max(0, totalBobot))}%` }}
@@ -237,9 +237,9 @@ export default function AdminSpkPage() {
                   </div>
                 </div>
                 {/* Visual bar */}
-                <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-1.5 w-full rounded-xs bg-slate-100 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                    className="h-full rounded-xs bg-[#1e3a8a] transition-all duration-300"
                     style={{ width: `${Math.min(Math.max(c.bobot, 0), 100)}%` }}
                   />
                 </div>

@@ -545,19 +545,19 @@ export default function AdminAbsensiPage() {
                 {selectedMapel === "Umum" ? "Wali Kelas" : selectedMapel}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-emerald-600" />
                 Hadir: {summary.hadir}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-amber-600" />
                 Izin: {summary.izin}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200 tabular-nums">
+                <span className="w-1.5 h-1.5 rounded-xs bg-[#1e3a8a]" />
                 Sakit: {summary.sakit}
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 tabular-nums">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                <span className="w-1.5 h-1.5 rounded-xs bg-rose-600" />
                 Alfa: {summary.alfa}
               </span>
             </div>
@@ -569,7 +569,7 @@ export default function AdminAbsensiPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-rose-950/50 border-rose-800/70 text-rose-300 hover:bg-rose-900/60 hover:text-rose-200"
+                      className="bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:text-rose-800"
                     >
                       <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Hapus Sesi
                     </Button>

@@ -10,8 +10,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-blue-600 text-white shadow-xs hover:bg-blue-700",
-        dark: "bg-slate-900 text-white border-slate-800 shadow-xs hover:bg-slate-800",
+        default: "bg-[#1e3a8a] text-white shadow-xs hover:bg-[#172554]",
+        dark: "bg-[#0f172a] text-white border-slate-800 shadow-xs hover:bg-[#1e3a8a]",
         outline:
           "border-slate-200 bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 aria-expanded:bg-slate-50 aria-expanded:text-slate-900",
         secondary:
@@ -20,7 +20,7 @@ const buttonVariants = cva(
           "text-slate-600 hover:bg-slate-100 hover:text-slate-900 aria-expanded:bg-slate-100 aria-expanded:text-slate-900",
         destructive:
           "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 focus-visible:border-rose-400 focus-visible:ring-rose-200",
-        link: "text-blue-600 underline-offset-4 hover:underline hover:text-blue-800",
+        link: "text-[#1e3a8a] underline-offset-4 hover:underline hover:text-[#172554]",
       },
       size: {
         default:

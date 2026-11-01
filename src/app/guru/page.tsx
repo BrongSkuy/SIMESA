@@ -158,14 +158,14 @@ export default function GuruDashboard() {
                           Kelas {kelas.namaKelas}
                         </CardTitle>
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold border ${
                             isDone
                               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "border-amber-200 bg-amber-50 text-amber-700"
                           }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
+                            className={`w-1.5 h-1.5 rounded-xs ${
                               isDone ? "bg-emerald-500" : "bg-amber-500"
                             }`}
                           />

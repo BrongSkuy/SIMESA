@@ -356,7 +356,7 @@ export default function SiswaDashboard() {
                       >
                         <TableCell className="pl-5">
                           <span
-                            className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+                            className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
                               entry.rank === 1
                                 ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
                                 : entry.rank === 2
@@ -372,7 +372,7 @@ export default function SiswaDashboard() {
                         <TableCell className="font-semibold text-slate-800">
                           <span>{entry.namaLengkap}</span>
                           {isMe && (
-                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-blue-600 text-white">
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
                               Kamu
                             </span>
                           )}

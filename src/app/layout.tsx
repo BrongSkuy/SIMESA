@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SMK Penerbangan Dirgantara — Sistem Tata Kelola Sekolah & SPK Terpadu",
+  title: "SIMESA — Sistem Informasi Sekolah Terpadu | SMK Penerbangan Dirgantara",
   description:
-    "Sistem Administrasi Akademik, Presensi Siswa, dan Evaluasi SPK Siswa Berprestasi SMK Penerbangan Dirgantara",
+    "Sistem Informasi Sekolah Terpadu (SIMESA) — Administrasi Akademik, Presensi, dan Evaluasi Prestasi SMK Penerbangan Dirgantara",
 };
 
 export default function RootLayout({

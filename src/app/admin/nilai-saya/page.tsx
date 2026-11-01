@@ -431,9 +431,9 @@ export default function AdminNilaiSayaPage() {
                     </div>
 
                     {/* Progress bar */}
-                    <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden">
                       <div
-                        className="bg-blue-600 h-full rounded-full transition-all"
+                        className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>

@@ -31,9 +31,9 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-slate-900 text-white">
+    <div className="flex h-full flex-col bg-gradient-to-b from-[#0a192f] via-[#1e3a8a] to-[#0f172a] text-white">
       {/* Header Brand */}
-      <div className="flex items-center gap-3 border-b border-slate-800 px-4 h-16 shrink-0">
+      <div className="flex items-center gap-3 border-b border-blue-900/60 px-4 h-16 shrink-0">
         <div className="relative h-9 w-9 shrink-0">
           <Image
             src="/logo.png?v=2"
@@ -45,10 +45,15 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
           />
         </div>
         <div className="min-w-0">
-          <span className="text-sm font-bold text-white tracking-tight truncate block">
-            SMK Penerbangan Dirgantara
-          </span>
-          <p className="text-xs text-slate-400 truncate mt-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-extrabold tracking-wide text-white uppercase">
+              SIMESA
+            </span>
+            <span className="text-[10px] font-medium text-amber-300/90 border border-amber-400/30 px-1 rounded-sm">
+              SMK
+            </span>
+          </div>
+          <p className="text-[11px] text-blue-200/80 truncate mt-0.5">
             {role === "ADMIN"
               ? "Sistem Administrasi"
               : role === "GURU"
@@ -70,18 +75,18 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
                     pathname === "/admin"
-                      ? "bg-slate-800 text-white font-semibold"
-                      : "text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium"
+                      ? "bg-white/15 text-white font-semibold"
+                      : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                   )}
                 >
-                  <LayoutDashboard className="w-4 h-4 text-slate-400" />
+                  <LayoutDashboard className="w-4 h-4 text-blue-200" />
                   Beranda
                 </Link>
               </div>
 
               {ADMIN_DROPDOWN_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-1">
-                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-blue-200/70">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -96,12 +101,12 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         className={cn(
                           "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors",
                           active
-                            ? "bg-slate-800 text-white font-semibold"
-                            : "text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium"
+                            ? "bg-white/15 text-white font-semibold"
+                            : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                         )}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Icon className="w-4 h-4 text-slate-400" />
+                          <Icon className="w-4 h-4 text-blue-200" />
                           <span>{item.label}</span>
                         </div>
                       </Link>
@@ -125,12 +130,12 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                       className={cn(
                         "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors",
                         active
-                          ? "bg-slate-800 text-white font-semibold"
-                          : "text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium"
+                          ? "bg-white/15 text-white font-semibold"
+                          : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                       )}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className="w-4 h-4 text-slate-400" />
+                        <Icon className="w-4 h-4 text-blue-200" />
                         <span>{item.label}</span>
                       </div>
                     </Link>
@@ -140,13 +145,13 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
             </div>
           )}
 
-          <div className="pt-2 border-t border-slate-800 space-y-1">
+          <div className="pt-2 border-t border-blue-900/60 space-y-1">
             <Link
               href={`${homeHref}/profil`}
               onClick={onToggle}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition-colors"
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-blue-100/80 hover:bg-white/10 hover:text-white transition-colors"
             >
-              <UserIcon className="w-4 h-4 text-slate-400" />
+              <UserIcon className="w-4 h-4 text-blue-200" />
               <span>Profil Akun</span>
             </Link>
             <button
@@ -155,7 +160,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                 await authClient.signOut();
                 router.push("/login");
               }}
-              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-400 hover:bg-slate-800/80 hover:text-rose-300 transition-colors text-left"
+              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar</span>

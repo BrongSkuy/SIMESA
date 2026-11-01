@@ -344,23 +344,23 @@ export default function SiswaAbsensiPage() {
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-emerald-500" />
           <span>Hadir</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-amber-500" />
           <span>Izin</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-[#1e3a8a]" />
           <span>Sakit</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-rose-500" />
           <span>Alfa</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-200" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-slate-200" />
           <span>Belum Ada / Akhir Pekan</span>
         </div>
       </div>
@@ -425,7 +425,7 @@ export default function SiswaAbsensiPage() {
                   >
                     {day.date}
                     {day.count > 1 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-xs">
+                      <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] text-[10px] font-bold text-white shadow-xs">
                         {day.count}
                       </span>
                     )}
@@ -490,7 +490,7 @@ export default function SiswaAbsensiPage() {
                               </TableCell>
                               <TableCell className="text-right pr-5">
                                 <span
-                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${
                                     r.status
                                       ? statusPillMap[r.status]
                                       : "bg-slate-100 text-slate-500 border-slate-200"

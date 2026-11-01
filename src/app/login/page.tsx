@@ -192,7 +192,7 @@ export default function LoginPage() {
             <br />
             Meraih Masa Depan
           </p>
-          <div className="h-1 w-12 bg-amber-400 rounded-full mx-auto mt-3" />
+          <div className="h-1 w-12 bg-amber-400 rounded-xs mx-auto mt-3" />
         </div>
       </div>
 

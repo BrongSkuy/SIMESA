@@ -20,6 +20,11 @@
   --color-brand-700: #1d4ed8;
   --color-brand-900: #1e3a8a;
 
+  /* SIMESA Theme Palette */
+  --color-simesa-navy: #1e3a8a;
+  --color-simesa-navy-dark: #172554;
+  --color-simesa-gold: #fbbf24;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -63,7 +68,7 @@
   --card-foreground: #0F172A;
   --popover: #FFFFFF;
   --popover-foreground: #0F172A;
-  --primary: #2563EB;
+  --primary: #1e3a8a;
   --primary-foreground: #FFFFFF;
   --secondary: #F1F5F9;
   --secondary-foreground: #0F172A;
@@ -74,21 +79,21 @@
   --destructive: #DC2626;
   --border: #E2E8F0;
   --input: #E2E8F0;
-  --ring: #2563EB;
+  --ring: #1e3a8a;
   --chart-1: #059669;
   --chart-2: #D97706;
-  --chart-3: #2563EB;
+  --chart-3: #1e3a8a;
   --chart-4: #DC2626;
   --chart-5: #4F46E5;
   --radius: 0.5rem;
   --sidebar: #0F172A;
   --sidebar-foreground: #CBD5E1;
-  --sidebar-primary: #2563EB;
+  --sidebar-primary: #1e3a8a;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #1E293B;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #1E293B;
-  --sidebar-ring: #2563EB;
+  --sidebar-ring: #1e3a8a;
 }
 
 @layer base {
