@@ -723,12 +723,12 @@ export default function GuruNilaiPage() {
               )}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
-                  <thead>
-                    <tr className="border-b border-slate-800 bg-[#091524] text-xs font-semibold text-slate-200">
-                      <th className="px-4 py-3 font-semibold w-12 sticky left-0 bg-[#091524] z-10 text-white border-r border-slate-800">
+                  <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
+                    <tr className="border-b border-slate-800/80 bg-transparent text-xs font-semibold text-slate-200">
+                      <th className="px-4 py-3 font-semibold w-12 sticky left-0 bg-[#091524] z-10 text-white border-r border-slate-800/80">
                         No
                       </th>
-                      <th className="px-4 py-3 font-semibold w-24 sticky left-12 bg-[#091524] z-10 text-slate-200 border-r border-slate-800">
+                      <th className="px-4 py-3 font-semibold w-24 sticky left-12 bg-[#091524] z-10 text-slate-200 border-r border-slate-800/80">
                         NIS
                       </th>
                       <th className="px-4 py-3 font-semibold min-w-[200px] whitespace-nowrap text-white">
@@ -755,7 +755,7 @@ export default function GuruNilaiPage() {
                         </th>
                       ))}
                       {isAkademik && (
-                        <th className="px-4 py-3 text-center font-semibold text-blue-300 bg-blue-950/60 border-l border-slate-800 min-w-[110px]">
+                        <th className="px-4 py-3 text-center font-semibold text-blue-300 bg-blue-950/60 border-l border-slate-800/80 min-w-[110px]">
                           Rata-rata
                         </th>
                       )}

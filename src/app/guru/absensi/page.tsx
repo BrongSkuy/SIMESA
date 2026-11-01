@@ -813,8 +813,8 @@ export default function GuruAbsensiPage() {
           {/* Grid Table */}
           <div className="border-b border-slate-200 overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
-                  <thead>
-                    <tr className="border-b border-slate-800 bg-[#091524] text-slate-200 text-xs font-semibold">
+                  <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
+                    <tr className="border-b border-slate-800/80 bg-transparent text-slate-200 text-xs font-semibold">
                       <th className="px-5 py-3 font-semibold w-14 text-white">No</th>
                       <th className="px-4 py-3 font-semibold w-28 text-slate-300">NIS</th>
                       <th className="px-4 py-3 font-semibold min-w-[220px] whitespace-nowrap text-white">
@@ -1053,7 +1053,7 @@ export default function GuruAbsensiPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-max text-left border-collapse">
-                    <thead className="bg-[#091524] border-b border-slate-800 text-xs text-slate-200">
+                    <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80 text-xs text-slate-200">
                       <tr>
                         {/* Sticky Left Columns */}
                         <th className="sticky left-0 z-20 bg-[#091524] px-3 py-3 font-semibold w-12 min-w-[48px] text-center border-r border-slate-800 text-white">
@@ -1253,7 +1253,7 @@ export default function GuruAbsensiPage() {
                           : 0;
 
                       return (
-                        <tfoot className="bg-[#091524] font-semibold text-xs border-t-2 border-slate-800 text-white">
+                        <tfoot className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] font-semibold text-xs border-t-2 border-slate-800/80 text-white">
                           <tr>
                             <td
                               colSpan={3}

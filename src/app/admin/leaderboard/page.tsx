@@ -515,7 +515,7 @@ export default function AdminLeaderboardPage() {
 
                   <div className="my-3 border border-slate-200 rounded-lg max-h-[300px] overflow-y-auto bg-white">
                     <Table>
-                      <TableHeader className="sticky top-0 z-10 bg-[#091524]">
+                      <TableHeader className="sticky top-0 z-10 bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
                         <TableRow>
                           <TableHead className="py-2.5 pl-4">Siswa</TableHead>
                           <TableHead className="py-2.5">Kelas</TableHead>

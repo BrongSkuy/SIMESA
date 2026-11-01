@@ -24,7 +24,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     <thead
       data-slot="table-header"
       className={cn(
-        "bg-[#091524] border-b border-slate-800 text-white [&_tr]:border-b [&_tr]:border-slate-800 [&_tr]:bg-[#091524] [&_tr]:hover:bg-[#091524]",
+        "bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80 text-white [&_tr]:border-b [&_tr]:border-slate-800/80 [&_tr]:!bg-transparent [&_tr]:hover:!bg-transparent",
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t-2 border-slate-800 bg-[#091524] font-medium text-white [&>tr]:last:border-b-0 [&_tr]:bg-[#091524] [&_tr]:hover:bg-[#091524]",
+        "border-t-2 border-slate-800/80 bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] font-medium text-white [&>tr]:last:border-b-0 [&_tr]:!bg-transparent [&_tr]:hover:!bg-transparent",
         className
       )}
       {...props}

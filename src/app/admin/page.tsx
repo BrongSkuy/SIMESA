@@ -749,7 +749,7 @@ export default function AdminDashboard() {
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
-            <thead className="bg-[#091524] border-b border-slate-800">
+            <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
               <tr>
                 <th scope="col" className="py-3 px-4 text-xs font-semibold text-white w-16 text-center">
                   Peringkat
@@ -766,7 +766,7 @@ export default function AdminDashboard() {
                 <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-200">
                   Skor Akhir SAW
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600 text-right">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-300 text-right">
                   Rincian
                 </th>
               </tr>
@@ -897,7 +897,7 @@ export default function AdminDashboard() {
                 </h5>
                 <div className="border border-slate-200/80 rounded-xl overflow-hidden">
                   <table className="min-w-full divide-y divide-slate-800 text-xs text-left">
-                    <thead className="bg-[#091524] border-b border-slate-800">
+                    <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
                       <tr>
                         <th className="py-2.5 px-3 font-semibold text-white">Kriteria</th>
                         <th className="py-2.5 px-3 font-semibold text-slate-200 text-right">Nilai Input</th>

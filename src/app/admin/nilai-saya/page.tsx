@@ -488,8 +488,8 @@ export default function AdminNilaiSayaPage() {
             </div>
             <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
               <Table>
-                <TableHeader className="bg-[#091524] border-b border-slate-800">
-                  <TableRow className="bg-[#091524] hover:bg-[#091524] border-b border-slate-800">
+                <TableHeader>
+                  <TableRow>
                     <TableHead className="pl-6 text-white font-semibold">Kriteria Evaluasi</TableHead>
                     <TableHead className="text-center text-slate-200 font-semibold">Tipe Input</TableHead>
                     <TableHead className="text-center text-slate-200 font-semibold">Bobot</TableHead>
@@ -532,7 +532,7 @@ export default function AdminNilaiSayaPage() {
                     </TableRow>
                   ))}
                   {/* Total Row - Dark Anchor */}
-                  <TableRow className="bg-[#091524] hover:bg-[#091524] border-t-2 border-slate-800 text-white">
+                  <TableRow className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] hover:bg-[#0E1E34] border-t-2 border-slate-800/80 text-white">
                     <TableCell
                       colSpan={4}
                       className="pl-6 font-bold text-white"
