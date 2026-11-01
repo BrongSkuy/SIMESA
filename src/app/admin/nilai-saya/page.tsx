@@ -3,16 +3,14 @@
 import { useState, useEffect } from "react";
 import {
   ClipboardList,
-  Loader2,
   TrendingUp,
   Award,
   BookOpen,
   CheckCircle2,
   AlertCircle,
-  Search,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@/components/ui/button";
+import { SessionSetup } from "@/components/shared/session-setup";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -22,10 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
@@ -179,6 +174,8 @@ export default function AdminNilaiSayaPage() {
     };
   };
 
+  const selectedStudentObj = students.find((s) => s.id === selectedStudent);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -188,92 +185,105 @@ export default function AdminNilaiSayaPage() {
         icon={ClipboardList}
       />
 
-      <div className="py-3.5 border-y border-slate-200">
-        <div>
-          <div className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="space-y-1.5 flex-1 w-full">
-              <Label className="text-xs font-medium text-slate-700">
-                Pilih Kelas
-              </Label>
-              <Select
-                value={selectedKelas || null}
-                onValueChange={(v) => {
-                  setSelectedKelas(v || "");
-                  setStudents([]);
-                  setSelectedStudent("");
-                }}
-              >
-                <SelectTrigger className="w-full h-9 text-xs">
-                  <SelectValue placeholder="Pilih Kelas..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((c) => (
-                    <SelectItem key={c.id} value={c.namaKelas}>
-                      {c.namaKelas}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5 flex-1 w-full">
-              <Label className="text-xs font-medium text-slate-700">
-                Pilih Siswa
-              </Label>
-              <Select
-                value={selectedStudent || null}
-                onValueChange={(v) => setSelectedStudent(v || "")}
-                disabled={!selectedKelas}
-              >
-                <SelectTrigger className="w-full h-9 text-xs">
-                  <SelectValue placeholder="Pilih Siswa...">
-                    {selectedStudent
-                      ? students.find((s) => s.id === selectedStudent)
-                        ? `${students.find((s) => s.id === selectedStudent)?.nis} - ${
-                            students.find((s) => s.id === selectedStudent)
-                              ?.namaLengkap
-                          }`
-                        : "Siswa terpilih"
-                      : undefined}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {students.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      Tidak ada siswa di kelas ini
-                    </SelectItem>
-                  ) : (
-                    students.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {`${s.nis} - ${s.namaLengkap}`}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={handleFetchScores}
-              disabled={loading || !selectedStudent}
-              className="gap-1.5 h-9 w-full md:w-auto shrink-0"
+      <SessionSetup
+        active={Boolean(data)}
+        icon={ClipboardList}
+        eyebrow="Langkah 1 dari 2"
+        title="Pilih Siswa untuk Membuka Transkrip"
+        description="Pilih rombongan belajar dan nama siswa untuk memuat rincian nilai tugas, UTS, UAS, persentase kehadiran, dan akumulasi skor SPK SAW."
+        submitLabel="Tampilkan Transkrip Siswa"
+        onSubmit={handleFetchScores}
+        loading={loading}
+        disabled={!selectedStudent}
+        onChangeSession={() => setData(null)}
+        chips={[
+          { label: "Kelas", value: data?.student.kelas || selectedKelas || "-" },
+          {
+            label: "Siswa",
+            value: data?.student
+              ? `${data.student.nis} · ${data.student.namaLengkap}`
+              : selectedStudentObj
+                ? `${selectedStudentObj.nis} · ${selectedStudentObj.namaLengkap}`
+                : "-",
+          },
+          { label: "Periode", value: data?.periode || "Aktif" },
+        ]}
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Target Kelas
+            </Label>
+            <Select
+              value={selectedKelas || null}
+              onValueChange={(v) => {
+                setSelectedKelas(v || "");
+                setStudents([]);
+                setSelectedStudent("");
+              }}
             >
-              {loading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Search className="h-3.5 w-3.5" />
-              )}
-              Tampilkan Transkrip
-            </Button>
+              <SelectTrigger className="h-9 w-full text-xs">
+                <SelectValue placeholder="Pilih Kelas..." />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((c) => (
+                  <SelectItem key={c.id} value={c.namaKelas}>
+                    {c.namaKelas}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Pilih Siswa
+            </Label>
+            <Select
+              value={selectedStudent || null}
+              onValueChange={(v) => setSelectedStudent(v || "")}
+              disabled={!selectedKelas}
+            >
+              <SelectTrigger className="h-9 w-full text-xs">
+                <SelectValue
+                  placeholder={
+                    !selectedKelas
+                      ? "Pilih kelas terlebih dahulu..."
+                      : "Pilih Siswa..."
+                  }
+                >
+                  {selectedStudent
+                    ? selectedStudentObj
+                      ? `${selectedStudentObj.nis} - ${selectedStudentObj.namaLengkap}`
+                      : "Siswa terpilih"
+                    : undefined}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {students.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    Tidak ada siswa di kelas ini
+                  </SelectItem>
+                ) : (
+                  students.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {`${s.nis} - ${s.namaLengkap}`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </div>
+      </SessionSetup>
 
-      {error && (
-        <div className="flex h-56 flex-col items-center justify-center gap-2 text-slate-500 bg-white border border-slate-200">
-          <AlertCircle className="h-8 w-8 text-rose-500" />
+      {error && !data && (
+        <div className="flex h-44 flex-col items-center justify-center gap-2 text-slate-500 bg-white border border-slate-200 rounded-xl max-w-xl mx-auto my-4 p-6 text-center">
+          <AlertCircle className="h-7 w-7 text-rose-500" />
           <p className="text-sm font-semibold text-slate-800">
-            Gagal Memuat Nilai
+            Gagal Memuat Transkrip Nilai
           </p>
-          <p className="text-xs">{error}</p>
+          <p className="text-xs text-slate-500">{error}</p>
         </div>
       )}
 
