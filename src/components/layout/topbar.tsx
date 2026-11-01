@@ -406,12 +406,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={
-                  <button
-                    type="button"
-                    className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl bg-white/6 hover:bg-white/10 border border-white/15 transition-all focus:outline-none cursor-pointer w-64 shadow-xs"
-                  />
-                }
+                className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 transition-all focus:outline-none cursor-pointer w-64 shadow-xs"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 ring-1 ring-white/15 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
