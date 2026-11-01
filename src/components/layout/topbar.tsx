@@ -409,31 +409,33 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 render={
                   <button
                     type="button"
-                    className="flex items-center space-x-3 px-2.5 py-1.5 rounded-xl hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
+                    className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl bg-white/6 hover:bg-white/10 border border-white/15 transition-all focus:outline-none cursor-pointer w-64 shadow-xs"
                   />
                 }
               >
-                <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 ring-1 ring-white/15 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.nama}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    getInitials(user.nama)
-                  )}
-                </div>
-                <div className="hidden sm:block text-left leading-tight">
-                  <div className="text-sm font-semibold text-white max-w-[170px] truncate">
-                    {user.nama}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 ring-1 ring-white/15 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.nama}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      getInitials(user.nama)
+                    )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>{roleMeta.label}</span>
+                  <div className="hidden sm:block text-left leading-tight min-w-0">
+                    <div className="text-sm font-semibold text-white truncate max-w-[145px]">
+                      {user.nama}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="truncate">{roleMeta.label}</span>
+                    </div>
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-blue-200" />
+                <ChevronDown className="w-4 h-4 text-blue-200 shrink-0" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
