@@ -190,7 +190,7 @@ export default function AdminProfilPage() {
     }
   };
 
-  // Handle Password Change with all security fixes
+  // Handle Password Change
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -248,11 +248,11 @@ export default function AdminProfilPage() {
   const strength = calculateStrength(newPassword);
 
   return (
-    <div className="space-y-6 w-full max-w-5xl">
+    <div className="space-y-6 w-full">
       <PageHeader
         title="Profil & Keamanan Administrator"
         badge="Akun Saya"
-        description="Kelola identitas, foto profil, dan perbarui kata sandi akun administrator"
+        description="Kelola identitas, foto profil, dan perbarui kata sandi otentikasi administrator"
         icon={User}
       />
 
@@ -260,10 +260,10 @@ export default function AdminProfilPage() {
         {/* Kolom Identitas & Foto */}
         <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 space-y-6">
           <div className="space-y-5">
-            {/* Foto Profil & Upload */}
-            <div className="flex flex-col items-center sm:items-start gap-4">
-              <div className="relative group">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-100 flex items-center justify-center shadow-sm">
+            {/* Foto Profil & Info Identitas Bersatu */}
+            <div className="flex items-center gap-3.5">
+              <div className="relative group shrink-0">
+                <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-xs">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
@@ -271,7 +271,7 @@ export default function AdminProfilPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#1e3a8a] text-white font-bold text-2xl flex items-center justify-center">
+                    <div className="w-full h-full bg-[#1e3a8a] text-white font-bold text-xl flex items-center justify-center">
                       {getInitials(displayName || session?.user?.name || "Admin")}
                     </div>
                   )}
@@ -281,58 +281,64 @@ export default function AdminProfilPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  className="absolute inset-0 bg-black/50 text-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-[11px] font-medium cursor-pointer"
+                  className="absolute -bottom-1 -right-1 p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow border-2 border-white transition-all cursor-pointer"
                   title="Ubah Foto Profil"
                 >
-                  <Camera className="w-5 h-5" />
-                  <span>Ubah Foto</span>
+                  {uploadingPhoto ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Camera className="w-3 h-3" />
+                  )}
                 </button>
               </div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/jpg, image/webp"
-                className="hidden"
-                onChange={handlePhotoChange}
-              />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold text-slate-900 truncate">
+                  {displayName || session?.user?.name || "Administrator"}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Pengguna Sistem Aktif
+                </p>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs h-8 gap-1.5 border-slate-300"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingPhoto}
-                >
-                  {uploadingPhoto ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Camera className="w-3.5 h-3.5 text-blue-600" />
-                  )}
-                  {photoPreview ? "Ganti Foto" : "Unggah Foto"}
-                </Button>
-                {photoPreview && (
+                <div className="flex items-center gap-2 mt-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="text-xs h-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                    onClick={handleRemovePhoto}
+                    className="h-7 text-xs px-2.5 gap-1.5 border-slate-300"
+                    onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingPhoto}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Camera className="w-3 h-3 text-blue-600" />
+                    {photoPreview ? "Ganti Foto" : "Unggah Foto"}
                   </Button>
-                )}
+                  {photoPreview && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs"
+                      onClick={handleRemovePhoto}
+                      disabled={uploadingPhoto}
+                      title="Hapus Foto Profil"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
               </div>
-              <p className="text-[11px] text-slate-400 text-center sm:text-left">
-                Format JPG, PNG, atau WebP. Otomatis dikompresi agar ringan.
-              </p>
             </div>
 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png, image/jpeg, image/jpg, image/webp"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
+
             {/* Form Ubah Nama Lengkap */}
-            <form onSubmit={handleSaveName} className="space-y-3 pt-3 border-t border-slate-100">
+            <form onSubmit={handleSaveName} className="space-y-3 pt-4 border-t border-slate-100">
               <div className="space-y-1.5">
                 <Label htmlFor="displayName" className="text-xs font-semibold text-slate-700">
                   Nama Tampilan
@@ -350,7 +356,7 @@ export default function AdminProfilPage() {
                     type="submit"
                     size="sm"
                     className="h-9 text-xs shrink-0"
-                    disabled={savingName || displayName === session?.user?.name}
+                    disabled={savingName || displayName === (session?.user?.name || "")}
                   >
                     {savingName ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Simpan"}
                   </Button>
@@ -361,18 +367,18 @@ export default function AdminProfilPage() {
             {/* Detail Kredensial & Peran */}
             <div className="space-y-3 pt-3 border-t border-slate-100 text-xs">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Username / ID Login
                 </p>
-                <p className="font-mono text-xs text-slate-800 mt-1 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-md w-fit">
+                <p className="font-mono text-sm text-slate-800 mt-1 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-md w-fit">
                   {username}
                 </p>
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Peran Akses
                 </p>
-                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200">
+                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-[#1e3a8a] border border-blue-200">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   {appRole}
                 </span>
@@ -380,8 +386,8 @@ export default function AdminProfilPage() {
             </div>
           </div>
 
-          <div className="border border-slate-200 bg-slate-50 p-3.5 rounded-lg text-xs text-slate-600 leading-relaxed">
-            Foto profil dan nama tampilan ini akan muncul pada navigasi atas serta sistem audit aktivitas.
+          <div className="border border-slate-200 bg-slate-50 p-3.5 rounded-md text-xs text-slate-500 leading-relaxed">
+            Foto profil dan nama tampilan ini akan langsung diperbarui pada navigasi atas serta sistem audit aktivitas.
           </div>
         </div>
 
@@ -397,7 +403,7 @@ export default function AdminProfilPage() {
           </div>
 
           <div className="pt-2">
-            <div className="mb-5 border border-slate-200 bg-slate-50 p-3.5 rounded-lg text-xs text-slate-600">
+            <div className="mb-5 border border-slate-200 bg-slate-50 p-3.5 rounded-md text-xs text-slate-600">
               <p className="font-semibold text-slate-800 mb-1 flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 text-blue-600" /> Catatan Keamanan:
               </p>
