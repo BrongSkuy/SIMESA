@@ -21,7 +21,10 @@ import * as XLSX from "xlsx";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
   CardDescription,
+  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,6 +80,18 @@ const initialArchives: {
   periode: string;
   uploadedAt: string;
 }[] = [];
+
+function getInitials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "S"
+  );
+}
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
@@ -166,6 +181,7 @@ export default function AdminLeaderboardPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const targetKelas =
       activeTab === "umum" ||
@@ -515,7 +531,7 @@ export default function AdminLeaderboardPage() {
 
                   <div className="my-3 border border-slate-200 rounded-lg max-h-[300px] overflow-y-auto bg-white">
                     <Table>
-                      <TableHeader className="sticky top-0 z-10 bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
+                      <TableHeader className="sticky top-0 z-10 bg-slate-50">
                         <TableRow>
                           <TableHead className="py-2.5 pl-4">Siswa</TableHead>
                           <TableHead className="py-2.5">Kelas</TableHead>

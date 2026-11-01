@@ -27,8 +27,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Panel } from "@/components/shared/panel";
 import {
@@ -748,25 +750,25 @@ export default function AdminDashboard() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
-            <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
+          <table className="min-w-full divide-y divide-slate-200/80 text-left text-sm">
+            <thead className="bg-slate-50/80">
               <tr>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-white w-16 text-center">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600 w-16 text-center">
                   Peringkat
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-white">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600">
                   Nama Siswa
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-200">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600">
                   Kelas
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-200">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600">
                   Presensi Kehadiran
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-200">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600">
                   Skor Akhir SAW
                 </th>
-                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-300 text-right">
+                <th scope="col" className="py-3 px-4 text-xs font-semibold text-slate-600 text-right">
                   Rincian
                 </th>
               </tr>
@@ -896,12 +898,12 @@ export default function AdminDashboard() {
                   Daftar Kriteria Penilaian
                 </h5>
                 <div className="border border-slate-200/80 rounded-xl overflow-hidden">
-                  <table className="min-w-full divide-y divide-slate-800 text-xs text-left">
-                    <thead className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80">
+                  <table className="min-w-full divide-y divide-slate-200 text-xs text-left">
+                    <thead className="bg-slate-50">
                       <tr>
-                        <th className="py-2.5 px-3 font-semibold text-white">Kriteria</th>
-                        <th className="py-2.5 px-3 font-semibold text-slate-200 text-right">Nilai Input</th>
-                        <th className="py-2.5 px-3 font-semibold text-slate-200 text-right">Normalisasi</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600">Kriteria</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Nilai Input</th>
+                        <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Normalisasi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">

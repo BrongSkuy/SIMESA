@@ -486,15 +486,15 @@ export default function AdminNilaiSayaPage() {
                 Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
               </CardDescription>
             </div>
-            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+            <div className="border-b border-slate-200 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-6 text-white font-semibold">Kriteria Evaluasi</TableHead>
-                    <TableHead className="text-center text-slate-200 font-semibold">Tipe Input</TableHead>
-                    <TableHead className="text-center text-slate-200 font-semibold">Bobot</TableHead>
-                    <TableHead className="text-center text-slate-200 font-semibold">Nilai</TableHead>
-                    <TableHead className="text-right pr-6 text-white font-semibold">
+                    <TableHead className="pl-6">Kriteria Evaluasi</TableHead>
+                    <TableHead className="text-center">Tipe Input</TableHead>
+                    <TableHead className="text-center">Bobot</TableHead>
+                    <TableHead className="text-center">Nilai</TableHead>
+                    <TableHead className="text-right pr-6">
                       Skor Terbobot
                     </TableHead>
                   </TableRow>
@@ -531,15 +531,15 @@ export default function AdminNilaiSayaPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {/* Total Row - Dark Anchor */}
-                  <TableRow className="bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] hover:bg-[#0E1E34] border-t-2 border-slate-800/80 text-white">
+                  {/* Total Row */}
+                  <TableRow className="bg-slate-50 border-t-2 border-slate-200">
                     <TableCell
                       colSpan={4}
-                      className="pl-6 font-bold text-white"
+                      className="pl-6 font-bold text-slate-900"
                     >
                       Total Akumulasi Skor SPK
                     </TableCell>
-                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-400">
+                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600">
                       {data.totalSkorSPK}
                     </TableCell>
                   </TableRow>

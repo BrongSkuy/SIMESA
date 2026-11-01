@@ -23,10 +23,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn(
-        "bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] border-b border-slate-800/80 text-white [&_tr]:border-b [&_tr]:border-slate-800/80 [&_tr]:!bg-transparent [&_tr]:hover:!bg-transparent",
-        className
-      )}
+      className={cn("bg-slate-50 border-b border-slate-200 [&_tr]:border-b [&_tr]:border-slate-200", className)}
       {...props}
     />
   )
@@ -47,7 +44,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t-2 border-slate-800/80 bg-[#091524] bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] font-medium text-white [&>tr]:last:border-b-0 [&_tr]:!bg-transparent [&_tr]:hover:!bg-transparent",
+        "border-t border-slate-200 bg-slate-50 font-medium [&>tr]:last:border-b-0",
         className
       )}
       {...props}
@@ -73,7 +70,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "py-3 px-4 text-left align-middle text-xs font-semibold whitespace-nowrap text-slate-200 [&:has([role=checkbox])]:pr-0",
+        "py-3 px-4 text-left align-middle text-xs font-semibold whitespace-nowrap text-slate-700 [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
