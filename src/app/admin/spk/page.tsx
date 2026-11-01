@@ -13,13 +13,6 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 interface SpkCriteria {
   id: string;
@@ -184,11 +177,11 @@ export default function AdminSpkPage() {
       </div>
 
       {/* Criteria cards */}
-      <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-px sm:bg-slate-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {criteria.map((c, index) => (
           <div
             key={c.id}
-            className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
+            className="rounded-xl border border-slate-200/90 bg-white p-5 hover:border-slate-300 hover:shadow-2xs transition-all flex flex-col justify-between"
           >
             <div>
               <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100 mb-3">
