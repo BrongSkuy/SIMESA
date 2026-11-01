@@ -221,41 +221,41 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0a192f] via-[#1e3a8a] to-[#0f172a] border-b border-blue-900/80 text-white">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#0a192f] via-[#1e3a8a] to-[#0f172a] border-b border-blue-900/80 text-white shadow-md">
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-20 gap-4">
           {/* Sisi Kiri: Tombol Menu Mobile & Brand Sekolah */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3.5 shrink-0">
             <button
               type="button"
               onClick={onMenuClick}
-              className="lg:hidden p-2 -ml-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2.5 -ml-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
               aria-label="Buka menu navigasi"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </button>
 
-            <Link href={homeHref} className="flex items-center space-x-3 group">
-              <div className="relative h-9 w-9 flex items-center justify-center shrink-0">
+            <Link href={homeHref} className="flex items-center space-x-3.5 group py-1">
+              <div className="relative h-12 w-12 sm:h-13 sm:w-13 flex items-center justify-center shrink-0 drop-shadow-sm">
                 <Image
                   src="/logo.png?v=2"
                   alt="Logo SMK Penerbangan Dirgantara"
                   fill
-                  sizes="36px"
+                  sizes="52px"
                   unoptimized
                   className="object-contain"
                 />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-extrabold tracking-wide text-white uppercase">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-wide text-white uppercase drop-shadow-xs">
                     SIMESA
                   </span>
-                  <span className="hidden sm:inline-block text-[11px] font-medium text-amber-300/90 border border-amber-400/30 px-1.5 py-0.5 rounded-sm">
+                  <span className="hidden sm:inline-block text-xs font-semibold text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-sm bg-amber-400/10 tracking-wide">
                     SMK Penerbangan Dirgantara
                   </span>
                 </div>
-                <p className="text-[11px] text-blue-200/80 mt-0.5 leading-none">
+                <p className="text-xs text-blue-200/90 mt-1 font-medium leading-none">
                   {roleMeta.subtitle}
                 </p>
               </div>
@@ -263,16 +263,16 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
           </div>
 
           {/* Sisi Tengah: Menu Navigasi Horizontal */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1.5">
             {user.role === "ADMIN" ? (
               <>
                 <Link
                   href="/admin"
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors",
+                    "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
                     pathname === "/admin"
-                      ? "text-white bg-white/15 font-semibold"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/10"
+                      ? "text-white bg-white/20 font-semibold shadow-xs"
+                      : "text-blue-100/85 hover:text-white hover:bg-white/10"
                   )}
                 >
                   <LayoutDashboard className="w-4 h-4 text-blue-200" />
@@ -290,10 +290,10 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors focus:outline-none",
+                          "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none cursor-pointer",
                           groupActive
-                            ? "text-white bg-white/15 font-semibold"
-                            : "text-blue-100/80 hover:text-white hover:bg-white/10"
+                            ? "text-white bg-white/20 font-semibold shadow-xs"
+                            : "text-blue-100/85 hover:text-white hover:bg-white/10"
                         )}
                       >
                         <GroupIcon className="w-4 h-4 text-blue-200" />
@@ -301,8 +301,8 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                         <ChevronDown className="w-3.5 h-3.5 text-blue-200 group-hover:text-white transition-transform duration-150" />
                       </button>
 
-                      <div className="absolute left-0 top-full pt-1.5 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
-                        <div className="rounded-lg bg-white p-2 shadow-lg border border-slate-200 text-slate-800">
+                      <div className="absolute left-0 top-full pt-2 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
+                        <div className="rounded-xl bg-white p-2 shadow-xl border border-slate-200 text-slate-800">
                           <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
                             {group.sectionTitle}
                           </div>
@@ -314,7 +314,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                  "flex items-start gap-3 p-2 rounded-md transition-colors",
+                                  "flex items-start gap-3 p-2 rounded-lg transition-colors",
                                   item.dividerBefore &&
                                     "border-t border-slate-100 mt-1 pt-2",
                                   active
@@ -322,7 +322,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                                     : "hover:bg-slate-50 text-slate-700"
                                 )}
                               >
-                                <div className="p-1.5 rounded bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
+                                <div className="p-1.5 rounded-md bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
                                   <ItemIcon className="w-4 h-4" />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -357,10 +357,10 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors",
+                        "inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
                         active
-                          ? "text-white bg-white/15 font-semibold"
-                          : "text-blue-100/80 hover:text-white hover:bg-white/10"
+                          ? "text-white bg-white/20 font-semibold shadow-xs"
+                          : "text-blue-100/85 hover:text-white hover:bg-white/10"
                       )}
                     >
                       <ItemIcon className="w-4 h-4 text-blue-200" />
@@ -379,11 +379,11 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 render={
                   <button
                     type="button"
-                    className="flex items-center space-x-2.5 px-2 py-1.5 rounded-md hover:bg-white/10 transition-colors focus:outline-none"
+                    className="flex items-center space-x-3 px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
                   />
                 }
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden relative">
+                <div className="w-10 h-10 rounded-lg bg-white/10 text-white border border-white/25 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
                   {user.image ? (
                     <img
                       src={user.image}
@@ -395,14 +395,14 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   )}
                 </div>
                 <div className="hidden sm:block text-left leading-tight">
-                  <div className="text-xs font-semibold text-white max-w-[150px] truncate">
+                  <div className="text-sm font-semibold text-white max-w-[170px] truncate">
                     {user.nama}
                   </div>
-                  <div className="text-xs text-blue-200 mt-0.5">
+                  <div className="text-xs text-blue-200/90 mt-0.5 font-medium">
                     {roleMeta.label}
                   </div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-blue-200" />
+                <ChevronDown className="w-4 h-4 text-blue-200" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
