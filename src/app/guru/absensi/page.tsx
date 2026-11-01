@@ -492,80 +492,84 @@ export default function GuruAbsensiPage() {
       </PageHeader>
 
       {/* Step 1: Select class, mapel, & date */}
-      <div className="pb-5 border-b border-slate-200">
-        <div className="pb-3 mb-4 border-b border-slate-100">
-          <CardTitle className="text-sm font-semibold text-slate-900">
-            Pengaturan Sesi Absensi
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-500">
-            Pilih kelas penugasan, mata pelajaran, dan tanggal pertemuan
-          </CardDescription>
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+        <div className="pb-3 mb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              Pengaturan Sesi Absensi
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Pilih kelas penugasan, mata pelajaran, dan tanggal pertemuan
+            </p>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">Langkah 1 dari 2</span>
         </div>
-        <div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="space-y-1.5 flex-1">
-              <Label className="text-xs font-medium text-slate-700">
-                Kelas Diampu
-              </Label>
-              <Select
-                value={selectedKelas}
-                onValueChange={(val) => setSelectedKelas(val as string)}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue placeholder="Pilih Kelas" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((k) => (
-                    <SelectItem key={k.id} value={k.namaKelas}>
-                      {k.namaKelas}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Kelas Diampu
+            </Label>
+            <Select
+              value={selectedKelas}
+              onValueChange={(val) => setSelectedKelas(val as string)}
+            >
+              <SelectTrigger className="w-full h-9 text-xs">
+                <SelectValue placeholder="Pilih Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((k) => (
+                  <SelectItem key={k.id} value={k.namaKelas}>
+                    {k.namaKelas}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Mata Pelajaran
+            </Label>
+            <Select
+              value={selectedMapel}
+              onValueChange={(val) => setSelectedMapel(val as string)}
+            >
+              <SelectTrigger className="w-full h-9 text-xs">
+                <SelectValue placeholder="Pilih Mapel" />
+              </SelectTrigger>
+              <SelectContent>
+                {isWaliKelas && waliClasses.includes(selectedKelas) && (
+                  <SelectItem value="Umum">
+                    Absen Pagi (Wali Kelas)
+                  </SelectItem>
+                )}
+                {subjects
+                  .filter((s) => s.kelas?.includes(selectedKelas))
+                  .map((s, i) => (
+                    <SelectItem key={i} value={s.namaMapel}>
+                      {s.namaMapel}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-1.5 flex-1 sm:min-w-[240px]">
-              <Label className="text-xs font-medium text-slate-700">
-                Mata Pelajaran
-              </Label>
-              <Select
-                value={selectedMapel}
-                onValueChange={(val) => setSelectedMapel(val as string)}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue placeholder="Pilih Mapel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isWaliKelas && waliClasses.includes(selectedKelas) && (
-                    <SelectItem value="Umum">
-                      Absen Pagi (Wali Kelas)
-                    </SelectItem>
-                  )}
-                  {subjects
-                    .filter((s) => s.kelas?.includes(selectedKelas))
-                    .map((s, i) => (
-                      <SelectItem key={i} value={s.namaMapel}>
-                        {s.namaMapel}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Tanggal Pertemuan
+            </Label>
+            <Input
+              type="date"
+              className="w-full h-9 text-xs bg-white border-slate-200"
+              value={tanggal}
+              onChange={(e) => setTanggal(e.target.value)}
+            />
+          </div>
 
-            <div className="space-y-1.5 flex-1">
-              <Label className="text-xs font-medium text-slate-700">
-                Tanggal Pertemuan
-              </Label>
-              <Input
-                type="date"
-                className="h-9 text-xs"
-                value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
-              />
-            </div>
-
+          <div>
             <Button
-              className="gap-1.5 shrink-0 h-9"
+              className="w-full gap-1.5 h-9 bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-xs"
               onClick={handleLoadGrid}
               disabled={loading || !selectedKelas || !selectedMapel}
             >
