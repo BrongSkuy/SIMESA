@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { FileQuestion, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50 px-4 text-center">
       <div className="max-w-md w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-xs">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-[#1e3a8a] border border-blue-200 shadow-xs">
-          <FileQuestion className="h-7 w-7" />
+        <div className="relative h-16 w-16 mx-auto mb-4">
+          <Image
+            src="/logo.png?v=3"
+            alt="Logo SMK Penerbangan Dirgantara"
+            fill
+            sizes="64px"
+            unoptimized
+            className="object-contain"
+          />
         </div>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200 mb-3">
           SIMESA · HTTP 404

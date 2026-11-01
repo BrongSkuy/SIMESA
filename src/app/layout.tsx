@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: "SIMESA — Sistem Informasi Sekolah Terpadu | SMK Penerbangan Dirgantara",
   description:
     "Sistem Informasi Sekolah Terpadu (SIMESA) — Administrasi Akademik, Presensi, dan Evaluasi Prestasi SMK Penerbangan Dirgantara",
+  icons: {
+    icon: [
+      { url: "/logo.png?v=3", type: "image/png" },
+      { url: "/favicon.ico?v=3" },
+    ],
+    shortcut: "/logo.png?v=3",
+    apple: "/logo.png?v=3",
+  },
 };
 
 export default function RootLayout({

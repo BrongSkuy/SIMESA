@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar, type TopbarUser } from "@/components/layout/topbar";
@@ -39,7 +40,17 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a8a]" />
+          <div className="relative h-12 w-12 animate-pulse">
+            <Image
+              src="/logo.png?v=3"
+              alt="Logo SMK Penerbangan Dirgantara"
+              fill
+              sizes="48px"
+              unoptimized
+              className="object-contain"
+            />
+          </div>
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a8a]" />
           <p className="text-xs font-medium text-slate-500">
             Memuat ruang kerja SIMESA...
           </p>
