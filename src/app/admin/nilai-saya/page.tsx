@@ -370,14 +370,14 @@ export default function AdminNilaiSayaPage() {
           )}
 
           {/* Criteria Detail Cards */}
-          <div className="border-y border-slate-200 divide-y md:divide-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-px md:bg-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {data.criteria.map((c) => {
               const tone = getScoreTone(c.nilaiRataRata);
               const pct = Math.min(100, Math.max(0, c.nilaiRataRata));
               return (
                 <div
                   key={c.id}
-                  className="bg-white p-5 hover:bg-slate-50/50 transition-colors flex flex-col justify-between"
+                  className="rounded-xl border border-slate-200/90 bg-white p-5 hover:border-slate-300 hover:shadow-2xs transition-all flex flex-col justify-between"
                 >
                   <div className="pb-3 border-b border-slate-100">
                     <div className="flex items-start justify-between gap-2">
