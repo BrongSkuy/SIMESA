@@ -12,10 +12,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import {
-  Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
@@ -149,41 +146,44 @@ export default function SiswaNilaiPage() {
         icon={ClipboardList}
       />
 
-      {/* Score Summary Banner */}
-      <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+      {/* Score Summary Banner - Executive Dark Hero */}
+      <div className="rounded-xl bg-[#091524] border border-slate-800/80 p-5 sm:p-6 overflow-hidden shadow-sm text-white bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-base shrink-0">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-lg flex items-center justify-center shrink-0 shadow-inner border border-blue-400/30">
             {getInitials(data.student.namaLengkap)}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/60">
                 Periode: {data.periode || "Aktif"}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs tabular-nums bg-slate-800/80 text-slate-300 border border-slate-700/60">
                 NIS {data.student.nis}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40">
                 Kelas {data.student.kelas}
               </span>
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-1.5">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">
               {data.student.namaLengkap}
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-3.5 bg-slate-50 px-4 py-3 border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
-          <div className="p-2 rounded-lg bg-blue-100 text-blue-700 border border-blue-200">
+        <div className="flex items-center gap-3.5 bg-slate-900/90 backdrop-blur-xs px-4 py-3 rounded-lg border border-slate-700/80 w-full sm:w-auto justify-between sm:justify-start shadow-inner">
+          <div className="p-2.5 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30">
             <Award className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Total Skor SPK
             </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900">
-              {data.totalSkorSPK}
-            </p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">
+                {data.totalSkorSPK}
+              </p>
+              <span className="text-xs text-blue-400 font-semibold">/ 100</span>
+            </div>
           </div>
         </div>
       </div>
@@ -239,14 +239,14 @@ export default function SiswaNilaiPage() {
       )}
 
       {/* Criteria Detail Cards */}
-      <div className="border-y border-slate-200 divide-y md:divide-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-px md:bg-slate-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {data.criteria.map((c) => {
           const tone = getScoreTone(c.nilaiRataRata);
           const pct = Math.min(100, Math.max(0, c.nilaiRataRata));
           return (
             <div
               key={c.id}
-              className="bg-white p-5 hover:bg-slate-50/50 transition-colors flex flex-col justify-between"
+              className="rounded-xl border border-slate-200/90 bg-white p-5 hover:border-slate-300 hover:shadow-2xs transition-all flex flex-col justify-between"
             >
               <div className="pb-3 border-b border-slate-100">
                 <div className="flex items-start justify-between gap-2">
@@ -353,15 +353,15 @@ export default function SiswaNilaiPage() {
             Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
           </p>
         </div>
-        <div className="border-b border-slate-200 overflow-x-auto">
+        <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6">Kriteria Evaluasi</TableHead>
-                <TableHead className="text-center">Tipe Input</TableHead>
-                <TableHead className="text-center">Bobot</TableHead>
-                <TableHead className="text-center">Nilai</TableHead>
-                <TableHead className="text-right pr-6">Skor Terbobot</TableHead>
+            <TableHeader className="bg-[#091524] border-b border-slate-800">
+              <TableRow className="bg-[#091524] hover:bg-[#091524] border-b border-slate-800">
+                <TableHead className="pl-6 text-white font-semibold">Kriteria Evaluasi</TableHead>
+                <TableHead className="text-center text-slate-200 font-semibold">Tipe Input</TableHead>
+                <TableHead className="text-center text-slate-200 font-semibold">Bobot</TableHead>
+                <TableHead className="text-center text-slate-200 font-semibold">Nilai</TableHead>
+                <TableHead className="text-right pr-6 text-white font-semibold">Skor Terbobot</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -396,14 +396,15 @@ export default function SiswaNilaiPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow className="bg-slate-50 border-t-2 border-slate-200">
+              {/* Total Row - Dark Anchor */}
+              <TableRow className="bg-[#091524] hover:bg-[#091524] border-t-2 border-slate-800 text-white">
                 <TableCell
                   colSpan={4}
-                  className="pl-6 font-bold text-slate-900"
+                  className="pl-6 font-bold text-white text-sm"
                 >
                   Total Akumulasi Skor SPK
                 </TableCell>
-                <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600">
+                <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-400">
                   {data.totalSkorSPK}
                 </TableCell>
               </TableRow>
