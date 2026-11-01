@@ -5,18 +5,32 @@ import { admin } from "better-auth/plugins";
 import { db } from "@/db";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret:
+    process.env.BETTER_AUTH_SECRET ||
+    "absensi_siswa_secret_key_1234567890_unpam",
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000"),
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
 
   trustedOrigins: [
     "http://localhost:3000",
+    "https://simesa-six.vercel.app",
     "https://absensi-siswa-smk.vercel.app",
     "https://absensi-siswa-mu.vercel.app",
     "https://absensi-siswa-git-main-brongskuys-projects.vercel.app",
     "https://absensisiswa-main-bzjg5eu66.vercel.app",
     process.env.BETTER_AUTH_URL || "",
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "",
   ].filter(Boolean),
 
   emailAndPassword: {
