@@ -1,14 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "SIMESA — Sistem Informasi Sekolah Terpadu | SMK Penerbangan Dirgantara",
@@ -32,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${inter.variable} h-full bg-white antialiased`}
+      className="h-full bg-white antialiased"
     >
       <body className="min-h-full font-sans text-slate-800 antialiased bg-white flex flex-col">
         {children}
