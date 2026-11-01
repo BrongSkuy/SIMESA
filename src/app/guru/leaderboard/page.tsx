@@ -16,10 +16,7 @@ import * as XLSX from "xlsx";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,18 +43,6 @@ interface SpkResult {
 interface ClassRow {
   id: string;
   namaKelas: string;
-}
-
-function getInitials(name: string): string {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "S"
-  );
 }
 
 function RankBadge({ rank }: { rank: number }) {
@@ -298,45 +283,45 @@ export default function GuruLeaderboardPage() {
         <div className="space-y-6">
           {/* Top 3 Podium Cards */}
           {data.length > 0 && !loading && (
-            <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white hide-on-print">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 hide-on-print">
               {data.slice(0, 3).map((student, i) => (
                 <div
                   key={student.studentId}
-                  className="p-5 flex flex-col justify-between"
+                  className="rounded-2xl border border-slate-200/80 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                           i === 0
-                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            ? "bg-amber-50 group-hover:bg-amber-500/15 text-amber-800 group-hover:text-amber-300 border-amber-200 group-hover:border-amber-500/30"
                             : i === 1
-                              ? "bg-slate-100 text-slate-700 border-slate-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
+                              ? "bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-300 border-slate-200 group-hover:border-slate-700"
+                              : "bg-amber-50 group-hover:bg-amber-500/15 text-amber-700 group-hover:text-amber-300 border-amber-200 group-hover:border-amber-500/30"
                         }`}
                       >
                         Peringkat #{student.rank}
                       </span>
-                      <h3 className="text-base font-bold text-slate-900 mt-2">
+                      <h3 className="text-base font-bold text-slate-900 group-hover:text-white mt-2 transition-colors">
                         {student.namaLengkap}
                       </h3>
-                      <p className="text-xs text-slate-500 tabular-nums mt-0.5">
+                      <p className="text-xs text-slate-500 group-hover:text-slate-400 tabular-nums mt-0.5 transition-colors">
                         NIS {student.nis} · Kelas {student.kelas}
                       </p>
                     </div>
                     <div
-                      className={`p-2.5 rounded-lg border shrink-0 ${
+                      className={`p-2.5 rounded-xl border shrink-0 transition-colors ${
                         i === 0
-                          ? "bg-amber-50 border-amber-200 text-amber-700"
-                          : "bg-slate-50 border-slate-200 text-slate-600"
+                          ? "bg-amber-50 group-hover:bg-amber-500/15 border-amber-200 group-hover:border-amber-500/30 text-amber-700 group-hover:text-amber-300"
+                          : "bg-slate-50 group-hover:bg-slate-800 border-slate-200 group-hover:border-slate-700 text-slate-600 group-hover:text-slate-300"
                       }`}
                     >
                       <Medal className="h-5 w-5" />
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Nilai Akhir SAW</span>
-                    <span className="font-bold tabular-nums text-slate-900">
+                  <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 flex items-center justify-between text-xs transition-colors">
+                    <span className="text-slate-500 group-hover:text-slate-400 transition-colors">Nilai Akhir SAW</span>
+                    <span className="font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
                       {student.rawScore.toFixed(4)} ({student.persentase}%)
                     </span>
                   </div>
@@ -345,16 +330,16 @@ export default function GuruLeaderboardPage() {
             </div>
           )}
 
-          <div className="print-area pt-2 space-y-3">
-            <div className="pb-3 border-b border-slate-200">
+          <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
+            <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-sm font-semibold text-slate-900">
+                  <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
                     {activeTab === "umum"
                       ? "Peringkat Keseluruhan (Semua Kelas)"
                       : `Peringkat Kelas ${activeTab}`}
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-500 mt-0.5">
+                  <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                     Periode {activePeriodeName}
                   </CardDescription>
                 </div>
@@ -375,7 +360,7 @@ export default function GuruLeaderboardPage() {
                 </Tabs>
               </div>
             </div>
-            <div className="border-b border-slate-200 overflow-x-auto">
+            <div className="overflow-x-auto">
               {loading ? (
                 <div className="flex py-16 justify-center">
                   <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
@@ -383,13 +368,13 @@ export default function GuruLeaderboardPage() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-20 pl-6">Peringkat</TableHead>
-                      <TableHead>Siswa</TableHead>
-                      <TableHead>Kelas</TableHead>
-                      <TableHead>Indeks SAW</TableHead>
-                      <TableHead className="text-center">Skor (%)</TableHead>
-                      <TableHead className="text-right pr-6">
+                    <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
+                      <TableHead className="w-20 pl-6 group-hover:text-slate-400">Peringkat</TableHead>
+                      <TableHead className="group-hover:text-slate-400">Siswa</TableHead>
+                      <TableHead className="group-hover:text-slate-400">Kelas</TableHead>
+                      <TableHead className="group-hover:text-slate-400">Indeks SAW</TableHead>
+                      <TableHead className="text-center group-hover:text-slate-400">Skor (%)</TableHead>
+                      <TableHead className="text-right pr-6 group-hover:text-slate-400">
                         Status Kelayakan
                       </TableHead>
                     </TableRow>
@@ -403,44 +388,47 @@ export default function GuruLeaderboardPage() {
                           Math.max(0, Math.round(entry.rawScore * 100))
                         );
                         return (
-                          <TableRow key={entry.studentId}>
+                          <TableRow
+                            key={entry.studentId}
+                            className="group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0"
+                          >
                             <TableCell className="pl-6">
                               <RankBadge rank={entry.rank} />
                             </TableCell>
                             <TableCell>
                               <div>
-                                <p className="font-semibold text-slate-900 text-sm">
+                                <p className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-200 text-sm transition-colors">
                                   {entry.namaLengkap}
                                 </p>
-                                <p className="text-xs text-slate-500 tabular-nums">
+                                <p className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                                   NIS: {entry.nis}
                                 </p>
                               </div>
                             </TableCell>
                             <TableCell>
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 transition-colors">
                                 {entry.kelas}
                               </span>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-slate-900 tabular-nums">
+                                <span className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-100 tabular-nums transition-colors">
                                   {entry.rawScore.toFixed(4)}
                                 </span>
-                                <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
+                                <div className="w-16 bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                   <div
-                                    className="bg-[#1e3a8a] h-full rounded-xs"
+                                    className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center font-semibold text-blue-700 tabular-nums">
+                            <TableCell className="text-center font-semibold text-blue-700 group-hover/row:text-blue-400 tabular-nums transition-colors">
                               {entry.persentase}%
                             </TableCell>
                             <TableCell className="text-right pr-6">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${predikat.className}`}
+                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border transition-colors ${predikat.className}`}
                               >
                                 {predikat.label}
                               </span>
@@ -452,7 +440,7 @@ export default function GuruLeaderboardPage() {
                       <TableRow>
                         <TableCell
                           colSpan={6}
-                          className="text-center py-10 text-slate-500"
+                          className="text-center py-10 text-slate-500 group-hover:text-slate-400"
                         >
                           Tidak ada data leaderboard untuk kelas ini.
                         </TableCell>

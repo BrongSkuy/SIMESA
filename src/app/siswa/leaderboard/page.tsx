@@ -13,13 +13,6 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Table,
   TableBody,
   TableCell,
@@ -264,27 +257,27 @@ export default function SiswaLeaderboardPage() {
             <div className="space-y-6">
               {/* Top 3 Podium Cards */}
               {data.length > 0 && (
-                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {data.slice(0, 3).map((student, i) => {
                     const isMe =
                       myData && student.studentId === myData.studentId;
                     return (
                       <div
                         key={student.studentId}
-                        className={`p-5 flex flex-col justify-between ${
-                          isMe ? "bg-blue-50/40" : "bg-white"
+                        className={`rounded-2xl border border-slate-200/80 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between ${
+                          isMe ? "ring-2 ring-blue-500/30" : ""
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${
+                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border transition-colors ${
                                   i === 0
-                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    ? "bg-amber-50 group-hover:bg-amber-500/15 text-amber-700 group-hover:text-amber-300 border-amber-200 group-hover:border-amber-500/30"
                                     : i === 1
-                                      ? "bg-slate-100 text-slate-700 border-slate-200"
-                                      : "bg-orange-50 text-orange-700 border-orange-200"
+                                      ? "bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-300 border-slate-200 group-hover:border-slate-700"
+                                      : "bg-orange-50 group-hover:bg-orange-500/15 text-orange-700 group-hover:text-orange-300 border-orange-200 group-hover:border-orange-500/30"
                                 }`}
                               >
                                 Peringkat #{student.rank}
@@ -295,26 +288,26 @@ export default function SiswaLeaderboardPage() {
                                 </span>
                               )}
                             </div>
-                            <h3 className="text-base font-bold text-slate-900 mt-2">
+                            <h3 className="text-base font-bold text-slate-900 group-hover:text-white mt-2 transition-colors">
                               {student.namaLengkap}
                             </h3>
-                            <p className="text-xs text-slate-500 mt-0.5">
+                            <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                               Kelas {student.kelas}
                             </p>
                           </div>
                           <div
-                            className={`p-2.5 rounded-lg border shrink-0 ${
+                            className={`p-2.5 rounded-xl border shrink-0 transition-colors ${
                               i === 0
-                                ? "bg-amber-50 border-amber-200 text-amber-600"
-                                : "bg-slate-50 border-slate-200 text-slate-600"
+                                ? "bg-amber-50 group-hover:bg-amber-500/15 border-amber-200 group-hover:border-amber-500/30 text-amber-600 group-hover:text-amber-300"
+                                : "bg-slate-50 group-hover:bg-slate-800 border-slate-200 group-hover:border-slate-700 text-slate-600 group-hover:text-slate-300"
                             }`}
                           >
                             <Medal className="h-5 w-5" />
                           </div>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                          <span className="text-slate-500">Skor Akhir SPK</span>
-                          <span className="tabular-nums font-bold text-slate-900">
+                        <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 flex items-center justify-between text-xs transition-colors">
+                          <span className="text-slate-500 group-hover:text-slate-400 transition-colors">Skor Akhir SPK</span>
+                          <span className="tabular-nums font-bold text-slate-900 group-hover:text-white transition-colors">
                             {student.persentase}
                           </span>
                         </div>
@@ -325,25 +318,25 @@ export default function SiswaLeaderboardPage() {
               )}
 
               {/* Full Table */}
-              <div className="pt-2 space-y-3">
-                <div className="pb-3 border-b border-slate-200">
-                  <h3 className="text-sm font-semibold text-slate-900">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
+                <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                  <h3 className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
                     {filterType === "umum"
                       ? "Peringkat Keseluruhan (Semua Kelas)"
                       : `Peringkat Kelas ${myData?.kelas}`}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                     Periode {activePeriodeName}
                   </p>
                 </div>
-                <div className="border-b border-slate-200 overflow-x-auto">
+                <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-20 pl-6">Peringkat</TableHead>
-                        <TableHead>Nama Siswa</TableHead>
-                        <TableHead>Kelas</TableHead>
-                        <TableHead className="text-right pr-6">
+                      <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
+                        <TableHead className="w-20 pl-6 group-hover:text-slate-400">Peringkat</TableHead>
+                        <TableHead className="group-hover:text-slate-400">Nama Siswa</TableHead>
+                        <TableHead className="group-hover:text-slate-400">Kelas</TableHead>
+                        <TableHead className="text-right pr-6 group-hover:text-slate-400">
                           Skor SPK
                         </TableHead>
                       </TableRow>
@@ -360,19 +353,19 @@ export default function SiswaLeaderboardPage() {
                           return (
                             <TableRow
                               key={entry.studentId}
-                              className={
-                                isMe ? "bg-blue-50/50" : undefined
-                              }
+                              className={`group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0 ${
+                                isMe ? "bg-blue-50/50 group-hover:bg-blue-950/30" : ""
+                              }`}
                             >
                               <TableCell className="pl-6">
                                 <RankBadge rank={entry.rank} />
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2.5">
-                                  <div className="h-7 w-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
+                                  <div className="h-7 w-7 rounded-md bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover:border-slate-700 shrink-0 transition-colors">
                                     {getInitials(entry.namaLengkap)}
                                   </div>
-                                  <span className="font-semibold text-slate-800">
+                                  <span className="font-semibold text-slate-800 group-hover/row:text-white group-hover:text-slate-100 transition-colors">
                                     {entry.namaLengkap}
                                   </span>
                                   {isMe && (
@@ -383,19 +376,19 @@ export default function SiswaLeaderboardPage() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 transition-colors">
                                   {entry.kelas}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
+                                  <div className="w-16 bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                     <div
-                                      className="bg-[#1e3a8a] h-full rounded-xs"
+                                      className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="font-bold tabular-nums text-[#1e3a8a]">
+                                  <span className="font-bold tabular-nums text-[#1e3a8a] group-hover/row:text-blue-400 group-hover:text-blue-300 transition-colors">
                                     {entry.persentase}
                                   </span>
                                 </div>
@@ -407,7 +400,7 @@ export default function SiswaLeaderboardPage() {
                         <TableRow>
                           <TableCell
                             colSpan={4}
-                            className="text-center py-10 text-xs text-slate-500"
+                            className="text-center py-10 text-xs text-slate-500 group-hover:text-slate-400"
                           >
                             Belum ada data perhitungan SPK untuk kategori ini.
                           </TableCell>

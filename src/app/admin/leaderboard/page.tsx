@@ -21,10 +21,7 @@ import * as XLSX from "xlsx";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -80,18 +77,6 @@ const initialArchives: {
   periode: string;
   uploadedAt: string;
 }[] = [];
-
-function getInitials(name: string): string {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "S"
-  );
-}
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
@@ -181,7 +166,6 @@ export default function AdminLeaderboardPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const targetKelas =
       activeTab === "umum" ||
@@ -594,19 +578,19 @@ export default function AdminLeaderboardPage() {
       )}
 
       {/* Main calculation preview container */}
-      <div className="print-area pt-2 space-y-3">
-        <div className="pb-3 border-b border-slate-200">
+      <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
+        <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold text-slate-900">
+                <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
                   Tabel Peringkat Siswa Berprestasi
                 </CardTitle>
-                <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
+                <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 group-hover:bg-blue-500/15 text-blue-700 group-hover:text-blue-300 rounded border border-blue-200 group-hover:border-blue-500/30 transition-colors">
                   Metode SAW
                 </span>
               </div>
-              <CardDescription className="text-xs text-slate-500 mt-0.5">
+              <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                 {publishStatus
                   ? `Kalkulasi normalisasi matriks real-time periode ${publishStatus.periode}`
                   : "Memuat periode aktif..."}
@@ -629,7 +613,7 @@ export default function AdminLeaderboardPage() {
             </Tabs>
           </div>
         </div>
-        <div className="border-b border-slate-200 overflow-x-auto">
+        <div className="overflow-x-auto">
           {loading ? (
             <div className="flex py-16 justify-center">
               <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
@@ -637,13 +621,13 @@ export default function AdminLeaderboardPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-20 pl-6">Peringkat</TableHead>
-                  <TableHead>Siswa</TableHead>
-                  <TableHead>Kelas</TableHead>
-                  <TableHead>Nilai SAW (V)</TableHead>
-                  <TableHead className="text-center">Persentase</TableHead>
-                  <TableHead className="text-right pr-6">
+                <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
+                  <TableHead className="w-20 pl-6 group-hover:text-slate-400">Peringkat</TableHead>
+                  <TableHead className="group-hover:text-slate-400">Siswa</TableHead>
+                  <TableHead className="group-hover:text-slate-400">Kelas</TableHead>
+                  <TableHead className="group-hover:text-slate-400">Nilai SAW (V)</TableHead>
+                  <TableHead className="text-center group-hover:text-slate-400">Persentase</TableHead>
+                  <TableHead className="text-right pr-6 group-hover:text-slate-400">
                     Predikat
                   </TableHead>
                 </TableRow>
@@ -657,44 +641,47 @@ export default function AdminLeaderboardPage() {
                       Math.max(0, Math.round(entry.rawScore * 100))
                     );
                     return (
-                      <TableRow key={entry.studentId}>
+                      <TableRow
+                        key={entry.studentId}
+                        className="group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0"
+                      >
                         <TableCell className="pl-6">
                           <RankBadge rank={entry.rank} />
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-semibold text-slate-900 text-sm">
+                            <p className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-200 text-sm transition-colors">
                               {entry.namaLengkap}
                             </p>
-                            <p className="text-xs text-slate-500 tabular-nums">
+                            <p className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                               NIS: {entry.nis}
                             </p>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 transition-colors">
                             {entry.kelas}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900 tabular-nums">
+                            <span className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-100 tabular-nums transition-colors">
                               {entry.rawScore.toFixed(4)}
                             </span>
-                            <div className="w-16 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
+                            <div className="w-16 bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                               <div
-                                className="bg-[#1e3a8a] h-full rounded-xs"
+                                className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-semibold text-blue-700 tabular-nums">
+                        <TableCell className="text-center font-semibold text-blue-700 group-hover/row:text-blue-400 tabular-nums transition-colors">
                           {entry.persentase}%
                         </TableCell>
                         <TableCell className="text-right pr-6">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${predikat.className}`}
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border transition-colors ${predikat.className}`}
                           >
                             {predikat.label}
                           </span>
@@ -706,7 +693,7 @@ export default function AdminLeaderboardPage() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="text-center py-10 text-slate-500"
+                      className="text-center py-10 text-slate-500 group-hover:text-slate-400"
                     >
                       Belum ada data perhitungan SPK untuk filter ini.
                     </TableCell>

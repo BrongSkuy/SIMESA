@@ -13,16 +13,8 @@ import {
   PenLine,
   Trophy,
 } from "lucide-react";
-import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 
 interface KelasRow {
@@ -114,6 +106,7 @@ export default function GuruDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Kelas Diampu"
             value={data?.totalKelasDiampu ?? 0}
             icon={Users}
@@ -123,6 +116,7 @@ export default function GuruDashboard() {
           />
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Presensi Hari Ini"
             value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
             icon={ClipboardCheck}
@@ -132,6 +126,7 @@ export default function GuruDashboard() {
           />
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Rata-rata Kehadiran"
             value={data?.rataRataKehadiran ?? "-"}
             icon={CheckCircle2}
@@ -165,24 +160,24 @@ export default function GuruDashboard() {
               Hubungi Administrator Sekolah.
             </div>
           ) : (
-            <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:grid sm:grid-cols-2 sm:gap-px sm:bg-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {classes.map((kelas) => {
                 const isDone = kelas.statusAbsensiHariIni === "Sudah Diabsen";
                 return (
                   <div
                     key={kelas.id}
-                    className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-3">
-                        <h3 className="text-sm font-bold text-slate-900">
+                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 group-hover:border-slate-800/80 mb-3 transition-colors">
+                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-white transition-colors">
                           Kelas {kelas.namaKelas}
                         </h3>
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs text-xs font-semibold border ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs text-xs font-semibold border transition-colors ${
                             isDone
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-amber-200 bg-amber-50 text-amber-700"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 group-hover:bg-emerald-500/15 group-hover:border-emerald-500/30 group-hover:text-emerald-300"
+                              : "border-amber-200 bg-amber-50 text-amber-700 group-hover:bg-amber-500/15 group-hover:border-amber-500/30 group-hover:text-amber-300"
                           }`}
                         >
                           <span
@@ -193,9 +188,9 @@ export default function GuruDashboard() {
                           {kelas.statusAbsensiHariIni}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mb-3">
+                      <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-3 transition-colors">
                         Tingkat {kelas.tingkat} · Wali Kelas:{" "}
-                        <span className="font-medium text-slate-700">
+                        <span className="font-medium text-slate-700 group-hover:text-slate-200 transition-colors">
                           {kelas.waliKelas || "-"}
                         </span>
                       </p>
@@ -205,26 +200,26 @@ export default function GuruDashboard() {
                           {kelas.subjects.map((subj) => (
                             <span
                               key={subj}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 group-hover:bg-blue-500/15 group-hover:border-blue-500/30 group-hover:text-blue-300 transition-colors"
                             >
-                              <BookOpen className="h-3 w-3 text-blue-600" />
+                              <BookOpen className="h-3 w-3 text-blue-600 group-hover:text-blue-400 transition-colors" />
                               {subj}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic mb-4">
+                        <p className="text-xs text-slate-400 group-hover:text-slate-500 italic mb-4 transition-colors">
                           Penugasan Wali Kelas
                         </p>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 transition-colors">
                       <Link
                         href={`/guru/absensi?kelas=${encodeURIComponent(kelas.namaKelas)}`}
                         className="flex-1"
                       >
-                        <Button className="w-full gap-1.5" size="sm">
+                        <Button className="w-full gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-xs" size="sm">
                           <ClipboardCheck className="h-3.5 w-3.5" />
                           Mulai Absensi
                         </Button>
@@ -235,7 +230,7 @@ export default function GuruDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1"
+                          className="gap-1 group-hover:border-slate-700 group-hover:text-slate-200 group-hover:hover:bg-slate-800 transition-colors"
                         >
                           Rekap <ArrowRight className="h-3.5 w-3.5" />
                         </Button>
@@ -249,75 +244,75 @@ export default function GuruDashboard() {
         </div>
 
         {/* Right Side: Quick Shortcuts */}
-        <div className="space-y-4">
-          <div>
-            <div className="pb-3 border-b border-slate-200 mb-2">
-              <h3 className="text-sm font-semibold text-slate-900 mb-0.5">
+        <div>
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
+            <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
                 Navigasi Cepat Guru
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
                 Pintasan modul operasional pengajaran harian
               </p>
             </div>
-            <div className="divide-y divide-slate-100 border-b border-slate-100">
+            <div className="space-y-2">
               <Link
                 href="/guru/absensi"
-                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-xl border border-slate-100 group-hover:border-slate-800/80 bg-slate-50/50 group-hover:bg-[#0d1d31] hover:bg-slate-100 group-hover:hover:bg-[#12263f] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xs bg-blue-50 text-blue-700 border border-blue-200">
+                  <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-500/15 text-blue-700 group-hover:text-blue-300 border border-blue-200 group-hover:border-blue-500/30 transition-colors">
                     <ClipboardCheck className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-800 group-hover:text-blue-700 transition-colors">
+                    <p className="text-xs font-semibold text-slate-800 group-hover:text-slate-100 transition-colors">
                       Presensi Per Mapel
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Input & impor absensi Excel
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-300 transition-colors" />
               </Link>
 
               <Link
                 href="/guru/nilai"
-                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-xl border border-slate-100 group-hover:border-slate-800/80 bg-slate-50/50 group-hover:bg-[#0d1d31] hover:bg-slate-100 group-hover:hover:bg-[#12263f] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xs bg-amber-50 text-amber-700 border border-amber-200">
+                  <div className="p-2 rounded-lg bg-amber-50 group-hover:bg-amber-500/15 text-amber-700 group-hover:text-amber-300 border border-amber-200 group-hover:border-amber-500/30 transition-colors">
                     <PenLine className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-800 group-hover:text-amber-700 transition-colors">
+                    <p className="text-xs font-semibold text-slate-800 group-hover:text-slate-100 transition-colors">
                       Input Nilai Kriteria SPK
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Tugas, UTS, UAS & kriteria
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-300 transition-colors" />
               </Link>
 
               <Link
                 href="/guru/leaderboard"
-                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-xl border border-slate-100 group-hover:border-slate-800/80 bg-slate-50/50 group-hover:bg-[#0d1d31] hover:bg-slate-100 group-hover:hover:bg-[#12263f] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="p-2 rounded-lg bg-emerald-50 group-hover:bg-emerald-500/15 text-emerald-700 group-hover:text-emerald-300 border border-emerald-200 group-hover:border-emerald-500/30 transition-colors">
                     <Trophy className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">
+                    <p className="text-xs font-semibold text-slate-800 group-hover:text-slate-100 transition-colors">
                       Peringkat Siswa
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Hasil pemeringkatan resmi SAW
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-500 group-hover:text-blue-400" />
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-300 transition-colors" />
               </Link>
             </div>
           </div>

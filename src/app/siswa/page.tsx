@@ -20,16 +20,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { PageHeader } from "@/components/shared/page-header";
+import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -222,6 +215,7 @@ export default function SiswaDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Persentase Kehadiran"
             value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
             icon={CalendarCheck}
@@ -231,6 +225,7 @@ export default function SiswaDashboard() {
           />
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Total Pertemuan Hadir"
             value={stats?.totalHadir ?? 0}
             icon={Trophy}
@@ -240,6 +235,7 @@ export default function SiswaDashboard() {
           />
           <StatCard
             variant="dark"
+            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
             title="Ketidakhadiran"
             value={
               stats
@@ -254,169 +250,176 @@ export default function SiswaDashboard() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         {/* Attendance Chart */}
-        <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-3">
-          <div className="pb-3 border-b border-slate-200">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-              Tren Riwayat Kehadiran Harian
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {chartData.length > 0
-                ? `Visualisasi frekuensi hadir dari ${chartData.length} tanggal pencatatan`
-                : "Belum ada rekaman kehadiran semester ini"}
-            </p>
-          </div>
-          <div className="pt-2">
-            <div className="h-[260px]">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient
-                        id="fillHadir"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#2563EB"
-                          stopOpacity={0.28}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#2563EB"
-                          stopOpacity={0.02}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#E2E8F0"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="tanggal"
-                      tick={{ fontSize: 11, fill: "#64748B" }}
-                      axisLine={false}
-                      tickLine={false}
-                      interval={
-                        chartData.length > 8
-                          ? Math.floor(chartData.length / 6)
-                          : 0
-                      }
-                      angle={chartData.length > 5 ? -45 : 0}
-                      textAnchor={chartData.length > 5 ? "end" : "middle"}
-                      height={chartData.length > 5 ? 60 : 30}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: "#64748B" }}
-                      axisLine={false}
-                      tickLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0F172A",
-                        color: "#F8FAFC",
-                        borderRadius: "8px",
-                        border: "1px solid #1E293B",
-                        fontSize: "12px",
-                      }}
-                      itemStyle={{ color: "#F8FAFC" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="hadir"
-                      name="Sesi Hadir"
-                      stroke="#2563EB"
-                      strokeWidth={2.5}
-                      fill="url(#fillHadir)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex h-full items-center justify-center text-slate-400">
-                  <p className="text-xs">Belum ada data untuk ditampilkan</p>
-                </div>
-              )}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group flex flex-col justify-between">
+          <div>
+            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
+                Tren Riwayat Kehadiran Harian
+              </h3>
+              <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+                {chartData.length > 0
+                  ? `Visualisasi frekuensi hadir dari ${chartData.length} tanggal pencatatan`
+                  : "Belum ada rekaman kehadiran semester ini"}
+              </p>
+            </div>
+            <div className="pt-4">
+              <div className="h-[260px]">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient
+                          id="fillHadir"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#2563EB"
+                            stopOpacity={0.28}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#2563EB"
+                            stopOpacity={0.02}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#E2E8F0"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="tanggal"
+                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={
+                          chartData.length > 8
+                            ? Math.floor(chartData.length / 6)
+                            : 0
+                        }
+                        angle={chartData.length > 5 ? -45 : 0}
+                        textAnchor={chartData.length > 5 ? "end" : "middle"}
+                        height={chartData.length > 5 ? 60 : 30}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        axisLine={false}
+                        tickLine={false}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#0F172A",
+                          color: "#F8FAFC",
+                          borderRadius: "8px",
+                          border: "1px solid #1E293B",
+                          fontSize: "12px",
+                        }}
+                        itemStyle={{ color: "#F8FAFC" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="hadir"
+                        name="Sesi Hadir"
+                        stroke="#2563EB"
+                        strokeWidth={2.5}
+                        fill="url(#fillHadir)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-400 group-hover:text-slate-500 transition-colors">
+                    <p className="text-xs">Belum ada data untuk ditampilkan</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Mini leaderboard kelas */}
-        <div className="space-y-3">
-          <div className="pb-3 border-b border-slate-200">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Trophy className="h-4 w-4 text-amber-500" />
-              Top 5 Kelas {profile.kelas}
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Peringkat skor SPK resmi di kelas Anda
-            </p>
-          </div>
-          <div className="border-b border-slate-200 overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-14 pl-5">#</TableHead>
-                  <TableHead>Siswa</TableHead>
-                  <TableHead className="text-right pr-5">Skor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {kelasLeaderboard.length > 0 ? (
-                  kelasLeaderboard.slice(0, 5).map((entry) => {
-                    const isMe = entry.studentId === profile.id;
-                    return (
-                      <TableRow
-                        key={entry.studentId}
-                        className={isMe ? "bg-blue-50/50" : undefined}
-                      >
-                        <TableCell className="pl-5">
-                          <span
-                            className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
-                              entry.rank === 1
-                                ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
-                                : entry.rank === 2
-                                  ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300"
-                                  : entry.rank === 3
-                                    ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300"
-                                    : "bg-slate-50 text-slate-600 border border-slate-200"
-                            }`}
-                          >
-                            #{entry.rank}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-semibold text-slate-800">
-                          <span>{entry.namaLengkap}</span>
-                          {isMe && (
-                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
-                              Kamu
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-blue-600 pr-5">
-                          {entry.skorSPK}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="py-10 text-center text-xs text-slate-500"
-                    >
-                      Leaderboard semester ini belum dirilis.
-                    </TableCell>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group flex flex-col justify-between">
+          <div>
+            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+                <Trophy className="h-4 w-4 text-amber-500" />
+                Top 5 Kelas {profile.kelas}
+              </h3>
+              <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+                Peringkat skor SPK resmi di kelas Anda
+              </p>
+            </div>
+            <div className="pt-2 overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
+                    <TableHead className="w-14 pl-2 group-hover:text-slate-400">#</TableHead>
+                    <TableHead className="group-hover:text-slate-400">Siswa</TableHead>
+                    <TableHead className="text-right pr-2 group-hover:text-slate-400">Skor</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {kelasLeaderboard.length > 0 ? (
+                    kelasLeaderboard.slice(0, 5).map((entry) => {
+                      const isMe = entry.studentId === profile.id;
+                      return (
+                        <TableRow
+                          key={entry.studentId}
+                          className={cn(
+                            "group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0",
+                            isMe && "bg-blue-50/50 group-hover:bg-blue-950/30"
+                          )}
+                        >
+                          <TableCell className="pl-2">
+                            <span
+                              className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
+                                entry.rank === 1
+                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
+                                  : entry.rank === 2
+                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300"
+                                    : entry.rank === 3
+                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300"
+                                      : "bg-slate-50 text-slate-600 border border-slate-200"
+                              }`}
+                            >
+                              #{entry.rank}
+                            </span>
+                          </TableCell>
+                          <TableCell className="font-semibold text-slate-800 group-hover/row:text-white group-hover:text-slate-200 transition-colors">
+                            <span>{entry.namaLengkap}</span>
+                            {isMe && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
+                                Kamu
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-400 group-hover:text-blue-300 pr-2 transition-colors">
+                            {entry.skorSPK}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={3}
+                        className="py-10 text-center text-xs text-slate-500 group-hover:text-slate-400"
+                      >
+                        Leaderboard semester ini belum dirilis.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>
