@@ -102,6 +102,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const todayStr = new Date().toISOString().split("T")[0];
+    if (body.tanggal > todayStr) {
+      return NextResponse.json(
+        { error: "Tanggal presensi tidak boleh di masa depan (maksimal hari ini)." },
+        { status: 400 }
+      );
+    }
+
     // Role Isolation Check
     if (appRole === "GURU") {
       const firstStudentId = body.records[0].studentId;
