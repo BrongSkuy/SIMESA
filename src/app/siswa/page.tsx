@@ -122,7 +122,7 @@ export default function SiswaDashboard() {
 
   if (!profile) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-2 bg-white border border-slate-200 rounded-xl shadow-xs text-slate-500">
+      <div className="flex h-64 flex-col items-center justify-center gap-2 bg-white border border-slate-200 text-slate-500">
         <p className="text-sm font-semibold text-slate-800">
           Profil siswa tidak ditemukan
         </p>
@@ -170,7 +170,7 @@ export default function SiswaDashboard() {
       </PageHeader>
 
       {/* Student Profile Banner */}
-      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 text-base font-bold shrink-0">
             {initials}
@@ -200,8 +200,8 @@ export default function SiswaDashboard() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* KPI Cards - Flat Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
         <StatCard
           title="Persentase Kehadiran"
           value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
@@ -232,21 +232,21 @@ export default function SiswaDashboard() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
         {/* Attendance Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-3">
+          <div className="pb-3 border-b border-slate-200">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <TrendingUp className="h-4 w-4 text-blue-600" />
               Tren Riwayat Kehadiran Harian
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
               {chartData.length > 0
                 ? `Visualisasi frekuensi hadir dari ${chartData.length} tanggal pencatatan`
                 : "Belum ada rekaman kehadiran semester ini"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-5">
+            </p>
+          </div>
+          <div className="pt-2">
             <div className="h-[260px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -322,21 +322,21 @@ export default function SiswaDashboard() {
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Mini leaderboard kelas */}
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        <div className="space-y-3">
+          <div className="pb-3 border-b border-slate-200">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <Trophy className="h-4 w-4 text-amber-500" />
               Top 5 Kelas {profile.kelas}
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
               Peringkat skor SPK resmi di kelas Anda
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
+            </p>
+          </div>
+          <div className="border-b border-slate-200 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -395,8 +395,8 @@ export default function SiswaDashboard() {
                 )}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

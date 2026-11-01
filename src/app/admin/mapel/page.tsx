@@ -230,7 +230,7 @@ export default function AdminMapelPage() {
               className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs cursor-pointer select-none transition-colors",
                 isChecked
-                  ? "bg-blue-600 border-blue-600 text-white font-medium shadow-xs"
+                  ? "bg-blue-600 border-blue-600 text-white font-medium"
                   : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
               )}
             >
@@ -287,7 +287,7 @@ export default function AdminMapelPage() {
               </Button>
             }
           />
-          <DialogContent className="rounded-xl border-slate-200">
+          <DialogContent className="rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Tambah Mata Pelajaran
@@ -373,7 +373,7 @@ export default function AdminMapelPage() {
             if (!open) resetForm();
           }}
         >
-          <DialogContent className="rounded-xl border-slate-200">
+          <DialogContent className="rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Edit Mata Pelajaran
@@ -456,7 +456,7 @@ export default function AdminMapelPage() {
       </PageHeader>
 
       {/* Search Toolbar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+      <div className="py-3.5 border-y border-slate-200">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
@@ -469,7 +469,7 @@ export default function AdminMapelPage() {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="border-b border-slate-200 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

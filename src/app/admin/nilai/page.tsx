@@ -299,16 +299,16 @@ export default function AdminNilaiPage() {
         icon={PenLine}
       />
 
-      <Card>
-        <CardHeader className="border-b border-slate-100 pb-4">
+      <div className="pb-5 border-b border-slate-200">
+        <div className="pb-3 mb-4 border-b border-slate-100">
           <CardTitle className="text-sm font-semibold text-slate-900">
             Pengaturan Sesi Penilaian
           </CardTitle>
           <CardDescription className="text-xs text-slate-500">
             Pilih target kelas, mata pelajaran, dan kriteria evaluasi SPK
           </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-5">
+        </div>
+        <div>
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
             <div className="space-y-1.5 flex-1 sm:min-w-[150px]">
               <Label className="text-xs font-medium text-slate-700">
@@ -491,13 +491,13 @@ export default function AdminNilaiPage() {
               }}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {showGrid && (
         <>
           {/* Session Toolbar */}
-          <div className="bg-white text-slate-800 rounded-lg p-4 border border-slate-200 shadow-xs flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+          <div className="py-3.5 border-b border-slate-200 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
             {isAkademik ? (
               <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center w-full xl:w-auto">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -681,8 +681,8 @@ export default function AdminNilaiPage() {
             </div>
           </div>
 
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
+          <div className="border-b border-slate-200">
+          <div>
               {categories.length === 0 && (
                 <div className="flex flex-col items-center justify-center p-8 text-slate-500 bg-slate-50/60 border-b border-slate-200">
                   <BookOpen className="h-6 w-6 mb-2 text-slate-400" />
@@ -800,13 +800,13 @@ export default function AdminNilaiPage() {
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <div className="flex justify-end">
             <Button
               size="lg"
-              className="gap-2 w-full sm:w-auto shadow-xs"
+              className="gap-2 w-full sm:w-auto"
               onClick={handleSave}
               disabled={saving || categories.length === 0}
             >

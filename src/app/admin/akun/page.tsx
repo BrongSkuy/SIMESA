@@ -218,8 +218,8 @@ export default function AdminAkunPage() {
         icon={UserCog}
       />
 
-      <Card>
-        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center">
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <Input
@@ -246,11 +246,11 @@ export default function AdminAkunPage() {
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
+      </div>
+
+      <div className="border-b border-slate-200 overflow-x-auto">
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -360,8 +360,8 @@ export default function AdminAkunPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+
+      </div>
 
       {/* Dialog Edit Profile */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

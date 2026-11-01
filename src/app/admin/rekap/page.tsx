@@ -197,11 +197,9 @@ export default function AdminRekapPage() {
       </PageHeader>
 
       {classes.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-xs text-slate-500">
-            Belum ada data kelas terdaftar.
-          </CardContent>
-        </Card>
+        <div className="border border-slate-200 py-12 text-center text-xs text-slate-500">
+          Belum ada data kelas terdaftar.
+        </div>
       ) : (
         <Tabs value={selectedClass} onValueChange={setSelectedClass}>
           <TabsList className="flex flex-wrap h-auto">
@@ -220,7 +218,7 @@ export default function AdminRekapPage() {
             ) : (
               <>
                 {/* KPI Row */}
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
                   <StatCard
                     title={`Siswa Kelas ${selectedClass}`}
                     value={rekapData.length}
@@ -248,8 +246,8 @@ export default function AdminRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <Card>
-                  <CardHeader className="border-b border-slate-100 pb-4">
+                <div className="pt-2 space-y-3">
+                  <div className="pb-3 border-b border-slate-200">
                     <CardTitle className="text-sm font-semibold text-slate-900">
                       Distribusi Status Kehadiran Tersimpan
                     </CardTitle>
@@ -257,8 +255,8 @@ export default function AdminRekapPage() {
                       Kelas {selectedClass} · Perbandingan frekuensi Hadir,
                       Izin, Sakit, dan Alfa
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-5">
+                  </div>
+                  <div className="pt-2">
                     <div className="h-[230px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -306,12 +304,12 @@ export default function AdminRekapPage() {
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Detail Table */}
-                <Card className="overflow-hidden">
-                  <CardHeader className="border-b border-slate-100 pb-4">
+                <div className="pt-2 space-y-3">
+                  <div className="pb-3 border-b border-slate-200">
                     <CardTitle className="text-sm font-semibold text-slate-900">
                       Matriks Rekapitulasi Per Siswa
                     </CardTitle>
@@ -319,8 +317,8 @@ export default function AdminRekapPage() {
                       Rincian kehadiran dan rata-rata nilai kriteria untuk Kelas{" "}
                       {selectedClass}
                     </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
+                  </div>
+                  <div className="border-b border-slate-200 overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -415,8 +413,8 @@ export default function AdminRekapPage() {
                         )}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </>
             )}
           </TabsContent>

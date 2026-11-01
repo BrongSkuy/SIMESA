@@ -228,7 +228,7 @@ export default function GuruLeaderboardPage() {
 
       {!isPublished ? (
         <div className="flex flex-col items-center justify-center py-10">
-          <div className="max-w-xl w-full bg-white border border-slate-200 rounded-lg shadow-xs overflow-hidden">
+          <div className="max-w-xl w-full bg-white border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 p-6 text-slate-800 flex items-center gap-4 border-b border-slate-200">
               <div className="h-12 w-12 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
                 <Lock className="h-5 w-5" />
@@ -298,11 +298,11 @@ export default function GuruLeaderboardPage() {
         <div className="space-y-6">
           {/* Top 3 Podium Cards */}
           {data.length > 0 && !loading && (
-            <div className="grid gap-4 sm:grid-cols-3 hide-on-print">
+            <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white hide-on-print">
               {data.slice(0, 3).map((student, i) => (
                 <div
                   key={student.studentId}
-                  className="bg-white text-slate-800 rounded-lg p-5 border border-slate-200 shadow-xs flex flex-col justify-between"
+                  className="p-5 flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -345,8 +345,8 @@ export default function GuruLeaderboardPage() {
             </div>
           )}
 
-          <Card className="print-area overflow-hidden">
-            <CardHeader className="pb-4 border-b border-slate-100">
+          <div className="print-area pt-2 space-y-3">
+            <div className="pb-3 border-b border-slate-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <CardTitle className="text-sm font-semibold text-slate-900">
@@ -374,8 +374,8 @@ export default function GuruLeaderboardPage() {
                   </TabsList>
                 </Tabs>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div className="border-b border-slate-200 overflow-x-auto">
               {loading ? (
                 <div className="flex py-16 justify-center">
                   <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
@@ -461,8 +461,8 @@ export default function GuruLeaderboardPage() {
                   </TableBody>
                 </Table>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
     </div>

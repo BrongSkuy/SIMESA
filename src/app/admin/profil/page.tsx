@@ -93,11 +93,11 @@ export default function AdminProfilPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-5">
-        {/* Identity Card */}
-        <div className="md:col-span-2 bg-white rounded-lg p-6 border border-slate-200 shadow-xs flex flex-col justify-between space-y-6">
+        {/* Identity Column */}
+        <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 space-y-6">
           <div className="space-y-5">
             <div className="flex items-center gap-3.5">
-              <div className="h-12 w-12 rounded-lg bg-[#1e3a8a] flex items-center justify-center text-white font-bold text-base shadow-xs shrink-0">
+              <div className="h-12 w-12 bg-[#1e3a8a] flex items-center justify-center text-white font-bold text-base shrink-0">
                 {getInitials(userName)}
               </div>
               <div className="min-w-0">
@@ -131,25 +131,25 @@ export default function AdminProfilPage() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5 text-xs text-slate-500 leading-relaxed">
+          <div className="border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-500 leading-relaxed">
             Mengganti kata sandi akan otomatis memperbarui kredensial masuk akun
             Anda pada sistem ini.
           </div>
         </div>
 
-        {/* White Password Update Card */}
-        <Card className="md:col-span-3">
-          <CardHeader className="border-b border-slate-100 pb-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        {/* Password Update Column */}
+        <div className="md:col-span-3 space-y-4">
+          <div className="pb-3 border-b border-slate-200">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <KeyRound className="h-4 w-4 text-blue-600" /> Perbarui Kata Sandi
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
               Gunakan kombinasi kata sandi yang kuat untuk menjaga keamanan
               akses panel kontrol
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-5">
-            <div className="mb-5 rounded-lg bg-slate-50 p-3.5 text-xs text-slate-600 border border-slate-200">
+            </p>
+          </div>
+          <div className="pt-2">
+            <div className="mb-5 border border-slate-200 bg-slate-50 p-3.5 text-xs text-slate-600">
               <p className="font-semibold text-slate-800 mb-1">
                 Catatan Keamanan:
               </p>
@@ -251,8 +251,8 @@ export default function AdminProfilPage() {
                 Simpan Kata Sandi Baru
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

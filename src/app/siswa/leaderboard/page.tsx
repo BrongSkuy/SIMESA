@@ -167,9 +167,9 @@ export default function SiswaLeaderboardPage() {
 
       {!isPublished ? (
         <div className="flex flex-col items-center justify-center py-10">
-          <div className="max-w-xl w-full bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+          <div className="max-w-xl w-full bg-white border border-slate-200 overflow-hidden">
             <div className="bg-slate-50 p-6 border-b border-slate-200 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+              <div className="h-12 w-12 bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
                 <Lock className="h-5 w-5" />
               </div>
               <div>
@@ -189,7 +189,7 @@ export default function SiswaLeaderboardPage() {
                 sekolah. Peringkat resmi akan dipublikasikan secara serentak.
               </p>
 
-              <div className="border border-slate-200 rounded-xl bg-slate-50 p-4 space-y-3">
+              <div className="border border-slate-200 bg-slate-50 p-4 space-y-3">
                 <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-slate-400" /> Tahapan
                   Validasi Akademik
@@ -264,15 +264,15 @@ export default function SiswaLeaderboardPage() {
             <div className="space-y-6">
               {/* Top 3 Podium Cards */}
               {data.length > 0 && (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
                   {data.slice(0, 3).map((student, i) => {
                     const isMe =
                       myData && student.studentId === myData.studentId;
                     return (
                       <div
                         key={student.studentId}
-                        className={`bg-white rounded-xl p-5 border shadow-xs flex flex-col justify-between ${
-                          isMe ? "border-blue-500 ring-1 ring-blue-500/30" : "border-slate-200"
+                        className={`p-5 flex flex-col justify-between ${
+                          isMe ? "bg-blue-50/40" : "bg-white"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -325,18 +325,18 @@ export default function SiswaLeaderboardPage() {
               )}
 
               {/* Full Table */}
-              <Card className="overflow-hidden">
-                <CardHeader className="border-b border-slate-100 pb-4">
-                  <CardTitle className="text-sm font-semibold text-slate-900">
+              <div className="pt-2 space-y-3">
+                <div className="pb-3 border-b border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-900">
                     {filterType === "umum"
                       ? "Peringkat Keseluruhan (Semua Kelas)"
                       : `Peringkat Kelas ${myData?.kelas}`}
-                  </CardTitle>
-                  <CardDescription className="text-xs text-slate-500">
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Periode {activePeriodeName}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
+                  </p>
+                </div>
+                <div className="border-b border-slate-200 overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -415,8 +415,8 @@ export default function SiswaLeaderboardPage() {
                       )}
                     </TableBody>
                   </Table>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
         </>

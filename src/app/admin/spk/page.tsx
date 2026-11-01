@@ -118,7 +118,7 @@ export default function AdminSpkPage() {
       </PageHeader>
 
       {/* Total Weight Validation Banner */}
-      <div className="bg-white rounded-lg p-5 border border-slate-200 shadow-xs">
+      <div className="py-4 border-b border-slate-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5">
             <div
@@ -184,24 +184,24 @@ export default function AdminSpkPage() {
       </div>
 
       {/* Criteria cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-px sm:bg-slate-200">
         {criteria.map((c, index) => (
-          <Card
+          <div
             key={c.id}
-            className="group transition-colors hover:border-slate-300"
+            className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
           >
-            <CardHeader className="pb-3 border-b border-slate-100">
-              <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100 mb-3">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Kriteria C{index + 1}
                   </span>
-                  <CardTitle className="text-sm font-semibold text-slate-900 mt-0.5">
+                  <h3 className="text-sm font-semibold text-slate-900 mt-0.5">
                     {c.namaKriteria}
-                  </CardTitle>
+                  </h3>
                 </div>
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border shrink-0 ${
+                  className={`inline-flex items-center px-2 py-0.5 rounded-xs text-xs font-medium border shrink-0 ${
                     c.tipe === "Otomatis"
                       ? "border-blue-200 bg-blue-50 text-blue-700"
                       : "border-indigo-200 bg-indigo-50 text-indigo-700"
@@ -210,11 +210,11 @@ export default function AdminSpkPage() {
                   {c.tipe}
                 </span>
               </div>
-              <CardDescription className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 mb-4">
                 {c.deskripsi || "Parameter evaluasi kinerja & prestasi siswa"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
+              </p>
+            </div>
+            <div className="pt-2">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-slate-600">
@@ -244,13 +244,13 @@ export default function AdminSpkPage() {
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Info box */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-start gap-3">
+      <div className="py-4 border-b border-slate-200 flex items-start gap-3">
         <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 shrink-0">
           <Info className="h-4 w-4" />
         </div>

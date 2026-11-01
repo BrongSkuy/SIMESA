@@ -360,7 +360,7 @@ export default function AdminLeaderboardPage() {
 
       {/* Publication Status & Control Banner */}
       {publishStatus && (
-        <div className="bg-white text-slate-800 rounded-lg p-6 border border-slate-200 shadow-xs hide-on-print">
+        <div className="py-4 border-b border-slate-200 hide-on-print">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -438,7 +438,7 @@ export default function AdminLeaderboardPage() {
                   <AlertDialogTrigger
                     render={
                       <Button
-                        className="font-semibold shadow-xs"
+                        className="font-semibold"
                         disabled={hasMissing}
                       >
                         <Unlock className="mr-2 h-3.5 w-3.5" /> Publikasikan
@@ -594,8 +594,8 @@ export default function AdminLeaderboardPage() {
       )}
 
       {/* Main calculation preview container */}
-      <Card className="print-area overflow-hidden">
-        <CardHeader className="pb-4 border-b border-slate-100">
+      <div className="print-area pt-2 space-y-3">
+        <div className="pb-3 border-b border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -628,8 +628,8 @@ export default function AdminLeaderboardPage() {
               </TabsList>
             </Tabs>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
+        </div>
+        <div className="border-b border-slate-200 overflow-x-auto">
           {loading ? (
             <div className="flex py-16 justify-center">
               <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
@@ -715,12 +715,12 @@ export default function AdminLeaderboardPage() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Archives */}
-      <Card className="hide-on-print">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <div className="hide-on-print pt-2 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
           <div>
             <CardTitle className="text-sm font-semibold text-slate-900">
               Arsip Dokumen Historis (Tahun Ajaran)
@@ -744,18 +744,18 @@ export default function AdminLeaderboardPage() {
             className="hidden"
             onChange={handleUploadArsip}
           />
-        </CardHeader>
-        <CardContent className="pt-5">
+        </div>
+        <div className="pt-2">
           <div className="space-y-3">
             {archives.length === 0 ? (
-              <div className="py-10 text-center text-xs text-slate-500 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+              <div className="py-10 text-center text-xs text-slate-500 bg-slate-50/50 border-y border-slate-200">
                 Belum ada dokumen arsip dari semester sebelumnya yang diunggah.
               </div>
             ) : (
               archives.map((arc) => (
                 <div
                   key={arc.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50/70"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 py-3.5 transition-colors hover:bg-slate-50/70"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 border border-emerald-200 shrink-0">
@@ -792,8 +792,8 @@ export default function AdminLeaderboardPage() {
               ))
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

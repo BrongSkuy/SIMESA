@@ -492,16 +492,16 @@ export default function GuruAbsensiPage() {
       </PageHeader>
 
       {/* Step 1: Select class, mapel, & date */}
-      <Card>
-        <CardHeader className="border-b border-slate-100 pb-4">
+      <div className="pb-5 border-b border-slate-200">
+        <div className="pb-3 mb-4 border-b border-slate-100">
           <CardTitle className="text-sm font-semibold text-slate-900">
             Pengaturan Sesi Absensi
           </CardTitle>
           <CardDescription className="text-xs text-slate-500">
             Pilih kelas penugasan, mata pelajaran, dan tanggal pertemuan
           </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-5">
+        </div>
+        <div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="space-y-1.5 flex-1">
               <Label className="text-xs font-medium text-slate-700">
@@ -577,14 +577,14 @@ export default function GuruAbsensiPage() {
               Muat Absensi
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Step 2: Attendance Grid */}
       {showGrid && (
         <>
           {/* Session Summary Bar */}
-          <div className="bg-white text-slate-800 rounded-lg p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="py-3.5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                 Kelas {selectedKelas} ·{" "}
@@ -662,8 +662,8 @@ export default function GuruAbsensiPage() {
           </div>
 
           {/* Grid Table */}
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
+          <div className="pt-2 space-y-3">
+            <div>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
                   <thead>
@@ -747,14 +747,14 @@ export default function GuruAbsensiPage() {
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Save Button */}
           <div className="flex justify-end">
             <Button
               size="lg"
-              className="gap-2 w-full sm:w-auto shadow-xs"
+              className="gap-2 w-full sm:w-auto"
               onClick={handleSave}
               disabled={saving}
             >
@@ -768,8 +768,8 @@ export default function GuruAbsensiPage() {
           </div>
 
           {/* History Table */}
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="pt-2 space-y-3">
+            <div className="pb-3 mb-4 border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 Matriks Riwayat Kehadiran (
                 {selectedMapel === "Umum" ? "Umum / Wali Kelas" : selectedMapel}
@@ -782,8 +782,8 @@ export default function GuruAbsensiPage() {
                 Rekam jejak seluruh pertemuan yang telah tersimpan untuk mata
                 pelajaran ini
               </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div>
               {historyData.dates.length === 0 ? (
                 <div className="p-10 text-center text-xs text-slate-500">
                   Belum ada riwayat absensi yang disimpan untuk mata pelajaran
@@ -865,8 +865,8 @@ export default function GuruAbsensiPage() {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </>
       )}
     </div>

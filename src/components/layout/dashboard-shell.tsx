@@ -54,7 +54,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+      <div className="min-h-screen flex flex-col bg-white text-slate-800">
         {/* Sticky Dark Enterprise Top Navigation Bar */}
         <Topbar user={user} onMenuClick={() => setMobileOpen(true)} />
 

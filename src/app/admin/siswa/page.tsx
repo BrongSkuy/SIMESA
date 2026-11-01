@@ -399,7 +399,7 @@ export default function AdminSiswaPage() {
               </Button>
             }
           />
-          <DialogContent className="max-w-lg rounded-xl border-slate-200">
+          <DialogContent className="max-w-lg rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Tambah Siswa Baru
@@ -514,7 +514,7 @@ export default function AdminSiswaPage() {
             if (!open) resetForm();
           }}
         >
-          <DialogContent className="max-w-lg rounded-xl border-slate-200">
+          <DialogContent className="max-w-lg rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Edit Data Siswa
@@ -648,7 +648,7 @@ export default function AdminSiswaPage() {
       </PageHeader>
 
       {/* Enterprise Filter Toolbar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
@@ -683,7 +683,7 @@ export default function AdminSiswaPage() {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="border-b border-slate-200 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

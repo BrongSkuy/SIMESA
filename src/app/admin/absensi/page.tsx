@@ -444,16 +444,16 @@ export default function AdminAbsensiPage() {
       </PageHeader>
 
       {/* Step 1: Select class, mapel & date */}
-      <Card>
-        <CardHeader className="border-b border-slate-100 pb-4">
-          <CardTitle className="text-sm font-semibold text-slate-900">
+      <div className="pb-5 border-b border-slate-200">
+        <div className="pb-3 mb-4 border-b border-slate-100">
+          <h2 className="text-sm font-semibold text-slate-900">
             Pengaturan Sesi Absensi
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-500">
+          </h2>
+          <p className="text-xs text-slate-500">
             Pilih kelas, mata pelajaran, dan tanggal presensi yang akan dikelola
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-5">
+          </p>
+        </div>
+        <div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="space-y-1.5 flex-1">
               <Label className="text-xs font-medium text-slate-700">
@@ -531,14 +531,14 @@ export default function AdminAbsensiPage() {
               Muat Absensi
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Step 2: Attendance Grid */}
       {showGrid && (
         <>
           {/* Session Summary Bar */}
-          <div className="bg-white text-slate-800 rounded-lg p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="py-3.5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
                 Kelas {selectedKelas} ·{" "}
@@ -616,10 +616,8 @@ export default function AdminAbsensiPage() {
           </div>
 
           {/* Grid Table */}
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-max border-collapse text-left">
+          <div className="border-b border-slate-200 overflow-x-auto">
+            <table className="w-full min-w-max border-collapse text-left">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-xs font-semibold">
                       <th className="px-5 py-3 w-14">No</th>
@@ -695,14 +693,12 @@ export default function AdminAbsensiPage() {
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
 
           {/* Save Button */}
           <div className="flex justify-end">
             <Button
               size="lg"
-              className="gap-2 w-full sm:w-auto shadow-xs"
+              className="gap-2 w-full sm:w-auto"
               onClick={handleSave}
               disabled={saving}
             >
@@ -716,22 +712,22 @@ export default function AdminAbsensiPage() {
           </div>
 
           {/* History Table */}
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+          <div className="pt-2 space-y-3">
+            <div className="pb-3 border-b border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 Matriks Riwayat Kehadiran (
                 {selectedMapel === "Umum" ? "Umum / Wali Kelas" : selectedMapel}
                 )
                 {loadingHistory && (
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
                 )}
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              </h3>
+              <p className="text-xs text-slate-500">
                 Rekam jejak presensi seluruh pertemuan yang telah tersimpan
                 untuk mata pelajaran ini
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+              </p>
+            </div>
+            <div className="border-b border-slate-200 overflow-x-auto">
               {historyData.dates.length === 0 ? (
                 <div className="p-10 text-center text-xs text-slate-500">
                   Belum ada riwayat absensi yang disimpan untuk mata pelajaran
@@ -813,8 +809,8 @@ export default function AdminAbsensiPage() {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </>
       )}
     </div>

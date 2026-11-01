@@ -188,8 +188,8 @@ export default function AdminNilaiSayaPage() {
         icon={ClipboardList}
       />
 
-      <Card>
-        <CardContent className="p-5">
+      <div className="py-3.5 border-y border-slate-200">
+        <div>
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="space-y-1.5 flex-1 w-full">
               <Label className="text-xs font-medium text-slate-700">
@@ -264,11 +264,11 @@ export default function AdminNilaiSayaPage() {
               Tampilkan Transkrip
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {error && (
-        <div className="flex h-56 flex-col items-center justify-center gap-2 text-slate-500 bg-white border border-slate-200 rounded-xl shadow-xs">
+        <div className="flex h-56 flex-col items-center justify-center gap-2 text-slate-500 bg-white border border-slate-200">
           <AlertCircle className="h-8 w-8 text-rose-500" />
           <p className="text-sm font-semibold text-slate-800">
             Gagal Memuat Nilai
@@ -280,7 +280,7 @@ export default function AdminNilaiSayaPage() {
       {!loading && !error && data && (
         <div className="space-y-6">
           {/* Score Summary Banner */}
-          <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+          <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 font-bold text-base flex items-center justify-center shrink-0">
                 {getInitials(data.student.namaLengkap)}
@@ -303,7 +303,7 @@ export default function AdminNilaiSayaPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 bg-slate-50 rounded-lg px-5 py-3.5 border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center gap-3.5 bg-slate-50 px-4 py-3 border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
               <div className="p-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
                 <Award className="h-6 w-6" />
               </div>
@@ -320,8 +320,8 @@ export default function AdminNilaiSayaPage() {
 
           {/* Attendance Summary */}
           {data.kehadiran && (
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-5">
-              <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
+            <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid grid-cols-2 sm:grid-cols-5 bg-white">
+              <div className="p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Hadir
                 </p>
@@ -329,7 +329,7 @@ export default function AdminNilaiSayaPage() {
                   {data.kehadiran.hadir}
                 </p>
               </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
+              <div className="p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Izin
                 </p>
@@ -337,7 +337,7 @@ export default function AdminNilaiSayaPage() {
                   {data.kehadiran.izin}
                 </p>
               </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
+              <div className="p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Sakit
                 </p>
@@ -345,7 +345,7 @@ export default function AdminNilaiSayaPage() {
                   {data.kehadiran.sakit}
                 </p>
               </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs">
+              <div className="p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Alfa
                 </p>
@@ -353,7 +353,7 @@ export default function AdminNilaiSayaPage() {
                   {data.kehadiran.alfa}
                 </p>
               </div>
-              <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-xs col-span-2 sm:col-span-1">
+              <div className="p-4 col-span-2 sm:col-span-1">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   % Kehadiran
                 </p>
@@ -369,16 +369,16 @@ export default function AdminNilaiSayaPage() {
           )}
 
           {/* Criteria Detail Cards */}
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="border-y border-slate-200 divide-y md:divide-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-px md:bg-slate-200">
             {data.criteria.map((c) => {
               const tone = getScoreTone(c.nilaiRataRata);
               const pct = Math.min(100, Math.max(0, c.nilaiRataRata));
               return (
-                <Card
+                <div
                   key={c.id}
-                  className="hover:border-slate-300 transition-colors"
+                  className="bg-white p-5 hover:bg-slate-50/50 transition-colors flex flex-col justify-between"
                 >
-                  <CardHeader className="pb-3 border-b border-slate-100">
+                  <div className="pb-3 border-b border-slate-100">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -397,8 +397,8 @@ export default function AdminNilaiSayaPage() {
                         {c.bobot}%
                       </span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-4">
+                  </div>
+                  <div className="pt-4">
                     <div className="flex items-end justify-between">
                       <div>
                         <p className="text-xs text-slate-500 mb-0.5">
@@ -468,15 +468,15 @@ export default function AdminNilaiSayaPage() {
                           </div>
                         </div>
                       )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               );
             })}
           </div>
 
           {/* Full Table Summary */}
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="pt-2 space-y-3">
+            <div className="pb-3 border-b border-slate-200">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-blue-600" />
                 Ringkasan Perhitungan Skor SPK SAW
@@ -484,8 +484,8 @@ export default function AdminNilaiSayaPage() {
               <CardDescription className="text-xs text-slate-500">
                 Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
               </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div className="border-b border-slate-200 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -544,8 +544,8 @@ export default function AdminNilaiSayaPage() {
                   </TableRow>
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
     </div>

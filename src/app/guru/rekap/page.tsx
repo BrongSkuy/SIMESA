@@ -254,11 +254,11 @@ export default function GuruRekapPage() {
       </PageHeader>
 
       {classes.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-xs text-slate-500">
+        <div className="border border-slate-200 py-12 text-center text-xs text-slate-500">
+
             Anda belum memiliki penugasan kelas.
-          </CardContent>
-        </Card>
+        </div>
+
       ) : (
         <Tabs
           value={selectedClass}
@@ -285,7 +285,7 @@ export default function GuruRekapPage() {
             ) : (
               <>
                 {/* Dark KPI Row */}
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
                   <StatCard
                     title={`Siswa Kelas ${selectedClass}`}
                     value={rekapData.length}
@@ -310,8 +310,8 @@ export default function GuruRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <Card>
-                  <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div className="pt-2 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
                     <div>
                       <CardTitle className="text-sm font-semibold text-slate-900">
                         Distribusi Kehadiran Tersimpan
@@ -368,8 +368,8 @@ export default function GuruRekapPage() {
                         </Button>
                       )}
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-5">
+                  </div>
+                  <div className="pt-2">
                     <div className="h-[230px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -421,17 +421,17 @@ export default function GuruRekapPage() {
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Detail Table */}
-                <Card className="overflow-hidden">
-                  <CardHeader className="border-b border-slate-100 pb-4">
+                <div className="pt-2 space-y-3">
+                  <div className="pb-3 border-b border-slate-200">
                     <CardTitle className="text-sm font-semibold text-slate-900">
                       Matriks Detail Per Siswa
                     </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0 overflow-x-auto">
+                  </div>
+                  <div className="border-b border-slate-200 overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -547,8 +547,8 @@ export default function GuruRekapPage() {
                         )}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </>
             )}
           </TabsContent>

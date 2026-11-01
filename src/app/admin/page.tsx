@@ -301,8 +301,8 @@ export default function AdminDashboard() {
         </button>
       </PageHeader>
 
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4 Kartu Metrik Utama - Flat Seamless Strip */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
         <StatCard
           title="Total Siswa"
           value={stats.totalSiswa}
@@ -368,8 +368,9 @@ export default function AdminDashboard() {
       </section>
 
       {/* Baris Grafik & Pintasan (2/3 + 1/3) */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
         {/* Kolom Kiri: Visualisasi Grafik Presensi Recharts */}
+        <div className="lg:col-span-2 lg:border-r lg:border-slate-200 lg:pr-8">
         <Panel
           title="Grafik Presensi Siswa"
           description="Rekapitulasi jumlah siswa hadir, izin, sakit, dan alfa"
@@ -392,8 +393,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           }
-          className="lg:col-span-2 flex flex-col justify-between"
-          bodyClassName="p-5 flex-1 flex flex-col justify-between"
+          bodyClassName="pt-4 flex flex-col justify-between"
         >
           <div className="h-72 w-full pt-2">
             {chartSeries.length > 0 ? (
@@ -454,6 +454,7 @@ export default function AdminDashboard() {
             </span>
           </div>
         </Panel>
+        </div>
 
         {/* Kolom Kanan: Pintasan Aksi & Status Kesiapan SPK */}
         <div className="space-y-6">
@@ -461,17 +462,17 @@ export default function AdminDashboard() {
             title="Pintasan Menu"
             description="Akses cepat pengelolaan data harian"
           >
-            <div className="space-y-2.5">
+            <div className="divide-y divide-slate-100">
               <Link
                 href="/admin/siswa"
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-md bg-blue-50 text-[#1e3a8a] flex items-center justify-center shrink-0">
                     <Upload className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-[#1e3a8a] transition-colors">
                       Kelola Data Siswa
                     </span>
                     <p className="text-xs text-slate-500 mt-0.5">
@@ -484,7 +485,7 @@ export default function AdminDashboard() {
 
               <Link
                 href="/admin/spk"
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
@@ -504,7 +505,7 @@ export default function AdminDashboard() {
 
               <Link
                 href="/admin/leaderboard"
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="w-full flex items-center justify-between py-2.5 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">

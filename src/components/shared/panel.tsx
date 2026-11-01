@@ -24,7 +24,7 @@ export function Panel({
   return (
     <div
       className={cn(
-        "bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden",
+        "bg-white",
         className
       )}
       {...props}
@@ -32,7 +32,7 @@ export function Panel({
       {hasHeader && (
         <div
           className={cn(
-            "px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white",
+            "pb-3.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white",
             headerClassName
           )}
         >
@@ -51,7 +51,7 @@ export function Panel({
           {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
-      <div className={cn("p-5", bodyClassName)}>{children}</div>
+      <div className={cn("pt-4", bodyClassName)}>{children}</div>
     </div>
   );
 }

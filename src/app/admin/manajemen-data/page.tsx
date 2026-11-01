@@ -304,8 +304,8 @@ export default function ManajemenDataPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column: Academic Years Management */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="overflow-hidden">
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
               <div>
                 <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                   <CalendarRange className="h-4 w-4 text-blue-600" />
@@ -324,8 +324,8 @@ export default function ManajemenDataPage() {
                 <Plus className="h-3.5 w-3.5" />
                 Tambah Periode
               </Button>
-            </CardHeader>
-            <CardContent className="pt-5 space-y-5">
+            </div>
+            <div className="space-y-4">
               {/* Dark Enterprise Active Period Banner */}
               {activePeriod ? (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
@@ -367,7 +367,7 @@ export default function ManajemenDataPage() {
               )}
 
               {/* Table of periods */}
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="border-b border-slate-200 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -482,15 +482,15 @@ export default function ManajemenDataPage() {
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Export and Reset Cards */}
         <div className="space-y-6">
           {/* Export Card */}
-          <Card>
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="space-y-3">
+            <div className="pb-3 border-b border-slate-200">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
                 Cadangan & Ekspor Basis Data
@@ -499,8 +499,8 @@ export default function ManajemenDataPage() {
                 Unduh seluruh tabel sistem dalam satu berkas Excel (.xlsx)
                 multi-sheet
               </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
+            </div>
+            <div>
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 mb-4">
                 <ul className="text-xs text-slate-600 space-y-1.5">
                   <li>• Master Siswa, Guru, Kelas & Mata Pelajaran</li>
@@ -523,12 +523,12 @@ export default function ManajemenDataPage() {
                 )}
                 {exporting ? "Menyiapkan Berkas..." : "Unduh Backup Excel"}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Reset Card (Danger Zone) */}
-          <Card className="border-rose-200 bg-rose-50/30">
-            <CardHeader className="border-b border-rose-200/70 pb-4">
+          <div className="space-y-3 pt-4 border-t border-slate-200">
+            <div className="pb-3 border-b border-rose-200">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-rose-900">
                 <ShieldAlert className="h-4 w-4 text-rose-600" />
                 Zona Bahaya — Reset Operasional
@@ -537,8 +537,8 @@ export default function ManajemenDataPage() {
                 Bersihkan seluruh data transaksi operasional dengan tetap
                 mempertahankan akun & bobot SPK
               </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
+            </div>
+            <div>
               <div className="rounded-lg border border-rose-200 bg-white/80 p-3.5 mb-4">
                 <div className="flex items-start gap-2.5">
                   <AlertTriangle className="h-4 w-4 text-rose-600 mt-0.5 shrink-0" />
@@ -557,8 +557,8 @@ export default function ManajemenDataPage() {
                 <Trash2 className="h-4 w-4" />
                 Reset Seluruh Data Operasional
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

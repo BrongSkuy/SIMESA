@@ -246,7 +246,7 @@ export default function SiswaAbsensiPage() {
       />
 
       {/* Controls: Filter + View Toggle */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="py-3.5 border-y border-slate-200 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex items-center gap-2.5 flex-wrap">
           <BookOpen className="h-4 w-4 text-slate-400" />
           <Select
@@ -290,8 +290,8 @@ export default function SiswaAbsensiPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+      <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid grid-cols-2 sm:grid-cols-5 bg-white">
+        <div className="p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Hadir
           </p>
@@ -299,7 +299,7 @@ export default function SiswaAbsensiPage() {
             {summary.hadir}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Izin
           </p>
@@ -307,7 +307,7 @@ export default function SiswaAbsensiPage() {
             {summary.izin}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Sakit
           </p>
@@ -315,7 +315,7 @@ export default function SiswaAbsensiPage() {
             {summary.sakit}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+        <div className="p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Alfa
           </p>
@@ -323,7 +323,7 @@ export default function SiswaAbsensiPage() {
             {summary.alfa}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs col-span-2 sm:col-span-1">
+        <div className="p-4 col-span-2 sm:col-span-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             % Kehadiran
           </p>
@@ -368,8 +368,8 @@ export default function SiswaAbsensiPage() {
       {viewMode === "kalender" ? (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Calendar */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 pb-3">
+          <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-4">
+            <div className="flex flex-row items-center justify-between pb-3 border-b border-slate-200">
               <CardTitle className="text-sm font-semibold text-slate-900">
                 {months[currentMonth]} {currentYear}
               </CardTitle>
@@ -391,8 +391,8 @@ export default function SiswaAbsensiPage() {
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="pt-4">
+            </div>
+            <div className="pt-1">
               <div className="grid grid-cols-7 gap-1.5 mb-1.5">
                 {dayNames.map((d) => (
                   <div
@@ -432,12 +432,12 @@ export default function SiswaAbsensiPage() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Recent History */}
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="space-y-4">
+            <div className="pb-3 border-b border-slate-200">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <List className="h-4 w-4 text-blue-600" />
                 Log Presensi Terkini
@@ -445,8 +445,8 @@ export default function SiswaAbsensiPage() {
               <CardDescription className="text-xs text-slate-500">
                 15 catatan kehadiran terakhir Anda
               </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div className="border-b border-slate-200">
               <div className="max-h-[430px] overflow-y-auto">
                 <Table>
                   <TableHeader>
@@ -518,14 +518,14 @@ export default function SiswaAbsensiPage() {
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       ) : (
         /* Grafik Per Mapel View */
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-4">
+            <div className="pb-3 border-b border-slate-200">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-blue-600" />
                 Grafik Kehadiran Per Mata Pelajaran
@@ -534,8 +534,8 @@ export default function SiswaAbsensiPage() {
                 Perbandingan frekuensi status kehadiran pada setiap mata
                 pelajaran
               </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-5">
+            </div>
+            <div className="pt-2">
               <div className="h-[340px]">
                 {perMapelChartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -603,11 +603,11 @@ export default function SiswaAbsensiPage() {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-slate-100 pb-4">
+          <div className="space-y-4">
+            <div className="pb-3 border-b border-slate-200">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-blue-600" />
                 Rincian Per Mapel
@@ -615,8 +615,8 @@ export default function SiswaAbsensiPage() {
               <CardDescription className="text-xs text-slate-500">
                 Akumulasi H / I / S / A tiap mata pelajaran
               </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div className="border-b border-slate-200">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -661,8 +661,8 @@ export default function SiswaAbsensiPage() {
                   )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
     </div>

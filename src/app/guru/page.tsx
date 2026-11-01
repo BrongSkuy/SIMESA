@@ -91,8 +91,8 @@ export default function GuruDashboard() {
         </Link>
       </PageHeader>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* KPI Cards - Flat Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
         <StatCard
           title="Kelas Diampu"
           value={data?.totalKelasDiampu ?? 0}
@@ -119,9 +119,9 @@ export default function GuruDashboard() {
         />
       </div>
 
-      {/* Main Content Split: Assigned Classes + Dark Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
+      {/* Main Content Split: Assigned Classes + Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-2">
+        <div className="lg:col-span-2 lg:border-r lg:border-slate-200 lg:pr-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">
@@ -137,28 +137,26 @@ export default function GuruDashboard() {
           </div>
 
           {classes.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-xs text-slate-500">
-                Akun Anda belum ditugaskan ke kelas atau mata pelajaran manapun.
-                Hubungi Administrator Sekolah.
-              </CardContent>
-            </Card>
+            <div className="border border-slate-200 py-12 text-center text-xs text-slate-500">
+              Akun Anda belum ditugaskan ke kelas atau mata pelajaran manapun.
+              Hubungi Administrator Sekolah.
+            </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:grid sm:grid-cols-2 sm:gap-px sm:bg-slate-200">
               {classes.map((kelas) => {
                 const isDone = kelas.statusAbsensiHariIni === "Sudah Diabsen";
                 return (
-                  <Card
+                  <div
                     key={kelas.id}
-                    className="group transition-colors hover:border-slate-300 flex flex-col justify-between"
+                    className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
                   >
-                    <CardHeader className="pb-3 border-b border-slate-100">
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle className="text-base font-bold text-slate-900">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-3">
+                        <h3 className="text-sm font-bold text-slate-900">
                           Kelas {kelas.namaKelas}
-                        </CardTitle>
+                        </h3>
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold border ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs text-xs font-semibold border ${
                             isDone
                               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                               : "border-amber-200 bg-amber-50 text-amber-700"
@@ -172,21 +170,19 @@ export default function GuruDashboard() {
                           {kelas.statusAbsensiHariIni}
                         </span>
                       </div>
-                      <CardDescription className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-slate-500 mb-3">
                         Tingkat {kelas.tingkat} · Wali Kelas:{" "}
                         <span className="font-medium text-slate-700">
                           {kelas.waliKelas || "-"}
                         </span>
-                      </CardDescription>
-                    </CardHeader>
+                      </p>
 
-                    <CardContent className="pt-4 space-y-4">
                       {kelas.subjects && kelas.subjects.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1.5 mb-4">
                           {kelas.subjects.map((subj) => (
                             <span
                               key={subj}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
                             >
                               <BookOpen className="h-3 w-3 text-blue-600" />
                               {subj}
@@ -194,35 +190,35 @@ export default function GuruDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic">
+                        <p className="text-xs text-slate-400 italic mb-4">
                           Penugasan Wali Kelas
                         </p>
                       )}
+                    </div>
 
-                      <div className="flex items-center gap-2 pt-1">
-                        <Link
-                          href={`/guru/absensi?kelas=${encodeURIComponent(kelas.namaKelas)}`}
-                          className="flex-1"
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                      <Link
+                        href={`/guru/absensi?kelas=${encodeURIComponent(kelas.namaKelas)}`}
+                        className="flex-1"
+                      >
+                        <Button className="w-full gap-1.5" size="sm">
+                          <ClipboardCheck className="h-3.5 w-3.5" />
+                          Mulai Absensi
+                        </Button>
+                      </Link>
+                      <Link
+                        href={`/guru/rekap?kelas=${encodeURIComponent(kelas.namaKelas)}`}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
                         >
-                          <Button className="w-full gap-1.5" size="sm">
-                            <ClipboardCheck className="h-3.5 w-3.5" />
-                            Mulai Absensi
-                          </Button>
-                        </Link>
-                        <Link
-                          href={`/guru/rekap?kelas=${encodeURIComponent(kelas.namaKelas)}`}
-                        >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1"
-                          >
-                            Rekap <ArrowRight className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
+                          Rekap <ArrowRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -231,20 +227,22 @@ export default function GuruDashboard() {
 
         {/* Right Side: Quick Shortcuts */}
         <div className="space-y-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-1">
-              Navigasi Cepat Guru
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Pintasan modul operasional pengajaran harian
-            </p>
-            <div className="space-y-2.5">
+          <div>
+            <div className="pb-3 border-b border-slate-200 mb-2">
+              <h3 className="text-sm font-semibold text-slate-900 mb-0.5">
+                Navigasi Cepat Guru
+              </h3>
+              <p className="text-xs text-slate-500">
+                Pintasan modul operasional pengajaran harian
+              </p>
+            </div>
+            <div className="divide-y divide-slate-100 border-b border-slate-100">
               <Link
                 href="/guru/absensi"
-                className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                  <div className="p-2 rounded-xs bg-blue-50 text-blue-700 border border-blue-200">
                     <ClipboardCheck className="h-4 w-4" />
                   </div>
                   <div>
@@ -261,10 +259,10 @@ export default function GuruDashboard() {
 
               <Link
                 href="/guru/nilai"
-                className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-md bg-amber-50 text-amber-700 border border-amber-200">
+                  <div className="p-2 rounded-xs bg-amber-50 text-amber-700 border border-amber-200">
                     <PenLine className="h-4 w-4" />
                   </div>
                   <div>
@@ -281,10 +279,10 @@ export default function GuruDashboard() {
 
               <Link
                 href="/guru/leaderboard"
-                className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors group"
+                className="flex items-center justify-between py-3 hover:bg-slate-50/70 transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="p-2 rounded-xs bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <Trophy className="h-4 w-4" />
                   </div>
                   <div>

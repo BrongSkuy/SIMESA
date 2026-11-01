@@ -101,7 +101,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-slate-50 text-slate-800 text-sm antialiased;
+    @apply bg-white text-slate-800 text-sm antialiased;
   }
   html {
     @apply font-sans;

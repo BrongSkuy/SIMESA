@@ -206,7 +206,7 @@ export default function AdminKelasPage() {
               </Button>
             }
           />
-          <DialogContent className="rounded-xl border-slate-200">
+          <DialogContent className="rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Tambah Kelas Baru
@@ -297,7 +297,7 @@ export default function AdminKelasPage() {
             if (!open) resetForm();
           }}
         >
-          <DialogContent className="rounded-xl border-slate-200">
+          <DialogContent className="rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
                 Edit Data Kelas
@@ -396,20 +396,20 @@ export default function AdminKelasPage() {
           onAction={() => setDialogOpen(true)}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="border-y border-slate-200 divide-y divide-slate-200 sm:divide-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-px sm:bg-slate-200">
           {classes.map((kelas) => (
             <div
               key={kelas.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-colors flex flex-col justify-between"
+              className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="h-9 w-9 bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
                       {kelas.namaKelas}
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                      <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                         Kelas {kelas.namaKelas}
                       </h3>
                       <p className="text-xs text-slate-500">
@@ -417,13 +417,13 @@ export default function AdminKelasPage() {
                       </p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 tabular-nums">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 tabular-nums">
                     <Users className="w-3 h-3" />
                     {kelas.jumlahSiswa} siswa
                   </span>
                 </div>
 
-                <div className="rounded-lg bg-slate-50 border border-slate-200/70 p-3 mb-4">
+                <div className="bg-slate-50 border border-slate-200 p-3 mb-4">
                   <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider">
                     <UserCheck className="w-3.5 h-3.5 text-slate-400" />
                     <span>Wali Kelas</span>
