@@ -277,41 +277,44 @@ export default function AdminNilaiSayaPage() {
 
       {!loading && !error && data && (
         <div className="space-y-6">
-          {/* Score Summary Banner */}
-          <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+          {/* Score Summary Banner - Executive Dark Hero */}
+          <div className="rounded-xl bg-[#091524] border border-slate-800/80 p-5 sm:p-6 overflow-hidden shadow-sm text-white bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 font-bold text-base flex items-center justify-center shrink-0">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-lg flex items-center justify-center shrink-0 shadow-inner border border-blue-400/30">
                 {getInitials(data.student.namaLengkap)}
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/60">
                     Periode: {data.periode || "Aktif"}
                   </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs tabular-nums bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs tabular-nums bg-slate-800/80 text-slate-300 border border-slate-700/60">
                     NIS {data.student.nis}
                   </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40">
                     Kelas {data.student.kelas}
                   </span>
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-1.5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">
                   {data.student.namaLengkap}
                 </h2>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 bg-slate-50 px-4 py-3 border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+            <div className="flex items-center gap-3.5 bg-slate-900/90 backdrop-blur-xs px-4 py-3 rounded-lg border border-slate-700/80 w-full sm:w-auto justify-between sm:justify-start shadow-inner">
+              <div className="p-2.5 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30">
                 <Award className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   Total Skor SPK
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-slate-900">
-                  {data.totalSkorSPK}
-                </p>
+                <div className="flex items-baseline gap-1.5">
+                  <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">
+                    {data.totalSkorSPK}
+                  </p>
+                  <span className="text-xs text-blue-400 font-semibold">/ 100</span>
+                </div>
               </div>
             </div>
           </div>
