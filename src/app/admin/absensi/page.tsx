@@ -8,7 +8,6 @@ import {
   Download,
   Upload,
   CheckCheck,
-  Calendar as CalendarIcon,
   Loader2,
   Trash2,
   AlertCircle,
@@ -17,16 +16,13 @@ import {
 import { toast } from "sonner";
 import { getTodayWIB } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
+import {
+  SessionSetup,
+  formatTanggalID,
+} from "@/components/shared/session-setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -94,18 +90,6 @@ interface HistoryRecord {
   history: Record<string, string>;
 }
 
-function getInitials(name: string): string {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "S"
-  );
-}
-
 export default function AdminAbsensiPage() {
   const [classes, setClasses] = useState<KelasRow[]>([]);
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
@@ -131,6 +115,7 @@ export default function AdminAbsensiPage() {
   }>({ dates: [], records: [] });
   const [loadingHistory, setLoadingHistory] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
+  const loadedSnapshotRef = useRef<string>("");
 
   // Fetch classes and subjects on mount
   useEffect(() => {
@@ -209,6 +194,7 @@ export default function AdminAbsensiPage() {
         init[s.studentId] = s.status || "Hadir";
       });
       setAttendanceData(init);
+      loadedSnapshotRef.current = JSON.stringify(init);
       setShowGrid(true);
 
       await fetchHistory();
@@ -218,6 +204,21 @@ export default function AdminAbsensiPage() {
       setLoading(false);
     }
   }, [selectedKelas, tanggal, selectedMapel, fetchHistory]);
+
+  // Kembali ke pengaturan sesi; konfirmasi bila ada perubahan yang belum disimpan
+  const handleChangeSession = () => {
+    const isDirty =
+      loadedSnapshotRef.current !== JSON.stringify(attendanceData);
+    if (
+      isDirty &&
+      !confirm(
+        "Perubahan presensi pada sesi ini belum disimpan. Tetap ganti sesi?"
+      )
+    ) {
+      return;
+    }
+    setShowGrid(false);
+  };
 
   const handleStatusChange = (studentId: string, status: Status) => {
     setAttendanceData((prev) => ({ ...prev, [studentId]: status }));
@@ -476,60 +477,74 @@ export default function AdminAbsensiPage() {
         description="Input dan kelola kehadiran harian siswa per rombongan belajar dan mata pelajaran"
         icon={ClipboardCheck}
       >
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={handleDownloadTemplate}
-        >
-          <Download className="h-3.5 w-3.5 text-slate-500" /> Template
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={handleExportData}
-        >
-          <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => importRef.current?.click()}
-          disabled={importing}
-        >
-          {importing ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Upload className="h-3.5 w-3.5 text-slate-500" />
-          )}
-          Impor Excel
-        </Button>
-        <input
-          ref={importRef}
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={handleImport}
-        />
+        {showGrid && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleDownloadTemplate}
+            >
+              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleExportData}
+            >
+              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => importRef.current?.click()}
+              disabled={importing}
+            >
+              {importing ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Upload className="h-3.5 w-3.5 text-slate-500" />
+              )}
+              Impor Excel
+            </Button>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </>
+        )}
       </PageHeader>
 
       {/* Step 1: Select class, mapel & date */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-        <div className="pb-3 mb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-900">
-              Pengaturan Sesi Absensi
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Pilih kelas, mata pelajaran, dan tanggal presensi yang akan dikelola
-            </p>
-          </div>
-          <span className="text-xs text-slate-400 font-medium">Langkah 1 dari 2</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+      <SessionSetup
+        active={showGrid}
+        icon={ClipboardCheck}
+        eyebrow="Langkah 1 dari 2"
+        title="Mulai Sesi Presensi Siswa"
+        description="Pilih rombongan belajar, mata pelajaran, dan tanggal pertemuan untuk membuka lembar pencatatan kehadiran."
+        submitLabel="Buka Lembar Presensi"
+        onSubmit={handleLoadGrid}
+        loading={loading}
+        disabled={!selectedKelas}
+        onChangeSession={handleChangeSession}
+        chips={[
+          { label: "Kelas", value: selectedKelas },
+          {
+            label: "Mapel",
+            value:
+              selectedMapel === "Umum"
+                ? "Absen Pagi (Wali Kelas)"
+                : selectedMapel,
+          },
+          { label: "Tanggal", value: formatTanggalID(tanggal) },
+        ]}
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-700">
               Kelas / Rombel
@@ -538,7 +553,7 @@ export default function AdminAbsensiPage() {
               value={selectedKelas}
               onValueChange={(val) => setSelectedKelas(val || "")}
             >
-              <SelectTrigger className="w-full h-9 text-xs">
+              <SelectTrigger className="h-9 w-full text-xs">
                 <SelectValue placeholder="Pilih Kelas" />
               </SelectTrigger>
               <SelectContent>
@@ -559,7 +574,7 @@ export default function AdminAbsensiPage() {
               value={selectedMapel}
               onValueChange={(val) => setSelectedMapel(val || "Umum")}
             >
-              <SelectTrigger className="w-full h-9 text-xs">
+              <SelectTrigger className="h-9 w-full text-xs">
                 <SelectValue placeholder="Pilih Mata Pelajaran" />
               </SelectTrigger>
               <SelectContent>
@@ -580,63 +595,47 @@ export default function AdminAbsensiPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-slate-700">
-                Tanggal Presensi
-              </Label>
-              {isSunday && (
-                <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                  Hari Minggu
-                </span>
-              )}
-            </div>
-            <Input
-              type="date"
-              max={getTodayWIB()}
-              className={`w-full h-9 text-xs bg-white ${
-                isSunday
-                  ? "border-amber-400 focus-visible:ring-amber-400"
-                  : "border-slate-200"
-              }`}
-              value={tanggal}
-              onChange={(e) => setTanggal(e.target.value)}
-            />
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold text-slate-700">
+              Tanggal Presensi
+            </Label>
             {isSunday && (
-              <p className="text-[11px] text-amber-600 flex items-center gap-1 font-normal">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                Tanggal terpilih adalah hari libur (Minggu).
-              </p>
+              <span className="rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                Hari Minggu
+              </span>
             )}
           </div>
-
-          <div>
-            <Button
-              className="w-full gap-1.5 h-9 bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-xs"
-              onClick={handleLoadGrid}
-              disabled={loading || !selectedKelas}
-            >
-              {loading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CalendarIcon className="h-3.5 w-3.5" />
-              )}
-              Muat Absensi
-            </Button>
-          </div>
+          <Input
+            type="date"
+            max={getTodayWIB()}
+            className={`h-9 w-full bg-white text-xs ${
+              isSunday
+                ? "border-amber-400 focus-visible:ring-amber-400"
+                : "border-slate-200"
+            }`}
+            value={tanggal}
+            onChange={(e) => setTanggal(e.target.value)}
+          />
+          {isSunday && (
+            <p className="flex items-center gap-1 text-[11px] font-normal text-amber-600">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Tanggal terpilih adalah hari libur (Minggu).
+            </p>
+          )}
         </div>
-      </div>
+      </SessionSetup>
 
       {/* Step 2: Attendance Grid */}
       {showGrid && (
         <>
           {/* Session Summary Bar */}
-          <div className="py-3.5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="py-3 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
-                Kelas {selectedKelas} ·{" "}
-                {selectedMapel === "Umum" ? "Wali Kelas" : selectedMapel}
+              <span className="text-xs font-medium text-slate-500 mr-1">
+                Ringkasan ({siswaList.length} siswa):
               </span>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
                 <span className="w-1.5 h-1.5 rounded-xs bg-emerald-600" />
@@ -700,10 +699,10 @@ export default function AdminAbsensiPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white gap-1.5"
+                className="gap-1.5"
                 onClick={handleMarkAllPresent}
               >
-                <CheckCheck className="h-3.5 w-3.5 text-emerald-400" /> Tandai
+                <CheckCheck className="h-3.5 w-3.5 text-emerald-600" /> Tandai
                 Hadir Semua
               </Button>
             </div>

@@ -15,16 +15,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
+import { SessionSetup } from "@/components/shared/session-setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -95,6 +89,7 @@ export default function GuruNilaiPage() {
   const [isWaliKelas, setIsWaliKelas] = useState(false);
   const [waliClasses, setWaliClasses] = useState<string[]>([]);
   const importRef = useRef<HTMLInputElement>(null);
+  const loadedSnapshotRef = useRef<string>("");
 
   useEffect(() => {
     Promise.all([
@@ -198,6 +193,10 @@ export default function GuruNilaiPage() {
         init[s.studentId] = det;
       });
       setDetails(init);
+      loadedSnapshotRef.current = JSON.stringify({
+        categories: fetchedCats,
+        details: init,
+      });
       setShowGrid(true);
     } catch {
       toast.error("Gagal memuat grid nilai");
@@ -205,6 +204,20 @@ export default function GuruNilaiPage() {
       setLoading(false);
     }
   }, [selectedKelas, selectedCriteria, selectedMapel, criteria]);
+
+  const handleChangeSession = () => {
+    const isDirty =
+      loadedSnapshotRef.current !== JSON.stringify({ categories, details });
+    if (
+      isDirty &&
+      !confirm(
+        "Perubahan penilaian pada sesi ini belum disimpan. Tetap ganti sesi?"
+      )
+    ) {
+      return;
+    }
+    setShowGrid(false);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -303,6 +316,119 @@ export default function GuruNilaiPage() {
     .toLowerCase()
     .includes("akademik");
 
+  const handleDownloadTemplate = () => {
+    const templateData = siswaList.map((s) => {
+      const baseRow: Record<string, string | number> = {
+        NIS: s.nis,
+        NamaLengkap: s.namaLengkap,
+      };
+      categories.forEach((c) => {
+        baseRow[c] = "";
+      });
+      return baseRow;
+    });
+    if (templateData.length === 0) return toast.error("Tidak ada siswa");
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
+    XLSX.writeFile(wb, `Template_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
+  };
+
+  const handleExportExcel = () => {
+    const dataToExport = siswaList.map((s) => {
+      const row: Record<string, string | number> = {
+        NIS: s.nis,
+        NamaLengkap: s.namaLengkap,
+      };
+      categories.forEach((c) => {
+        row[c] =
+          details[s.studentId]?.[c] !== undefined
+            ? details[s.studentId][c]
+            : "";
+      });
+      row["Rata-rata"] = getAverage(s.studentId);
+      return row;
+    });
+    if (dataToExport.length === 0) return toast.error("Tidak ada siswa");
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Nilai");
+    XLSX.writeFile(wb, `Data_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
+  };
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows =
+        XLSX.utils.sheet_to_json<Record<string, string | number>>(sheet);
+
+      if (rows.length === 0) {
+        toast.error("File excel kosong");
+        return;
+      }
+
+      let matchCount = 0;
+      const excelCategories = categories.filter(
+        (c) => rows[0] && (c in rows[0] || c.toLowerCase() in rows[0])
+      );
+
+      if (excelCategories.length === 0 && categories.length > 0) {
+        toast.error(
+          "Format Excel tidak sesuai. Gagal menemukan kolom dengan nama kategori. Coba Download Template Excel terlebih dahulu."
+        );
+        return;
+      }
+
+      setDetails((prev) => {
+        const next = { ...prev };
+        rows.forEach((row) => {
+          const rowNis = String(row.NIS || row.nis || "").trim();
+
+          if (rowNis) {
+            const matchedStudent = siswaList.find((s) => s.nis === rowNis);
+            if (matchedStudent) {
+              if (!next[matchedStudent.studentId])
+                next[matchedStudent.studentId] = {};
+
+              categories.forEach((cat) => {
+                const val =
+                  row[cat] !== undefined
+                    ? row[cat]
+                    : row[cat.toLowerCase()] !== undefined
+                      ? row[cat.toLowerCase()]
+                      : "";
+                const parsed = parseFloat(String(val));
+                if (!isNaN(parsed)) {
+                  next[matchedStudent.studentId][cat] = parsed;
+                }
+              });
+              matchCount++;
+            }
+          }
+        });
+        return next;
+      });
+
+      if (matchCount > 0) {
+        toast.success(
+          `Berhasil mengimpor nilai untuk ${matchCount} siswa. Klik 'Simpan Record Nilai' jika sudah sesuai.`
+        );
+      } else {
+        toast.warning("Tidak ada NIS yang cocok dengan daftar di kelas ini.");
+      }
+    } catch {
+      toast.error("Gagal membaca file excel");
+    } finally {
+      setImporting(false);
+      if (importRef.current) importRef.current.value = "";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -310,205 +436,170 @@ export default function GuruNilaiPage() {
         badge="Portal Guru"
         description="Kelola komponen penilaian Tugas, UTS, UAS, Praktek, maupun kriteria non-akademik SPK SAW"
         icon={PenLine}
-      />
-
-      <div className="pb-5 border-b border-slate-200">
-        <div className="pb-3 mb-4 border-b border-slate-100">
-          <CardTitle className="text-sm font-semibold text-slate-900">
-            Pengaturan Sesi Penilaian
-          </CardTitle>
-          <CardDescription className="text-xs text-slate-500">
-            Pilih target kelas penugasan, mata pelajaran, dan kriteria evaluasi
-          </CardDescription>
-        </div>
-        <div>
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
-            <div className="space-y-1.5 flex-1 sm:min-w-[150px]">
-              <Label className="text-xs font-medium text-slate-700">
-                Target Kelas
-              </Label>
-              <Select
-                value={selectedKelas}
-                onValueChange={(val: string | null) =>
-                  val && setSelectedKelas(val)
-                }
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((k) => (
-                    <SelectItem key={k.id} value={k.namaKelas}>
-                      {k.namaKelas}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5 flex-1 sm:min-w-[240px]">
-              <Label className="text-xs font-medium text-slate-700">
-                Mata Pelajaran (Pilih Umum untuk Non-Akademik)
-              </Label>
-              <Select
-                value={selectedMapel}
-                onValueChange={(val: string | null) =>
-                  val && setSelectedMapel(val)
-                }
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {isWaliKelas && waliClasses.includes(selectedKelas) && (
-                    <SelectItem value="Umum">Umum / Semua Mapel</SelectItem>
-                  )}
-                  {subjects
-                    .filter((s) => s.kelas?.includes(selectedKelas))
-                    .map((s, i) => (
-                      <SelectItem key={i} value={s.namaMapel}>
-                        {s.namaMapel}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5 flex-1 sm:min-w-[280px]">
-              <Label className="text-xs font-medium text-slate-700">
-                Kriteria Penilaian SPK
-              </Label>
-              <Select
-                value={selectedCriteria}
-                onValueChange={(val: string | null) =>
-                  val && setSelectedCriteria(val)
-                }
-              >
-                <SelectTrigger className="w-full h-9 text-xs">
-                  <span className="line-clamp-1 truncate">
-                    {activeCriteriaObj
-                      ? `${activeCriteriaObj.namaKriteria} (Bobot: ${activeCriteriaObj.bobot}%)`
-                      : "Pilih Kriteria..."}
-                  </span>
-                </SelectTrigger>
-                <SelectContent className="max-w-[100vw] xl:max-w-2xl">
-                  {criteria.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.namaKriteria} (Bobot: {c.bobot}%)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+      >
+        {showGrid && (
+          <>
             <Button
-              className="w-full xl:w-auto h-9 gap-1.5 shrink-0"
-              onClick={handleLoad}
-              disabled={loading || !selectedKelas || !selectedMapel}
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleDownloadTemplate}
             >
-              {loading ? (
+              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleExportExcel}
+            >
+              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              disabled={importing || categories.length === 0}
+              onClick={() => importRef.current?.click()}
+            >
+              {importing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <BookOpen className="h-3.5 w-3.5" />
+                <Upload className="h-3.5 w-3.5 text-slate-500" />
               )}
-              Muat Data Tabel
+              Impor Excel
             </Button>
-
             <input
               ref={importRef}
               type="file"
               accept=".xlsx,.xls"
               className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                setImporting(true);
-                try {
-                  const data = await file.arrayBuffer();
-                  const workbook = XLSX.read(data);
-                  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                  const rows =
-                    XLSX.utils.sheet_to_json<Record<string, string | number>>(
-                      sheet
-                    );
-
-                  if (rows.length === 0) {
-                    toast.error("File excel kosong");
-                    return;
-                  }
-
-                  let matchCount = 0;
-                  const excelCategories = categories.filter(
-                    (c) =>
-                      rows[0] && (c in rows[0] || c.toLowerCase() in rows[0])
-                  );
-
-                  if (excelCategories.length === 0 && categories.length > 0) {
-                    toast.error(
-                      "Format Excel tidak sesuai. Gagal menemukan kolom dengan nama kategori. Coba Download Template Excel terlebih dahulu."
-                    );
-                    return;
-                  }
-
-                  setDetails((prev) => {
-                    const next = { ...prev };
-                    rows.forEach((row) => {
-                      const rowNis = String(row.NIS || row.nis || "").trim();
-
-                      if (rowNis) {
-                        const matchedStudent = siswaList.find(
-                          (s) => s.nis === rowNis
-                        );
-                        if (matchedStudent) {
-                          if (!next[matchedStudent.studentId])
-                            next[matchedStudent.studentId] = {};
-
-                          categories.forEach((cat) => {
-                            const val =
-                              row[cat] !== undefined
-                                ? row[cat]
-                                : row[cat.toLowerCase()] !== undefined
-                                  ? row[cat.toLowerCase()]
-                                  : "";
-                            const parsed = parseFloat(String(val));
-                            if (!isNaN(parsed)) {
-                              next[matchedStudent.studentId][cat] = parsed;
-                            }
-                          });
-                          matchCount++;
-                        }
-                      }
-                    });
-                    return next;
-                  });
-
-                  if (matchCount > 0) {
-                    toast.success(
-                      `Berhasil mengimpor nilai untuk ${matchCount} siswa. Klik 'Simpan Record Nilai' jika sudah sesuai.`
-                    );
-                  } else {
-                    toast.warning(
-                      "Tidak ada NIS yang cocok dengan daftar di kelas ini."
-                    );
-                  }
-                } catch {
-                  toast.error("Gagal membaca file excel");
-                } finally {
-                  setImporting(false);
-                  if (importRef.current) importRef.current.value = "";
-                }
-              }}
+              onChange={handleImportExcel}
             />
+          </>
+        )}
+      </PageHeader>
+
+      <SessionSetup
+        active={showGrid}
+        icon={PenLine}
+        eyebrow="Langkah 1 dari 2"
+        title="Mulai Sesi Penilaian Siswa"
+        description="Pilih target kelas penugasan, mata pelajaran, dan kriteria evaluasi SPK SAW untuk membuka lembar pengisian nilai."
+        submitLabel="Buka Lembar Penilaian"
+        onSubmit={handleLoad}
+        loading={loading}
+        disabled={!selectedKelas || !selectedMapel || !selectedCriteria}
+        onChangeSession={handleChangeSession}
+        chips={[
+          { label: "Kelas", value: selectedKelas },
+          {
+            label: "Mapel",
+            value:
+              selectedMapel === "Umum" ? "Umum / Semua Mapel" : selectedMapel,
+          },
+          {
+            label: "Kriteria",
+            value: activeCriteriaObj
+              ? `${activeCriteriaObj.namaKriteria} (${activeCriteriaObj.bobot}%)`
+              : "-",
+          },
+        ]}
+      >
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Target Kelas
+            </Label>
+            <Select
+              value={selectedKelas}
+              onValueChange={(val: string | null) =>
+                val && setSelectedKelas(val)
+              }
+            >
+              <SelectTrigger className="h-9 w-full text-xs">
+                <SelectValue placeholder="Pilih Kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((k) => (
+                  <SelectItem key={k.id} value={k.namaKelas}>
+                    {k.namaKelas}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">
+              Mata Pelajaran
+            </Label>
+            <Select
+              value={selectedMapel}
+              onValueChange={(val: string | null) =>
+                val && setSelectedMapel(val)
+              }
+            >
+              <SelectTrigger className="h-9 w-full text-xs">
+                <SelectValue placeholder="Pilih Mapel" />
+              </SelectTrigger>
+              <SelectContent>
+                {isWaliKelas && waliClasses.includes(selectedKelas) && (
+                  <SelectItem value="Umum">Umum / Semua Mapel</SelectItem>
+                )}
+                {subjects
+                  .filter((s) => s.kelas?.includes(selectedKelas))
+                  .map((s, i) => (
+                    <SelectItem key={i} value={s.namaMapel}>
+                      {s.namaMapel}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-slate-700">
+            Kriteria Penilaian SPK
+          </Label>
+          <Select
+            value={selectedCriteria}
+            onValueChange={(val: string | null) =>
+              val && setSelectedCriteria(val)
+            }
+          >
+            <SelectTrigger className="h-9 w-full text-xs">
+              <span className="line-clamp-1 truncate">
+                {activeCriteriaObj
+                  ? `${activeCriteriaObj.namaKriteria} (Bobot: ${activeCriteriaObj.bobot}%)`
+                  : "Pilih Kriteria..."}
+              </span>
+            </SelectTrigger>
+            <SelectContent className="max-w-[100vw] xl:max-w-2xl">
+              {criteria.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.namaKriteria} (Bobot: {c.bobot}%)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {isWaliKelas && waliClasses.includes(selectedKelas) && (
+            <p className="text-[11px] text-slate-400">
+              Pilih <span className="font-medium text-slate-500">Umum</span>{" "}
+              pada mata pelajaran apabila mengisi kriteria non-akademik kelas
+              perwalian.
+            </p>
+          )}
+        </div>
+      </SessionSetup>
 
       {showGrid && (
         <>
           {/* Session Toolbar */}
-          <div className="py-3.5 border-b border-slate-200 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+          <div className="py-3 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             {isAkademik ? (
-              <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center w-full xl:w-auto">
+              <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center w-full sm:w-auto">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Select
                     value={newCat}
@@ -556,101 +647,22 @@ export default function GuruNilaiPage() {
                 )}
               </div>
             ) : (
-              <div className="text-xs text-slate-300">
-                Sesi:{" "}
-                <span className="font-semibold text-white">
-                  Kelas {selectedKelas}
-                </span>{" "}
-                ·{" "}
-                <span className="text-blue-400 font-medium">
-                  {activeCriteriaObj?.namaKriteria}
+              <div className="text-xs text-slate-500">
+                Penilaian kriteria tunggal{" "}
+                <span className="font-semibold text-slate-800">
+                  ({siswaList.length} siswa)
                 </span>
               </div>
             )}
 
-            <div className="flex flex-wrap justify-start xl:justify-end gap-2 items-center w-full xl:w-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white gap-1.5"
-                onClick={() => {
-                  const dataToExport = siswaList.map((s) => {
-                    const row: Record<string, string | number> = {
-                      NIS: s.nis,
-                      NamaLengkap: s.namaLengkap,
-                    };
-                    categories.forEach((c) => {
-                      row[c] =
-                        details[s.studentId]?.[c] !== undefined
-                          ? details[s.studentId][c]
-                          : "";
-                    });
-                    row["Rata-rata"] = getAverage(s.studentId);
-                    return row;
-                  });
-                  if (dataToExport.length === 0)
-                    return toast.error("Tidak ada siswa");
-                  const ws = XLSX.utils.json_to_sheet(dataToExport);
-                  const wb = XLSX.utils.book_new();
-                  XLSX.utils.book_append_sheet(wb, ws, "Data Nilai");
-                  XLSX.writeFile(
-                    wb,
-                    `Data_Nilai_${selectedKelas}_${selectedMapel}.xlsx`
-                  );
-                }}
-              >
-                <Download className="h-3.5 w-3.5 text-emerald-400" /> Ekspor
-                Excel
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white gap-1.5"
-                onClick={() => {
-                  const templateData = siswaList.map((s) => {
-                    const baseRow: Record<string, string | number> = {
-                      NIS: s.nis,
-                      NamaLengkap: s.namaLengkap,
-                    };
-                    categories.forEach((c) => {
-                      baseRow[c] = "";
-                    });
-                    return baseRow;
-                  });
-                  if (templateData.length === 0)
-                    return toast.error("Tidak ada siswa");
-                  const ws = XLSX.utils.json_to_sheet(templateData);
-                  const wb = XLSX.utils.book_new();
-                  XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
-                  XLSX.writeFile(
-                    wb,
-                    `Template_Nilai_${selectedKelas}_${selectedMapel}.xlsx`
-                  );
-                }}
-              >
-                <Download className="h-3.5 w-3.5 text-blue-400" /> Template
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white gap-1.5"
-                disabled={importing || categories.length === 0}
-                onClick={() => importRef.current?.click()}
-              >
-                {importing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Upload className="h-3.5 w-3.5 text-amber-400" />
-                )}
-                Impor Excel
-              </Button>
+            <div className="flex flex-wrap items-center gap-2">
               <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                 <AlertDialogTrigger
                   render={
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-rose-950/50 border-rose-800/70 text-rose-300 hover:bg-rose-900/60 hover:text-rose-200 gap-1.5"
+                      className="bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:text-rose-800 gap-1.5"
                       disabled={deleting}
                     >
                       {deleting ? (
@@ -704,7 +716,7 @@ export default function GuruNilaiPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-600">
                       <th className="px-4 py-3 font-semibold w-12 sticky left-0 bg-slate-50 z-10">
                         No
                       </th>
