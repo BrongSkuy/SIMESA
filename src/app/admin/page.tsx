@@ -331,90 +331,109 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman */}
-      <PageHeader
-        title="Beranda Administrator"
-        badge={stats.semesterDisplay || "Semester Genap 2025/2026"}
-        description="Ringkasan data presensi harian siswa, tenaga pendidik, dan evaluasi SPK metode SAW."
-      >
-        <div className="inline-flex items-center bg-white border border-slate-200 rounded-md px-3 py-1.5 text-xs text-slate-600 shadow-xs">
-          <Calendar className="w-3.5 h-3.5 text-slate-400 mr-2" />
-          <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
+      {/* Dark Executive Hero & KPI Command Strip */}
+      <section className="rounded-xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
+        {/* Header Info Row */}
+        <div className="p-5 sm:p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
+          <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                Beranda Administrator
+              </h1>
+              <span className="inline-flex items-center rounded-sm bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300 border border-blue-500/30">
+                {stats.semesterDisplay || "Semester Genap 2025/2026"}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+              Ringkasan data presensi harian siswa, tenaga pendidik, dan evaluasi SPK metode SAW.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="inline-flex items-center bg-slate-900/90 border border-slate-700/80 rounded-md px-3 py-1.5 text-xs text-slate-300">
+              <Calendar className="w-3.5 h-3.5 text-slate-400 mr-2" />
+              <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleExportReport}
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 border border-blue-500 rounded-md px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-colors"
+            >
+              <Download className="w-3.5 h-3.5 mr-1.5 text-blue-100" />
+              Ekspor Laporan
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleExportReport}
-          className="inline-flex items-center bg-white hover:bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition-colors"
-        >
-          <Download className="w-3.5 h-3.5 text-slate-500 mr-1.5" />
-          Ekspor Laporan
-        </button>
-      </PageHeader>
 
-      {/* 4 Kartu Metrik Utama - Flat Seamless Strip */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border-y border-slate-200 bg-white">
-        <StatCard
-          title="Total Siswa"
-          value={stats.totalSiswa}
-          icon={Users}
-          color="blue"
-          footerLeft={
-            stats.totalKelas ? `${stats.totalKelas} Rombongan Belajar` : "Siswa Terdaftar"
-          }
-          footerRight={
-            stats.totalSiswa > 0 && stats.totalKelas
-              ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
-              : undefined
-          }
-        />
+        {/* 4 Kartu Metrik Utama - Dark Seamless Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
+          <StatCard
+            variant="dark"
+            title="Total Siswa"
+            value={stats.totalSiswa}
+            icon={Users}
+            color="blue"
+            footerLeft={
+              stats.totalKelas ? `${stats.totalKelas} Rombongan Belajar` : "Siswa Terdaftar"
+            }
+            footerRight={
+              stats.totalSiswa > 0 && stats.totalKelas
+                ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
+                : undefined
+            }
+          />
 
-        <StatCard
-          title="Total Guru"
-          value={stats.totalGuru}
-          icon={GraduationCap}
-          color="slate"
-          footerLeft="Tenaga Pendidik & Pengampu"
-          footerRight="Aktif Mengajar"
-        />
+          <StatCard
+            variant="dark"
+            title="Total Guru"
+            value={stats.totalGuru}
+            icon={GraduationCap}
+            color="slate"
+            footerLeft="Tenaga Pendidik & Pengampu"
+            footerRight="Aktif Mengajar"
+          />
 
-        <StatCard
-          title={
-            stats.isTodayData === false
-              ? "Kehadiran Terakhir"
-              : "Kehadiran Hari Ini"
-          }
-          value={`${stats.kehadiranHariIni}%`}
-          icon={CheckCircle2}
-          color="emerald"
-          trend={
-            todayDiff !== 0
-              ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
-              : undefined
-          }
-          footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
-          footerRight={
-            (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
-              ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
-              : "Lengkap"
-          }
-        />
+          <StatCard
+            variant="dark"
+            title={
+              stats.isTodayData === false
+                ? "Kehadiran Terakhir"
+                : "Kehadiran Hari Ini"
+            }
+            value={`${stats.kehadiranHariIni}%`}
+            icon={CheckCircle2}
+            color="emerald"
+            trend={
+              todayDiff !== 0
+                ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
+                : undefined
+            }
+            footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
+            footerRight={
+              (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
+                ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
+                : "Lengkap"
+            }
+          />
 
-        <StatCard
-          title="Status Evaluasi SPK"
-          value={
-            stats.isSpkPublished
-              ? "Terpublikasi"
-              : leaderboard.length > 0 && spkValid
-                ? "Siap Dihitung"
-                : leaderboard.length > 0
-                  ? "Draf Perhitungan"
-                  : "Belum Dihitung"
-          }
-          icon={BarChart3}
-          color="amber"
-          footerLeft="Parameter Penilaian"
-          footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
-        />
+          <StatCard
+            variant="dark"
+            title="Status Evaluasi SPK"
+            value={
+              stats.isSpkPublished
+                ? "Terpublikasi"
+                : leaderboard.length > 0 && spkValid
+                  ? "Siap Dihitung"
+                  : leaderboard.length > 0
+                    ? "Draf Perhitungan"
+                    : "Belum Dihitung"
+            }
+            icon={BarChart3}
+            color="amber"
+            footerLeft="Parameter Penilaian"
+            footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
+          />
+        </div>
       </section>
 
       {/* Baris Grafik & Pintasan (2/3 + 1/3) */}

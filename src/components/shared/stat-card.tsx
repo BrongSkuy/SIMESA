@@ -14,6 +14,7 @@ interface StatCardProps {
   footerLeft?: React.ReactNode;
   footerRight?: React.ReactNode;
   color?: "navy" | "slate" | "amber" | "emerald" | "rose" | "blue";
+  variant?: "light" | "dark";
   className?: string;
 }
 
@@ -26,6 +27,15 @@ const iconToneMap: Record<NonNullable<StatCardProps["color"]>, string> = {
   rose: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
+const darkIconToneMap: Record<NonNullable<StatCardProps["color"]>, string> = {
+  navy: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  blue: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  slate: "bg-slate-800 text-slate-300 border-slate-700",
+  emerald: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  amber: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  rose: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+};
+
 export function StatCard({
   title,
   value,
@@ -36,34 +46,53 @@ export function StatCard({
   footerLeft,
   footerRight,
   color = "slate",
+  variant = "light",
   className,
 }: StatCardProps) {
-  const iconTone = iconToneMap[color] || iconToneMap.slate;
+  const isDark = variant === "dark";
+  const iconTone = isDark
+    ? darkIconToneMap[color] || darkIconToneMap.slate
+    : iconToneMap[color] || iconToneMap.slate;
   const resolvedFooterLeft = footerLeft ?? subtitle;
 
   return (
     <div
       className={cn(
-        "bg-white text-slate-900 p-4 sm:p-5 flex flex-col justify-between",
+        isDark ? "bg-transparent text-white" : "bg-white text-slate-900",
+        "p-4 sm:p-5 flex flex-col justify-between",
         className
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">
+          <p
+            className={cn(
+              "text-xs font-semibold uppercase tracking-wider truncate",
+              isDark ? "text-slate-400" : "text-slate-500"
+            )}
+          >
             {title}
           </p>
           <div className="flex flex-wrap items-baseline gap-2 mt-2">
-            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 tabular-nums">
+            <h3
+              className={cn(
+                "text-2xl sm:text-3xl font-bold tracking-tight tabular-nums",
+                isDark ? "text-white" : "text-slate-900"
+              )}
+            >
               {value}
             </h3>
             {trend && (
               <span
                 className={cn(
                   "text-xs font-medium flex items-center px-1.5 py-0.5 rounded-sm border",
-                  trend.isPositive
-                    ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                    : "text-rose-700 bg-rose-50 border-rose-200"
+                  isDark
+                    ? trend.isPositive
+                      ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
+                      : "text-rose-400 bg-rose-500/15 border-rose-500/30"
+                    : trend.isPositive
+                      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                      : "text-rose-700 bg-rose-50 border-rose-200"
                 )}
               >
                 {trend.isPositive ? (
@@ -90,10 +119,24 @@ export function StatCard({
       </div>
 
       {(resolvedFooterLeft || footerRight) && (
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-          <span className="text-slate-500 truncate">{resolvedFooterLeft}</span>
+        <div
+          className={cn(
+            "mt-4 pt-3 flex items-center justify-between gap-2 text-xs",
+            isDark ? "border-t border-slate-800/80" : "border-t border-slate-100"
+          )}
+        >
+          <span
+            className={cn("truncate", isDark ? "text-slate-400" : "text-slate-500")}
+          >
+            {resolvedFooterLeft}
+          </span>
           {footerRight && (
-            <span className="text-slate-600 font-medium shrink-0">
+            <span
+              className={cn(
+                "font-medium shrink-0",
+                isDark ? "text-slate-300" : "text-slate-600"
+              )}
+            >
               {footerRight}
             </span>
           )}
