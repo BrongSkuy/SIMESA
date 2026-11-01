@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { nip, namaLengkap, jenisKelamin } = body;
+    const { nip, namaLengkap, jenisKelamin, foto } = body;
 
     if (!nip || !namaLengkap) {
       return NextResponse.json({ error: "NIP dan nama wajib diisi" }, { status: 400 });
@@ -68,6 +68,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    if (foto) {
+      await db.update(user).set({ image: foto }).where(eq(user.id, newUser.user.id)).run();
+    }
+
     const [teacher] = await db
       .insert(teachers)
       .values({
@@ -76,6 +80,7 @@ export async function POST(request: NextRequest) {
         namaLengkap,
         jenisKelamin: jenisKelamin || "L",
         status: "aktif",
+        foto: foto || null,
       })
       .returning();
 

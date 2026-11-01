@@ -31,6 +31,9 @@ export async function PUT(
       if (body.jenisKelamin) {
         updatePayload.jenisKelamin = body.jenisKelamin;
       }
+      if (body.foto !== undefined) {
+        updatePayload.foto = body.foto;
+      }
 
       const [updatedTeacher] = await tx
         .update(teachers)
@@ -42,16 +45,20 @@ export async function PUT(
         throw new Error("NOT_FOUND");
       }
 
-      // Sync auth user table: name, username (NIP), and email
+      // Sync auth user table: name, username (NIP), email, and image (foto)
       if (updatedTeacher.userId) {
         const { user } = await import("@/db/auth-schema");
+        const userUpdate: Record<string, unknown> = {
+          name: updatedTeacher.namaLengkap,
+          username: updatedTeacher.nip,
+          email: `${updatedTeacher.nip}@sekolah.id`,
+        };
+        if (updatedTeacher.foto !== undefined) {
+          userUpdate.image = updatedTeacher.foto;
+        }
         await tx
           .update(user)
-          .set({ 
-            name: updatedTeacher.namaLengkap,
-            username: updatedTeacher.nip,
-            email: `${updatedTeacher.nip}@sekolah.id`,
-          })
+          .set(userUpdate)
           .where(eq(user.id, updatedTeacher.userId))
           .run();
       }

@@ -12,11 +12,13 @@ import {
   Download,
   Filter,
   Loader2,
+  Camera,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { compressImage } from "@/lib/image-compress";
 import {
   Table,
   TableBody,
@@ -52,6 +54,7 @@ interface StudentRow {
   angkatan: string;
   jenisKelamin: "L" | "P";
   status: "aktif" | "nonaktif";
+  foto?: string | null;
 }
 
 interface KelasRow {
@@ -93,6 +96,10 @@ export default function AdminSiswaPage() {
   const [formAngkatan, setFormAngkatan] = useState("2024");
   const [formJk, setFormJk] = useState("");
   const [formStatus, setFormStatus] = useState("aktif");
+  const [formFoto, setFormFoto] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const editPhotoInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -130,7 +137,24 @@ export default function AdminSiswaPage() {
     setFormAngkatan("2024");
     setFormJk("");
     setFormStatus("aktif");
+    setFormFoto(null);
     setEditId(null);
+  };
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const compressed = await compressImage(file, 360, 0.85);
+      setFormFoto(compressed);
+      toast.success("Foto profil siap disimpan");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memproses gambar";
+      toast.error(msg);
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   const handleCreate = async () => {
@@ -149,6 +173,7 @@ export default function AdminSiswaPage() {
           kelas: formKelas,
           angkatan: formAngkatan,
           jenisKelamin: formJk,
+          foto: formFoto,
         }),
       });
 
@@ -178,6 +203,7 @@ export default function AdminSiswaPage() {
     setFormAngkatan(siswa.angkatan);
     setFormJk(siswa.jenisKelamin);
     setFormStatus(siswa.status);
+    setFormFoto(siswa.foto || null);
     setEditOpen(true);
   };
 
@@ -198,6 +224,7 @@ export default function AdminSiswaPage() {
           angkatan: formAngkatan,
           jenisKelamin: formJk,
           status: formStatus,
+          foto: formFoto,
         }),
       });
 
@@ -409,6 +436,53 @@ export default function AdminSiswaPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
+              {/* Foto Profil Input */}
+              <div className="flex items-center gap-3.5 p-3 rounded-lg border border-slate-200 bg-slate-50/50">
+                <div className="w-14 h-14 rounded-xl border border-slate-200 bg-white flex items-center justify-center font-bold text-slate-400 text-sm overflow-hidden shrink-0 shadow-xs">
+                  {formFoto ? (
+                    <img src={formFoto} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Users className="w-6 h-6 text-slate-300" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => photoInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                    >
+                      {uploadingPhoto ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3 text-blue-600" />}
+                      {formFoto ? "Ganti Foto" : "Unggah Foto Siswa"}
+                    </Button>
+                    {formFoto && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs"
+                        onClick={() => setFormFoto(null)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Opsi tambahan. Format JPG, PNG, atau WebP.
+                  </p>
+                </div>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="nis" className="text-xs font-semibold">
@@ -524,6 +598,53 @@ export default function AdminSiswaPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
+              {/* Foto Profil Input */}
+              <div className="flex items-center gap-3.5 p-3 rounded-lg border border-slate-200 bg-slate-50/50">
+                <div className="w-14 h-14 rounded-xl border border-slate-200 bg-white flex items-center justify-center font-bold text-slate-400 text-sm overflow-hidden shrink-0 shadow-xs">
+                  {formFoto ? (
+                    <img src={formFoto} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Users className="w-6 h-6 text-slate-300" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => editPhotoInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                    >
+                      {uploadingPhoto ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3 text-blue-600" />}
+                      {formFoto ? "Ganti Foto" : "Unggah Foto Siswa"}
+                    </Button>
+                    {formFoto && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs"
+                        onClick={() => setFormFoto(null)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Format JPG, PNG, atau WebP.
+                  </p>
+                </div>
+                <input
+                  ref={editPhotoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-nis" className="text-xs font-semibold">
@@ -716,8 +837,16 @@ export default function AdminSiswaPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
-                        {getInitials(siswa.namaLengkap)}
+                      <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0 overflow-hidden">
+                        {siswa.foto ? (
+                          <img
+                            src={siswa.foto}
+                            alt={siswa.namaLengkap}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          getInitials(siswa.namaLengkap)
+                        )}
                       </div>
                       <div>
                         <div className="font-semibold text-slate-900">

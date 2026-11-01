@@ -27,6 +27,9 @@ export async function PUT(
       jenisKelamin: body.jenisKelamin,
       status: body.status,
     };
+    if (body.foto !== undefined) {
+      updatePayload.foto = body.foto;
+    }
     if (body.nis) {
       // Check duplicate NIS
       const existingWithNis = await db
@@ -51,16 +54,20 @@ export async function PUT(
       return NextResponse.json({ error: "Siswa tidak ditemukan" }, { status: 404 });
     }
 
-    // Sync auth user table: name, username (NIS), and email
+    // Sync auth user table: name, username (NIS), email, and image (foto)
     if (updated.userId) {
       const { user } = await import("@/db/auth-schema");
+      const userUpdate: Record<string, unknown> = {
+        name: updated.namaLengkap,
+        username: updated.nis,
+        email: `${updated.nis}@siswa.sekolah.id`,
+      };
+      if (updated.foto !== undefined) {
+        userUpdate.image = updated.foto;
+      }
       await db
         .update(user)
-        .set({ 
-          name: updated.namaLengkap,
-          username: updated.nis,
-          email: `${updated.nis}@siswa.sekolah.id`,
-        })
+        .set(userUpdate)
         .where(eq(user.id, updated.userId))
         .run();
     }

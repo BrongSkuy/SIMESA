@@ -34,6 +34,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
       ((session?.user as Record<string, unknown>)?.username as string) || "",
     email: session?.user?.email || "",
     role,
+    image: session?.user?.image || null,
   };
 
   if (isPending) {

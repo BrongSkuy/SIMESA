@@ -13,6 +13,7 @@ export const students = sqliteTable("students", {
   kelas: text("kelas").notNull(),
   angkatan: text("angkatan").notNull(),
   jenisKelamin: text("jenis_kelamin", { enum: ["L", "P"] }).notNull(),
+  foto: text("foto"),
   status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
 }, (table) => [
   index("students_user_idx").on(table.userId),
@@ -26,6 +27,7 @@ export const teachers = sqliteTable("teachers", {
   nip: text("nip").notNull().unique(),
   namaLengkap: text("nama_lengkap").notNull(),
   jenisKelamin: text("jenis_kelamin", { enum: ["L", "P"] }).notNull().default("L"),
+  foto: text("foto"),
   status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
 }, (table) => [
   index("teachers_user_idx").on(table.userId),

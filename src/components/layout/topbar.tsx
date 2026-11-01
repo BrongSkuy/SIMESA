@@ -42,6 +42,7 @@ export interface TopbarUser {
   username: string;
   email?: string;
   role: UserRole;
+  image?: string | null;
 }
 
 interface DropdownNavLink {
@@ -382,8 +383,16 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   />
                 }
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-xs shrink-0">
-                  {getInitials(user.nama)}
+                <div className="w-8 h-8 rounded-md bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden relative">
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.nama}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    getInitials(user.nama)
+                  )}
                 </div>
                 <div className="hidden sm:block text-left leading-tight">
                   <div className="text-xs font-semibold text-white max-w-[150px] truncate">
@@ -400,13 +409,26 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 align="end"
                 className="w-56 p-1 rounded-lg border-slate-200 shadow-lg text-slate-800"
               >
-                <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                  <p className="text-xs font-semibold text-slate-900 truncate">
-                    {user.nama}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">
-                    {user.username || user.email}
-                  </p>
+                <div className="px-3 py-2 border-b border-slate-100 mb-1 flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.nama}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      getInitials(user.nama)
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-slate-900 truncate">
+                      {user.nama}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                      {user.username || user.email}
+                    </p>
+                  </div>
                 </div>
                 <DropdownMenuItem
                   className="cursor-pointer text-xs rounded-md py-2 gap-2"

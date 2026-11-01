@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { nis, namaLengkap, kelas, angkatan, jenisKelamin } = body;
+    const { nis, namaLengkap, kelas, angkatan, jenisKelamin, foto } = body;
 
     if (!nis || !namaLengkap || !kelas || !angkatan || !jenisKelamin) {
       return NextResponse.json(
@@ -84,6 +84,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    if (foto) {
+      const { user } = await import("@/db/auth-schema");
+      await db
+        .update(user)
+        .set({ image: foto })
+        .where(eq(user.id, newUser.user.id))
+        .run();
+    }
+
     // Create student profile
     const [student] = await db
       .insert(students)
@@ -94,6 +103,7 @@ export async function POST(request: NextRequest) {
         kelas,
         angkatan,
         jenisKelamin,
+        foto: foto || null,
         status: "aktif",
       })
       .returning();
