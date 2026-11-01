@@ -268,7 +268,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/admin"
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors",
+                    "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors",
                     pathname === "/admin"
                       ? "text-white bg-white/15 font-semibold"
                       : "text-blue-100/80 hover:text-white hover:bg-white/10"
@@ -289,7 +289,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition-colors focus:outline-none",
+                          "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors focus:outline-none",
                           groupActive
                             ? "text-white bg-white/15 font-semibold"
                             : "text-blue-100/80 hover:text-white hover:bg-white/10"
@@ -356,7 +356,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors",
+                        "inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors",
                         active
                           ? "text-white bg-white/15 font-semibold"
                           : "text-blue-100/80 hover:text-white hover:bg-white/10"
@@ -378,11 +378,11 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 render={
                   <button
                     type="button"
-                    className="flex items-center space-x-2.5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none"
+                    className="flex items-center space-x-2.5 px-2 py-1.5 rounded-md hover:bg-white/10 transition-colors focus:outline-none"
                   />
                 }
               >
-                <div className="w-8 h-8 rounded-lg bg-white/10 text-white border border-white/20 flex items-center justify-center font-semibold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-md bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-xs shrink-0">
                   {getInitials(user.nama)}
                 </div>
                 <div className="hidden sm:block text-left leading-tight">

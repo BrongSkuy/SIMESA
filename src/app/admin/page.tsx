@@ -287,14 +287,14 @@ export default function AdminDashboard() {
         badge={stats.semesterDisplay || "Semester Genap 2025/2026"}
         description="Ringkasan data presensi harian siswa, tenaga pendidik, dan evaluasi SPK metode SAW."
       >
-        <div className="inline-flex items-center bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-600 shadow-xs">
+        <div className="inline-flex items-center bg-white border border-slate-200 rounded-md px-3 py-1.5 text-xs text-slate-600 shadow-xs">
           <Calendar className="w-3.5 h-3.5 text-slate-400 mr-2" />
           <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
         </div>
         <button
           type="button"
           onClick={handleExportReport}
-          className="inline-flex items-center bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition-colors"
+          className="inline-flex items-center bg-white hover:bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition-colors"
         >
           <Download className="w-3.5 h-3.5 text-slate-500 mr-1.5" />
           Ekspor Laporan
@@ -374,17 +374,17 @@ export default function AdminDashboard() {
           title="Grafik Presensi Siswa"
           description="Rekapitulasi jumlah siswa hadir, izin, sakit, dan alfa"
           action={
-            <div className="inline-flex p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium">
+            <div className="inline-flex rounded-md border border-slate-200 divide-x divide-slate-200 bg-white text-xs font-medium overflow-hidden shadow-xs">
               {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => setChartMode(mode)}
                   className={cn(
-                    "px-3 py-1 rounded-md capitalize transition-colors",
+                    "px-3 py-1.5 capitalize transition-colors",
                     chartMode === mode
-                      ? "bg-white text-slate-900 shadow-xs font-semibold"
-                      : "text-slate-500 hover:text-slate-800"
+                      ? "bg-[#1e3a8a] text-white font-semibold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
                   {mode}

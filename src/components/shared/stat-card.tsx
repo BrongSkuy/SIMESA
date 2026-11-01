@@ -60,7 +60,7 @@ export function StatCard({
             {trend && (
               <span
                 className={cn(
-                  "text-xs font-medium flex items-center px-1.5 py-0.5 rounded border",
+                  "text-xs font-medium flex items-center px-1.5 py-0.5 rounded-sm border",
                   trend.isPositive
                     ? "text-emerald-700 bg-emerald-50 border-emerald-200"
                     : "text-rose-700 bg-rose-50 border-rose-200"
@@ -81,7 +81,7 @@ export function StatCard({
 
         <div
           className={cn(
-            "p-2.5 rounded-lg border shrink-0 transition-colors",
+            "p-2.5 rounded-md border shrink-0 transition-colors",
             iconTone
           )}
         >

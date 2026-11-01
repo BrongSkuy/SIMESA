@@ -73,7 +73,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/admin"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-xs transition-colors",
                     pathname === "/admin"
                       ? "bg-white/15 text-white font-semibold"
                       : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
@@ -99,7 +99,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         href={item.href}
                         onClick={onToggle}
                         className={cn(
-                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors",
+                          "flex items-center justify-between rounded-md px-3 py-2 text-xs transition-colors",
                           active
                             ? "bg-white/15 text-white font-semibold"
                             : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
@@ -128,7 +128,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                       href={item.href}
                       onClick={onToggle}
                       className={cn(
-                        "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors",
+                        "flex items-center justify-between rounded-md px-3 py-2 text-xs transition-colors",
                         active
                           ? "bg-white/15 text-white font-semibold"
                           : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
@@ -149,7 +149,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
             <Link
               href={`${homeHref}/profil`}
               onClick={onToggle}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-blue-100/80 hover:bg-white/10 hover:text-white transition-colors"
+              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-blue-100/80 hover:bg-white/10 hover:text-white transition-colors"
             >
               <UserIcon className="w-4 h-4 text-blue-200" />
               <span>Profil Akun</span>
@@ -160,7 +160,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                 await authClient.signOut();
                 router.push("/login");
               }}
-              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left"
+              className="w-full flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar</span>
