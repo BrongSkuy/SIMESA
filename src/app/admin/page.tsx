@@ -330,18 +330,18 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
       <section className="-mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-8 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
-        {/* Header Info Row - Ultra Clean & Minimalist */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
-          <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+        {/* Header Info Row - Centered Executive Layout */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-7 space-y-3">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Beranda Administrator
             </h1>
-            <p className="text-xs sm:text-sm text-blue-200/70">
+            <p className="text-xs sm:text-sm text-blue-200/70 max-w-2xl">
               Ikhtisar operasional presensi dan evaluasi SPK metode SAW real-time
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
             <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-300 shadow-xs">
               <Calendar className="w-3.5 h-3.5 text-amber-400 mr-2" />
               <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
