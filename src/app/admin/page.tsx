@@ -138,7 +138,6 @@ const CustomPresensiTooltip = ({ active, payload, label }: CustomTooltipProps) =
 };
 
 export default function AdminDashboard() {
-  const [loadingStats, setLoadingStats] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalSiswa: 0,
     totalGuru: 0,
@@ -163,8 +162,7 @@ export default function AdminDashboard() {
       .then((d) => {
         if (d && !d.error) setStats(d);
       })
-      .catch(() => {})
-      .finally(() => setLoadingStats(false));
+      .catch(() => {});
 
     fetch("/api/spk/criteria")
       .then((r) => r.json())
@@ -330,37 +328,28 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Dark Executive Hero & KPI Command Strip */}
-      <section className="rounded-2xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
-        {/* Header Info Row */}
-        <div className="p-5 sm:p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
-          <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Beranda Administrator
-              </h1>
-              {loadingStats ? (
-                <div className="h-6 w-44 rounded-full bg-blue-500/20 animate-pulse border border-blue-500/30" />
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300 border border-blue-500/30">
-                  {stats.semesterDisplay || "Semester Ganjil 2024/2025"}
-                </span>
-              )}
-            </div>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-              Ringkasan data presensi harian siswa, tenaga pendidik, dan evaluasi SPK metode SAW.
+      {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
+      <section className="-mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-8 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Header Info Row - Ultra Clean & Minimalist */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
+          <div className="space-y-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Beranda Administrator
+            </h1>
+            <p className="text-xs sm:text-sm text-blue-200/70">
+              Ikhtisar operasional presensi dan evaluasi SPK metode SAW real-time
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="inline-flex items-center bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-slate-300 shadow-xs">
-              <Calendar className="w-3.5 h-3.5 text-slate-400 mr-2" />
+            <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-300 shadow-xs">
+              <Calendar className="w-3.5 h-3.5 text-amber-400 mr-2" />
               <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
             </div>
             <button
               type="button"
               onClick={handleExportReport}
-              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-500/80 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md transition-all cursor-pointer"
+              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 mr-2 text-blue-100" />
               Ekspor Laporan
@@ -368,11 +357,11 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 4 Kartu Metrik Utama - Dark Seamless Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
+        {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Total Siswa"
             value={stats.totalSiswa}
             icon={Users}
@@ -389,7 +378,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Total Guru"
             value={stats.totalGuru}
             icon={GraduationCap}
@@ -400,7 +389,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title={
               stats.isTodayData === false
                 ? "Kehadiran Terakhir"
@@ -424,7 +413,7 @@ export default function AdminDashboard() {
 
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Status Evaluasi SPK"
             value={
               stats.isSpkPublished
