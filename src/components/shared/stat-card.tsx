@@ -58,7 +58,9 @@ export function StatCard({
   return (
     <div
       className={cn(
-        isDark ? "bg-transparent text-white" : "bg-white text-slate-900",
+        isDark
+          ? "bg-transparent text-white"
+          : "bg-white text-slate-900 hover:bg-[#091524] transition-all duration-300 group cursor-pointer",
         "p-4 sm:p-5 flex flex-col justify-between",
         className
       )}
@@ -67,8 +69,10 @@ export function StatCard({
         <div className="min-w-0">
           <p
             className={cn(
-              "text-xs font-semibold uppercase tracking-wider truncate",
-              isDark ? "text-slate-400" : "text-slate-500"
+              "text-xs font-semibold uppercase tracking-wider truncate transition-colors",
+              isDark
+                ? "text-slate-400"
+                : "text-slate-500 group-hover:text-slate-400"
             )}
           >
             {title}
@@ -76,8 +80,8 @@ export function StatCard({
           <div className="flex flex-wrap items-baseline gap-2 mt-2">
             <h3
               className={cn(
-                "text-2xl sm:text-3xl font-bold tracking-tight tabular-nums",
-                isDark ? "text-white" : "text-slate-900"
+                "text-2xl sm:text-3xl font-bold tracking-tight tabular-nums transition-colors",
+                isDark ? "text-white" : "text-slate-900 group-hover:text-white"
               )}
             >
               {value}
@@ -85,14 +89,14 @@ export function StatCard({
             {trend && (
               <span
                 className={cn(
-                  "text-[11px] font-semibold flex items-center px-2 py-0.5 rounded-full border",
+                  "text-[11px] font-semibold flex items-center px-2 py-0.5 rounded-full border transition-colors",
                   isDark
                     ? trend.isPositive
                       ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
                       : "text-rose-400 bg-rose-500/15 border-rose-500/30"
                     : trend.isPositive
-                      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                      : "text-rose-700 bg-rose-50 border-rose-200"
+                      ? "text-emerald-700 bg-emerald-50 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30"
+                      : "text-rose-700 bg-rose-50 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30"
                 )}
               >
                 {trend.isPositive ? (
@@ -121,20 +125,29 @@ export function StatCard({
       {(resolvedFooterLeft || footerRight) && (
         <div
           className={cn(
-            "mt-4 pt-3 flex items-center justify-between gap-2 text-xs",
-            isDark ? "border-t border-slate-800/80" : "border-t border-slate-100"
+            "mt-4 pt-3 flex items-center justify-between gap-2 text-xs transition-colors",
+            isDark
+              ? "border-t border-slate-800/80"
+              : "border-t border-slate-100 group-hover:border-slate-800/80"
           )}
         >
           <span
-            className={cn("truncate", isDark ? "text-slate-400" : "text-slate-500")}
+            className={cn(
+              "truncate transition-colors",
+              isDark
+                ? "text-slate-400"
+                : "text-slate-500 group-hover:text-slate-400"
+            )}
           >
             {resolvedFooterLeft}
           </span>
           {footerRight && (
             <span
               className={cn(
-                "font-medium shrink-0",
-                isDark ? "text-slate-300" : "text-slate-600"
+                "font-medium shrink-0 transition-colors",
+                isDark
+                  ? "text-slate-300"
+                  : "text-slate-600 group-hover:text-slate-300"
               )}
             >
               {footerRight}

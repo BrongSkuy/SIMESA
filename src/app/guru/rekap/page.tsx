@@ -279,7 +279,7 @@ export default function GuruRekapPage() {
             ) : (
               <>
                 {/* Dark KPI Row */}
-                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
+                <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white overflow-hidden shadow-xs">
                   <StatCard
                     title={`Siswa Kelas ${selectedClass}`}
                     value={rekapData.length}
@@ -304,13 +304,13 @@ export default function GuruRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <div className="pt-2 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3 cursor-pointer">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
                     <div>
-                      <CardTitle className="text-sm font-semibold text-slate-900">
+                      <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
                         Distribusi Kehadiran Tersimpan
                       </CardTitle>
-                      <CardDescription className="text-xs text-slate-500">
+                      <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                         Kelas {selectedClass} ·{" "}
                         {selectedTanggal
                           ? `Tanggal: ${selectedTanggal}`
@@ -324,7 +324,7 @@ export default function GuruRekapPage() {
                           setSelectedMapel(val || "Semua Mata Pelajaran")
                         }
                       >
-                        <SelectTrigger className="w-[200px] h-8 text-xs">
+                        <SelectTrigger className="w-[200px] h-8 text-xs group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:text-white transition-colors">
                           <SelectValue placeholder="Pilih Mata Pelajaran" />
                         </SelectTrigger>
                         <SelectContent>
@@ -350,13 +350,14 @@ export default function GuruRekapPage() {
                         type="date"
                         value={selectedTanggal}
                         onChange={(e) => setSelectedTanggal(e.target.value)}
-                        className="w-auto h-8 text-xs"
+                        className="w-auto h-8 text-xs group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:text-white transition-colors"
                       />
                       {selectedTanggal && (
                         <Button
                           variant="ghost"
                           size="xs"
                           onClick={() => setSelectedTanggal("")}
+                          className="group-hover:text-slate-300 group-hover:hover:bg-slate-800 transition-colors"
                         >
                           Reset
                         </Button>
@@ -373,12 +374,12 @@ export default function GuruRekapPage() {
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
-                            stroke="#E2E8F0"
+                            stroke="rgba(148, 163, 184, 0.18)"
                             horizontal={false}
                           />
                           <XAxis
                             type="number"
-                            tick={{ fontSize: 11, fill: "#64748B" }}
+                            tick={{ fontSize: 11, fill: "#94A3B8" }}
                             axisLine={false}
                             tickLine={false}
                           />
@@ -387,7 +388,7 @@ export default function GuruRekapPage() {
                             dataKey="status"
                             tick={{
                               fontSize: 12,
-                              fill: "#334155",
+                              fill: "#94A3B8",
                               fontWeight: 600,
                             }}
                             axisLine={false}
@@ -396,7 +397,7 @@ export default function GuruRekapPage() {
                           />
                           <Tooltip
                             contentStyle={{
-                              backgroundColor: "#0F172A",
+                              backgroundColor: "#091524",
                               color: "#F8FAFC",
                               borderRadius: "8px",
                               border: "1px solid #1E293B",
@@ -419,13 +420,13 @@ export default function GuruRekapPage() {
                 </div>
 
                 {/* Detail Table */}
-                <div className="pt-2 space-y-3">
-                  <div className="pb-3 border-b border-slate-200">
-                    <CardTitle className="text-sm font-semibold text-slate-900">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+                  <div className="pb-3 border-b border-slate-100">
+                    <CardTitle className="text-base font-semibold text-slate-900 tracking-tight">
                       Matriks Detail Per Siswa
                     </CardTitle>
                   </div>
-                  <div className="border-b border-slate-200 overflow-x-auto">
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>

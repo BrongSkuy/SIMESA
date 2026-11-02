@@ -212,7 +212,7 @@ export default function AdminRekapPage() {
             ) : (
               <>
                 {/* KPI Row */}
-                <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white">
+                <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white overflow-hidden shadow-xs">
                   <StatCard
                     title={`Siswa Kelas ${selectedClass}`}
                     value={rekapData.length}
@@ -240,12 +240,12 @@ export default function AdminRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <div className="pt-2 space-y-3">
-                  <div className="pb-3 border-b border-slate-200">
-                    <CardTitle className="text-sm font-semibold text-slate-900">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3 cursor-pointer">
+                  <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                    <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
                       Distribusi Status Kehadiran Tersimpan
                     </CardTitle>
-                    <CardDescription className="text-xs text-slate-500">
+                    <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                       Kelas {selectedClass} · Perbandingan frekuensi Hadir,
                       Izin, Sakit, dan Alfa
                     </CardDescription>
@@ -260,26 +260,26 @@ export default function AdminRekapPage() {
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
-                            stroke="#E2E8F0"
+                            stroke="rgba(148, 163, 184, 0.18)"
                             horizontal={false}
                           />
                           <XAxis
                             type="number"
-                            tick={{ fontSize: 11, fill: "#64748B" }}
+                            tick={{ fontSize: 11, fill: "#94A3B8" }}
                             axisLine={false}
                             tickLine={false}
                           />
                           <YAxis
                             type="category"
                             dataKey="status"
-                            tick={{ fontSize: 12, fill: "#334155", fontWeight: 600 }}
+                            tick={{ fontSize: 12, fill: "#94A3B8", fontWeight: 600 }}
                             axisLine={false}
                             tickLine={false}
                             width={65}
                           />
                           <Tooltip
                             contentStyle={{
-                              backgroundColor: "#0F172A",
+                              backgroundColor: "#091524",
                               color: "#F8FAFC",
                               borderRadius: "8px",
                               border: "1px solid #1E293B",
@@ -302,17 +302,17 @@ export default function AdminRekapPage() {
                 </div>
 
                 {/* Detail Table */}
-                <div className="pt-2 space-y-3">
-                  <div className="pb-3 border-b border-slate-200">
-                    <CardTitle className="text-sm font-semibold text-slate-900">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+                  <div className="pb-3 border-b border-slate-100">
+                    <CardTitle className="text-base font-semibold text-slate-900 tracking-tight">
                       Matriks Rekapitulasi Per Siswa
                     </CardTitle>
-                    <CardDescription className="text-xs text-slate-500">
+                    <CardDescription className="text-xs text-slate-500 mt-0.5">
                       Rincian kehadiran dan rata-rata nilai kriteria untuk Kelas{" "}
                       {selectedClass}
                     </CardDescription>
                   </div>
-                  <div className="border-b border-slate-200 overflow-x-auto">
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>

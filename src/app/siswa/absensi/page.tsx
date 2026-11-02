@@ -521,13 +521,13 @@ export default function SiswaAbsensiPage() {
       ) : (
         /* Grafik Per Mapel View */
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-4">
-            <div className="pb-3 border-b border-slate-200">
-              <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-blue-600" />
+          <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4 cursor-pointer">
+            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+              <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                <BarChart3 className="h-4 w-4 text-blue-600 group-hover:text-blue-400 transition-colors" />
                 Grafik Kehadiran Per Mata Pelajaran
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
                 Perbandingan frekuensi status kehadiran pada setiap mata
                 pelajaran
               </CardDescription>
@@ -539,24 +539,24 @@ export default function SiswaAbsensiPage() {
                     <BarChart data={perMapelChartData} barGap={2}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#E2E8F0"
+                        stroke="rgba(148, 163, 184, 0.18)"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="mapel"
-                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        tick={{ fontSize: 11, fill: "#94A3B8" }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        tick={{ fontSize: 11, fill: "#94A3B8" }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#0F172A",
+                          backgroundColor: "#091524",
                           color: "#F8FAFC",
                           borderRadius: "8px",
                           border: "1px solid #1E293B",
@@ -603,8 +603,8 @@ export default function SiswaAbsensiPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="pb-3 border-b border-slate-200">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+            <div className="pb-3 border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-blue-600" />
                 Rincian Per Mapel
@@ -613,7 +613,7 @@ export default function SiswaAbsensiPage() {
                 Akumulasi H / I / S / A tiap mata pelajaran
               </CardDescription>
             </div>
-            <div className="border-b border-slate-200">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
