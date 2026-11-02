@@ -65,22 +65,22 @@ export default function GuruDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Dark Executive Hero & KPI Command Strip */}
-      <section className="rounded-xl bg-[#091524] border border-slate-800/80 overflow-hidden shadow-sm text-white">
-        {/* Header Info Row */}
-        <div className="p-5 sm:p-6 lg:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524]">
-          <div className="space-y-1.5 border-l-4 border-blue-500 pl-4">
+      {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
+      <section className="-mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-8 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Header Info Row - Clean & Minimalist */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
+          <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
                 <LayoutDashboard className="w-5 h-5 text-blue-400 shrink-0" />
                 <span>Ringkasan Pengajaran Guru</span>
               </h1>
-              <span className="inline-flex items-center rounded-sm bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300 border border-blue-500/30">
+              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-0.5 text-xs font-semibold text-blue-300 border border-white/10 shadow-xs">
                 Portal Guru
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-              Selamat bertugas, <strong className="text-slate-200">{teacherName}</strong> · Kelola presensi harian dan penilaian akademik kelas Anda.
+            <p className="text-xs sm:text-sm text-blue-200/70">
+              Selamat bertugas, <strong className="text-white">{teacherName}</strong> · Kelola presensi harian dan penilaian akademik kelas Anda
             </p>
           </div>
 
@@ -89,24 +89,24 @@ export default function GuruDashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 bg-slate-900/90 border-slate-700/80 text-slate-200 hover:bg-slate-800 hover:text-white"
+                className="gap-1.5 bg-white/5 border-white/10 text-slate-200 hover:bg-white/10 hover:border-amber-400/40 hover:text-white transition-all cursor-pointer"
               >
-                <PenLine className="h-3.5 w-3.5 text-slate-400" /> Input Nilai
+                <PenLine className="h-3.5 w-3.5 text-amber-300" /> Input Nilai
               </Button>
             </Link>
             <Link href="/guru/absensi">
-              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500 shadow-xs">
-                <ClipboardCheck className="h-3.5 w-3.5" /> Buka Presensi
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 shadow-xs hover:shadow-md transition-all cursor-pointer">
+                <ClipboardCheck className="h-3.5 w-3.5 text-blue-100" /> Buka Presensi
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* 3 KPI Cards - Dark Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-800/80 bg-[#091524]">
+        {/* 3 KPI Cards - Sleek Glassmorphism Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Kelas Diampu"
             value={data?.totalKelasDiampu ?? 0}
             icon={Users}
@@ -116,7 +116,7 @@ export default function GuruDashboard() {
           />
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Presensi Hari Ini"
             value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
             icon={ClipboardCheck}
@@ -126,7 +126,7 @@ export default function GuruDashboard() {
           />
           <StatCard
             variant="dark"
-            className="hover:bg-slate-800/80 transition-colors duration-200 cursor-pointer"
+            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
             title="Rata-rata Kehadiran"
             value={data?.rataRataKehadiran ?? "-"}
             icon={CheckCircle2}
