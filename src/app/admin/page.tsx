@@ -329,106 +329,111 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
-      <section className="-mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-8 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
-        {/* Header Info Row - Centered Executive Layout */}
-        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-7 space-y-3">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Beranda Administrator
-            </h1>
-            <p className="text-xs sm:text-sm text-blue-200/70 max-w-2xl">
-              Ikhtisar operasional presensi dan evaluasi SPK metode SAW real-time
-            </p>
-          </div>
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Subtle Ambient Radial Glow: Memberi efek kedalaman panel instrumen penerbangan */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
-          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
-            <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-300 shadow-xs">
-              <Calendar className="w-3.5 h-3.5 text-amber-400 mr-2" />
-              <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
+        <div className="relative z-10">
+          {/* Header Info Row - Centered Executive Layout with Extended Breathing Room */}
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
+                Beranda Administrator
+              </h1>
+              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
+                Ikhtisar operasional presensi dan evaluasi SPK metode SAW real-time
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={handleExportReport}
-              className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-md transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 mr-2 text-blue-100" />
-              Ekspor Laporan
-            </button>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <div className="inline-flex items-center bg-white/[0.04] border border-white/10 rounded-full px-4 py-1.5 text-xs text-slate-300 shadow-xs backdrop-blur-xs">
+                <Calendar className="w-3.5 h-3.5 text-amber-300 mr-2" />
+                <span>Periode: {stats.periodeRangeLabel || "Semester Aktif"}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleExportReport}
+                className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 mr-2 text-blue-100" />
+                Ekspor Laporan
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Total Siswa"
-            value={stats.totalSiswa}
-            icon={Users}
-            color="blue"
-            footerLeft={
-              stats.totalKelas ? `${stats.totalKelas} Rombongan Belajar` : "Siswa Terdaftar"
-            }
-            footerRight={
-              stats.totalSiswa > 0 && stats.totalKelas
-                ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
-                : undefined
-            }
-          />
+          {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Total Siswa"
+              value={stats.totalSiswa}
+              icon={Users}
+              color="blue"
+              footerLeft={
+                stats.totalKelas ? `${stats.totalKelas} Rombongan Belajar` : "Siswa Terdaftar"
+              }
+              footerRight={
+                stats.totalSiswa > 0 && stats.totalKelas
+                  ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
+                  : undefined
+              }
+            />
 
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Total Guru"
-            value={stats.totalGuru}
-            icon={GraduationCap}
-            color="slate"
-            footerLeft="Tenaga Pendidik & Pengampu"
-            footerRight="Aktif Mengajar"
-          />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Total Guru"
+              value={stats.totalGuru}
+              icon={GraduationCap}
+              color="slate"
+              footerLeft="Tenaga Pendidik & Pengampu"
+              footerRight="Aktif Mengajar"
+            />
 
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title={
-              stats.isTodayData === false
-                ? "Kehadiran Terakhir"
-                : "Kehadiran Hari Ini"
-            }
-            value={`${stats.kehadiranHariIni}%`}
-            icon={CheckCircle2}
-            color="emerald"
-            trend={
-              todayDiff !== 0
-                ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
-                : undefined
-            }
-            footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
-            footerRight={
-              (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
-                ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
-                : "Lengkap"
-            }
-          />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title={
+                stats.isTodayData === false
+                  ? "Kehadiran Terakhir"
+                  : "Kehadiran Hari Ini"
+              }
+              value={`${stats.kehadiranHariIni}%`}
+              icon={CheckCircle2}
+              color="emerald"
+              trend={
+                todayDiff !== 0
+                  ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
+                  : undefined
+              }
+              footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
+              footerRight={
+                (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
+                  ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
+                  : "Lengkap"
+              }
+            />
 
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Status Evaluasi SPK"
-            value={
-              stats.isSpkPublished
-                ? "Terpublikasi"
-                : leaderboard.length > 0 && spkValid
-                  ? "Siap Dihitung"
-                  : leaderboard.length > 0
-                    ? "Draf Perhitungan"
-                    : "Belum Dihitung"
-            }
-            icon={BarChart3}
-            color="amber"
-            footerLeft="Parameter Penilaian"
-            footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
-          />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Status Evaluasi SPK"
+              value={
+                stats.isSpkPublished
+                  ? "Terpublikasi"
+                  : leaderboard.length > 0 && spkValid
+                    ? "Siap Dihitung"
+                    : leaderboard.length > 0
+                      ? "Draf Perhitungan"
+                      : "Belum Dihitung"
+              }
+              icon={BarChart3}
+              color="amber"
+              footerLeft="Parameter Penilaian"
+              footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
+            />
+          </div>
         </div>
       </section>
 
