@@ -788,16 +788,16 @@ export default function AdminAbsensiPage() {
                         return (
                           <tr
                             key={siswa.studentId}
-                            className="transition-colors hover:bg-slate-50/80"
+                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer"
                           >
-                            <td className="px-5 py-3 text-slate-500 tabular-nums">
+                            <td className="px-5 py-3 text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                               {i + 1}
                             </td>
-                            <td className="px-4 py-3 tabular-nums text-slate-600">
+                            <td className="px-4 py-3 tabular-nums text-slate-600 group-hover/row:text-slate-400 font-mono transition-colors">
                               {siswa.nis}
                             </td>
                             <td className="px-4 py-3">
-                              <span className="font-semibold text-slate-800">
+                              <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                                 {siswa.namaLengkap}
                               </span>
                             </td>
@@ -817,7 +817,7 @@ export default function AdminAbsensiPage() {
                                       }
                                       className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${isActive
                                           ? statusActiveStyles[status]
-                                          : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                          : "border-slate-200 bg-white group-hover/row:bg-slate-900/80 group-hover/row:border-slate-700 text-slate-500 group-hover/row:text-slate-300 hover:bg-slate-50 hover:text-slate-700 group-hover/row:hover:bg-slate-800 group-hover/row:hover:text-white"
                                         }`}
                                       aria-label={`Tandai ${siswa.namaLengkap} ${status}`}
                                     >
@@ -1099,16 +1099,16 @@ export default function AdminAbsensiPage() {
                         return (
                           <tr
                             key={siswa.id}
-                            className="group transition-colors hover:bg-slate-50/80"
+                            className="group/matrix transition-all duration-200 hover:bg-[#091524] cursor-pointer"
                           >
                             {/* Sticky Left Body Cells */}
-                            <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/90 px-3 py-2.5 text-slate-500 tabular-nums text-center border-r border-slate-200">
+                            <td className="sticky left-0 z-10 bg-white group-hover/matrix:bg-[#091524] px-3 py-2.5 text-slate-500 group-hover/matrix:text-slate-400 tabular-nums text-center border-r border-slate-200 group-hover/matrix:border-slate-800 transition-colors">
                               {index + 1}
                             </td>
-                            <td className="sticky left-12 z-10 bg-white group-hover:bg-slate-50/90 px-3 py-2.5 tabular-nums text-slate-600 text-center border-r border-slate-200 font-mono">
+                            <td className="sticky left-12 z-10 bg-white group-hover/matrix:bg-[#091524] px-3 py-2.5 tabular-nums text-slate-600 group-hover/matrix:text-slate-400 text-center border-r border-slate-200 group-hover/matrix:border-slate-800 font-mono transition-colors">
                               {siswa.nis}
                             </td>
-                            <td className="sticky left-[144px] z-10 bg-white group-hover:bg-slate-50/90 px-4 py-2.5 font-semibold text-slate-800 border-r-2 border-slate-300 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.06)]">
+                            <td className="sticky left-[144px] z-10 bg-white group-hover/matrix:bg-[#091524] px-4 py-2.5 font-semibold text-slate-800 group-hover/matrix:text-white border-r-2 border-slate-300 group-hover/matrix:border-slate-700 shadow-[4px_0_8px_-3px_rgba(0,0,0,0.06)] transition-colors">
                               {siswa.nama}
                             </td>
 
@@ -1117,7 +1117,7 @@ export default function AdminAbsensiPage() {
                               const status = siswa.history[date];
                               const pillStyle =
                                 statusHistoryBadge[status] ||
-                                "bg-slate-50 text-slate-400 border-slate-200";
+                                "bg-slate-50 text-slate-400 border-slate-200 group-hover/matrix:bg-slate-900 group-hover/matrix:border-slate-700";
                               const shortCode =
                                 status === "Hadir"
                                   ? "H"
@@ -1131,7 +1131,7 @@ export default function AdminAbsensiPage() {
                               return (
                                 <td
                                   key={date}
-                                  className="px-2.5 py-2 text-center border-r border-slate-100"
+                                  className="px-2.5 py-2 text-center border-r border-slate-100 group-hover/matrix:border-slate-800/80 transition-colors"
                                 >
                                   <span
                                     className={`inline-flex h-6 w-6 items-center justify-center rounded-md border text-xs font-bold ${pillStyle}`}
@@ -1143,19 +1143,19 @@ export default function AdminAbsensiPage() {
                             })}
 
                             {/* Summary Columns Data (Calculated Across Full Semester) */}
-                            <td className="px-3 py-2 text-center font-bold text-emerald-700 bg-emerald-50/30 border-l-2 border-slate-300 tabular-nums">
+                            <td className="px-3 py-2 text-center font-bold text-emerald-700 group-hover/matrix:text-emerald-400 bg-emerald-50/30 group-hover/matrix:bg-emerald-950/20 border-l-2 border-slate-300 group-hover/matrix:border-slate-700 tabular-nums transition-colors">
                               {counts.h}
                             </td>
-                            <td className="px-3 py-2 text-center font-bold text-amber-700 bg-amber-50/30 border-l border-slate-200 tabular-nums">
+                            <td className="px-3 py-2 text-center font-bold text-amber-700 group-hover/matrix:text-amber-400 bg-amber-50/30 group-hover/matrix:bg-amber-950/20 border-l border-slate-200 group-hover/matrix:border-slate-800 tabular-nums transition-colors">
                               {counts.i}
                             </td>
-                            <td className="px-3 py-2 text-center font-bold text-indigo-700 bg-indigo-50/30 border-l border-slate-200 tabular-nums">
+                            <td className="px-3 py-2 text-center font-bold text-indigo-700 group-hover/matrix:text-indigo-400 bg-indigo-50/30 group-hover/matrix:bg-indigo-950/20 border-l border-slate-200 group-hover/matrix:border-slate-800 tabular-nums transition-colors">
                               {counts.s}
                             </td>
-                            <td className="px-3 py-2 text-center font-bold text-rose-700 bg-rose-50/30 border-l border-slate-200 tabular-nums">
+                            <td className="px-3 py-2 text-center font-bold text-rose-700 group-hover/matrix:text-rose-400 bg-rose-50/30 group-hover/matrix:bg-rose-950/20 border-l border-slate-200 group-hover/matrix:border-slate-800 tabular-nums transition-colors">
                               {counts.a}
                             </td>
-                            <td className="px-3 py-2 text-center border-l border-slate-200">
+                            <td className="px-3 py-2 text-center border-l border-slate-200 group-hover/matrix:border-slate-800 transition-colors">
                               <span
                                 className={`inline-block px-2 py-0.5 rounded text-xs font-bold border tabular-nums ${pctBadgeClass}`}
                               >

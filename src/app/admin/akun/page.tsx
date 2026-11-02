@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -274,38 +273,41 @@ export default function AdminAkunPage() {
                 </TableRow>
               ) : (
                 filtered.map((a, i) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="pl-6 font-mono text-slate-500">
+                  <TableRow
+                    key={a.id}
+                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                  >
+                    <TableCell className="pl-6 font-mono text-slate-500 group-hover/row:text-slate-400 transition-colors">
                       {i + 1}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
-                        <div className="h-7 w-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
+                        <div className="h-7 w-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-white font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
                           {getInitials(a.name)}
                         </div>
-                        <span className="font-semibold text-slate-800">
+                        <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                           {a.name}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-slate-600">
+                    <TableCell className="font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
                       {a.username || "-"}
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${getRolePill(
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border transition-colors ${getRolePill(
                           a.appRole
-                        )}`}
+                        )} group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700`}
                       >
                         {a.appRole || "-"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border ${
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border transition-colors ${
                           !a.banned
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border-emerald-200 group-hover/row:border-emerald-500/30"
+                            : "bg-rose-50 group-hover/row:bg-rose-500/15 text-rose-700 group-hover/row:text-rose-300 border-rose-200 group-hover/row:border-rose-500/30"
                         }`}
                       >
                         <span
@@ -321,7 +323,7 @@ export default function AdminAkunPage() {
                         <Button
                           variant="ghost"
                           size="xs"
-                          className="gap-1 text-slate-700 hover:text-blue-600 hover:bg-blue-50"
+                          className="gap-1 text-slate-700 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 transition-colors"
                           onClick={() => openEdit(a)}
                         >
                           <Edit className="h-3 w-3" /> Edit
@@ -329,7 +331,7 @@ export default function AdminAkunPage() {
                         <Button
                           variant="ghost"
                           size="xs"
-                          className="gap-1 text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+                          className="gap-1 text-amber-700 group-hover/row:text-amber-400 hover:text-amber-800 hover:bg-amber-50 group-hover/row:hover:bg-amber-950/40 transition-colors"
                           onClick={() => openReset(a)}
                         >
                           <KeyRound className="h-3 w-3" /> Reset Sandi
@@ -338,7 +340,7 @@ export default function AdminAkunPage() {
                           <Button
                             variant="ghost"
                             size="xs"
-                            className="gap-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                            className="gap-1 text-rose-600 group-hover/row:text-rose-400 hover:text-rose-700 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 transition-colors"
                             onClick={() => toggleStatus(a, true)}
                           >
                             <Ban className="h-3 w-3" /> Suspend
@@ -347,7 +349,7 @@ export default function AdminAkunPage() {
                           <Button
                             variant="ghost"
                             size="xs"
-                            className="gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            className="gap-1 text-emerald-600 group-hover/row:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 group-hover/row:hover:bg-emerald-950/40 transition-colors"
                             onClick={() => toggleStatus(a, false)}
                           >
                             <CheckCircle2 className="h-3 w-3" /> Aktifkan

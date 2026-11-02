@@ -11,13 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -246,24 +240,24 @@ export default function SiswaNilaiPage() {
           return (
             <div
               key={c.id}
-              className="bg-white p-5 hover:bg-slate-50/50 transition-colors flex flex-col justify-between"
+              className="bg-white p-5 hover:bg-[#091524] transition-all duration-200 group flex flex-col justify-between"
             >
-              <div className="pb-3 border-b border-slate-100">
+              <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800 transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
                       {c.tipe === "Otomatis" ? (
-                        <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
                       ) : (
-                        <BookOpen className="h-4 w-4 text-indigo-600 shrink-0" />
+                        <BookOpen className="h-4 w-4 text-indigo-600 group-hover:text-indigo-400 shrink-0" />
                       )}
                       <span className="truncate">{c.namaKriteria}</span>
                     </CardTitle>
-                    <CardDescription className="mt-1 text-xs text-slate-500">
+                    <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
                       {c.deskripsi || `Bobot evaluasi ${c.bobot}%`}
                     </CardDescription>
                   </div>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 shrink-0 transition-colors">
                     {c.bobot}%
                   </span>
                 </div>
@@ -271,7 +265,7 @@ export default function SiswaNilaiPage() {
               <div className="pt-4">
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-xs text-slate-500 mb-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
                       Nilai Rata-Rata
                     </p>
                     <div className="flex items-center gap-2">
@@ -288,22 +282,22 @@ export default function SiswaNilaiPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-slate-500 mb-0.5">
+                    <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
                       Skor Terbobot
                     </p>
-                    <p className="text-base font-bold tabular-nums text-slate-900">
+                    <p className="text-base font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
                       {c.nilaiTerbobot}
                     </p>
-                    <p className="text-xs tabular-nums text-slate-400">
+                    <p className="text-xs tabular-nums text-slate-400 group-hover:text-slate-500 transition-colors">
                       ({c.nilaiRataRata} × {c.bobot}%)
                     </p>
                   </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden">
+                <div className="mt-3 w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
                   <div
-                    className="bg-[#1e3a8a] h-full rounded-xs transition-all"
+                    className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -311,8 +305,8 @@ export default function SiswaNilaiPage() {
                 {/* Per-Mapel detail if any */}
                 {Object.keys(c.detailMapel).length > 0 &&
                   c.tipe === "Manual" && (
-                    <div className="mt-4 pt-3 border-t border-slate-100">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 mb-2 transition-colors">
                         Rincian Per Mata Pelajaran
                       </p>
                       <div className="space-y-1.5">
@@ -321,7 +315,7 @@ export default function SiswaNilaiPage() {
                             key={mapel}
                             className="flex items-center justify-between text-xs"
                           >
-                            <span className="text-slate-600 truncate mr-2">
+                            <span className="text-slate-600 group-hover:text-slate-300 truncate mr-2 transition-colors">
                               {mapel}
                             </span>
                             <span
@@ -366,32 +360,35 @@ export default function SiswaNilaiPage() {
             </TableHeader>
             <TableBody>
               {data.criteria.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="pl-6 font-semibold text-slate-800">
+                <TableRow
+                  key={c.id}
+                  className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                >
+                  <TableCell className="pl-6 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                     {c.namaKriteria}
                   </TableCell>
                   <TableCell className="text-center">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                         c.tipe === "Otomatis"
-                          ? "border-blue-200 text-[#1e3a8a] bg-blue-50"
-                          : "border-indigo-200 text-indigo-700 bg-indigo-50"
+                          ? "border-blue-200 text-[#1e3a8a] bg-blue-50 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30"
+                          : "border-indigo-200 text-indigo-700 bg-indigo-50 group-hover/row:bg-indigo-500/15 group-hover/row:text-indigo-300 group-hover/row:border-indigo-500/30"
                       }`}
                     >
                       {c.tipe}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center font-mono text-slate-600">
+                  <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-400 transition-colors">
                     {c.bobot}%
                   </TableCell>
                   <TableCell
-                    className={`text-center font-mono font-bold ${
+                    className={`text-center font-mono font-bold transition-colors ${
                       getScoreTone(c.nilaiRataRata).text
                     }`}
                   >
                     {c.nilaiRataRata}
                   </TableCell>
-                  <TableCell className="text-right pr-6 font-mono font-bold text-slate-900">
+                  <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
                     {c.nilaiTerbobot}
                   </TableCell>
                 </TableRow>

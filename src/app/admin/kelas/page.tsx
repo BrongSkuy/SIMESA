@@ -400,48 +400,48 @@ export default function AdminKelasPage() {
           {classes.map((kelas) => (
             <div
               key={kelas.id}
-              className="bg-white p-5 hover:bg-slate-50/70 transition-colors flex flex-col justify-between"
+              className="bg-white p-5 hover:bg-[#091524] transition-all duration-200 group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="h-9 w-9 bg-slate-100 group-hover:bg-slate-800 text-slate-800 group-hover:text-white border border-slate-200 group-hover:border-slate-700 flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
                       {kelas.namaKelas}
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-white tracking-tight transition-colors">
                         Kelas {kelas.namaKelas}
                       </h3>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
                         Tingkat {kelas.tingkat}
                       </p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 tabular-nums">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-xs font-medium bg-blue-50 group-hover:bg-blue-500/15 text-blue-700 group-hover:text-blue-300 border border-blue-200 group-hover:border-blue-500/30 tabular-nums transition-colors">
                     <Users className="w-3 h-3" />
                     {kelas.jumlahSiswa} siswa
                   </span>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 p-3 mb-4">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+                <div className="bg-slate-50 group-hover:bg-slate-900/80 border border-slate-200 group-hover:border-slate-800 p-3 mb-4 transition-colors">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 group-hover:text-slate-400 uppercase tracking-wider transition-colors">
+                    <UserCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-500" />
                     <span>Wali Kelas</span>
                   </div>
-                  <p className="text-xs font-semibold text-slate-800 mt-1 truncate">
+                  <p className="text-xs font-semibold text-slate-800 group-hover:text-white mt-1 truncate transition-colors">
                     {kelas.waliKelas || "Belum ditentukan"}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 group-hover:bg-slate-800 group-hover:border-slate-700 group-hover:text-white transition-colors"
                   onClick={() => openEdit(kelas)}
                 >
-                  <Edit className="h-3.5 w-3.5 text-blue-600" />
+                  <Edit className="h-3.5 w-3.5 text-blue-600 group-hover:text-blue-400" />
                   Edit Rombel
                 </Button>
                 <Button

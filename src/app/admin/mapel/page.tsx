@@ -492,23 +492,26 @@ export default function AdminMapelPage() {
               </TableRow>
             ) : (
               filtered.map((mapel, i) => (
-                <TableRow key={mapel.id}>
-                  <TableCell className="text-center font-mono text-slate-400">
+                <TableRow
+                  key={mapel.id}
+                  className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                >
+                  <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500 transition-colors">
                     {i + 1}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 shrink-0">
+                      <div className="p-1.5 rounded-md bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-600 group-hover/row:text-blue-300 border border-blue-100 group-hover/row:border-blue-500/30 shrink-0 transition-colors">
                         <BookOpen className="w-3.5 h-3.5" />
                       </div>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
                         {mapel.namaMapel}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium text-slate-700">
+                  <TableCell className="font-medium text-slate-700 group-hover/row:text-slate-300 transition-colors">
                     {mapel.guruPengampu || (
-                      <span className="text-slate-400 italic">
+                      <span className="text-slate-400 group-hover/row:text-slate-500 italic transition-colors">
                         Belum ditentukan
                       </span>
                     )}
@@ -522,14 +525,14 @@ export default function AdminMapelPage() {
                           return (
                             <span
                               key={trimmed}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
                             >
                               {trimmed}
                             </span>
                           );
                         })
                       ) : (
-                        <span className="text-xs text-slate-400">-</span>
+                        <span className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">-</span>
                       )}
                     </div>
                   </TableCell>
@@ -539,7 +542,7 @@ export default function AdminMapelPage() {
                         type="button"
                         aria-label={`Edit ${mapel.namaMapel}`}
                         onClick={() => openEdit(mapel)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
                       >
                         <Edit className="h-3.5 w-3.5" />
                       </button>
@@ -547,7 +550,7 @@ export default function AdminMapelPage() {
                         type="button"
                         aria-label={`Hapus ${mapel.namaMapel}`}
                         onClick={() => handleDelete(mapel)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-600 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

@@ -16,13 +16,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -341,50 +335,53 @@ export default function AdminRekapPage() {
                       <TableBody>
                         {rekapData.length > 0 ? (
                           rekapData.map((r) => (
-                            <TableRow key={r.id}>
-                              <TableCell className="pl-6 font-mono text-slate-600">
+                            <TableRow
+                              key={r.id}
+                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                            >
+                              <TableCell className="pl-6 font-mono text-slate-600 group-hover/row:text-slate-400 transition-colors">
                                 {r.nis}
                               </TableCell>
-                              <TableCell className="font-semibold text-slate-800">
+                              <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                                 {r.nama}
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border border-emerald-200 group-hover/row:border-emerald-500/30 transition-colors">
                                   {r.hadir}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-amber-50 group-hover/row:bg-amber-500/15 text-amber-700 group-hover/row:text-amber-300 border border-amber-200 group-hover/row:border-amber-500/30 transition-colors">
                                   {r.izin}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors">
                                   {r.sakit}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-rose-50 group-hover/row:bg-rose-500/15 text-rose-700 group-hover/row:text-rose-300 border border-rose-200 group-hover/row:border-rose-500/30 transition-colors">
                                   {r.alfa}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-14 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block">
+                                  <div className="w-14 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                     <div
-                                      className="bg-[#1e3a8a] h-full rounded-xs"
+                                      className="bg-[#1e3a8a] group-hover/row:bg-blue-500 h-full rounded-xs transition-colors"
                                       style={{
                                         width: `${Math.min(100, Math.max(0, r.persen))}%`,
                                       }}
                                     />
                                   </div>
                                   <span
-                                    className={`font-mono font-bold ${
+                                    className={`font-mono font-bold transition-colors ${
                                       r.persen >= 90
-                                        ? "text-emerald-700"
+                                        ? "text-emerald-700 group-hover/row:text-emerald-400"
                                         : r.persen >= 75
-                                          ? "text-amber-700"
-                                          : "text-rose-700"
+                                          ? "text-amber-700 group-hover/row:text-amber-400"
+                                          : "text-rose-700 group-hover/row:text-rose-400"
                                     }`}
                                   >
                                     {r.persen}%
@@ -394,7 +391,7 @@ export default function AdminRekapPage() {
                               {criteriaKeys.map((k) => (
                                 <TableCell
                                   key={k}
-                                  className="text-right pr-5 font-mono font-semibold text-slate-700"
+                                  className="text-right pr-5 font-mono font-semibold text-slate-700 group-hover/row:text-slate-300 transition-colors"
                                 >
                                   {r.nilai?.[k] || 0}
                                 </TableCell>

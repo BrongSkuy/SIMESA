@@ -12,13 +12,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -474,23 +468,26 @@ export default function SiswaAbsensiPage() {
                           }).format(parsedDate);
 
                           return (
-                            <TableRow key={`${r.id}-${i}`}>
+                            <TableRow
+                              key={`${r.id}-${i}`}
+                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                            >
                               <TableCell className="pl-5">
-                                <p className="text-xs font-semibold text-slate-800">
+                                <p className="text-xs font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                                   {formattedDate}
                                 </p>
-                                <p className="text-xs text-slate-400">
+                                <p className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">
                                   {hariName}
                                 </p>
                               </TableCell>
                               <TableCell>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
                                   {r.mapel || "Umum"}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right pr-5">
                                 <span
-                                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                                     r.status
                                       ? statusPillMap[r.status]
                                       : "bg-slate-100 text-slate-500 border-slate-200"
@@ -629,22 +626,25 @@ export default function SiswaAbsensiPage() {
                 </TableHeader>
                 <TableBody>
                   {perMapelChartData.map((row) => (
-                    <TableRow key={row.mapel}>
+                    <TableRow
+                      key={row.mapel}
+                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                    >
                       <TableCell className="pl-5">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
                           {row.mapel}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-emerald-600">
+                      <TableCell className="text-center font-mono font-semibold text-emerald-600 group-hover/row:text-emerald-400 transition-colors">
                         {row.hadir}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-amber-600">
+                      <TableCell className="text-center font-mono font-semibold text-amber-600 group-hover/row:text-amber-400 transition-colors">
                         {row.izin}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-blue-600">
+                      <TableCell className="text-center font-mono font-semibold text-blue-600 group-hover/row:text-blue-400 transition-colors">
                         {row.sakit}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-rose-600 pr-5">
+                      <TableCell className="text-center font-mono font-semibold text-rose-600 group-hover/row:text-rose-400 pr-5 transition-colors">
                         {row.alfa}
                       </TableCell>
                     </TableRow>

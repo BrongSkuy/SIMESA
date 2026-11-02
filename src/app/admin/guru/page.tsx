@@ -588,13 +588,16 @@ export default function AdminGuruPage() {
               </TableRow>
             ) : (
               filtered.map((guru, i) => (
-                <TableRow key={guru.id}>
-                  <TableCell className="text-center font-mono text-slate-400">
+                <TableRow
+                  key={guru.id}
+                  className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                >
+                  <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500">
                     {i + 1}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-semibold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                      <div className="w-8 h-8 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 font-semibold flex items-center justify-center text-xs shrink-0 overflow-hidden transition-colors">
                         {guru.foto ? (
                           <img
                             src={guru.foto}
@@ -606,10 +609,10 @@ export default function AdminGuruPage() {
                         )}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900">
+                        <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
                           {guru.namaLengkap}
                         </div>
-                        <div className="text-xs text-slate-500 tabular-nums">
+                        <div className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                           NIP: {guru.nip}
                         </div>
                       </div>
@@ -619,8 +622,8 @@ export default function AdminGuruPage() {
                     <span
                       className={
                         guru.jenisKelamin === "L"
-                          ? "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
-                          : "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          ? "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
+                          : "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 group-hover/row:bg-indigo-500/15 text-indigo-700 group-hover/row:text-indigo-300 border border-indigo-200 group-hover/row:border-indigo-500/30 transition-colors"
                       }
                     >
                       {guru.jenisKelamin === "L" ? "Laki-laki" : "Perempuan"}
@@ -630,8 +633,8 @@ export default function AdminGuruPage() {
                     <span
                       className={
                         guru.status === "aktif"
-                          ? "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border border-emerald-200 group-hover/row:border-emerald-500/30 transition-colors"
+                          : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-600 group-hover/row:text-slate-400 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
                       }
                     >
                       <span
@@ -650,7 +653,7 @@ export default function AdminGuruPage() {
                         type="button"
                         aria-label={`Edit ${guru.namaLengkap}`}
                         onClick={() => openEdit(guru)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
                       >
                         <Edit className="h-3.5 w-3.5" />
                       </button>
@@ -658,7 +661,7 @@ export default function AdminGuruPage() {
                         type="button"
                         aria-label={`Hapus ${guru.namaLengkap}`}
                         onClick={() => handleDelete(guru)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
