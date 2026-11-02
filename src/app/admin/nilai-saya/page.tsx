@@ -476,25 +476,25 @@ export default function AdminNilaiSayaPage() {
           </div>
 
           {/* Full Table Summary */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
-            <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-              <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
-                <TrendingUp className="h-4 w-4 text-blue-600 group-hover:text-blue-400 transition-colors" />
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="pb-3 border-b border-slate-100">
+              <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
                 Ringkasan Perhitungan Skor SPK SAW
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+              <CardDescription className="text-xs text-slate-500">
                 Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
               </CardDescription>
             </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
-                    <TableHead className="pl-6 group-hover:text-slate-400">Kriteria Evaluasi</TableHead>
-                    <TableHead className="text-center group-hover:text-slate-400">Tipe Input</TableHead>
-                    <TableHead className="text-center group-hover:text-slate-400">Bobot</TableHead>
-                    <TableHead className="text-center group-hover:text-slate-400">Nilai</TableHead>
-                    <TableHead className="text-right pr-6 group-hover:text-slate-400">
+                  <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
+                    <TableHead className="pl-6 font-semibold text-slate-600">Kriteria Evaluasi</TableHead>
+                    <TableHead className="text-center font-semibold text-slate-600">Tipe Input</TableHead>
+                    <TableHead className="text-center font-semibold text-slate-600">Bobot</TableHead>
+                    <TableHead className="text-center font-semibold text-slate-600">Nilai</TableHead>
+                    <TableHead className="text-right pr-6 font-semibold text-slate-600">
                       Skor Terbobot
                     </TableHead>
                   </TableRow>
@@ -503,23 +503,23 @@ export default function AdminNilaiSayaPage() {
                   {data.criteria.map((c) => (
                     <TableRow
                       key={c.id}
-                      className="group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                     >
-                      <TableCell className="pl-6 font-semibold text-slate-800 group-hover/row:text-white group-hover:text-slate-200 transition-colors">
+                      <TableCell className="pl-6 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                         {c.namaKriteria}
                       </TableCell>
                       <TableCell className="text-center">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border transition-colors ${
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                             c.tipe === "Otomatis"
-                              ? "border-blue-200 text-blue-700 bg-blue-50 group-hover:bg-blue-500/15 group-hover:border-blue-500/30 group-hover:text-blue-300"
-                              : "border-indigo-200 text-indigo-700 bg-indigo-50 group-hover:bg-indigo-500/15 group-hover:border-indigo-500/30 group-hover:text-indigo-300"
+                              ? "border-blue-200 text-[#1e3a8a] bg-blue-50 group-hover/row:bg-blue-500/15 group-hover/row:border-blue-500/30 group-hover/row:text-blue-300"
+                              : "border-indigo-200 text-indigo-700 bg-indigo-50 group-hover/row:bg-indigo-500/15 group-hover/row:border-indigo-500/30 group-hover/row:text-indigo-300"
                           }`}
                         >
                           {c.tipe}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 group-hover:text-slate-400 transition-colors">
+                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
                         {c.bobot}%
                       </TableCell>
                       <TableCell
@@ -529,20 +529,20 @@ export default function AdminNilaiSayaPage() {
                       >
                         {c.nilaiRataRata}
                       </TableCell>
-                      <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white group-hover:text-slate-100 transition-colors">
+                      <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
                         {c.nilaiTerbobot}
                       </TableCell>
                     </TableRow>
                   ))}
                   {/* Total Row */}
-                  <TableRow className="bg-slate-50 group-hover:bg-[#0a1626] border-t-2 border-slate-200 group-hover:border-slate-700/80 transition-colors">
+                  <TableRow className="bg-slate-50 border-t-2 border-slate-200">
                     <TableCell
                       colSpan={4}
-                      className="pl-6 font-bold text-slate-900 group-hover:text-white transition-colors"
+                      className="pl-6 font-bold text-slate-900"
                     >
                       Total Akumulasi Skor SPK
                     </TableCell>
-                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 group-hover:text-blue-400 transition-colors">
+                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600">
                       {data.totalSkorSPK}
                     </TableCell>
                   </TableRow>

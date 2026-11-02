@@ -346,24 +346,24 @@ export default function SiswaDashboard() {
         </div>
 
         {/* Mini leaderboard kelas */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+            <div className="pb-3.5 border-b border-slate-100">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight">
                 <Trophy className="h-4 w-4 text-amber-500" />
                 Top 5 Kelas {profile.kelas}
               </h3>
-              <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Peringkat skor SPK resmi di kelas Anda
               </p>
             </div>
             <div className="pt-2 overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
-                    <TableHead className="w-14 pl-2 group-hover:text-slate-400">#</TableHead>
-                    <TableHead className="group-hover:text-slate-400">Siswa</TableHead>
-                    <TableHead className="text-right pr-2 group-hover:text-slate-400">Skor</TableHead>
+                  <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
+                    <TableHead className="w-14 pl-2 font-semibold text-slate-600">#</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Siswa</TableHead>
+                    <TableHead className="text-right pr-2 font-semibold text-slate-600">Skor</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -374,26 +374,26 @@ export default function SiswaDashboard() {
                         <TableRow
                           key={entry.studentId}
                           className={cn(
-                            "group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0",
-                            isMe && "bg-blue-50/50 group-hover:bg-blue-950/30"
+                            "group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0",
+                            isMe && "bg-blue-50/50 hover:bg-[#091524]"
                           )}
                         >
                           <TableCell className="pl-2">
                             <span
                               className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
                                 entry.rank === 1
-                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
+                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300"
                                   : entry.rank === 2
-                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300"
+                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300"
                                     : entry.rank === 3
-                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300"
-                                      : "bg-slate-50 text-slate-600 border border-slate-200"
+                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300"
+                                      : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300"
                               }`}
                             >
                               #{entry.rank}
                             </span>
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-800 group-hover/row:text-white group-hover:text-slate-200 transition-colors">
+                          <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                             <span>{entry.namaLengkap}</span>
                             {isMe && (
                               <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
@@ -401,7 +401,7 @@ export default function SiswaDashboard() {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-400 group-hover:text-blue-300 pr-2 transition-colors">
+                          <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
                             {entry.skorSPK}
                           </TableCell>
                         </TableRow>
@@ -411,7 +411,7 @@ export default function SiswaDashboard() {
                     <TableRow>
                       <TableCell
                         colSpan={3}
-                        className="py-10 text-center text-xs text-slate-500 group-hover:text-slate-400"
+                        className="py-10 text-center text-xs text-slate-500"
                       >
                         Leaderboard semester ini belum dirilis.
                       </TableCell>

@@ -318,25 +318,25 @@ export default function SiswaLeaderboardPage() {
               )}
 
               {/* Full Table */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
-                <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-                  <h3 className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100">
+                  <h3 className="text-sm font-semibold text-slate-900">
                     {filterType === "umum"
                       ? "Peringkat Keseluruhan (Semua Kelas)"
                       : `Peringkat Kelas ${myData?.kelas}`}
                   </h3>
-                  <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Periode {activePeriodeName}
                   </p>
                 </div>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
-                        <TableHead className="w-20 pl-6 group-hover:text-slate-400">Peringkat</TableHead>
-                        <TableHead className="group-hover:text-slate-400">Nama Siswa</TableHead>
-                        <TableHead className="group-hover:text-slate-400">Kelas</TableHead>
-                        <TableHead className="text-right pr-6 group-hover:text-slate-400">
+                      <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
+                        <TableHead className="w-20 pl-6 font-semibold text-slate-600">Peringkat</TableHead>
+                        <TableHead className="font-semibold text-slate-600">Nama Siswa</TableHead>
+                        <TableHead className="font-semibold text-slate-600">Kelas</TableHead>
+                        <TableHead className="text-right pr-6 font-semibold text-slate-600">
                           Skor SPK
                         </TableHead>
                       </TableRow>
@@ -353,8 +353,8 @@ export default function SiswaLeaderboardPage() {
                           return (
                             <TableRow
                               key={entry.studentId}
-                              className={`group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0 ${
-                                isMe ? "bg-blue-50/50 group-hover:bg-blue-950/30" : ""
+                              className={`group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0 ${
+                                isMe ? "bg-blue-50/50" : ""
                               }`}
                             >
                               <TableCell className="pl-6">
@@ -362,10 +362,10 @@ export default function SiswaLeaderboardPage() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2.5">
-                                  <div className="h-7 w-7 rounded-md bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover:border-slate-700 shrink-0 transition-colors">
+                                  <div className="h-7 w-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
                                     {getInitials(entry.namaLengkap)}
                                   </div>
-                                  <span className="font-semibold text-slate-800 group-hover/row:text-white group-hover:text-slate-100 transition-colors">
+                                  <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                                     {entry.namaLengkap}
                                   </span>
                                   {isMe && (
@@ -376,19 +376,19 @@ export default function SiswaLeaderboardPage() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 transition-colors">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
                                   {entry.kelas}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-16 bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
+                                  <div className="w-16 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                     <div
-                                      className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                                      className="bg-[#1e3a8a] group-hover/row:bg-blue-400 h-full rounded-xs transition-all"
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
-                                  <span className="font-bold tabular-nums text-[#1e3a8a] group-hover/row:text-blue-400 group-hover:text-blue-300 transition-colors">
+                                  <span className="font-bold tabular-nums text-[#1e3a8a] group-hover/row:text-blue-300 transition-colors">
                                     {entry.persentase}
                                   </span>
                                 </div>
@@ -400,7 +400,7 @@ export default function SiswaLeaderboardPage() {
                         <TableRow>
                           <TableCell
                             colSpan={4}
-                            className="text-center py-10 text-xs text-slate-500 group-hover:text-slate-400"
+                            className="text-center py-10 text-xs text-slate-500"
                           >
                             Belum ada data perhitungan SPK untuk kategori ini.
                           </TableCell>

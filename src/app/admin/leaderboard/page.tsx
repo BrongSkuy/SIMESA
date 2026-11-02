@@ -578,19 +578,19 @@ export default function AdminLeaderboardPage() {
       )}
 
       {/* Main calculation preview container */}
-      <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4">
-        <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+      <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="pb-3 border-b border-slate-100">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white transition-colors">
+                <CardTitle className="text-sm font-semibold text-slate-900">
                   Tabel Peringkat Siswa Berprestasi
                 </CardTitle>
-                <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 group-hover:bg-blue-500/15 text-blue-700 group-hover:text-blue-300 rounded border border-blue-200 group-hover:border-blue-500/30 transition-colors">
+                <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
                   Metode SAW
                 </span>
               </div>
-              <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+              <CardDescription className="text-xs text-slate-500 mt-0.5">
                 {publishStatus
                   ? `Kalkulasi normalisasi matriks real-time periode ${publishStatus.periode}`
                   : "Memuat periode aktif..."}
@@ -621,13 +621,13 @@ export default function AdminLeaderboardPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-slate-100 group-hover:border-slate-800/80 hover:bg-transparent">
-                  <TableHead className="w-20 pl-6 group-hover:text-slate-400">Peringkat</TableHead>
-                  <TableHead className="group-hover:text-slate-400">Siswa</TableHead>
-                  <TableHead className="group-hover:text-slate-400">Kelas</TableHead>
-                  <TableHead className="group-hover:text-slate-400">Nilai SAW (V)</TableHead>
-                  <TableHead className="text-center group-hover:text-slate-400">Persentase</TableHead>
-                  <TableHead className="text-right pr-6 group-hover:text-slate-400">
+                <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
+                  <TableHead className="w-20 pl-6 font-semibold text-slate-600">Peringkat</TableHead>
+                  <TableHead className="font-semibold text-slate-600">Siswa</TableHead>
+                  <TableHead className="font-semibold text-slate-600">Kelas</TableHead>
+                  <TableHead className="font-semibold text-slate-600">Nilai SAW (V)</TableHead>
+                  <TableHead className="text-center font-semibold text-slate-600">Persentase</TableHead>
+                  <TableHead className="text-right pr-6 font-semibold text-slate-600">
                     Predikat
                   </TableHead>
                 </TableRow>
@@ -643,14 +643,14 @@ export default function AdminLeaderboardPage() {
                     return (
                       <TableRow
                         key={entry.studentId}
-                        className="group/row transition-all duration-200 hover:bg-[#0d1d31] hover:shadow-md cursor-pointer border-b border-slate-100 group-hover:border-slate-800/60 last:border-0"
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                       >
                         <TableCell className="pl-6">
                           <RankBadge rank={entry.rank} />
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-200 text-sm transition-colors">
+                            <p className="font-semibold text-slate-900 group-hover/row:text-white text-sm transition-colors">
                               {entry.namaLengkap}
                             </p>
                             <p className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
@@ -659,24 +659,24 @@ export default function AdminLeaderboardPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 transition-colors">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
                             {entry.kelas}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900 group-hover/row:text-white group-hover:text-slate-100 tabular-nums transition-colors">
+                            <span className="font-semibold text-slate-900 group-hover/row:text-white tabular-nums transition-colors">
                               {entry.rawScore.toFixed(4)}
                             </span>
-                            <div className="w-16 bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
+                            <div className="w-16 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                               <div
-                                className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                                className="bg-[#1e3a8a] group-hover/row:bg-blue-400 h-full rounded-xs transition-all"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-semibold text-blue-700 group-hover/row:text-blue-400 tabular-nums transition-colors">
+                        <TableCell className="text-center font-semibold text-blue-700 group-hover/row:text-blue-300 tabular-nums transition-colors">
                           {entry.persentase}%
                         </TableCell>
                         <TableCell className="text-right pr-6">
