@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Trophy,
-  Sparkles,
+  PartyPopper,
   Download,
   Loader2,
   Medal,
@@ -340,70 +340,141 @@ export default function GuruLeaderboardPage() {
             </div>
           )}
 
-          <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-            {/* Centered Prestigious Masthead */}
-            <div className="pb-5 border-b border-slate-100 flex flex-col items-center text-center space-y-3">
-              {/* Trophy & Sparkles Ambient Badge */}
-              <div className="relative inline-flex items-center justify-center">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-amber-400/10 to-yellow-200/40 border border-amber-300/60 shadow-[0_0_20px_rgba(245,158,11,0.22)] flex items-center justify-center text-amber-500">
-                  <Trophy className="w-6 h-6 animate-pulse" />
+          <div className="print-area rounded-2xl border-2 border-amber-300/80 bg-white shadow-[0_4px_30px_rgba(245,158,11,0.09)] overflow-hidden">
+            {/* Top Championship Gold Ribbon Bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-yellow-300 via-amber-400 to-amber-500" />
+
+            <div className="p-5 sm:p-6 space-y-5">
+              {/* Centered Festive Prestigious Masthead */}
+              <div className="relative rounded-2xl bg-gradient-to-b from-amber-50/70 via-amber-50/25 to-slate-50/20 border border-amber-200/70 p-5 sm:p-6 pb-6 text-center space-y-4 overflow-hidden">
+                {/* Decorative Fireworks & Confetti SVGs (Background) */}
+                <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" aria-hidden="true">
+                  {/* Fireworks Burst - Left Corner */}
+                  <svg className="absolute -top-1 -left-1 w-24 h-24 sm:w-28 sm:h-28 opacity-60" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="2.5" fill="#f59e0b" />
+                    <line x1="50" y1="50" x2="18" y2="22" stroke="#ef4444" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="80" y2="20" stroke="#3b82f6" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="84" y2="60" stroke="#10b981" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="22" y2="76" stroke="#f59e0b" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="50" y2="8" stroke="#ec4899" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <circle cx="18" cy="22" r="2" fill="#ef4444" />
+                    <circle cx="80" cy="20" r="2" fill="#3b82f6" />
+                    <circle cx="84" cy="60" r="2" fill="#10b981" />
+                    <circle cx="22" cy="76" r="2" fill="#f59e0b" />
+                    <circle cx="50" cy="8" r="2" fill="#ec4899" />
+                  </svg>
+
+                  {/* Fireworks Burst - Right Corner */}
+                  <svg className="absolute -top-1 -right-1 w-24 h-24 sm:w-28 sm:h-28 opacity-60" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="2.5" fill="#3b82f6" />
+                    <line x1="50" y1="50" x2="22" y2="20" stroke="#f59e0b" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="82" y2="24" stroke="#ef4444" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="16" y2="58" stroke="#8b5cf6" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="74" y2="78" stroke="#10b981" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <line x1="50" y1="50" x2="50" y2="8" stroke="#f59e0b" strokeWidth="1.8" strokeDasharray="3 2" />
+                    <circle cx="22" cy="20" r="2" fill="#f59e0b" />
+                    <circle cx="82" cy="24" r="2" fill="#ef4444" />
+                    <circle cx="16" cy="58" r="2" fill="#8b5cf6" />
+                    <circle cx="74" cy="78" r="2" fill="#10b981" />
+                    <circle cx="50" cy="8" r="2" fill="#f59e0b" />
+                  </svg>
+
+                  {/* Confetti Ribbon Streamers & Dots */}
+                  <svg className="absolute inset-0 w-full h-full opacity-45" preserveAspectRatio="none" viewBox="0 0 500 140" fill="none">
+                    <path d="M 40 10 Q 55 25 45 42 T 52 75" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M 460 10 Q 445 25 455 42 T 448 75" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M 120 8 Q 135 20 130 36" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M 380 8 Q 365 20 370 36" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+                    <rect x="85" y="30" width="6" height="3" rx="1" fill="#ef4444" transform="rotate(25 85 30)" />
+                    <rect x="160" y="16" width="6" height="3" rx="1" fill="#3b82f6" transform="rotate(-30 160 16)" />
+                    <rect x="340" y="16" width="6" height="3" rx="1" fill="#f59e0b" transform="rotate(40 340 16)" />
+                    <rect x="415" y="30" width="6" height="3" rx="1" fill="#8b5cf6" transform="rotate(-15 415 30)" />
+                    <circle cx="100" cy="50" r="2" fill="#f59e0b" />
+                    <circle cx="180" cy="35" r="1.5" fill="#10b981" />
+                    <circle cx="320" cy="35" r="1.5" fill="#ef4444" />
+                    <circle cx="400" cy="50" r="2" fill="#3b82f6" />
+                  </svg>
                 </div>
-                <div className="absolute -top-1 -right-1 p-1 bg-amber-400 text-white rounded-full shadow-xs">
-                  <Sparkles className="w-3 h-3" />
+
+                {/* Central Trophy Medallion Flanked by Party Poppers (PURE GOLDEN TROPHY - NO AI SYMBOL) */}
+                <div className="relative flex items-center justify-center gap-3 sm:gap-6 pt-1">
+                  {/* Left Party Popper Horn */}
+                  <div
+                    className="p-2 sm:p-2.5 rounded-full bg-amber-100/90 border border-amber-300/80 text-amber-700 shadow-xs -rotate-12 hover:-rotate-45 transition-transform"
+                    title="Perayaan Prestasi!"
+                  >
+                    <PartyPopper className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                  </div>
+
+                  {/* Pure Golden Trophy Medallion */}
+                  <div className="relative inline-flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 p-0.5 shadow-[0_0_24px_rgba(245,158,11,0.4)] ring-4 ring-amber-100/90">
+                      <div className="w-full h-full rounded-[14px] bg-gradient-to-b from-amber-50 via-white to-amber-100 flex items-center justify-center">
+                        <Trophy className="w-7 h-7 text-amber-600 drop-shadow-xs" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Party Popper Horn (Flipped) */}
+                  <div
+                    className="p-2 sm:p-2.5 rounded-full bg-amber-100/90 border border-amber-300/80 text-amber-700 shadow-xs rotate-12 scale-x-[-1] hover:rotate-45 transition-transform"
+                    title="Perayaan Prestasi!"
+                  >
+                    <PartyPopper className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+                  </div>
                 </div>
-              </div>
 
-              {/* Title & Subtitle */}
-              <div className="space-y-1 max-w-xl">
-                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-                  {activeTab === "umum"
-                    ? "Tabel Peringkat Siswa Berprestasi"
-                    : `Peringkat Siswa Kelas ${activeTab}`}
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  Kalkulasi normalisasi matriks multi-kriteria real-time metode SAW
-                </p>
-              </div>
+                {/* Title & Subtitle */}
+                <div className="relative space-y-1 max-w-xl mx-auto">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                    {activeTab === "umum"
+                      ? "Tabel Peringkat Siswa Berprestasi"
+                      : `Peringkat Siswa Kelas ${activeTab}`}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Kalkulasi normalisasi matriks multi-kriteria real-time metode SAW
+                  </p>
+                </div>
 
-              {/* Centered Dual Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-0.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  Metode SAW Multi-Kriteria
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-full border border-amber-200/90 shadow-2xs">
-                  <Trophy className="w-3 h-3 text-amber-600" />
-                  Periode: {activePeriodeName}
-                </span>
-              </div>
+                {/* Centered Dual Badges */}
+                <div className="relative flex flex-wrap items-center justify-center gap-2 pt-0.5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    Metode SAW Multi-Kriteria
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-full border border-amber-300/90 shadow-2xs">
+                    <Trophy className="w-3 h-3 text-amber-600" />
+                    Periode: {activePeriodeName}
+                  </span>
+                </div>
 
-              {/* Centered Class Tabs */}
-              <div className="w-full pt-2 flex justify-center hide-on-print">
-                <Tabs
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-auto"
-                >
-                  <TabsList className="flex flex-wrap items-center justify-center h-auto p-1 bg-slate-100/90 rounded-full border border-slate-200/80 gap-1">
-                    <TabsTrigger
-                      value="umum"
-                      className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-xs transition-all"
-                    >
-                      Umum (Semua)
-                    </TabsTrigger>
-                    {classes.map((c) => (
+                {/* Centered Class Tabs */}
+                <div className="relative w-full pt-2 flex justify-center hide-on-print">
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="w-auto"
+                  >
+                    <TabsList className="flex flex-wrap items-center justify-center h-auto p-1 bg-white/90 backdrop-blur-xs rounded-full border border-amber-200/80 shadow-2xs gap-1">
                       <TabsTrigger
-                        key={c.id}
-                        value={c.namaKelas}
-                        className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-xs transition-all"
+                        value="umum"
+                        className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all"
                       >
-                        {c.namaKelas}
+                        Umum (Semua)
                       </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+                      {classes.map((c) => (
+                        <TabsTrigger
+                          key={c.id}
+                          value={c.namaKelas}
+                          className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all"
+                        >
+                          {c.namaKelas}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
-            </div>
             <div className="overflow-x-auto">
               {loading ? (
                 <div className="flex py-16 justify-center">
@@ -514,6 +585,7 @@ export default function GuruLeaderboardPage() {
                   </TableBody>
                 </Table>
               )}
+            </div>
             </div>
           </div>
         </div>
