@@ -53,7 +53,7 @@ export function PageHeader({
         </div>
 
         {children && (
-          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1 [&_.bg-white]:bg-white/5 [&_.text-slate-700]:text-slate-200 [&_.border-slate-200]:border-white/10 [&_.hover\:bg-slate-50:hover]:bg-white/10 [&_.hover\:text-slate-900:hover]:text-white [&_.text-slate-500]:text-slate-400 [&_button[data-variant=outline]]:bg-white/5 [&_button[data-variant=outline]]:border-white/10 [&_button[data-variant=outline]]:text-slate-200 [&_button[data-variant=outline]:hover]:border-amber-400/40 [&_button[data-variant=outline]:hover]:bg-white/10 transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1 [&_.bg-white]:bg-white/5 [&_.text-slate-700]:text-slate-200 [&_.border-slate-200]:border-white/10 [&_.hover\:bg-slate-50:hover]:bg-white/10 [&_.hover\:text-slate-900:hover]:text-white [&_.text-slate-500]:text-slate-400 [&_button[data-variant=outline]]:bg-white/5 [&_button[data-variant=outline]]:border-white/10 [&_button[data-variant=outline]]:text-slate-200 [&_button[data-variant=outline]:hover]:border-amber-400/40 [&_button[data-variant=outline]:hover]:bg-white/10 [&_[data-slot=select-icon]]:text-white [&_[data-slot=select-icon]]:bg-transparent transition-colors">
             {children}
           </div>
         )}

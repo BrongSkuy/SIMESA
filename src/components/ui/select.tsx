@@ -41,17 +41,18 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-full items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 shadow-xs transition-colors hover:border-slate-300 focus-visible:border-blue-600 focus-visible:ring-1 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-slate-400 data-[size=default]:h-9 data-[size=sm]:h-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex w-full items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 shadow-xs transition-colors hover:border-slate-300 focus-visible:border-blue-600 focus-visible:ring-1 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-slate-400 data-[size=default]:h-9 data-[size=sm]:h-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 appearance-none [&::-webkit-inner-spin-button]:appearance-none",
         className
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon
-        render={
-          <ChevronDownIcon className="pointer-events-none size-4 text-slate-400 shrink-0 transition-transform duration-150 data-[open]:rotate-180" />
-        }
-      />
+        data-slot="select-icon"
+        className="flex items-center justify-center bg-transparent p-0 border-0 shadow-none text-slate-400 data-[state=open]:rotate-180 transition-transform duration-150 shrink-0 group-hover:text-slate-600 [.bg-white\/5_&]:text-white [.bg-white\/10_&]:text-white [.bg-transparent_&]:text-white [.text-white_&]:text-white [.text-slate-200_&]:text-white"
+      >
+        <ChevronDownIcon className="pointer-events-none size-4 text-current shrink-0 bg-transparent" />
+      </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
 }
