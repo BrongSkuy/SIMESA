@@ -406,7 +406,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex items-center justify-between gap-2 sm:gap-2.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-transparent hover:bg-amber-400/5 border border-amber-400/40 hover:border-amber-400/80 hover:shadow-[0_0_15px_rgba(251,191,36,0.12)] transition-all focus:outline-none cursor-pointer w-auto max-w-[200px] sm:max-w-[240px] xl:w-56 shadow-xs group shrink-0"
+                className="flex items-center justify-between gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-2 rounded-2xl bg-transparent hover:bg-amber-400/5 border border-amber-400/40 hover:border-amber-400/80 hover:shadow-[0_0_15px_rgba(251,191,36,0.12)] transition-all focus:outline-none cursor-pointer w-auto max-w-[180px] min-[390px]:max-w-[210px] sm:max-w-[240px] xl:w-56 shadow-xs group shrink-0"
               >
                 <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                   <div className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 ring-1 ring-amber-400/20 group-hover:bg-amber-400/15 group-hover:border-amber-400/50 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 overflow-hidden relative shadow-xs transition-colors">
@@ -420,17 +420,17 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                       getInitials(user.nama)
                     )}
                   </div>
-                  <div className="hidden sm:block text-left leading-tight min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-amber-100 truncate max-w-[85px] sm:max-w-[110px] xl:max-w-[130px] transition-colors">
+                  <div className="block text-left leading-tight min-w-0">
+                    <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-amber-100 truncate max-w-[75px] min-[390px]:max-w-[100px] sm:max-w-[110px] xl:max-w-[130px] transition-colors">
                       {user.nama}
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs text-emerald-400 font-medium mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-emerald-400 font-medium mt-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                       <span className="truncate">{roleMeta.label}</span>
                     </div>
                   </div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300/80 group-hover:text-amber-300 shrink-0 transition-colors" />
+                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300/80 group-hover:text-amber-300 shrink-0 transition-colors" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
