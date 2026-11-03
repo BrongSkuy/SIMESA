@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Building2, Plus, Edit, Trash2, Loader2, Users, UserCheck } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Building2, Plus, Edit, Trash2, Loader2, Users, UserCheck, Search, Filter, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -47,6 +47,11 @@ export default function AdminKelasPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
+  // Filter & Search State
+  const [search, setSearch] = useState("");
+  const [filterTingkat, setFilterTingkat] = useState("all");
+  const [filterWali, setFilterWali] = useState("all");
+
   // Form State
   const [formName, setFormName] = useState("");
   const [formTingkat, setFormTingkat] = useState("");
@@ -72,6 +77,23 @@ export default function AdminKelasPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const filteredClasses = useMemo(() => {
+    const searchLow = search.toLowerCase();
+    return classes.filter((k) => {
+      const matchSearch =
+        !search ||
+        k.namaKelas.toLowerCase().includes(searchLow) ||
+        (k.waliKelas && k.waliKelas.toLowerCase().includes(searchLow));
+      const matchTingkat =
+        filterTingkat === "all" || k.tingkat === filterTingkat;
+      const matchWali =
+        filterWali === "all" ||
+        (filterWali === "assigned" && Boolean(k.waliKelas)) ||
+        (filterWali === "unassigned" && !k.waliKelas);
+      return matchSearch && matchTingkat && matchWali;
+    });
+  }, [classes, search, filterTingkat, filterWali]);
 
   const resetForm = () => {
     setFormName("");
@@ -387,6 +409,67 @@ export default function AdminKelasPage() {
         </Dialog>
       </PageHeader>
 
+      {/* Enterprise Filter Toolbar */}
+      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <Input
+            placeholder="Cari nama kelas atau wali kelas..."
+            className="pl-8.5 h-9 text-xs border-slate-200 bg-slate-50/50 focus:bg-white"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Filter className="h-3.5 w-3.5 text-slate-400" />
+            <span>Filter:</span>
+          </div>
+          <Select
+            value={filterTingkat}
+            onValueChange={(val) => setFilterTingkat(val || "all")}
+          >
+            <SelectTrigger className="w-[140px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Tingkat" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Tingkat</SelectItem>
+              <SelectItem value="10">Tingkat 10 (X)</SelectItem>
+              <SelectItem value="11">Tingkat 11 (XI)</SelectItem>
+              <SelectItem value="12">Tingkat 12 (XII)</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={filterWali}
+            onValueChange={(val) => setFilterWali(val || "all")}
+          >
+            <SelectTrigger className="w-[160px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Wali Kelas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status Wali</SelectItem>
+              <SelectItem value="assigned">Memiliki Wali</SelectItem>
+              <SelectItem value="unassigned">Belum Ada Wali</SelectItem>
+            </SelectContent>
+          </Select>
+          {(search || filterTingkat !== "all" || filterWali !== "all") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearch("");
+                setFilterTingkat("all");
+                setFilterWali("all");
+              }}
+              className="h-9 px-2.5 text-xs text-slate-500 hover:text-slate-900 gap-1 cursor-pointer"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </Button>
+          )}
+        </div>
+      </div>
+
       {classes.length === 0 ? (
         <EmptyState
           icon={Building2}
@@ -395,9 +478,13 @@ export default function AdminKelasPage() {
           actionLabel="Tambah Kelas"
           onAction={() => setDialogOpen(true)}
         />
+      ) : filteredClasses.length === 0 ? (
+        <div className="border border-slate-200 py-12 text-center text-xs text-slate-500 bg-white">
+          Tidak ada data kelas yang cocok dengan kriteria pencarian atau filter.
+        </div>
       ) : (
         <div className="border-y border-slate-200 divide-y divide-slate-200 sm:divide-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-px sm:bg-slate-200">
-          {classes.map((kelas) => (
+          {filteredClasses.map((kelas) => (
             <div
               key={kelas.id}
               className="bg-white p-5 hover:bg-[#091524] transition-all duration-200 group flex flex-col justify-between"

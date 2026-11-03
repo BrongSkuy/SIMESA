@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { GraduationCap, Plus, Search, Edit, Trash2, Loader2, Camera } from "lucide-react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { GraduationCap, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,8 @@ function getInitials(name: string): string {
 
 export default function AdminGuruPage() {
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterGender, setFilterGender] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -90,11 +92,20 @@ export default function AdminGuruPage() {
     fetchData();
   }, [fetchData]);
 
-  const filtered = teachers.filter(
-    (t) =>
-      t.namaLengkap.toLowerCase().includes(search.toLowerCase()) ||
-      t.nip.includes(search)
-  );
+  const filtered = useMemo(() => {
+    const searchLow = search.toLowerCase();
+    return teachers.filter((t) => {
+      const matchSearch =
+        !search ||
+        t.namaLengkap.toLowerCase().includes(searchLow) ||
+        t.nip.includes(search);
+      const matchStatus =
+        filterStatus === "all" || t.status === filterStatus;
+      const matchGender =
+        filterGender === "all" || t.jenisKelamin === filterGender;
+      return matchSearch && matchStatus && matchGender;
+    });
+  }, [teachers, search, filterStatus, filterGender]);
 
   const resetForm = () => {
     setFormNip("");
@@ -551,9 +562,9 @@ export default function AdminGuruPage() {
         </Dialog>
       </PageHeader>
 
-      {/* Search Toolbar */}
-      <div className="py-3.5 border-y border-slate-200">
-        <div className="relative max-w-md">
+      {/* Enterprise Filter Toolbar */}
+      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Cari nama guru atau NIP..."
@@ -561,6 +572,53 @@ export default function AdminGuruPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Filter className="h-3.5 w-3.5 text-slate-400" />
+            <span>Filter:</span>
+          </div>
+          <Select
+            value={filterStatus}
+            onValueChange={(val) => setFilterStatus(val || "all")}
+          >
+            <SelectTrigger className="w-[135px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="aktif">Aktif</SelectItem>
+              <SelectItem value="nonaktif">Nonaktif</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={filterGender}
+            onValueChange={(val) => setFilterGender(val || "all")}
+          >
+            <SelectTrigger className="w-[145px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Gender</SelectItem>
+              <SelectItem value="L">Laki-laki (L)</SelectItem>
+              <SelectItem value="P">Perempuan (P)</SelectItem>
+            </SelectContent>
+          </Select>
+          {(search || filterStatus !== "all" || filterGender !== "all") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearch("");
+                setFilterStatus("all");
+                setFilterGender("all");
+              }}
+              className="h-9 px-2.5 text-xs text-slate-500 hover:text-slate-900 gap-1 cursor-pointer"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </Button>
+          )}
         </div>
       </div>
 

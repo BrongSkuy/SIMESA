@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { BookOpen, Plus, Search, Edit, Trash2, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { BookOpen, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,8 @@ interface ClassOption {
 
 export default function AdminMapelPage() {
   const [search, setSearch] = useState("");
+  const [filterGuru, setFilterGuru] = useState("all");
+  const [filterKelas, setFilterKelas] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -92,12 +94,33 @@ export default function AdminMapelPage() {
     fetchData();
   }, [fetchData]);
 
-  const filtered = subjects.filter(
-    (m) =>
-      m.namaMapel.toLowerCase().includes(search.toLowerCase()) ||
-      (m.guruPengampu || "").toLowerCase().includes(search.toLowerCase()) ||
-      (m.kelasDiampu || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    const searchLow = search.toLowerCase();
+    return subjects.filter((m) => {
+      const matchSearch =
+        !search ||
+        m.namaMapel.toLowerCase().includes(searchLow) ||
+        (m.guruPengampu || "").toLowerCase().includes(searchLow) ||
+        (m.kelasDiampu || "").toLowerCase().includes(searchLow);
+
+      const matchGuru =
+        filterGuru === "all" ||
+        (filterGuru === "unassigned" && !m.guruPengampu) ||
+        m.guruPengampu === filterGuru ||
+        m.teacherId === filterGuru;
+
+      const matchKelas =
+        filterKelas === "all" ||
+        (m.kelasDiampu
+          ? m.kelasDiampu
+              .split(",")
+              .map((k) => k.trim().toLowerCase())
+              .includes(filterKelas.toLowerCase())
+          : false);
+
+      return matchSearch && matchGuru && matchKelas;
+    });
+  }, [subjects, search, filterGuru, filterKelas]);
 
   const resetForm = () => {
     setFormName("");
@@ -455,9 +478,9 @@ export default function AdminMapelPage() {
         </Dialog>
       </PageHeader>
 
-      {/* Search Toolbar */}
-      <div className="py-3.5 border-y border-slate-200">
-        <div className="relative max-w-md">
+      {/* Enterprise Filter Toolbar */}
+      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Cari mata pelajaran, guru pengampu, atau kelas..."
@@ -465,6 +488,60 @@ export default function AdminMapelPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <Filter className="h-3.5 w-3.5 text-slate-400" />
+            <span>Filter:</span>
+          </div>
+          <Select
+            value={filterGuru}
+            onValueChange={(val) => setFilterGuru(val || "all")}
+          >
+            <SelectTrigger className="w-[155px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Guru Pengampu" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Guru</SelectItem>
+              <SelectItem value="unassigned">Belum Ditentukan</SelectItem>
+              {teachers.map((t) => (
+                <SelectItem key={t.id} value={t.namaLengkap}>
+                  {t.namaLengkap}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filterKelas}
+            onValueChange={(val) => setFilterKelas(val || "all")}
+          >
+            <SelectTrigger className="w-[145px] h-9 text-xs border-slate-200">
+              <SelectValue placeholder="Alokasi Kelas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Kelas</SelectItem>
+              {classesList.map((k) => (
+                <SelectItem key={k.id} value={k.namaKelas}>
+                  Kelas {k.namaKelas}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {(search || filterGuru !== "all" || filterKelas !== "all") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearch("");
+                setFilterGuru("all");
+                setFilterKelas("all");
+              }}
+              className="h-9 px-2.5 text-xs text-slate-500 hover:text-slate-900 gap-1 cursor-pointer"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </Button>
+          )}
         </div>
       </div>
 
