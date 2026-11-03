@@ -87,7 +87,6 @@ interface SpkCriteriaItem {
 }
 
 type ChartMode = "harian" | "mingguan" | "bulanan";
-type ChartLayout = "stacked" | "grouped";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -152,7 +151,6 @@ export default function AdminDashboard() {
   const [criteriaList, setCriteriaList] = useState<SpkCriteriaItem[]>([]);
   const [spkValid, setSpkValid] = useState<boolean>(true);
   const [chartMode, setChartMode] = useState<ChartMode>("harian");
-  const [chartLayout, setChartLayout] = useState<ChartLayout>("stacked");
   const [selectedStudent, setSelectedStudent] =
     useState<SpkLeaderboardEntry | null>(null);
 
@@ -452,55 +450,23 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Toggle Format: Tumpuk vs Berdampingan */}
-                <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 group-hover:bg-slate-800/90 border border-slate-200/80 group-hover:border-slate-700/80 text-xs font-medium gap-0.5 transition-colors">
+              {/* Filter Rentang Periode */}
+              <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 group-hover:bg-slate-800/90 border border-slate-200/80 group-hover:border-slate-700/80 text-xs font-medium gap-0.5 transition-colors">
+                {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
                   <button
+                    key={mode}
                     type="button"
-                    onClick={() => setChartLayout("stacked")}
+                    onClick={() => setChartMode(mode)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
-                      chartLayout === "stacked"
+                      "px-3 py-1.5 rounded-lg capitalize transition-all text-xs cursor-pointer",
+                      chartMode === mode
                         ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
                         : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
                     )}
-                    title="Tampilan Tumpuk (Rapi, Terpusat & Akumulatif)"
                   >
-                    Tumpuk
+                    {mode}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setChartLayout("grouped")}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer",
-                      chartLayout === "grouped"
-                        ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
-                        : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
-                    )}
-                    title="Tampilan Berdampingan"
-                  >
-                    Berdampingan
-                  </button>
-                </div>
-
-                {/* Filter Rentang Periode */}
-                <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 group-hover:bg-slate-800/90 border border-slate-200/80 group-hover:border-slate-700/80 text-xs font-medium gap-0.5 transition-colors">
-                  {(["harian", "mingguan", "bulanan"] as ChartMode[]).map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => setChartMode(mode)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg capitalize transition-all text-xs cursor-pointer",
-                        chartMode === mode
-                          ? "bg-white text-slate-900 group-hover:bg-slate-700 group-hover:text-white font-semibold shadow-xs"
-                          : "text-slate-600 group-hover:text-slate-400 hover:text-slate-900 hover:bg-white/50"
-                      )}
-                    >
-                      {mode}
-                    </button>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
 
@@ -525,9 +491,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <span className="text-[11px] text-slate-400 group-hover:text-slate-400 font-normal transition-colors">
-                {chartLayout === "stacked"
-                  ? "Format tumpuk: total presensi per tanggal"
-                  : "Format berdampingan: perbandingan kategori"}
+                Perbandingan jumlah per kategori kehadiran
               </span>
             </div>
 
@@ -537,8 +501,8 @@ export default function AdminDashboard() {
                   <BarChart
                     data={chartSeries}
                     margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
-                    barGap={chartLayout === "grouped" ? 2 : 0}
-                    barCategoryGap={chartLayout === "grouped" ? "24%" : "32%"}
+                    barGap={3}
+                    barCategoryGap="22%"
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.18)" />
                     <XAxis
@@ -558,33 +522,29 @@ export default function AdminDashboard() {
                       dataKey="hadir"
                       name="Hadir"
                       fill="#10B981"
-                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                      maxBarSize={14}
+                      radius={[3, 3, 0, 0]}
                     />
                     <Bar
                       dataKey="izin"
                       name="Izin"
                       fill="#F59E0B"
-                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                      maxBarSize={14}
+                      radius={[3, 3, 0, 0]}
                     />
                     <Bar
                       dataKey="sakit"
                       name="Sakit"
                       fill="#6366F1"
-                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                      maxBarSize={14}
+                      radius={[3, 3, 0, 0]}
                     />
                     <Bar
                       dataKey="alfa"
                       name="Alfa"
                       fill="#F43F5E"
-                      stackId={chartLayout === "stacked" ? "presensi" : undefined}
-                      maxBarSize={chartLayout === "stacked" ? 28 : 12}
-                      radius={chartLayout === "grouped" ? [2, 2, 0, 0] : undefined}
+                      maxBarSize={14}
+                      radius={[3, 3, 0, 0]}
                     />
                   </BarChart>
                 </ResponsiveContainer>
