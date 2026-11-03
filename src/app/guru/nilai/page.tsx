@@ -812,7 +812,7 @@ export default function GuruNilaiPage() {
                                         },
                                       }))
                                     }
-                                    className="w-20 h-8 text-center font-mono text-xs font-semibold group-hover/row:bg-slate-900/90 group-hover/row:border-slate-700 group-hover/row:text-white transition-colors"
+                                    className="w-20 h-8 text-center font-mono text-xs font-semibold group-hover/row:bg-slate-900/90 group-hover/row:border-slate-700 group-hover/row:text-white group-hover/row:[color-scheme:dark] transition-colors"
                                   />
                                 </div>
                               </td>

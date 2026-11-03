@@ -222,7 +222,7 @@ export default function AdminSpkPage() {
                       onChange={(e) =>
                         updateBobot(c.id, parseInt(e.target.value) || 0)
                       }
-                      className="h-10 text-center text-lg font-mono font-bold text-slate-900 group-hover:text-white group-hover:bg-slate-900/90 group-hover:border-slate-700 w-24 transition-colors"
+                      className="h-10 text-center text-lg font-mono font-bold text-slate-900 group-hover:text-white group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:[color-scheme:dark] w-24 transition-colors"
                     />
                     <span className="text-sm font-mono font-semibold text-slate-500 group-hover:text-slate-400 transition-colors">
                       %

@@ -155,3 +155,33 @@
   color: #991B1B;
   border: 1px solid #FECACA;
 }
+
+/* Number Input Stepper Spin Buttons: Eliminate white square & render crisp white arrows on dark hover */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  background: transparent !important;
+}
+
+/* When table rows, cards, or dark containers are hovered or active, make arrows crisp white */
+.group\/row:hover input[type="number"],
+tr:hover input[type="number"],
+.dark input[type="number"],
+[data-theme="dark"] input[type="number"],
+[class*="bg-slate-900"] input[type="number"],
+[class*="bg-[#091524]"] input[type="number"] {
+  color-scheme: dark !important;
+}
+
+.group\/row:hover input[type="number"]::-webkit-inner-spin-button,
+.group\/row:hover input[type="number"]::-webkit-outer-spin-button,
+tr:hover input[type="number"]::-webkit-inner-spin-button,
+tr:hover input[type="number"]::-webkit-outer-spin-button,
+.dark input[type="number"]::-webkit-inner-spin-button,
+.dark input[type="number"]::-webkit-outer-spin-button,
+[data-theme="dark"] input[type="number"]::-webkit-inner-spin-button,
+[data-theme="dark"] input[type="number"]::-webkit-outer-spin-button,
+[class*="bg-slate-900"] input[type="number"]::-webkit-inner-spin-button,
+[class*="bg-[#091524]"] input[type="number"]::-webkit-inner-spin-button {
+  background: transparent !important;
+  filter: brightness(2.5) contrast(1.2);
+}
