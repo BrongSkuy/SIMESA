@@ -144,109 +144,114 @@ export default function SiswaDashboard() {
   return (
     <div className="space-y-6">
       {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
-      <section className="-mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-8 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs space-y-5">
-        {/* Header Info Row - Clean & Minimalist */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-                <LayoutDashboard className="w-5 h-5 text-blue-400 shrink-0" />
-                <span>Ringkasan Akademik Siswa</span>
-              </h1>
-              <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-0.5 text-xs font-semibold text-blue-300 border border-white/10 shadow-xs">
-                Portal Siswa
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-blue-200/70">
-              Selamat datang, <strong className="text-white">{profile.namaLengkap}</strong> · Pantau presensi dan capaian evaluasi semester Anda
-            </p>
-          </div>
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs space-y-6">
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Link href="/siswa/absensi">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 bg-white/5 border-white/10 text-slate-200 hover:bg-white/10 hover:border-amber-400/40 hover:text-white transition-all cursor-pointer"
-              >
-                <CalendarCheck className="h-3.5 w-3.5 text-amber-300" /> Riwayat Absensi
-              </Button>
-            </Link>
-            <Link href="/siswa/nilai">
-              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 shadow-xs hover:shadow-md transition-all cursor-pointer">
-                <ClipboardList className="h-3.5 w-3.5 text-blue-100" /> Transkrip Nilai
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Student Profile Info Card - Sleek Glassmorphism */}
-        <div className="p-4 sm:p-5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-amber-400/10 border border-amber-400/30 ring-1 ring-amber-400/20 flex items-center justify-center text-amber-300 text-sm font-bold shrink-0 shadow-xs">
-              {initials}
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  Siswa Aktif
-                </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
-                  NIS: {profile.nis}
+        <div className="relative z-10 space-y-6">
+          {/* Header Info Row - Centered Executive Layout */}
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-3.5">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2.5 drop-shadow-xs">
+                  <LayoutDashboard className="w-6 h-6 text-blue-400 shrink-0" />
+                  <span>Ringkasan Akademik Siswa</span>
+                </h1>
+                <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-blue-300 border border-white/10 shadow-xs">
+                  Portal Siswa
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mt-1">
-                {profile.namaLengkap}
-              </h2>
+              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
+                Selamat datang, <strong className="text-white">{profile.namaLengkap}</strong> · Pantau presensi dan capaian evaluasi semester Anda
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <Link href="/siswa/absensi">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 bg-white/5 border-white/10 text-slate-200 hover:bg-white/10 hover:border-amber-400/40 hover:text-white transition-all cursor-pointer"
+                >
+                  <CalendarCheck className="h-3.5 w-3.5 text-amber-300" /> Riwayat Absensi
+                </Button>
+              </Link>
+              <Link href="/siswa/nilai">
+                <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 shadow-xs hover:shadow-md transition-all cursor-pointer">
+                  <ClipboardList className="h-3.5 w-3.5 text-blue-100" /> Transkrip Nilai
+                </Button>
+              </Link>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 text-blue-300 border border-white/10">
-              Kelas {profile.kelas}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-white/5 text-slate-300 border border-white/10">
-              Angkatan {profile.angkatan}
-            </span>
-          </div>
-        </div>
+          {/* Student Profile Info Card - Sleek Glassmorphism */}
+          <div className="p-4 sm:p-5 rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-amber-400/10 border border-amber-400/30 ring-1 ring-amber-400/20 flex items-center justify-center text-amber-300 text-sm font-bold shrink-0 shadow-xs">
+                {initials}
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    Siswa Aktif
+                  </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
+                    NIS: {profile.nis}
+                  </span>
+                </div>
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mt-1">
+                  {profile.namaLengkap}
+                </h2>
+              </div>
+            </div>
 
-        {/* 3 KPI Cards - Sleek Glassmorphism Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Persentase Kehadiran"
-            value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
-            icon={CalendarCheck}
-            color="emerald"
-            footerLeft="Akumulasi semester aktif"
-            footerRight="Presensi"
-          />
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Total Pertemuan Hadir"
-            value={stats?.totalHadir ?? 0}
-            icon={Trophy}
-            color="blue"
-            footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
-            footerRight="Tercatat"
-          />
-          <StatCard
-            variant="dark"
-            className="rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.08] transition-all duration-200 cursor-pointer shadow-xs"
-            title="Ketidakhadiran"
-            value={
-              stats
-                ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
-                : 0
-            }
-            icon={Medal}
-            color="amber"
-            footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
-            footerRight="Rincian"
-          />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 text-blue-300 border border-white/10">
+                Kelas {profile.kelas}
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-white/5 text-slate-300 border border-white/10">
+                Angkatan {profile.angkatan}
+              </span>
+            </div>
+          </div>
+
+          {/* 3 KPI Cards - Sleek Glassmorphism Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Persentase Kehadiran"
+              value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
+              icon={CalendarCheck}
+              color="emerald"
+              footerLeft="Akumulasi semester aktif"
+              footerRight="Presensi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Total Pertemuan Hadir"
+              value={stats?.totalHadir ?? 0}
+              icon={Trophy}
+              color="blue"
+              footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
+              footerRight="Tercatat"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="Ketidakhadiran"
+              value={
+                stats
+                  ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
+                  : 0
+              }
+              icon={Medal}
+              color="amber"
+              footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
+              footerRight="Rincian"
+            />
+          </div>
         </div>
       </section>
 
