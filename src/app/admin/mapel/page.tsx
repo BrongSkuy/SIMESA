@@ -269,7 +269,7 @@ export default function AdminMapelPage() {
       <PageHeader
         title="Mata Pelajaran"
         badge={`${subjects.length} Mapel`}
-        description="Kurikulum mata pelajaran, guru pengampu, dan distribusi rombongan belajar."
+        description="Kurikulum mata pelajaran, guru pengampu, dan distribusi kelas."
         icon={BookOpen}
       >
         <Dialog

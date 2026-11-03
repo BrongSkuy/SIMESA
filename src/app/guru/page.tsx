@@ -115,7 +115,7 @@ export default function GuruDashboard() {
               value={data?.totalKelasDiampu ?? 0}
               icon={Users}
               color="blue"
-              footerLeft="Rombongan belajar aktif"
+              footerLeft="Kelas aktif mengajar"
               footerRight="Terjadwal"
             />
             <StatCard
@@ -151,11 +151,11 @@ export default function GuruDashboard() {
                 Daftar Kelas yang Diampu
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Status presensi harian dan alokasi mata pelajaran per rombel
+                Status presensi harian dan alokasi mata pelajaran per kelas
               </p>
             </div>
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-              {classes.length} Rombel
+              {classes.length} Kelas
             </span>
           </div>
 

@@ -268,7 +268,7 @@ export default function AdminDashboard() {
         { Metrik: "Periode Akademik", Nilai: stats.semesterDisplay || stats.tahunAjaran },
         { Metrik: "Total Siswa Aktif", Nilai: stats.totalSiswa },
         { Metrik: "Total Guru Pengajar", Nilai: stats.totalGuru },
-        { Metrik: "Total Rombel Kelas", Nilai: stats.totalKelas ?? 0 },
+        { Metrik: "Total Kelas", Nilai: stats.totalKelas ?? 0 },
         { Metrik: "Kehadiran Terkini (%)", Nilai: `${stats.kehadiranHariIni}%` },
         { Metrik: "Rata-rata Kehadiran Semester (%)", Nilai: `${stats.avgAttendance ?? 0}%` },
       ];
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
               icon={Users}
               color="blue"
               footerLeft={
-                stats.totalKelas ? `${stats.totalKelas} Rombongan Belajar` : "Siswa Terdaftar"
+                stats.totalKelas ? `${stats.totalKelas} Kelas` : "Siswa Terdaftar"
               }
               footerRight={
                 stats.totalSiswa > 0 && stats.totalKelas

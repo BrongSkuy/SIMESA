@@ -176,7 +176,7 @@ export default function AdminRekapPage() {
       <PageHeader
         title="Rekapitulasi Kehadiran & Nilai"
         badge="Analitik Kelas"
-        description="Pantau matriks akumulasi presensi dan perolehan nilai kriteria SPK per rombongan belajar"
+        description="Pantau matriks akumulasi presensi dan perolehan nilai kriteria SPK per kelas"
         icon={BarChart3}
       >
         <Button
@@ -219,7 +219,7 @@ export default function AdminRekapPage() {
                     icon={Users}
                     color="blue"
                     footerLeft="Peserta didik terdaftar"
-                    footerRight="Rombel Aktif"
+                    footerRight="Kelas Aktif"
                   />
                   <StatCard
                     title="Rata-rata Kehadiran"

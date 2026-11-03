@@ -592,7 +592,7 @@ export default function GuruAbsensiPage() {
       <PageHeader
         title="Presensi & Absensi Siswa"
         badge="Portal Guru"
-        description="Input kehadiran siswa spesifik pada jam pelajaran atau rombel perwalian yang Anda ampu"
+        description="Input kehadiran siswa spesifik pada jam pelajaran atau kelas perwalian yang Anda ampu"
         icon={ClipboardCheck}
       >
         {showGrid && (

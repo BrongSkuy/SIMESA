@@ -187,8 +187,8 @@ export default function AdminKelasPage() {
     <div className="space-y-6">
       <PageHeader
         title="Data Kelas"
-        badge={`${classes.length} Rombel`}
-        description="Kelola rombongan belajar, tingkat kelas, dan alokasi wali kelas."
+        badge={`${classes.length} Kelas`}
+        description="Kelola daftar kelas, tingkat kelas, dan alokasi wali kelas."
         icon={Building2}
       >
         <Dialog
@@ -212,7 +212,7 @@ export default function AdminKelasPage() {
                 Tambah Kelas Baru
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
-                Isi informasi rombongan belajar yang akan dibuat.
+                Isi informasi kelas yang akan dibuat.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
@@ -303,7 +303,7 @@ export default function AdminKelasPage() {
                 Edit Data Kelas
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
-                Perbarui informasi nama rombel, tingkat, atau wali kelas.
+                Perbarui informasi nama kelas, tingkat, atau wali kelas.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
@@ -391,7 +391,7 @@ export default function AdminKelasPage() {
         <EmptyState
           icon={Building2}
           title="Belum Ada Data Kelas"
-          description="Tambahkan rombongan belajar pertama untuk mulai mengalokasikan siswa dan jadwal absensi."
+          description="Tambahkan kelas pertama untuk mulai mengalokasikan siswa dan jadwal absensi."
           actionLabel="Tambah Kelas"
           onAction={() => setDialogOpen(true)}
         />
@@ -442,7 +442,7 @@ export default function AdminKelasPage() {
                   onClick={() => openEdit(kelas)}
                 >
                   <Edit className="h-3.5 w-3.5 text-blue-600 group-hover:text-blue-400" />
-                  Edit Rombel
+                  Edit Kelas
                 </Button>
                 <Button
                   variant="destructive"

@@ -84,7 +84,7 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
       },
       {
         label: "Data Kelas",
-        description: "Rombongan belajar dan wali kelas",
+        description: "Daftar kelas dan wali kelas",
         href: "/admin/kelas",
         icon: Building2,
       },

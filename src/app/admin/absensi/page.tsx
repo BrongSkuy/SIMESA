@@ -538,7 +538,7 @@ export default function AdminAbsensiPage() {
       <PageHeader
         title="Presensi & Absensi Siswa"
         badge="Operasional"
-        description="Input dan kelola kehadiran harian siswa per rombongan belajar dan mata pelajaran"
+        description="Input dan kelola kehadiran harian siswa per kelas dan mata pelajaran"
         icon={ClipboardCheck}
       >
         {showGrid && (
@@ -590,7 +590,7 @@ export default function AdminAbsensiPage() {
         icon={ClipboardCheck}
         eyebrow="Langkah 1 dari 2"
         title="Mulai Sesi Presensi Siswa"
-        description="Pilih rombongan belajar, mata pelajaran, dan tanggal pertemuan untuk membuka lembar pencatatan kehadiran."
+        description="Pilih kelas, mata pelajaran, dan tanggal pertemuan untuk membuka lembar pencatatan kehadiran."
         submitLabel="Buka Lembar Presensi"
         onSubmit={handleLoadGrid}
         loading={loading}
@@ -611,7 +611,7 @@ export default function AdminAbsensiPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-700">
-              Kelas / Rombel
+              Kelas
             </Label>
             <Select
               value={selectedKelas}

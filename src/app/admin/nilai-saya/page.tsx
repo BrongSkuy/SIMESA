@@ -191,7 +191,7 @@ export default function AdminNilaiSayaPage() {
         icon={ClipboardList}
         eyebrow="Langkah 1 dari 2"
         title="Pilih Siswa untuk Membuka Transkrip"
-        description="Pilih rombongan belajar dan nama siswa untuk memuat rincian nilai tugas, UTS, UAS, persentase kehadiran, dan akumulasi skor SPK SAW."
+        description="Pilih kelas dan nama siswa untuk memuat rincian nilai tugas, UTS, UAS, persentase kehadiran, dan akumulasi skor SPK SAW."
         submitLabel="Tampilkan Transkrip Siswa"
         onSubmit={handleFetchScores}
         loading={loading}
