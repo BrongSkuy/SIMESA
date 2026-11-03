@@ -258,6 +258,69 @@ export default function AdminLeaderboardPage() {
     window.print();
   };
 
+  // Ekspor daftar penilaian kosong ke Excel (.xlsx) dengan kop formal
+  const handleExportMissingExcel = () => {
+    if (!validation?.missing || validation.missing.length === 0) {
+      toast.error("Tidak ada data penilaian kosong untuk diunduh.");
+      return;
+    }
+
+    const periode = publishStatus?.periode || "Semester Aktif";
+    const exportTime = new Date().toLocaleString("id-ID", {
+      dateStyle: "full",
+      timeStyle: "short",
+    });
+
+    // Susun data tabel dengan kop formal
+    const sheetData: (string | number)[][] = [
+      ["DAFTAR PENILAIAN BELUM LENGKAP (SPK SAW)"],
+      ["SMK PENERBANGAN DIRGANTARA — SIMESA"],
+      [`Periode / Semester: ${periode}`],
+      [`Waktu Ekspor: ${exportTime} WIB`],
+      [
+        "Catatan: Mohon Bapak/Ibu Guru pengajar atau Wali Kelas melengkapi item penilaian berikut sebelum perilisan leaderboard resmi.",
+      ],
+      [], // Baris kosong pemisah
+      [
+        "No",
+        "Siswa / Cakupan",
+        "Kelas",
+        "Kriteria / Mata Pelajaran",
+        "Status / Penyebab",
+      ],
+    ];
+
+    validation.missing.forEach((item, index) => {
+      sheetData.push([
+        index + 1,
+        item.studentName,
+        item.kelas,
+        item.criteriaName,
+        item.reason,
+      ]);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Set lebar kolom yang proporsional
+    worksheet["!cols"] = [
+      { wch: 6 },  // No
+      { wch: 28 }, // Siswa
+      { wch: 14 }, // Kelas
+      { wch: 38 }, // Kriteria / Mata Pelajaran
+      { wch: 35 }, // Status / Penyebab
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Penilaian Kosong");
+
+    const safePeriode = periode.replace(/[/\\?%*:|"<> ]/g, "_");
+    const fileName = `Daftar_Penilaian_Kosong_SMK_Dirgantara_${safePeriode}.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
+    toast.success("Berhasil mengunduh daftar penilaian kosong (.xlsx)!");
+  };
+
   const handleUploadArsip = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -548,12 +611,33 @@ export default function AdminLeaderboardPage() {
                     </Table>
                   </div>
 
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={() => setShowMissingDialog(false)}
-                    >
-                      Tutup Rincian
-                    </AlertDialogAction>
+                  <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                    <div className="text-xs text-slate-500 text-left">
+                      Total:{" "}
+                      <span className="font-semibold text-slate-800 font-mono">
+                        {validation?.missing?.length || 0}
+                      </span>{" "}
+                      item belum lengkap
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-xs gap-1.5 border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-medium"
+                        onClick={handleExportMissingExcel}
+                        disabled={!validation?.missing || validation.missing.length === 0}
+                      >
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                        Unduh Excel (.xlsx)
+                      </Button>
+                      <AlertDialogAction
+                        onClick={() => setShowMissingDialog(false)}
+                        className="text-xs"
+                      >
+                        Tutup Rincian
+                      </AlertDialogAction>
+                    </div>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

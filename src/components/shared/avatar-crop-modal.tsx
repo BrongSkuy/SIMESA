@@ -333,3 +333,4 @@ export function AvatarCropModal({
     </Dialog>
   );
 }
+
