@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { compressImage } from "@/lib/image-compress";
+import { AvatarCropModal } from "@/components/shared/avatar-crop-modal";
 
 function getInitials(name: string): string {
   return (
@@ -78,6 +78,10 @@ export default function ProfilSiswaPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
+  // Avatar Crop Modal state
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [selectedImageSrc, setSelectedImageSrc] = useState<string | null>(null);
+
   // Password state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -97,20 +101,36 @@ export default function ProfilSiswaPage() {
     }
   }, [session, displayName, photoPreview]);
 
-  // Handle Photo Upload
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Photo Selection -> Buka Interactive Crop Modal
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      toast.error("File yang dipilih harus berupa gambar.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setSelectedImageSrc(event.target?.result as string);
+      setCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Simpan hasil potongan foto profil ke server
+  const handleApplyCroppedPhoto = async (croppedDataUrl: string) => {
     setUploadingPhoto(true);
     try {
-      const compressedDataUrl = await compressImage(file, 360, 0.85);
-      setPhotoPreview(compressedDataUrl);
+      setPhotoPreview(croppedDataUrl);
 
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: compressedDataUrl }),
+        body: JSON.stringify({ image: croppedDataUrl }),
       });
 
       if (!res.ok) {
@@ -119,13 +139,14 @@ export default function ProfilSiswaPage() {
       }
 
       toast.success("Foto profil berhasil diperbarui!");
+      setCropModalOpen(false);
+      setSelectedImageSrc(null);
       window.location.reload();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal mengunggah foto";
       toast.error(msg);
     } finally {
       setUploadingPhoto(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -300,6 +321,18 @@ export default function ProfilSiswaPage() {
               accept="image/png, image/jpeg, image/jpg, image/webp"
               className="hidden"
               onChange={handlePhotoChange}
+            />
+
+            {/* Modal Dialog Interaktif untuk Penyesuaian Foto Profil (Crop, Zoom, Geser) */}
+            <AvatarCropModal
+              open={cropModalOpen}
+              imageSrc={selectedImageSrc}
+              onClose={() => {
+                setCropModalOpen(false);
+                setSelectedImageSrc(null);
+              }}
+              onApply={handleApplyCroppedPhoto}
+              isSaving={uploadingPhoto}
             />
 
             {/* Detail Kredensial & Peran */}
