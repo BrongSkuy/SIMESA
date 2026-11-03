@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Trophy,
+  Sparkles,
   Download,
   Loader2,
   Medal,
@@ -48,27 +49,36 @@ interface ClassRow {
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-100 text-amber-800 font-bold text-xs">
+      <span
+        title="Juara 1 (Emas)"
+        className="relative inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 text-white font-black text-xs shadow-[0_0_12px_rgba(245,158,11,0.45)] ring-2 ring-amber-300"
+      >
         1
       </span>
     );
   }
   if (rank === 2) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-200 text-slate-800 font-bold text-xs">
+      <span
+        title="Juara 2 (Perak)"
+        className="relative inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-b from-slate-200 via-slate-300 to-slate-500 text-white font-bold text-xs shadow-xs ring-2 ring-slate-300"
+      >
         2
       </span>
     );
   }
   if (rank === 3) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-50 text-amber-700 font-bold text-xs">
+      <span
+        title="Juara 3 (Perunggu)"
+        className="relative inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-b from-amber-600 via-amber-700 to-amber-900 text-white font-bold text-xs shadow-xs ring-2 ring-amber-400/80"
+      >
         3
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 text-slate-600 font-medium text-xs">
+    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-600 font-semibold text-xs border border-slate-200/80">
       {rank}
     </span>
   );
@@ -330,29 +340,63 @@ export default function GuruLeaderboardPage() {
             </div>
           )}
 
-          <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="pb-3 border-b border-slate-100">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="text-sm font-semibold text-slate-900">
-                    {activeTab === "umum"
-                      ? "Peringkat Keseluruhan (Semua Kelas)"
-                      : `Peringkat Kelas ${activeTab}`}
-                  </CardTitle>
-                  <CardDescription className="text-xs text-slate-500 mt-0.5">
-                    Periode {activePeriodeName}
-                  </CardDescription>
+          <div className="print-area rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
+            {/* Centered Prestigious Masthead */}
+            <div className="pb-5 border-b border-slate-100 flex flex-col items-center text-center space-y-3">
+              {/* Trophy & Sparkles Ambient Badge */}
+              <div className="relative inline-flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-amber-400/10 to-yellow-200/40 border border-amber-300/60 shadow-[0_0_20px_rgba(245,158,11,0.22)] flex items-center justify-center text-amber-500">
+                  <Trophy className="w-6 h-6 animate-pulse" />
                 </div>
+                <div className="absolute -top-1 -right-1 p-1 bg-amber-400 text-white rounded-full shadow-xs">
+                  <Sparkles className="w-3 h-3" />
+                </div>
+              </div>
 
+              {/* Title & Subtitle */}
+              <div className="space-y-1 max-w-xl">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                  {activeTab === "umum"
+                    ? "Tabel Peringkat Siswa Berprestasi"
+                    : `Peringkat Siswa Kelas ${activeTab}`}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                  Kalkulasi normalisasi matriks multi-kriteria real-time metode SAW
+                </p>
+              </div>
+
+              {/* Centered Dual Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  Metode SAW Multi-Kriteria
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-full border border-amber-200/90 shadow-2xs">
+                  <Trophy className="w-3 h-3 text-amber-600" />
+                  Periode: {activePeriodeName}
+                </span>
+              </div>
+
+              {/* Centered Class Tabs */}
+              <div className="w-full pt-2 flex justify-center hide-on-print">
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
-                  className="hide-on-print"
+                  className="w-auto"
                 >
-                  <TabsList className="flex-wrap h-auto">
-                    <TabsTrigger value="umum">Umum (Semua)</TabsTrigger>
+                  <TabsList className="flex flex-wrap items-center justify-center h-auto p-1 bg-slate-100/90 rounded-full border border-slate-200/80 gap-1">
+                    <TabsTrigger
+                      value="umum"
+                      className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-xs transition-all"
+                    >
+                      Umum (Semua)
+                    </TabsTrigger>
                     {classes.map((c) => (
-                      <TabsTrigger key={c.id} value={c.namaKelas}>
+                      <TabsTrigger
+                        key={c.id}
+                        value={c.namaKelas}
+                        className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-xs transition-all"
+                      >
                         {c.namaKelas}
                       </TabsTrigger>
                     ))}
@@ -387,19 +431,34 @@ export default function GuruLeaderboardPage() {
                           100,
                           Math.max(0, Math.round(entry.rawScore * 100))
                         );
+                        const rowAccent =
+                          entry.rank === 1
+                            ? "bg-amber-50/40"
+                            : entry.rank === 2
+                            ? "bg-slate-50/60"
+                            : entry.rank === 3
+                            ? "bg-amber-50/20"
+                            : "";
                         return (
                           <TableRow
                             key={entry.studentId}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                            className={`group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0 ${rowAccent}`}
                           >
                             <TableCell className="pl-6">
                               <RankBadge rank={entry.rank} />
                             </TableCell>
                             <TableCell>
                               <div>
-                                <p className="font-semibold text-slate-900 group-hover/row:text-white text-sm transition-colors">
-                                  {entry.namaLengkap}
-                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-semibold text-slate-900 group-hover/row:text-white text-sm transition-colors">
+                                    {entry.namaLengkap}
+                                  </p>
+                                  {entry.rank === 1 && (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-sm bg-amber-100 text-amber-800 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 border border-amber-300/80 transition-colors">
+                                      Top 1
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
                                   NIS: {entry.nis}
                                 </p>
@@ -415,9 +474,15 @@ export default function GuruLeaderboardPage() {
                                 <span className="font-semibold text-slate-900 group-hover/row:text-white tabular-nums transition-colors">
                                   {entry.rawScore.toFixed(4)}
                                 </span>
-                                <div className="w-16 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
+                                <div className="w-16 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block transition-colors">
                                   <div
-                                    className="bg-[#1e3a8a] group-hover/row:bg-blue-400 h-full rounded-xs transition-all"
+                                    className={`h-full rounded-full transition-all ${
+                                      entry.rank === 1
+                                        ? "bg-gradient-to-r from-amber-400 to-amber-600 group-hover/row:from-amber-300 group-hover/row:to-amber-500"
+                                        : entry.rank <= 3
+                                        ? "bg-gradient-to-r from-blue-600 to-amber-500 group-hover/row:from-blue-400 group-hover/row:to-amber-400"
+                                        : "bg-[#1e3a8a] group-hover/row:bg-blue-400"
+                                    }`}
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
