@@ -38,8 +38,6 @@ export function LeaderboardPagination({
 
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
-  const startItem = (safePage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(safePage * itemsPerPage, totalItems);
 
   // Build visible page numbers with ellipsis for large datasets (e.g., 100+ students)
   const getPageNumbers = (): (number | "ellipsis")[] => {
@@ -65,19 +63,7 @@ export function LeaderboardPagination({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="hide-on-print flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 px-2 border-t border-slate-100">
-      <p className="text-xs text-slate-500 tabular-nums">
-        Menampilkan peringkat{" "}
-        <span className="font-semibold text-slate-800">
-          {startItem}–{endItem}
-        </span>{" "}
-        dari <span className="font-semibold text-slate-800">{totalItems}</span>{" "}
-        siswa{" "}
-        <span className="text-slate-400">
-          (Maks. {itemsPerPage}/halaman)
-        </span>
-      </p>
-
+    <div className="hide-on-print flex items-center justify-center pt-4 px-2 border-t border-slate-100">
       <div className="flex items-center gap-1.5">
         <Button
           type="button"
