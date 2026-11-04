@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import {
+  LeaderboardPagination,
+  LEADERBOARD_ITEMS_PER_PAGE,
+} from "@/components/LeaderboardCard";
+import {
   Table,
   TableBody,
   TableCell,
@@ -78,6 +82,7 @@ export default function SiswaLeaderboardPage() {
   const [data, setData] = useState<SpkResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<"umum" | "kelas">("umum");
+  const [currentPage, setCurrentPage] = useState(1);
   const [myData, setMyData] = useState<{
     nama: string;
     kelas: string;
@@ -90,6 +95,7 @@ export default function SiswaLeaderboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setCurrentPage(1);
       setLoading(true);
       try {
         let profile = myData;
@@ -343,7 +349,12 @@ export default function SiswaLeaderboardPage() {
                     </TableHeader>
                     <TableBody>
                       {data.length > 0 ? (
-                        data.map((entry) => {
+                        data
+                          .slice(
+                            (currentPage - 1) * LEADERBOARD_ITEMS_PER_PAGE,
+                            currentPage * LEADERBOARD_ITEMS_PER_PAGE
+                          )
+                          .map((entry) => {
                           const isMe =
                             myData && entry.studentId === myData.studentId;
                           const pct = Math.min(
@@ -409,6 +420,14 @@ export default function SiswaLeaderboardPage() {
                     </TableBody>
                   </Table>
                 </div>
+                {!loading && data.length > 0 && (
+                  <LeaderboardPagination
+                    currentPage={currentPage}
+                    totalItems={data.length}
+                    itemsPerPage={LEADERBOARD_ITEMS_PER_PAGE}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
               </div>
             </div>
           )}

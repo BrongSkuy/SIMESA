@@ -14,7 +14,10 @@ import {
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { PageHeader } from "@/components/shared/page-header";
-import LeaderboardCard from "@/components/LeaderboardCard";
+import LeaderboardCard, {
+  LeaderboardPagination,
+  LEADERBOARD_ITEMS_PER_PAGE,
+} from "@/components/LeaderboardCard";
 import { Button } from "@/components/ui/button";
 import {
   CardDescription,
@@ -105,6 +108,7 @@ function getPredikatBadge(rawScore: number) {
 export default function GuruLeaderboardPage() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [activeTab, setActiveTab] = useState("umum");
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<SpkResult[]>([]);
 
@@ -121,6 +125,7 @@ export default function GuruLeaderboardPage() {
 
   useEffect(() => {
     const loadCalculation = async () => {
+      setCurrentPage(1);
       setLoading(true);
       try {
         const targetKelas =
@@ -378,7 +383,12 @@ export default function GuruLeaderboardPage() {
                   </TableHeader>
                   <TableBody>
                     {data.length > 0 ? (
-                      data.map((entry) => {
+                      data
+                        .slice(
+                          (currentPage - 1) * LEADERBOARD_ITEMS_PER_PAGE,
+                          currentPage * LEADERBOARD_ITEMS_PER_PAGE
+                        )
+                        .map((entry) => {
                         const predikat = getPredikatBadge(entry.rawScore);
                         const pct = Math.min(
                           100,
@@ -468,6 +478,14 @@ export default function GuruLeaderboardPage() {
                 </Table>
               )}
             </div>
+            {!loading && data.length > 0 && (
+              <LeaderboardPagination
+                currentPage={currentPage}
+                totalItems={data.length}
+                itemsPerPage={LEADERBOARD_ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+            )}
             </div>
           </div>
         </div>

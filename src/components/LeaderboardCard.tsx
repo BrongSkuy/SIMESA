@@ -1,8 +1,11 @@
 "use client";
 
 import React from "react";
-import { Trophy, PartyPopper } from "lucide-react";
+import { Trophy, PartyPopper, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+
+export const LEADERBOARD_ITEMS_PER_PAGE = 15;
 
 export interface LeaderboardCardProps {
   title?: string;
@@ -16,6 +19,120 @@ export interface LeaderboardCardProps {
   onDetailClick?: () => void;
   onDownloadClick?: () => void;
   children?: React.ReactNode;
+}
+
+export interface LeaderboardPaginationProps {
+  currentPage: number;
+  totalItems: number;
+  itemsPerPage?: number;
+  onPageChange: (page: number) => void;
+}
+
+export function LeaderboardPagination({
+  currentPage,
+  totalItems,
+  itemsPerPage = LEADERBOARD_ITEMS_PER_PAGE,
+  onPageChange,
+}: LeaderboardPaginationProps) {
+  if (totalItems === 0) return null;
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const startItem = (safePage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(safePage * itemsPerPage, totalItems);
+
+  // Build visible page numbers with ellipsis for large datasets (e.g., 100+ students)
+  const getPageNumbers = (): (number | "ellipsis")[] => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | "ellipsis")[] = [1];
+    if (safePage > 3) {
+      pages.push("ellipsis");
+    }
+    const start = Math.max(2, safePage - 1);
+    const end = Math.min(totalPages - 1, safePage + 1);
+    for (let p = start; p <= end; p++) {
+      pages.push(p);
+    }
+    if (safePage < totalPages - 2) {
+      pages.push("ellipsis");
+    }
+    pages.push(totalPages);
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  return (
+    <div className="hide-on-print flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 px-2 border-t border-slate-100">
+      <p className="text-xs text-slate-500 tabular-nums">
+        Menampilkan peringkat{" "}
+        <span className="font-semibold text-slate-800">
+          {startItem}–{endItem}
+        </span>{" "}
+        dari <span className="font-semibold text-slate-800">{totalItems}</span>{" "}
+        siswa{" "}
+        <span className="text-slate-400">
+          (Maks. {itemsPerPage}/halaman)
+        </span>
+      </p>
+
+      <div className="flex items-center gap-1.5">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 disabled:opacity-40"
+          onClick={() => onPageChange(safePage - 1)}
+          disabled={safePage <= 1}
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Sebelumnya</span>
+        </Button>
+
+        <div className="flex items-center gap-1">
+          {pageNumbers.map((p, idx) =>
+            p === "ellipsis" ? (
+              <span
+                key={`ellipsis-${idx}`}
+                className="px-1.5 text-xs text-slate-400 select-none"
+              >
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(p)}
+                className={`h-8 min-w-8 px-2 rounded-md text-xs font-semibold tabular-nums border transition-all ${
+                  p === safePage
+                    ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200"
+                }`}
+                aria-label={`Halaman ${p}`}
+                aria-current={p === safePage ? "page" : undefined}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 disabled:opacity-40"
+          onClick={() => onPageChange(safePage + 1)}
+          disabled={safePage >= totalPages}
+        >
+          <span className="hidden sm:inline">Selanjutnya</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export default function LeaderboardCard({
