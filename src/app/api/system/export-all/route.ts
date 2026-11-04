@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { students, teachers, attendance, spkScores, spkCriteria, classes, subjects, spkGradingCategories } from "@/db/schema";
+import { students, teachers, attendance, spkScores, spkCriteria, classes, subjects, spkGradingCategories, academicYears } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import * as XLSX from "xlsx";
@@ -24,6 +24,7 @@ export async function GET() {
     const allScores = await db.select().from(spkScores);
     const allCriteria = await db.select().from(spkCriteria);
     const allGradingCats = await db.select().from(spkGradingCategories);
+    const allAcademicYears = await db.select().from(academicYears);
 
     const wb = XLSX.utils.book_new();
 
@@ -142,6 +143,23 @@ export async function GET() {
     }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(criteriaData.length > 0 ? criteriaData : [{}]), "Kriteria SPK");
 
+    // Sheet 7b: Kategori Penilaian & Periode Akademik
+    const gradingCatsData = allGradingCats.map(gc => ({
+      Kelas: gc.kelas,
+      Mapel: gc.mapel,
+      Kriteria: criteriaMap.get(gc.criteriaId)?.namaKriteria || gc.criteriaId,
+      Kategori: gc.categories,
+      Periode: gc.periode,
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(gradingCatsData.length > 0 ? gradingCatsData : [{}]), "Kategori Penilaian");
+
+    const academicYearsData = allAcademicYears.map(ay => ({
+      TahunAjaran: ay.tahunAjaran,
+      Semester: ay.semester,
+      Status: ay.isActive ? "Aktif" : "Arsip",
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(academicYearsData.length > 0 ? academicYearsData : [{}]), "Periode Akademik");
+
     // Sheet 8: Penugasan Guru-Kelas (derived from waliKelas + attendance-based assignments)
     const guruKelasRows: { NIP: string; NamaGuru: string; Kelas: string; Peran: string }[] = [];
 
@@ -211,7 +229,7 @@ export async function GET() {
     for (const c of allClasses) {
       const classStudents = spkLeaderboard.filter(d => d.kelas === c.namaKelas);
       // Re-sort and rank them for this specific class
-      const sortedClass = classStudents.sort((a, b) => b.rawScore - a.rawScore);
+      const sortedClass = classStudents.sort((a, b) => b.rawScore - a.rawScore || a.namaLengkap.localeCompare(b.namaLengkap));
       const spkClass = sortedClass.map((s, idx) => ({ ...s, rank: idx + 1 }));
 
       const classData = spkClass.map(d => ({

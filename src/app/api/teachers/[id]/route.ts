@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { teachers, academicYears } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { teachers, classes } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -20,6 +20,27 @@ export async function PUT(
 
   try {
     const updated = await db.transaction(async (tx) => {
+      const [oldTeacher] = await tx
+        .select()
+        .from(teachers)
+        .where(eq(teachers.id, id))
+        .all();
+
+      if (!oldTeacher) {
+        throw new Error("NOT_FOUND");
+      }
+
+      if (body.nip && body.nip !== oldTeacher.nip) {
+        const existingWithNip = await tx
+          .select()
+          .from(teachers)
+          .where(eq(teachers.nip, body.nip))
+          .all();
+        if (existingWithNip.some((t) => t.id !== id)) {
+          throw new Error("DUPLICATE_NIP");
+        }
+      }
+
       // Build update payload — include nip only if provided
       const updatePayload: Record<string, unknown> = {
         namaLengkap: body.namaLengkap,
@@ -45,12 +66,25 @@ export async function PUT(
         throw new Error("NOT_FOUND");
       }
 
+      // Sync classes.waliKelas if teacher's name changed
+      if (
+        body.namaLengkap &&
+        oldTeacher.namaLengkap !== updatedTeacher.namaLengkap
+      ) {
+        await tx
+          .update(classes)
+          .set({ waliKelas: updatedTeacher.namaLengkap })
+          .where(eq(classes.waliKelas, oldTeacher.namaLengkap))
+          .run();
+      }
+
       // Sync auth user table: name, username (NIP), email, and image (foto)
       if (updatedTeacher.userId) {
         const { user } = await import("@/db/auth-schema");
         const userUpdate: Record<string, unknown> = {
           name: updatedTeacher.namaLengkap,
           username: updatedTeacher.nip,
+          displayUsername: updatedTeacher.nip,
           email: `${updatedTeacher.nip}@sekolah.id`,
         };
         if (updatedTeacher.foto !== undefined) {
@@ -63,8 +97,6 @@ export async function PUT(
           .run();
       }
 
-
-
       return updatedTeacher;
     });
 
@@ -72,6 +104,12 @@ export async function PUT(
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "NOT_FOUND") {
       return NextResponse.json({ error: "Guru tidak ditemukan" }, { status: 404 });
+    }
+    if (error instanceof Error && error.message === "DUPLICATE_NIP") {
+      return NextResponse.json(
+        { error: "NIP tersebut sudah terdaftar untuk guru lain" },
+        { status: 400 }
+      );
     }
     const message = error instanceof Error ? error.message : "Gagal mengupdate data guru";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -100,7 +138,7 @@ export async function DELETE(
       const teacher = teacherList[0];
 
       // Unlink subjects
-      const { subjects, classes } = await import("@/db/schema");
+      const { subjects } = await import("@/db/schema");
       await tx.update(subjects).set({ teacherId: null }).where(eq(subjects.teacherId, id));
 
       // Cleanup classes.waliKelas where it matches the teacher's name

@@ -4,9 +4,9 @@ import { account } from "@/db/auth-schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "better-auth/crypto";
 
-// PUT /api/auth-accounts/[id]/reset — reset password directly
+// PUT /api/auth-accounts/[id]/reset — reset password directly using Better Auth's scrypt hashPassword
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,12 +19,15 @@ export async function PUT(
   const { id } = await params;
   const body = await request.json();
 
-  if (!body.newPassword) {
-    return NextResponse.json({ error: "Password baru tidak boleh kosong" }, { status: 400 });
+  if (!body.newPassword || String(body.newPassword).trim().length < 4) {
+    return NextResponse.json(
+      { error: "Password baru wajib diisi minimal 4 karakter" },
+      { status: 400 }
+    );
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(body.newPassword, 10);
+    const hashedPassword = await hashPassword(String(body.newPassword));
 
     const [updated] = await db
       .update(account)
@@ -33,12 +36,22 @@ export async function PUT(
       .returning();
 
     if (!updated) {
-      return NextResponse.json({ error: "Account credentials tidak ditemukan (pengguna mungkin tidak mendaftar menggunakan password)" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error:
+            "Account credentials tidak ditemukan (pengguna mungkin tidak mendaftar menggunakan password)",
+        },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ success: true, message: "Password berhasil di-reset" });
+    return NextResponse.json({
+      success: true,
+      message: "Password berhasil di-reset",
+    });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal me-reset password";
+    const message =
+      error instanceof Error ? error.message : "Gagal me-reset password";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Settings2,
   Save,
+  RotateCcw,
   AlertTriangle,
   CheckCircle2,
   Info,
@@ -24,6 +25,7 @@ interface SpkCriteria {
 
 export default function AdminSpkPage() {
   const [criteria, setCriteria] = useState<SpkCriteria[]>([]);
+  const [initialCriteria, setInitialCriteria] = useState<SpkCriteria[]>([]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,7 +34,9 @@ export default function AdminSpkPage() {
     fetch("/api/spk-criteria")
       .then((r) => r.json())
       .then((data) => {
-        setCriteria(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        setCriteria(list);
+        setInitialCriteria(list);
         setLoading(false);
       })
       .catch(() => {
@@ -42,13 +46,25 @@ export default function AdminSpkPage() {
   }, []);
 
   const totalBobot = criteria.reduce((sum, c) => sum + c.bobot, 0);
-  const isValid = totalBobot === 100;
+  const isValid =
+    totalBobot === 100 && criteria.every((c) => c.bobot >= 0 && c.bobot <= 100);
+  const hasChanges = criteria.some((c) => {
+    const orig = initialCriteria.find((ic) => ic.id === c.id);
+    return orig ? orig.bobot !== c.bobot : false;
+  });
 
-  const updateBobot = (id: string, value: number) => {
+  const updateBobot = (id: string, rawVal: number) => {
+    const clamped = Math.min(100, Math.max(0, Number.isNaN(rawVal) ? 0 : rawVal));
     setSaved(false);
     setCriteria((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, bobot: value } : c))
+      prev.map((c) => (c.id === id ? { ...c, bobot: clamped } : c))
     );
+  };
+
+  const handleResetChanges = () => {
+    setCriteria(initialCriteria);
+    setSaved(false);
+    toast.info("Bobot dikembalikan ke konfigurasi terakhir yang tersimpan.");
   };
 
   const handleSave = async () => {
@@ -69,8 +85,15 @@ export default function AdminSpkPage() {
         const err = await res.json();
         throw new Error(err.error);
       }
+      const updated = await res.json();
+      if (Array.isArray(updated)) {
+        setCriteria(updated);
+        setInitialCriteria(updated);
+      } else {
+        setInitialCriteria(criteria);
+      }
       setSaved(true);
-      toast.success("Bobot kriteria SPK berhasil disimpan!");
+      toast.success("Bobot kriteria SPK berhasil disimpan & disinkronkan!");
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Gagal menyimpan";
       toast.error(msg);
@@ -95,10 +118,22 @@ export default function AdminSpkPage() {
         description="Atur distribusi bobot persentase evaluasi untuk pemeringkatan siswa terbaik"
         icon={Settings2}
       >
+        {hasChanges && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={saving}
+            onClick={handleResetChanges}
+          >
+            <RotateCcw className="h-3.5 w-3.5 text-slate-500" />
+            Kembalikan Awal
+          </Button>
+        )}
         <Button
           className="gap-1.5"
           size="sm"
-          disabled={!isValid || saving}
+          disabled={!isValid || saving || !hasChanges}
           onClick={handleSave}
         >
           {saving ? (
@@ -141,7 +176,12 @@ export default function AdminSpkPage() {
                 >
                   {isValid ? "Valid (100%)" : "Belum Seimbang"}
                 </span>
-                {saved && (
+                {hasChanges && !saved && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-50 group-hover:bg-amber-500/15 text-amber-700 group-hover:text-amber-300 border border-amber-200 group-hover:border-amber-500/30 transition-colors">
+                    • Belum Disimpan
+                  </span>
+                )}
+                {saved && !hasChanges && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 group-hover:bg-blue-500/15 text-blue-700 group-hover:text-blue-300 border border-blue-200 group-hover:border-blue-500/30 transition-colors">
                     ✓ Tersimpan
                   </span>
@@ -220,7 +260,7 @@ export default function AdminSpkPage() {
                       max={100}
                       value={c.bobot}
                       onChange={(e) =>
-                        updateBobot(c.id, parseInt(e.target.value) || 0)
+                        updateBobot(c.id, parseInt(e.target.value, 10) || 0)
                       }
                       className="h-10 text-center text-lg font-mono font-bold text-slate-900 group-hover:text-white group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:[color-scheme:dark] w-24 transition-colors"
                     />
@@ -255,10 +295,15 @@ export default function AdminSpkPage() {
             Sistem menormalisasi matriks nilai siswa terhadap nilai maksimum di
             setiap kriteria (Benefit), lalu mengalikan hasil normalisasi dengan
             bobot persentase di atas. Kriteria bertipe{" "}
-            <strong className="text-slate-800 group-hover:text-white font-semibold transition-colors">Otomatis</strong> dihitung
-            langsung dari rekapitulasi presensi sistem, sedangkan kriteria{" "}
-            <strong className="text-slate-800 group-hover:text-white font-semibold transition-colors">Manual</strong> bersumber dari
-            penilaian guru mata pelajaran / wali kelas.
+            <strong className="text-slate-800 group-hover:text-white font-semibold transition-colors">
+              Otomatis
+            </strong>{" "}
+            dihitung langsung dari rekapitulasi presensi sistem, sedangkan
+            kriteria{" "}
+            <strong className="text-slate-800 group-hover:text-white font-semibold transition-colors">
+              Manual
+            </strong>{" "}
+            bersumber dari penilaian guru mata pelajaran / wali kelas.
           </p>
         </div>
       </div>

@@ -10,9 +10,16 @@ import {
   Filter,
   Loader2,
   Edit,
+  ShieldCheck,
+  Users,
+  GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
+import {
+  LeaderboardPagination,
+  LEADERBOARD_ITEMS_PER_PAGE,
+} from "@/components/LeaderboardCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +38,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -46,6 +63,7 @@ interface AccountRow {
   name: string;
   appRole: string | null;
   banned: boolean | null;
+  isCurrentUser?: boolean;
 }
 
 function getInitials(name: string): string {
@@ -63,6 +81,7 @@ function getInitials(name: string): string {
 export default function AdminAkunPage() {
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,6 +96,12 @@ export default function AdminAkunPage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetItem, setResetItem] = useState<AccountRow | null>(null);
   const [formNewPassword, setFormNewPassword] = useState("");
+
+  // Confirm Suspend/Activate State
+  const [statusTarget, setStatusTarget] = useState<{
+    account: AccountRow;
+    setBanned: boolean;
+  } | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -94,22 +119,35 @@ export default function AdminAkunPage() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterRole]);
+
   const toggleStatus = async (account: AccountRow, setBanned: boolean) => {
+    setSaving(true);
     try {
       const res = await fetch(`/api/auth-accounts/${account.id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ banned: setBanned }),
       });
-      if (!res.ok) throw new Error("Update gagal");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Update gagal");
+      }
       toast.success(
         `Akun ${account.name} berhasil ${
-          setBanned ? "dinonaktifkan" : "diaktifkan"
+          setBanned ? "ditangguhkan" : "diaktifkan kembali"
         }.`
       );
+      setStatusTarget(null);
       fetchData();
-    } catch {
-      toast.error("Gagal mengubah status akun.");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Gagal mengubah status akun.";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -121,7 +159,7 @@ export default function AdminAkunPage() {
   };
 
   const handleEdit = async () => {
-    if (!editItem || !formEditName) {
+    if (!editItem || !formEditName.trim()) {
       toast.error("Nama wajib diisi");
       return;
     }
@@ -131,16 +169,21 @@ export default function AdminAkunPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formEditName,
-          username: formEditUsername,
+          name: formEditName.trim(),
+          username: formEditUsername.trim(),
         }),
       });
-      if (!res.ok) throw new Error("Gagal menyimpan");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal menyimpan");
+      }
       toast.success("Profil akun berhasil diperbarui!");
       setEditOpen(false);
       fetchData();
-    } catch {
-      toast.error("Gagal memperbarui profil akun");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Gagal memperbarui profil akun";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -157,7 +200,7 @@ export default function AdminAkunPage() {
       toast.error("Password baru wajib diisi");
       return;
     }
-    if (formNewPassword.length < 4) {
+    if (formNewPassword.trim().length < 4) {
       toast.error("Karakter password terlalu pendek (minimal 4 karakter)");
       return;
     }
@@ -166,13 +209,18 @@ export default function AdminAkunPage() {
       const res = await fetch(`/api/auth-accounts/${resetItem.id}/reset`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPassword: formNewPassword }),
+        body: JSON.stringify({ newPassword: formNewPassword.trim() }),
       });
-      if (!res.ok) throw new Error("Gagal me-reset password");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal me-reset password");
+      }
       toast.success(`Password untuk ${resetItem.name} berhasil di-reset!`);
       setResetOpen(false);
-    } catch {
-      toast.error("Gagal me-reset password");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Gagal me-reset password";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -188,6 +236,14 @@ export default function AdminAkunPage() {
       (a.appRole && a.appRole.toUpperCase() === filterRole.toUpperCase());
     return matchSearch && matchRole;
   });
+
+  const totalAdminGuru = accounts.filter((a) =>
+    ["ADMIN", "GURU"].includes((a.appRole || "").toUpperCase())
+  ).length;
+  const totalSiswa = accounts.filter(
+    (a) => (a.appRole || "").toUpperCase() === "SISWA"
+  ).length;
+  const totalBanned = accounts.filter((a) => a.banned).length;
 
   if (loading) {
     return (
@@ -208,6 +264,12 @@ export default function AdminAkunPage() {
     return "bg-emerald-50 text-emerald-700 border-emerald-200";
   };
 
+  const startIndex = (currentPage - 1) * LEADERBOARD_ITEMS_PER_PAGE;
+  const paginatedAccounts = filtered.slice(
+    startIndex,
+    startIndex + LEADERBOARD_ITEMS_PER_PAGE
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -217,8 +279,62 @@ export default function AdminAkunPage() {
         icon={UserCog}
       />
 
-      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center">
+      {/* Summary Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-500">
+              Admin & Tenaga Pendidik
+            </p>
+            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
+              {totalAdminGuru}{" "}
+              <span className="text-xs font-normal text-slate-500">Akun</span>
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+        </div>
 
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-500">Akun Siswa</p>
+            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
+              {totalSiswa}{" "}
+              <span className="text-xs font-normal text-slate-500">Akun</span>
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+            <GraduationCap className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-500">
+              Status Akses Pengguna
+            </p>
+            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
+              {accounts.length - totalBanned}{" "}
+              <span className="text-xs font-normal text-emerald-600">
+                Aktif
+              </span>
+              {totalBanned > 0 && (
+                <span className="text-xs font-normal text-rose-600 ml-2">
+                  · {totalBanned} Ditangguhkan
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
+            <Users className="h-5 w-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Card Container */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <Input
@@ -245,14 +361,12 @@ export default function AdminAkunPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
 
-      </div>
-
-      <div className="border-b border-slate-200 overflow-x-auto">
-
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-slate-50/70 hover:bg-slate-50/70">
                 <TableHead className="w-14 pl-6">No</TableHead>
                 <TableHead>Pengguna</TableHead>
                 <TableHead>Username Login</TableHead>
@@ -262,32 +376,39 @@ export default function AdminAkunPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length === 0 ? (
+              {paginatedAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="py-10 text-center text-slate-500"
+                    className="py-10 text-center text-slate-500 text-xs"
                   >
                     Tidak ada akun yang cocok dengan filter pencarian.
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((a, i) => (
+                paginatedAccounts.map((a, i) => (
                   <TableRow
                     key={a.id}
                     className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                   >
                     <TableCell className="pl-6 font-mono text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                      {i + 1}
+                      {startIndex + i + 1}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
                         <div className="h-7 w-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-white font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
                           {getInitials(a.name)}
                         </div>
-                        <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
-                          {a.name}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                            {a.name}
+                          </span>
+                          {a.isCurrentUser && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-50 text-blue-700 border border-blue-200 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/40">
+                              Anda
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
@@ -340,8 +461,16 @@ export default function AdminAkunPage() {
                           <Button
                             variant="ghost"
                             size="xs"
-                            className="gap-1 text-rose-600 group-hover/row:text-rose-400 hover:text-rose-700 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 transition-colors"
-                            onClick={() => toggleStatus(a, true)}
+                            disabled={a.isCurrentUser}
+                            title={
+                              a.isCurrentUser
+                                ? "Akun yang sedang digunakan login tidak dapat ditangguhkan"
+                                : "Tangguhkan akses akun"
+                            }
+                            className="gap-1 text-rose-600 group-hover/row:text-rose-400 hover:text-rose-700 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 transition-colors disabled:opacity-30"
+                            onClick={() =>
+                              setStatusTarget({ account: a, setBanned: true })
+                            }
                           >
                             <Ban className="h-3 w-3" /> Suspend
                           </Button>
@@ -350,7 +479,9 @@ export default function AdminAkunPage() {
                             variant="ghost"
                             size="xs"
                             className="gap-1 text-emerald-600 group-hover/row:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 group-hover/row:hover:bg-emerald-950/40 transition-colors"
-                            onClick={() => toggleStatus(a, false)}
+                            onClick={() =>
+                              setStatusTarget({ account: a, setBanned: false })
+                            }
                           >
                             <CheckCircle2 className="h-3 w-3" /> Aktifkan
                           </Button>
@@ -362,7 +493,18 @@ export default function AdminAkunPage() {
               )}
             </TableBody>
           </Table>
+        </div>
 
+        {filtered.length > LEADERBOARD_ITEMS_PER_PAGE && (
+          <div className="px-5 pb-4">
+            <LeaderboardPagination
+              currentPage={currentPage}
+              totalItems={filtered.length}
+              itemsPerPage={LEADERBOARD_ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
 
       {/* Dialog Edit Profile */}
@@ -397,7 +539,8 @@ export default function AdminAkunPage() {
                 onChange={(e) => setFormEditUsername(e.target.value)}
               />
               <p className="text-xs text-slate-500">
-                Username digunakan untuk autentikasi masuk bersama kata sandi.
+                Username digunakan untuk autentikasi masuk bersama kata sandi
+                (otomatis tersinkronisasi dengan NIS/NIP).
               </p>
             </div>
           </div>
@@ -482,6 +625,72 @@ export default function AdminAkunPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog Confirm Suspend / Activate */}
+      <AlertDialog
+        open={!!statusTarget}
+        onOpenChange={(open) => {
+          if (!open) setStatusTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {statusTarget?.setBanned
+                ? "Tangguhkan Akses Akun?"
+                : "Aktifkan Kembali Akses Akun?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs leading-relaxed">
+              {statusTarget?.setBanned ? (
+                <>
+                  Apakah Anda yakin ingin menangguhkan akun{" "}
+                  <strong className="text-slate-900">
+                    {statusTarget.account.name}
+                  </strong>{" "}
+                  ({statusTarget.account.username || "-"})? Seluruh sesi login
+                  aktif pengguna ini akan langsung dihentikan dan statusnya
+                  menjadi nonaktif.
+                </>
+              ) : (
+                <>
+                  Apakah Anda yakin ingin mengaktifkan kembali akun{" "}
+                  <strong className="text-slate-900">
+                    {statusTarget?.account.name}
+                  </strong>{" "}
+                  ({statusTarget?.account.username || "-"}) agar dapat masuk ke
+                  sistem?
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setStatusTarget(null)}
+              disabled={saving}
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={saving}
+              className={
+                statusTarget?.setBanned
+                  ? "bg-rose-600 hover:bg-rose-700 text-white"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+              }
+              onClick={() => {
+                if (statusTarget) {
+                  toggleStatus(statusTarget.account, statusTarget.setBanned);
+                }
+              }}
+            >
+              {saving ? (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              ) : null}
+              {statusTarget?.setBanned ? "Ya, Tangguhkan" : "Ya, Aktifkan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

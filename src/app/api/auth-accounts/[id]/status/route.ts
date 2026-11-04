@@ -21,7 +21,14 @@ export async function PUT(
 
   try {
     const isBanned = body.banned === true;
-    
+
+    if (isBanned && id === session.user.id) {
+      return NextResponse.json(
+        { error: "Tidak dapat menangguhkan akun Anda sendiri yang sedang digunakan login." },
+        { status: 400 }
+      );
+    }
+
     const result = await db.transaction(async (tx) => {
       // Update user banned status
       const [updated] = await tx
@@ -51,7 +58,7 @@ export async function PUT(
           .run();
       }
 
-      // Item 11: Revoke active sessions immediately when banning
+      // Revoke active sessions immediately when banning
       if (isBanned) {
         await tx
           .delete(sessionTable)
@@ -71,4 +78,3 @@ export async function PUT(
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

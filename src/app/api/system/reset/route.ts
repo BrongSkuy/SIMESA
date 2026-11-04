@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { students, teachers, attendance, spkScores, spkGradingCategories, classes, subjects, spkResults, spkPublishStatus } from "@/db/schema";
-import { user } from "@/db/auth-schema";
-import { eq, inArray } from "drizzle-orm";
+import {
+  students,
+  teachers,
+  attendance,
+  spkScores,
+  spkGradingCategories,
+  classes,
+  subjects,
+  spkResults,
+  spkPublishStatus,
+  leaderboardArchives,
+} from "@/db/schema";
+import { user, session as sessionTable, account } from "@/db/auth-schema";
+import { inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -18,6 +29,7 @@ export async function POST() {
       // Delete in order to avoid FK issues (most dependent first)
       await tx.delete(spkResults);
       await tx.delete(spkPublishStatus);
+      await tx.delete(leaderboardArchives);
       await tx.delete(spkGradingCategories);
       await tx.delete(spkScores);
       await tx.delete(attendance);
@@ -26,17 +38,31 @@ export async function POST() {
       await tx.delete(subjects);
       await tx.delete(classes);
 
-      // Hapus akun login (auth users) siswa dan guru
-      await tx.delete(user).where(inArray(user.appRole, ["SISWA", "GURU"]));
+      // Find non-admin users (SISWA & GURU) and clean up their sessions & accounts explicitly
+      const nonAdminUsers = await tx
+        .select({ id: user.id })
+        .from(user)
+        .where(inArray(user.appRole, ["SISWA", "GURU"]));
+      const nonAdminIds = nonAdminUsers.map((u) => u.id);
+
+      if (nonAdminIds.length > 0) {
+        await tx
+          .delete(sessionTable)
+          .where(inArray(sessionTable.userId, nonAdminIds));
+        await tx
+          .delete(account)
+          .where(inArray(account.userId, nonAdminIds));
+        await tx.delete(user).where(inArray(user.id, nonAdminIds));
+      }
     });
 
     return NextResponse.json({
       success: true,
-      message: "Seluruh data operasional berhasil dihapus. Konfigurasi SPK dan akun tetap dipertahankan.",
+      message:
+        "Seluruh data operasional berhasil dihapus. Konfigurasi SPK dan akun administrator tetap dipertahankan.",
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Gagal mereset data";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

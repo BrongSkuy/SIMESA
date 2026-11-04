@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/auth-schema";
 import { auth } from "@/lib/auth";
@@ -12,5 +12,9 @@ export async function GET() {
   }
 
   const result = await db.select().from(user).all();
-  return NextResponse.json(result);
+  const mapped = result.map((u) => ({
+    ...u,
+    isCurrentUser: u.id === session.user.id,
+  }));
+  return NextResponse.json(mapped);
 }

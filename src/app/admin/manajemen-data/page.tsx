@@ -23,10 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
@@ -68,6 +65,23 @@ interface AcademicYear {
   tahunAjaran: string;
   semester: "Ganjil" | "Genap";
   isActive: boolean;
+}
+
+function validateTahunAjaranInput(val: string): string | null {
+  const trimmed = val.trim();
+  if (!trimmed) {
+    return "Tahun ajaran wajib diisi (contoh: 2025/2026)";
+  }
+  const match = /^(\d{4})\/(\d{4})$/.exec(trimmed);
+  if (!match) {
+    return "Format Tahun Ajaran harus YYYY/YYYY (contoh: 2025/2026)";
+  }
+  const startYear = Number(match[1]);
+  const endYear = Number(match[2]);
+  if (endYear !== startYear + 1) {
+    return `Tahun ajaran harus berurutan 1 tahun (contoh: ${startYear}/${startYear + 1})`;
+  }
+  return null;
 }
 
 export default function ManajemenDataPage() {
@@ -157,14 +171,9 @@ export default function ManajemenDataPage() {
 
   const handleAddYear = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTahunAjaran) {
-      toast.error("Tahun ajaran wajib diisi (contoh: 2025/2026)");
-      return;
-    }
-
-    const yearPattern = /^\d{4}\/\d{4}$/;
-    if (!yearPattern.test(newTahunAjaran)) {
-      toast.error("Format Tahun Ajaran harus YYYY/YYYY (contoh: 2025/2026)");
+    const err = validateTahunAjaranInput(newTahunAjaran);
+    if (err) {
+      toast.error(err);
       return;
     }
 
@@ -174,7 +183,7 @@ export default function ManajemenDataPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tahunAjaran: newTahunAjaran,
+          tahunAjaran: newTahunAjaran.trim(),
           semester: newSemester,
           isActive: newIsActive,
         }),
@@ -211,14 +220,9 @@ export default function ManajemenDataPage() {
     e.preventDefault();
     if (!yearToEdit) return;
 
-    if (!editTahunAjaran) {
-      toast.error("Tahun ajaran wajib diisi (contoh: 2025/2026)");
-      return;
-    }
-
-    const yearPattern = /^\d{4}\/\d{4}$/;
-    if (!yearPattern.test(editTahunAjaran)) {
-      toast.error("Format Tahun Ajaran harus YYYY/YYYY (contoh: 2025/2026)");
+    const err = validateTahunAjaranInput(editTahunAjaran);
+    if (err) {
+      toast.error(err);
       return;
     }
 
@@ -229,7 +233,7 @@ export default function ManajemenDataPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: yearToEdit.id,
-          tahunAjaran: editTahunAjaran,
+          tahunAjaran: editTahunAjaran.trim(),
           semester: editSemester,
           isActive: editIsActive,
         }),
@@ -291,6 +295,10 @@ export default function ManajemenDataPage() {
   };
 
   const activePeriod = academicYears.find((y) => y.isActive);
+  const isEditingSoleActive =
+    !!yearToEdit &&
+    yearToEdit.isActive &&
+    academicYears.filter((y) => y.isActive).length === 1;
 
   return (
     <div className="space-y-6">
@@ -303,9 +311,9 @@ export default function ManajemenDataPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column: Academic Years Management */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+        <div className="lg:col-span-2">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
               <div>
                 <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                   <CalendarRange className="h-4 w-4 text-blue-600" />
@@ -325,10 +333,11 @@ export default function ManajemenDataPage() {
                 Tambah Periode
               </Button>
             </div>
+
             <div className="space-y-4">
-              {/* Dark Enterprise Active Period Banner */}
+              {/* Active Period Banner */}
               {activePeriod ? (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-emerald-100 border border-emerald-200 p-2 text-emerald-700">
                       <CheckCircle2 className="h-5 w-5" />
@@ -349,7 +358,7 @@ export default function ManajemenDataPage() {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/60 p-4">
+                <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-amber-100 border border-amber-200 p-2 text-amber-700">
                       <AlertTriangle className="h-5 w-5" />
@@ -367,10 +376,10 @@ export default function ManajemenDataPage() {
               )}
 
               {/* Table of periods */}
-              <div className="border-b border-slate-200 overflow-x-auto">
+              <div className="rounded-xl border border-slate-200 overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-slate-50/70 hover:bg-slate-50/70">
                       <TableHead className="pl-5">Tahun Ajaran</TableHead>
                       <TableHead>Semester</TableHead>
                       <TableHead className="text-center">Status</TableHead>
@@ -489,25 +498,25 @@ export default function ManajemenDataPage() {
         {/* Right Column: Export and Reset Cards */}
         <div className="space-y-6">
           {/* Export Card */}
-          <div className="space-y-3">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
             <div className="pb-3 border-b border-slate-200">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
                 Cadangan & Ekspor Basis Data
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              <CardDescription className="text-xs text-slate-500 mt-0.5">
                 Unduh seluruh tabel sistem dalam satu berkas Excel (.xlsx)
                 multi-sheet
               </CardDescription>
             </div>
             <div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 mb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 mb-4">
                 <ul className="text-xs text-slate-600 space-y-1.5">
                   <li>• Master Siswa, Guru, Kelas & Mata Pelajaran</li>
                   <li>• Riwayat Lengkap Presensi & Absensi</li>
-                  <li>• Rincian Nilai & Bobot Kriteria SPK</li>
-                  <li>• Relasi Pengajaran Guru-Kelas-Mapel</li>
-                  <li>• Peringkat Leaderboard SPK SAW</li>
+                  <li>• Rincian Nilai, Kategori & Bobot Kriteria SPK</li>
+                  <li>• Relasi Pengajaran & Daftar Periode Akademik</li>
+                  <li>• Peringkat Leaderboard SPK SAW (Umum & Kelas)</li>
                 </ul>
               </div>
               <Button
@@ -527,19 +536,19 @@ export default function ManajemenDataPage() {
           </div>
 
           {/* Reset Card (Danger Zone) */}
-          <div className="space-y-3 pt-4 border-t border-slate-200">
+          <div className="rounded-2xl border border-rose-200/90 bg-rose-50/30 p-5 shadow-xs space-y-4">
             <div className="pb-3 border-b border-rose-200">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-rose-900">
                 <ShieldAlert className="h-4 w-4 text-rose-600" />
                 Zona Bahaya — Reset Operasional
               </CardTitle>
-              <CardDescription className="text-xs text-rose-700/80">
+              <CardDescription className="text-xs text-rose-700/80 mt-0.5">
                 Bersihkan seluruh data transaksi operasional dengan tetap
                 mempertahankan akun & bobot SPK
               </CardDescription>
             </div>
             <div>
-              <div className="rounded-lg border border-rose-200 bg-white/80 p-3.5 mb-4">
+              <div className="rounded-xl border border-rose-200 bg-white/90 p-3.5 mb-4">
                 <div className="flex items-start gap-2.5">
                   <AlertTriangle className="h-4 w-4 text-rose-600 mt-0.5 shrink-0" />
                   <p className="text-xs text-rose-800 leading-relaxed">
@@ -590,7 +599,7 @@ export default function ManajemenDataPage() {
                   maxLength={9}
                 />
                 <span className="text-xs text-slate-500">
-                  Gunakan format YYYY/YYYY (contoh: 2025/2026)
+                  Gunakan format berurutan YYYY/YYYY (contoh: 2025/2026)
                 </span>
               </div>
               <div className="grid gap-1.5">
@@ -685,7 +694,7 @@ export default function ManajemenDataPage() {
                   maxLength={9}
                 />
                 <span className="text-xs text-slate-500">
-                  Gunakan format YYYY/YYYY (contoh: 2025/2026)
+                  Gunakan format berurutan YYYY/YYYY (contoh: 2025/2026)
                 </span>
               </div>
               <div className="grid gap-1.5">
@@ -709,20 +718,29 @@ export default function ManajemenDataPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="editIsActive"
-                  checked={editIsActive}
-                  onChange={(e) => setEditIsActive(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-                />
-                <Label
-                  htmlFor="editIsActive"
-                  className="text-xs font-normal text-slate-700 cursor-pointer"
-                >
-                  Jadikan periode aktif saat ini
-                </Label>
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="editIsActive"
+                    checked={editIsActive}
+                    disabled={isEditingSoleActive}
+                    onChange={(e) => setEditIsActive(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50"
+                  />
+                  <Label
+                    htmlFor="editIsActive"
+                    className="text-xs font-normal text-slate-700 cursor-pointer"
+                  >
+                    Jadikan periode aktif saat ini
+                  </Label>
+                </div>
+                {isEditingSoleActive && (
+                  <p className="text-[11px] text-amber-700">
+                    Periode aktif utama tidak dapat dinonaktifkan langsung.
+                    Aktifkan periode lain terlebih dahulu jika ingin mengganti.
+                  </p>
+                )}
               </div>
             </div>
             <DialogFooter>
@@ -807,7 +825,7 @@ export default function ManajemenDataPage() {
             <div className="mt-3 text-xs">
               <span className="block font-semibold text-rose-800 bg-rose-50 border border-rose-200 p-3 rounded-lg">
                 Data yang dihapus: Siswa, Guru, Kelas, Mapel, Absensi, Nilai,
-                dan Leaderboard SPK.
+                Arsip, dan Leaderboard SPK.
                 <br />
                 <span className="font-normal text-rose-600">
                   (Konfigurasi bobot SPK dan akun administrator tetap tersimpan)

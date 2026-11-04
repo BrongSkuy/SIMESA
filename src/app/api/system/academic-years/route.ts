@@ -5,6 +5,19 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+function validateTahunAjaranFormat(tahunAjaran: string): string | null {
+  const match = /^(\d{4})\/(\d{4})$/.exec(tahunAjaran.trim());
+  if (!match) {
+    return "Format Tahun Ajaran harus YYYY/YYYY (contoh: 2025/2026)";
+  }
+  const startYear = Number(match[1]);
+  const endYear = Number(match[2]);
+  if (endYear !== startYear + 1) {
+    return `Tahun ajaran harus berurutan 1 tahun (contoh: ${startYear}/${startYear + 1})`;
+  }
+  return null;
+}
+
 // GET /api/system/academic-years — Get all academic years
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -19,7 +32,7 @@ export async function GET() {
       if (a.tahunAjaran !== b.tahunAjaran) {
         return b.tahunAjaran.localeCompare(a.tahunAjaran);
       }
-      return b.semester.localeCompare(a.semester); 
+      return b.semester.localeCompare(a.semester);
     });
     return NextResponse.json(sortedList);
   } catch (error: unknown) {
@@ -43,33 +56,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tahun ajaran dan semester wajib diisi" }, { status: 400 });
     }
 
+    const formatErr = validateTahunAjaranFormat(String(tahunAjaran));
+    if (formatErr) {
+      return NextResponse.json({ error: formatErr }, { status: 400 });
+    }
+
     // Check if duplicate exists
     const existing = await db
       .select()
       .from(academicYears)
       .where(
         and(
-          eq(academicYears.tahunAjaran, tahunAjaran),
+          eq(academicYears.tahunAjaran, tahunAjaran.trim()),
           eq(academicYears.semester, semester)
         )
       )
       .all();
 
     if (existing.length > 0) {
-      return NextResponse.json({ error: "Periode tahun ajaran dan semester tersebut sudah terdaftar" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Periode tahun ajaran dan semester tersebut sudah terdaftar" },
+        { status: 400 }
+      );
     }
 
+    const allYears = await db.select().from(academicYears).all();
+    const hasAnyActive = allYears.some((y) => y.isActive);
+    const shouldBeActive = Boolean(isActive) || !hasAnyActive;
+
     // If setting active, first set all others to false
-    if (isActive) {
+    if (shouldBeActive) {
       await db.update(academicYears).set({ isActive: false }).run();
     }
 
     const [inserted] = await db
       .insert(academicYears)
       .values({
-        tahunAjaran,
+        tahunAjaran: tahunAjaran.trim(),
         semester,
-        isActive: !!isActive,
+        isActive: shouldBeActive,
       })
       .returning();
 
@@ -95,25 +120,64 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "ID wajib diisi" }, { status: 400 });
     }
 
+    const allYears = await db.select().from(academicYears).all();
+    const current = allYears.find((y) => y.id === id);
+    if (!current) {
+      return NextResponse.json({ error: "Tahun ajaran tidak ditemukan" }, { status: 404 });
+    }
+
+    const nextTahunAjaran =
+      tahunAjaran !== undefined ? String(tahunAjaran).trim() : current.tahunAjaran;
+    const nextSemester = semester !== undefined ? semester : current.semester;
+
+    const formatErr = validateTahunAjaranFormat(nextTahunAjaran);
+    if (formatErr) {
+      return NextResponse.json({ error: formatErr }, { status: 400 });
+    }
+
+    // Check duplicate against other rows
+    const duplicate = allYears.find(
+      (y) =>
+        y.id !== id &&
+        y.tahunAjaran === nextTahunAjaran &&
+        y.semester === nextSemester
+    );
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "Periode tahun ajaran dan semester tersebut sudah terdaftar" },
+        { status: 400 }
+      );
+    }
+
+    // Prevent deactivating the sole active period
+    if (isActive === false && current.isActive) {
+      const otherActive = allYears.some((y) => y.id !== id && y.isActive);
+      if (!otherActive) {
+        return NextResponse.json(
+          {
+            error:
+              "Tidak dapat menonaktifkan satu-satunya periode yang sedang aktif. Aktifkan periode lain terlebih dahulu.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // If making this one active, set all others to inactive
     if (isActive) {
       await db.update(academicYears).set({ isActive: false }).run();
     }
 
     const updatePayload: Record<string, unknown> = {};
-    if (tahunAjaran !== undefined) updatePayload.tahunAjaran = tahunAjaran;
-    if (semester !== undefined) updatePayload.semester = semester;
-    if (isActive !== undefined) updatePayload.isActive = !!isActive;
+    if (tahunAjaran !== undefined) updatePayload.tahunAjaran = nextTahunAjaran;
+    if (semester !== undefined) updatePayload.semester = nextSemester;
+    if (isActive !== undefined) updatePayload.isActive = Boolean(isActive);
 
     const [updated] = await db
       .update(academicYears)
       .set(updatePayload)
       .where(eq(academicYears.id, id))
       .returning();
-
-    if (!updated) {
-      return NextResponse.json({ error: "Tahun ajaran tidak ditemukan" }, { status: 404 });
-    }
 
     return NextResponse.json(updated);
   } catch (error: unknown) {
@@ -144,7 +208,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (target.isActive) {
-      return NextResponse.json({ error: "Tahun ajaran yang sedang aktif tidak dapat dihapus" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tahun ajaran yang sedang aktif tidak dapat dihapus" },
+        { status: 400 }
+      );
     }
 
     const [deleted] = await db
