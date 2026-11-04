@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
     const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
     const activePeriode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
 
-    // 2. Handle Admin role (gets real-time calculation + validation details)
+    // 2. Handle Admin role (gets real-time calculation + school-wide validation details)
     if (isAdmin) {
       const results = await calculateSPK(kelas, activePeriode);
-      const validation = await validateSPKCriteriaFilled(kelas, activePeriode);
+      const validation = await validateSPKCriteriaFilled("umum", activePeriode);
       return NextResponse.json({ results, validation, activePeriode });
     }
 
@@ -64,9 +64,9 @@ export async function GET(request: NextRequest) {
     const targetKelas = kelas.toLowerCase();
 
     if (targetKelas !== "umum" && targetKelas !== "all") {
-      // Filter by class and re-rank dynamically
+      // Filter by class and re-rank dynamically with deterministic tie-breaker
       finalResults = cachedRows.filter(r => r.kelas.toLowerCase() === targetKelas);
-      finalResults.sort((a, b) => b.rawScore - a.rawScore);
+      finalResults.sort((a, b) => b.rawScore - a.rawScore || a.namaLengkap.localeCompare(b.namaLengkap));
       
       const mapped = finalResults.map((r, idx) => {
         let detailRaw = {};
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
     const activePeriode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
     const results = await calculateSPK(kelas, activePeriode);
-    const validation = await validateSPKCriteriaFilled(kelas, activePeriode);
+    const validation = await validateSPKCriteriaFilled("umum", activePeriode);
     return NextResponse.json({ results, validation, activePeriode });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Gagal memproses SPK";

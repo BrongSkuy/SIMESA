@@ -74,13 +74,13 @@ interface MissingCriterion {
   reason: string;
 }
 
-const initialArchives: {
+interface ArchiveRow {
   id: string;
-  fileUrl: string;
+  pathFile: string;
   namaFile: string;
   periode: string;
   uploadedAt: string;
-}[] = [];
+}
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
@@ -158,8 +158,20 @@ export default function AdminLeaderboardPage() {
   const [publishing, setPublishing] = useState(false);
   const [showMissingDialog, setShowMissingDialog] = useState(false);
 
-  const [archives, setArchives] = useState(initialArchives);
+  const [archives, setArchives] = useState<ArchiveRow[]>([]);
   const archiveRef = useRef<HTMLInputElement>(null);
+
+  const fetchArchives = async () => {
+    try {
+      const r = await fetch("/api/spk/archives");
+      if (r.ok) {
+        const rows = await r.json();
+        setArchives(Array.isArray(rows) ? rows : []);
+      }
+    } catch (e) {
+      console.error("Gagal memuat arsip", e);
+    }
+  };
 
   const fetchPublishStatus = async () => {
     try {
@@ -177,6 +189,7 @@ export default function AdminLeaderboardPage() {
       .then((d) => setClasses(Array.isArray(d) ? d : []))
       .catch(() => {});
     fetchPublishStatus();
+    fetchArchives();
   }, []);
 
   useEffect(() => {
@@ -339,37 +352,68 @@ export default function AdminLeaderboardPage() {
   const handleUploadArsip = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    toast.success(`Arsip ${file.name} berhasil diunggah!`);
-    const fileUrl = URL.createObjectURL(file);
-    setArchives([
-      ...archives,
-      {
-        id: String(Date.now()),
-        fileUrl,
-        namaFile: file.name,
-        periode: "Baru Diunggah",
-        uploadedAt: new Date().toLocaleDateString("id-ID"),
-      },
-    ]);
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      if (!dataUrl) {
+        toast.error("Gagal membaca berkas arsip.");
+        return;
+      }
+      try {
+        const r = await fetch("/api/spk/archives", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            namaFile: file.name,
+            pathFile: dataUrl,
+            periode: publishStatus?.periode || "Semester Aktif",
+          }),
+        });
+        const res = await r.json();
+        if (!r.ok) {
+          toast.error(res.error || "Gagal menyimpan arsip ke database.");
+        } else {
+          setArchives((prev) => [res, ...prev]);
+          toast.success(`Arsip ${file.name} berhasil disimpan ke database!`);
+        }
+      } catch {
+        toast.error("Terjadi kesalahan saat mengunggah arsip.");
+      }
+    };
+    reader.readAsDataURL(file);
     if (archiveRef.current) archiveRef.current.value = "";
   };
 
-  const handleDeleteArsip = (id: string, namaFile: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus arsip " + namaFile + "?")) {
-      setArchives(archives.filter((arc) => arc.id !== id));
-      toast.success("Arsip berhasil dihapus.");
+  const handleDeleteArsip = async (id: string, namaFile: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus arsip " + namaFile + "?")) {
+      return;
+    }
+    try {
+      const r = await fetch(`/api/spk/archives?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!r.ok) {
+        const res = await r.json().catch(() => ({}));
+        toast.error(res.error || "Gagal menghapus arsip.");
+        return;
+      }
+      setArchives((prev) => prev.filter((arc) => arc.id !== id));
+      toast.success("Arsip berhasil dihapus dari database.");
+    } catch {
+      toast.error("Terjadi kesalahan saat menghapus arsip.");
     }
   };
 
-  const handleDownloadArsip = (arc: { fileUrl: string; namaFile: string }) => {
-    if (!arc.fileUrl) {
+  const handleDownloadArsip = (arc: ArchiveRow) => {
+    if (!arc.pathFile) {
       toast.info(
-        `File mock ${arc.namaFile} tidak memiliki isi (hanya sampel UI).`
+        `File ${arc.namaFile} tidak memiliki isi berkas untuk diunduh.`
       );
       return;
     }
     const a = document.createElement("a");
-    a.href = arc.fileUrl;
+    a.href = arc.pathFile;
     a.download = arc.namaFile;
     document.body.appendChild(a);
     a.click();
@@ -874,7 +918,17 @@ export default function AdminLeaderboardPage() {
                         {arc.namaFile}
                       </p>
                       <p className="text-xs text-slate-500">
-                        Periode: {arc.periode} · Diunggah: {arc.uploadedAt}
+                        Periode: {arc.periode} · Diunggah:{" "}
+                        {(() => {
+                          const d = new Date(arc.uploadedAt);
+                          return isNaN(d.getTime())
+                            ? arc.uploadedAt
+                            : d.toLocaleDateString("id-ID", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              });
+                        })()}
                       </p>
                     </div>
                   </div>

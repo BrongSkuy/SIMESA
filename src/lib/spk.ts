@@ -4,15 +4,10 @@ import { eq, and, inArray } from "drizzle-orm";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 
 export async function calculateSPK(kelas: string, targetPeriode?: string) {
-  // 1. Fetch Students
-  let siswaKelas = [];
-  if (kelas === "all" || kelas === "umum") {
-    siswaKelas = await db.select().from(students).where(eq(students.status, "aktif")).all();
-  } else {
-    siswaKelas = await db.select().from(students).where(and(eq(students.kelas, kelas), eq(students.status, "aktif"))).all();
-  }
+  // 1. Fetch All Active Students (global school-wide normalization for consistent SAW scores)
+  const allActiveStudents = await db.select().from(students).where(eq(students.status, "aktif")).all();
   
-  if (siswaKelas.length === 0) return [];
+  if (allActiveStudents.length === 0) return [];
 
   // 2. Determine academic period
   let activePeriode = targetPeriode;
@@ -24,34 +19,18 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
   // 3. Fetch Criteria
   const criteriaList = await db.select().from(spkCriteria).all();
 
-  const studentIds = siswaKelas.map((s) => s.id);
-
-  // 4. Fetch SPK Scores filtered by active period and optionally studentIds
+  // 4. Fetch SPK Scores filtered by active period
   const allScores = await db
     .select()
     .from(spkScores)
-    .where(
-      kelas === "all" || kelas === "umum"
-        ? eq(spkScores.periode, activePeriode)
-        : and(
-            eq(spkScores.periode, activePeriode),
-            inArray(spkScores.studentId, studentIds)
-          )
-    )
+    .where(eq(spkScores.periode, activePeriode))
     .all();
 
-  // 5. Fetch Attendance filtered by active period and optionally studentIds
+  // 5. Fetch Attendance filtered by active period
   const allAttendance = await db
     .select()
     .from(attendance)
-    .where(
-      kelas === "all" || kelas === "umum"
-        ? eq(attendance.periode, activePeriode)
-        : and(
-            eq(attendance.periode, activePeriode),
-            inArray(attendance.studentId, studentIds)
-          )
-    )
+    .where(eq(attendance.periode, activePeriode))
     .all();
 
   // 6. Pre-group attendance by studentId and scores by studentId & criteriaId for O(1) lookups
@@ -78,9 +57,9 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
     list.push(sc);
   });
 
-  // Build raw Matrix
+  // Build raw Matrix across all active students
   const rawMatrix: Record<string, Record<string, number>> = {};
-  siswaKelas.forEach((s) => {
+  allActiveStudents.forEach((s) => {
      rawMatrix[s.id] = {};
      criteriaList.forEach((c) => {
         rawMatrix[s.id][c.id] = 0; // initialize
@@ -90,7 +69,7 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
   for (const c of criteriaList) {
      if (c.tipe === "Otomatis" && c.namaKriteria.toLowerCase().includes("kehadiran")) {
         // Calculate percentage from attendance
-        siswaKelas.forEach(s => {
+        allActiveStudents.forEach(s => {
            const sAtt = attendanceByStudent.get(s.id) || [];
            const hadir = sAtt.filter(a => a.status === "Hadir").length;
            const total = sAtt.length;
@@ -98,7 +77,7 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
         });
      } else {
         // Manual or specific criteria (C1 for example)
-        siswaKelas.forEach(s => {
+        allActiveStudents.forEach(s => {
            const studentScoresForC = scoresByStudentAndCriteria.get(`${s.id}-${c.id}`) || [];
            if (studentScoresForC.length === 0) {
               rawMatrix[s.id][c.id] = 0;
@@ -111,15 +90,15 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
      }
   }
 
-  // 7. Normalization (Simple Additive Weighting)
+  // 7. Normalization (Simple Additive Weighting) — global max across all active students
   // Assume all criteria are BENEFIT (higher is better)
   const maxVals: Record<string, number> = {};
   criteriaList.forEach(c => {
-     maxVals[c.id] = Math.max(...siswaKelas.map(s => rawMatrix[s.id][c.id]), 0);
+     maxVals[c.id] = Math.max(...allActiveStudents.map(s => rawMatrix[s.id][c.id]), 0);
   });
 
   const normalizedMatrix: Record<string, Record<string, number>> = {};
-  siswaKelas.forEach(s => {
+  allActiveStudents.forEach(s => {
      normalizedMatrix[s.id] = {};
      criteriaList.forEach(c => {
         const max = maxVals[c.id];
@@ -128,8 +107,8 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
      });
   });
 
-  // 8. Compute Final Score & Rank
-  const results = siswaKelas.map((s) => {
+  // 8. Compute Final Score & Filter by Class if requested
+  const allResults = allActiveStudents.map((s) => {
      let finalScore = 0;
      const detailNormalisasi: Record<string, number> = {};
      
@@ -152,11 +131,17 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
      };
   });
 
-  // Sort descending by score
-  results.sort((a, b) => b.rawScore - a.rawScore);
+  const targetKelas = (kelas || "umum").toLowerCase();
+  const filteredResults =
+    targetKelas === "all" || targetKelas === "umum"
+      ? allResults
+      : allResults.filter((r) => r.kelas.toLowerCase() === targetKelas);
 
-  // Assign rank
-  const rankedResults = results.map((r, i) => ({
+  // Sort descending by score, with alphabetical tie-breaker
+  filteredResults.sort((a, b) => b.rawScore - a.rawScore || a.namaLengkap.localeCompare(b.namaLengkap));
+
+  // Assign rank (1..N within the target view)
+  const rankedResults = filteredResults.map((r, i) => ({
      rank: i + 1,
      ...r
   }));
