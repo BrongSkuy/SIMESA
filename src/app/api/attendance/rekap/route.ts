@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     if (!activeYear) return NextResponse.json([]); // Strict active year requirement
     const periode = `${activeYear.tahunAjaran}-${activeYear.semester}`;
 
-    // 1. Get all students in this class
+    // 1. Get all active students in this class
     const siswaKelas = await db
       .select({
         id: students.id,
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         nis: students.nis,
       })
       .from(students)
-      .where(eq(students.kelas, kelas))
+      .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
       .all();
 
     if (siswaKelas.length === 0) {

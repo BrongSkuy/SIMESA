@@ -319,13 +319,18 @@ export default function AdminAbsensiPage() {
         { method: "DELETE" }
       );
 
-      if (!res.ok) throw new Error("Gagal menghapus absensi");
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || "Gagal menghapus absensi");
+      }
 
       toast.success("Data absensi berhasil dihapus!");
       handleLoadGrid();
       setDeleteOpen(false);
-    } catch {
-      toast.error("Gagal menghapus absensi");
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Gagal menghapus absensi";
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }

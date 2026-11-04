@@ -18,7 +18,7 @@ export async function GET() {
       namaKelas: classes.namaKelas,
       tingkat: classes.tingkat,
       waliKelas: classes.waliKelas,
-      jumlahSiswa: sql<number>`count(${students.id})`.mapWith(Number), 
+      jumlahSiswa: sql<number>`count(${students.id})`.mapWith(Number),
     })
     .from(classes)
     .leftJoin(students, eq(classes.namaKelas, students.kelas))
@@ -37,10 +37,26 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { namaKelas, tingkat, waliKelas } = body;
+    const namaKelas = String(body.namaKelas || "").trim();
+    const tingkat = String(body.tingkat || "").trim();
+    const { waliKelas } = body;
 
     if (!namaKelas || !tingkat) {
-      return NextResponse.json({ error: "Nama kelas dan tingkat wajib diisi" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Nama kelas dan tingkat wajib diisi" },
+        { status: 400 }
+      );
+    }
+
+    const allClasses = await db.select().from(classes).all();
+    const duplicate = allClasses.find(
+      (c) => c.namaKelas.toLowerCase().trim() === namaKelas.toLowerCase()
+    );
+    if (duplicate) {
+      return NextResponse.json(
+        { error: `Kelas '${namaKelas}' sudah terdaftar` },
+        { status: 400 }
+      );
     }
 
     const [newClass] = await db
@@ -54,7 +70,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newClass, { status: 201 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal menambahkan kelas";
+    const message =
+      error instanceof Error ? error.message : "Gagal menambahkan kelas";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

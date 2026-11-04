@@ -54,13 +54,16 @@ export async function PUT(
       return NextResponse.json({ error: "Siswa tidak ditemukan" }, { status: 404 });
     }
 
-    // Sync auth user table: name, username (NIS), email, and image (foto)
+    // Sync auth user table: name, username (NIS), email, image (foto), and banned status
     if (updated.userId) {
-      const { user } = await import("@/db/auth-schema");
+      const { user, session: sessionTable } = await import("@/db/auth-schema");
+      const isNonaktif = updated.status === "nonaktif";
       const userUpdate: Record<string, unknown> = {
         name: updated.namaLengkap,
         username: updated.nis,
+        displayUsername: updated.nis,
         email: `${updated.nis}@siswa.sekolah.id`,
+        banned: isNonaktif,
       };
       if (updated.foto !== undefined) {
         userUpdate.image = updated.foto;
@@ -70,6 +73,13 @@ export async function PUT(
         .set(userUpdate)
         .where(eq(user.id, updated.userId))
         .run();
+
+      if (isNonaktif) {
+        await db
+          .delete(sessionTable)
+          .where(eq(sessionTable.userId, updated.userId))
+          .run();
+      }
     }
 
     return NextResponse.json(updated);

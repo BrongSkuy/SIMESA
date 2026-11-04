@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { GraduationCap, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, Camera } from "lucide-react";
+import { GraduationCap, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, Camera, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,10 @@ export default function AdminGuruPage() {
   const [teachers, setTeachers] = useState<TeacherRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<TeacherRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const ITEMS_PER_PAGE = 15;
 
   // Form State
   const [formNip, setFormNip] = useState("");
@@ -106,6 +110,17 @@ export default function AdminGuruPage() {
       return matchSearch && matchStatus && matchGender;
     });
   }, [teachers, search, filterStatus, filterGender]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedTeachers = filtered.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus, filterGender]);
 
   const resetForm = () => {
     setFormNip("");
@@ -215,20 +230,27 @@ export default function AdminGuruPage() {
     }
   };
 
-  const handleDelete = async (teacher: TeacherRow) => {
-    if (!confirm(`Yakin ingin menghapus data ${teacher.namaLengkap}?`)) return;
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/teachers/${teacher.id}`, {
+      const res = await fetch(`/api/teachers/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Gagal menghapus");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal menghapus");
+      }
 
-      toast.success(`Data ${teacher.namaLengkap} berhasil dihapus!`);
+      toast.success(`Data ${deleteTarget.namaLengkap} berhasil dihapus!`);
+      setDeleteTarget(null);
       fetchData();
-    } catch {
-      toast.error("Gagal menghapus data guru");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus data guru";
+      toast.error(msg);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -623,114 +645,190 @@ export default function AdminGuruPage() {
       </div>
 
       {/* Data Table */}
-      <div className="border-b border-slate-200 overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-14 text-center">No</TableHead>
-              <TableHead>Nama Guru &amp; NIP</TableHead>
-              <TableHead>Jenis Kelamin</TableHead>
-              <TableHead>Status Kepegawaian</TableHead>
-              <TableHead className="text-right pr-5">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="py-10 text-center text-xs text-slate-500"
-                >
-                  Tidak ada data guru yang ditemukan.
-                </TableCell>
+                <TableHead className="w-14 text-center">No</TableHead>
+                <TableHead>Nama Guru &amp; NIP</TableHead>
+                <TableHead>Jenis Kelamin</TableHead>
+                <TableHead>Status Kepegawaian</TableHead>
+                <TableHead className="text-right pr-5">Aksi</TableHead>
               </TableRow>
-            ) : (
-              filtered.map((guru, i) => (
-                <TableRow
-                  key={guru.id}
-                  className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
-                >
-                  <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500">
-                    {i + 1}
+            </TableHeader>
+            <TableBody>
+              {paginatedTeachers.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="py-10 text-center text-xs text-slate-500"
+                  >
+                    Tidak ada data guru yang ditemukan.
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 font-semibold flex items-center justify-center text-xs shrink-0 overflow-hidden transition-colors">
-                        {guru.foto ? (
-                          <img
-                            src={guru.foto}
-                            alt={guru.namaLengkap}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          getInitials(guru.namaLengkap)
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
-                          {guru.namaLengkap}
+                </TableRow>
+              ) : (
+                paginatedTeachers.map((guru, i) => (
+                  <TableRow
+                    key={guru.id}
+                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                  >
+                    <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500">
+                      {(safePage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 font-semibold flex items-center justify-center text-xs shrink-0 overflow-hidden transition-colors">
+                          {guru.foto ? (
+                            <img
+                              src={guru.foto}
+                              alt={guru.namaLengkap}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            getInitials(guru.namaLengkap)
+                          )}
                         </div>
-                        <div className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
-                          NIP: {guru.nip}
+                        <div>
+                          <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                            {guru.namaLengkap}
+                          </div>
+                          <div className="text-xs text-slate-500 group-hover/row:text-slate-400 tabular-nums transition-colors">
+                            NIP: {guru.nip}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        guru.jenisKelamin === "L"
-                          ? "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
-                          : "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 group-hover/row:bg-indigo-500/15 text-indigo-700 group-hover/row:text-indigo-300 border border-indigo-200 group-hover/row:border-indigo-500/30 transition-colors"
-                      }
-                    >
-                      {guru.jenisKelamin === "L" ? "Laki-laki" : "Perempuan"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        guru.status === "aktif"
-                          ? "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border border-emerald-200 group-hover/row:border-emerald-500/30 transition-colors"
-                          : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-600 group-hover/row:text-slate-400 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
-                      }
-                    >
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          guru.jenisKelamin === "L"
+                            ? "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
+                            : "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 group-hover/row:bg-indigo-500/15 text-indigo-700 group-hover/row:text-indigo-300 border border-indigo-200 group-hover/row:border-indigo-500/30 transition-colors"
+                        }
+                      >
+                        {guru.jenisKelamin === "L" ? "Laki-laki" : "Perempuan"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
                       <span
                         className={
                           guru.status === "aktif"
-                            ? "w-1.5 h-1.5 rounded-xs bg-emerald-500"
-                            : "w-1.5 h-1.5 rounded-xs bg-slate-400"
+                            ? "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border border-emerald-200 group-hover/row:border-emerald-500/30 transition-colors"
+                            : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-600 group-hover/row:text-slate-400 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
                         }
-                      />
-                      {guru.status === "aktif" ? "Aktif" : "Nonaktif"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right pr-5">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        aria-label={`Edit ${guru.namaLengkap}`}
-                        onClick={() => openEdit(guru)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
                       >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Hapus ${guru.namaLengkap}`}
-                        onClick={() => handleDelete(guru)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        <span
+                          className={
+                            guru.status === "aktif"
+                              ? "w-1.5 h-1.5 rounded-xs bg-emerald-500"
+                              : "w-1.5 h-1.5 rounded-xs bg-slate-400"
+                          }
+                        />
+                        {guru.status === "aktif" ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right pr-5">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          aria-label={`Edit ${guru.namaLengkap}`}
+                          onClick={() => openEdit(guru)}
+                          className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Hapus ${guru.namaLengkap}`}
+                          onClick={() => setDeleteTarget(guru)}
+                          className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-slate-500">
+              Halaman <strong className="text-slate-800">{safePage}</strong> dari{" "}
+              <strong className="text-slate-800">{totalPages}</strong> ({filtered.length} guru)
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+              >
+                <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+              >
+                Selanjutnya
+                <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Dialog Konfirmasi Hapus Guru */}
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-md rounded-2xl border-slate-200 p-6">
+          <DialogHeader>
+            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Hapus Data Guru?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 leading-relaxed">
+              Apakah Anda yakin ingin menghapus data guru{" "}
+              <strong className="text-slate-800">{deleteTarget?.namaLengkap}</strong>{" "}
+              (NIP: <span className="font-mono">{deleteTarget?.nip}</span>)? Penugasan wali kelas, mata pelajaran, dan akun login guru ini juga akan dilepas/dihapus.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Ya, Hapus Guru
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

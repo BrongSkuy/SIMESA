@@ -45,17 +45,32 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { nip, namaLengkap, jenisKelamin, foto } = body;
+    const nip = String(body.nip || "").trim();
+    const namaLengkap = String(body.namaLengkap || "").trim();
+    const { jenisKelamin, foto } = body;
 
     if (!nip || !namaLengkap) {
       return NextResponse.json({ error: "NIP dan nama wajib diisi" }, { status: 400 });
     }
 
+    if (nip.length < 4) {
+      return NextResponse.json(
+        { error: "NIP minimal harus 4 karakter (untuk keamanan password)" },
+        { status: 400 }
+      );
+    }
+
     // Check explicit existing auth to prevent crash or dangling rows
     const { user } = await import("@/db/auth-schema");
-    const existingAuth = await db.select().from(user).where(or(eq(user.username, nip), eq(user.email, `${nip}@sekolah.id`)));
+    const existingAuth = await db
+      .select()
+      .from(user)
+      .where(or(eq(user.username, nip), eq(user.email, `${nip}@sekolah.id`)));
     if (existingAuth.length > 0) {
-      return NextResponse.json({ error: "Username atau NIP sudah dipakai di sistem authentikasi. Harap gunakan NIP lain." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Username atau NIP sudah dipakai di sistem authentikasi. Harap gunakan NIP lain." },
+        { status: 400 }
+      );
     }
 
     const newUser = await auth.api.signUpEmail({
@@ -68,25 +83,28 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (foto) {
-      await db.update(user).set({ image: foto }).where(eq(user.id, newUser.user.id)).run();
+    try {
+      if (foto) {
+        await db.update(user).set({ image: foto }).where(eq(user.id, newUser.user.id)).run();
+      }
+
+      const [teacher] = await db
+        .insert(teachers)
+        .values({
+          userId: newUser.user.id,
+          nip,
+          namaLengkap,
+          jenisKelamin: jenisKelamin || "L",
+          status: "aktif",
+          foto: foto || null,
+        })
+        .returning();
+
+      return NextResponse.json(teacher, { status: 201 });
+    } catch (insertError) {
+      await db.delete(user).where(eq(user.id, newUser.user.id)).run();
+      throw insertError;
     }
-
-    const [teacher] = await db
-      .insert(teachers)
-      .values({
-        userId: newUser.user.id,
-        nip,
-        namaLengkap,
-        jenisKelamin: jenisKelamin || "L",
-        status: "aktif",
-        foto: foto || null,
-      })
-      .returning();
-
-
-
-    return NextResponse.json(teacher, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Gagal menambahkan guru";
     return NextResponse.json({ error: message }, { status: 500 });

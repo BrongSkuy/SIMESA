@@ -152,25 +152,25 @@ export default function AdminNilaiSayaPage() {
   const getScoreTone = (score: number) => {
     if (score >= 85)
       return {
-        text: "text-emerald-700",
-        pill: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        text: "text-emerald-700 group-hover:text-emerald-400 group-hover/row:text-emerald-400",
+        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30",
         label: "Sangat Baik",
       };
     if (score >= 70)
       return {
-        text: "text-blue-700",
-        pill: "bg-blue-50 text-blue-700 border-blue-200",
+        text: "text-blue-700 group-hover:text-blue-400 group-hover/row:text-blue-400",
+        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30",
         label: "Baik",
       };
     if (score >= 50)
       return {
-        text: "text-amber-700",
-        pill: "bg-amber-50 text-amber-700 border-amber-200",
+        text: "text-amber-700 group-hover:text-amber-400 group-hover/row:text-amber-400",
+        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30",
         label: "Cukup",
       };
     return {
-      text: "text-rose-700",
-      pill: "bg-rose-50 text-rose-700 border-rose-200",
+      text: "text-rose-700 group-hover:text-rose-400 group-hover/row:text-rose-400",
+      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30",
       label: "Perlu Perbaikan",
     };
   };

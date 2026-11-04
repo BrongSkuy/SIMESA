@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
     const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : "2025/2026-Genap";
 
-    // 1. Get all students in the class
+    // 1. Get all active students in the class
     const siswaKelas = await db
       .select({
         id: students.id,
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         nama: students.namaLengkap,
       })
       .from(students)
-      .where(eq(students.kelas, kelas))
+      .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
       .all();
 
     if (siswaKelas.length === 0) {

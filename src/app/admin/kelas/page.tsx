@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Building2, Plus, Edit, Trash2, Loader2, Users, UserCheck, Search, Filter, RotateCcw } from "lucide-react";
+import { Building2, Plus, Edit, Trash2, Loader2, Users, UserCheck, Search, Filter, RotateCcw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -46,6 +46,8 @@ export default function AdminKelasPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ClassRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Filter & Search State
   const [search, setSearch] = useState("");
@@ -180,20 +182,27 @@ export default function AdminKelasPage() {
     }
   };
 
-  const handleDelete = async (kls: ClassRow) => {
-    if (!confirm(`Yakin ingin menghapus kelas ${kls.namaKelas}?`)) return;
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/classes/${kls.id}`, {
+      const res = await fetch(`/api/classes/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Gagal menghapus");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal menghapus kelas");
+      }
 
-      toast.success(`Kelas ${kls.namaKelas} berhasil dihapus!`);
+      toast.success(`Kelas ${deleteTarget.namaKelas} berhasil dihapus!`);
+      setDeleteTarget(null);
       fetchData();
-    } catch {
-      toast.error("Gagal menghapus kelas");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus kelas";
+      toast.error(msg);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -535,7 +544,7 @@ export default function AdminKelasPage() {
                   variant="destructive"
                   size="icon-sm"
                   aria-label={`Hapus kelas ${kelas.namaKelas}`}
-                  onClick={() => handleDelete(kelas)}
+                  onClick={() => setDeleteTarget(kelas)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -544,6 +553,48 @@ export default function AdminKelasPage() {
           ))}
         </div>
       )}
+
+      {/* Dialog Konfirmasi Hapus Kelas */}
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-md rounded-2xl border-slate-200 p-6">
+          <DialogHeader>
+            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Hapus Kelas {deleteTarget?.namaKelas}?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 leading-relaxed">
+              Apakah Anda yakin ingin menghapus kelas{" "}
+              <strong className="text-slate-800">{deleteTarget?.namaKelas}</strong>? Kelas yang masih memiliki siswa terdaftar tidak dapat dihapus.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Ya, Hapus Kelas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

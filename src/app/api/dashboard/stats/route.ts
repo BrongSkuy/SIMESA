@@ -52,42 +52,69 @@ export async function GET() {
     .from(spkPublishStatus)
     .where(eq(spkPublishStatus.periode, periode));
 
-  // Today's attendance (WIB)
-  const today = getTodayWIB();
-  const todayRows = await db
-    .select({
-      status: attendance.status,
-      count: count(),
-    })
-    .from(attendance)
-    .where(
-      sql`${attendance.tanggal} = ${today} AND ${attendance.periode} = ${periode}`
-    )
-    .groupBy(attendance.status);
-
-  let todayTotal = 0;
-  let todayHadir = 0;
-  let todayIzinSakit = 0;
-  let todayAlfa = 0;
-  for (const r of todayRows) {
-    todayTotal += r.count;
-    if (r.status === "Hadir") todayHadir += r.count;
-    else if (r.status === "Izin" || r.status === "Sakit")
-      todayIzinSakit += r.count;
-    else todayAlfa += r.count;
-  }
-
-  // All-time attendance trend (grouped by date) for active period
-  const allPeriodAttendance = await db
+  // Fetch attendance records for active students in active period
+  // Deduplicate per (tanggal, studentId) so multiple mapel records on the same day count 1 student once
+  const rawAttendanceRows = await db
     .select({
       tanggal: attendance.tanggal,
+      studentId: attendance.studentId,
+      mapel: attendance.mapel,
       status: attendance.status,
-      count: count(),
     })
     .from(attendance)
-    .where(eq(attendance.periode, periode))
-    .groupBy(attendance.tanggal, attendance.status)
+    .innerJoin(students, eq(attendance.studentId, students.id))
+    .where(
+      sql`${attendance.periode} = ${periode} AND ${students.status} = 'aktif'`
+    )
     .orderBy(sql`${attendance.tanggal} ASC`);
+
+  // Deduplicate per date & studentId:
+  // Prioritize "Umum" (daily homeroom attendance) if present, otherwise resolve status priority: Hadir > Sakit > Izin > Alfa
+  const perDateStudentStatus: Record<
+    string,
+    Record<string, { status: string; isUmum: boolean }>
+  > = {};
+
+  const statusRank: Record<string, number> = {
+    Hadir: 4,
+    Sakit: 3,
+    Izin: 2,
+    Alfa: 1,
+  };
+
+  for (const row of rawAttendanceRows) {
+    if (!perDateStudentStatus[row.tanggal]) {
+      perDateStudentStatus[row.tanggal] = {};
+    }
+    const existing = perDateStudentStatus[row.tanggal][row.studentId];
+    const isUmum = row.mapel === "Umum";
+    const normalizedStatus =
+      row.status === "Hadir" ||
+      row.status === "Izin" ||
+      row.status === "Sakit" ||
+      row.status === "Alfa"
+        ? row.status
+        : "Alfa";
+
+    if (!existing) {
+      perDateStudentStatus[row.tanggal][row.studentId] = {
+        status: normalizedStatus,
+        isUmum,
+      };
+    } else if (isUmum && !existing.isUmum) {
+      perDateStudentStatus[row.tanggal][row.studentId] = {
+        status: normalizedStatus,
+        isUmum: true,
+      };
+    } else if (!existing.isUmum && !isUmum) {
+      if ((statusRank[normalizedStatus] || 0) > (statusRank[existing.status] || 0)) {
+        perDateStudentStatus[row.tanggal][row.studentId] = {
+          status: normalizedStatus,
+          isUmum: false,
+        };
+      }
+    }
+  }
 
   const attendanceMap: Record<
     string,
@@ -96,17 +123,32 @@ export async function GET() {
   let grandTotalRecords = 0;
   let grandTotalHadir = 0;
 
-  for (const row of allPeriodAttendance) {
-    if (!attendanceMap[row.tanggal]) {
-      attendanceMap[row.tanggal] = { hadir: 0, izin: 0, sakit: 0, alfa: 0 };
-    }
-    const st = row.status ? row.status.toLowerCase() : "alfa";
-    if (st === "hadir" || st === "izin" || st === "sakit" || st === "alfa") {
-      attendanceMap[row.tanggal][st] = row.count;
-      grandTotalRecords += row.count;
-      if (st === "hadir") grandTotalHadir += row.count;
+  for (const [tanggal, studentMap] of Object.entries(perDateStudentStatus)) {
+    attendanceMap[tanggal] = { hadir: 0, izin: 0, sakit: 0, alfa: 0 };
+    for (const entry of Object.values(studentMap)) {
+      const st = entry.status.toLowerCase() as
+        | "hadir"
+        | "izin"
+        | "sakit"
+        | "alfa";
+      attendanceMap[tanggal][st] += 1;
+      grandTotalRecords += 1;
+      if (st === "hadir") grandTotalHadir += 1;
     }
   }
+
+  // Today's attendance (WIB)
+  const today = getTodayWIB();
+  const todaySummary = attendanceMap[today] || {
+    hadir: 0,
+    izin: 0,
+    sakit: 0,
+    alfa: 0,
+  };
+  const todayHadir = todaySummary.hadir;
+  const todayIzinSakit = todaySummary.izin + todaySummary.sakit;
+  const todayAlfa = todaySummary.alfa;
+  const todayTotal = todayHadir + todayIzinSakit + todayAlfa;
 
   const sortedDates = Object.keys(attendanceMap).sort();
 

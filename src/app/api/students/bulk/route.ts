@@ -34,18 +34,33 @@ export async function POST(request: NextRequest) {
     const errors: string[] = [];
     const existingStudents = await db.select().from(students).all();
     const existingClasses = await db.select().from(classes).all();
-    const classNamesSet = new Set(existingClasses.map(c => c.namaKelas.toLowerCase().trim()));
-    
+    const classCanonicalMap = new Map(
+      existingClasses.map((c) => [c.namaKelas.toLowerCase().trim(), c.namaKelas])
+    );
+
     // Pre-flight check
     for (const row of body.students) {
+       row.nis = String(row.nis || "").trim();
+       row.namaLengkap = String(row.namaLengkap || "").trim();
+       row.kelas = String(row.kelas || "").trim();
+       row.angkatan = String(row.angkatan || "").trim();
+       row.jenisKelamin = String(row.jenisKelamin || "").trim();
+
        if (!row.nis || !row.namaLengkap || !row.kelas || !row.angkatan || !row.jenisKelamin) {
           errors.push(`Baris ${row.nis || "?"}: Data tidak lengkap`);
           continue;
        }
-       
-       // Validasi kelas harus sudah ada di db classes
-       if (!classNamesSet.has(row.kelas.toLowerCase().trim())) {
+
+       if (row.nis.length < 4) {
+          errors.push(`Siswa ${row.namaLengkap}: NIS '${row.nis}' minimal harus 4 karakter.`);
+       }
+
+       // Validasi kelas harus sudah ada di db classes & normalisasi ke nama kelas kanonik
+       const canonicalKelas = classCanonicalMap.get(row.kelas.toLowerCase());
+       if (!canonicalKelas) {
           errors.push(`Siswa ${row.namaLengkap}: Kelas '${row.kelas}' tidak ditemukan di sistem. Harap tambahkan data kelas tersebut terlebih dahulu di menu Data Kelas.`);
+       } else {
+          row.kelas = canonicalKelas;
        }
 
        const jk = row.jenisKelamin.toUpperCase().startsWith("L") ? "L" : "P";

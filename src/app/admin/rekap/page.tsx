@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import { BarChart3, Loader2, Download, Users, CheckCircle2 } from "lucide-react";
 import {
   BarChart,
@@ -169,6 +170,7 @@ export default function AdminRekapPage() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Rekap Kelas");
     XLSX.writeFile(wb, `Rekap_Kehadiran_Nilai_Kelas_${selectedClass}.xlsx`);
+    toast.success("Rekapitulasi kelas berhasil diekspor!");
   };
 
   return (

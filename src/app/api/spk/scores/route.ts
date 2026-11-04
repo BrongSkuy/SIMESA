@@ -47,8 +47,12 @@ export async function GET(request: NextRequest) {
     ? JSON.parse(gradingCatRecord.categories) 
     : [];
 
-  // Get students
-  const siswaKelas = await db.select().from(students).where(eq(students.kelas, kelas)).all();
+  // Get active students in class
+  const siswaKelas = await db
+    .select()
+    .from(students)
+    .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
+    .all();
   if (siswaKelas.length === 0) {
     return NextResponse.json({
       categories,

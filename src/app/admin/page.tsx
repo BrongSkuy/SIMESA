@@ -150,6 +150,7 @@ export default function AdminDashboard() {
   const [leaderboard, setLeaderboard] = useState<SpkLeaderboardEntry[]>([]);
   const [criteriaList, setCriteriaList] = useState<SpkCriteriaItem[]>([]);
   const [spkValid, setSpkValid] = useState<boolean>(true);
+  const [missingDataCount, setMissingDataCount] = useState<number>(0);
   const [chartMode, setChartMode] = useState<ChartMode>("harian");
   const [selectedStudent, setSelectedStudent] =
     useState<SpkLeaderboardEntry | null>(null);
@@ -176,11 +177,24 @@ export default function AdminDashboard() {
           setLeaderboard(data);
         } else if (data && Array.isArray(data.results)) {
           setLeaderboard(data.results);
-          if (data.validation) setSpkValid(Boolean(data.validation.isValid));
+          if (data.validation) {
+            setSpkValid(Boolean(data.validation.isValid));
+            setMissingDataCount(
+              Array.isArray(data.validation.missingData)
+                ? data.validation.missingData.length
+                : 0
+            );
+          }
         }
       })
       .catch(() => {});
   }, []);
+
+  const isWeightValid = useMemo(() => {
+    if (criteriaList.length === 0) return true;
+    const sum = criteriaList.reduce((acc, c) => acc + Number(c.bobot || 0), 0);
+    return Math.abs(sum - 1) < 0.001 || Math.abs(sum - 100) < 0.1;
+  }, [criteriaList]);
 
   const kehadiranCriteriaId = useMemo(() => {
     const found = criteriaList.find(
@@ -654,6 +668,28 @@ export default function AdminDashboard() {
             <div className="space-y-3 text-xs">
               <div className="flex items-start gap-2.5 text-slate-600 group-hover:text-slate-300 transition-colors">
                 <div className="mt-0.5 shrink-0">
+                  {isWeightValid ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 group-hover:text-emerald-400 transition-colors" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-amber-600 group-hover:text-amber-400 transition-colors" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 group-hover:text-white transition-colors">
+                    {isWeightValid
+                      ? "Parameter Pembobotan Valid"
+                      : "Verifikasi Pembobotan Dibutuhkan"}
+                  </p>
+                  <p className="text-slate-500 group-hover:text-slate-400 mt-0.5 leading-relaxed transition-colors">
+                    {isWeightValid
+                      ? "Total bobot seluruh kriteria bernilai 1.0 (100%)."
+                      : "Pastikan total bobot kriteria berjumlah 1.0 (100%) di menu Konfigurasi SPK."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 text-slate-600 group-hover:text-slate-300 pt-2 border-t border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                <div className="mt-0.5 shrink-0">
                   {spkValid ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 group-hover:text-emerald-400 transition-colors" />
                   ) : (
@@ -663,13 +699,13 @@ export default function AdminDashboard() {
                 <div>
                   <p className="font-semibold text-slate-800 group-hover:text-white transition-colors">
                     {spkValid
-                      ? "Parameter Pembobotan Valid"
-                      : "Verifikasi Pembobotan Dibutuhkan"}
+                      ? "Data Nilai & Presensi Lengkap"
+                      : `Data Penilaian Belum Lengkap (${missingDataCount} siswa)`}
                   </p>
                   <p className="text-slate-500 group-hover:text-slate-400 mt-0.5 leading-relaxed transition-colors">
                     {spkValid
-                      ? "Total bobot seluruh kriteria bernilai 1.0 (100%). Perhitungan SAW dapat diandalkan."
-                      : "Pastikan total bobot kriteria berjumlah 1.0 agar hasil perhitungan normalisasi akurat."}
+                      ? "Seluruh siswa aktif telah memiliki nilai dan presensi lengkap untuk dipublikasikan."
+                      : "Lengkapi input nilai dan presensi seluruh siswa sebelum mempublikasikan peringkat."}
                   </p>
                 </div>
               </div>
@@ -679,10 +715,10 @@ export default function AdminDashboard() {
                   {stats.isSpkPublished ? "Hasil telah dipublikasikan" : "Status draf internal"}
                 </span>
                 <Link
-                  href="/admin/spk"
+                  href={spkValid ? "/admin/leaderboard" : "/admin/nilai"}
                   className="text-blue-600 group-hover:text-blue-400 font-semibold transition-colors"
                 >
-                  Konfigurasi kriteria →
+                  {spkValid ? "Buka Leaderboard →" : "Lengkapi Nilai →"}
                 </Link>
               </div>
             </div>

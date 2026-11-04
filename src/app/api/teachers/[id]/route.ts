@@ -78,14 +78,16 @@ export async function PUT(
           .run();
       }
 
-      // Sync auth user table: name, username (NIP), email, and image (foto)
+      // Sync auth user table: name, username (NIP), email, image (foto), and banned status
       if (updatedTeacher.userId) {
-        const { user } = await import("@/db/auth-schema");
+        const { user, session: sessionTable } = await import("@/db/auth-schema");
+        const isNonaktif = updatedTeacher.status === "nonaktif";
         const userUpdate: Record<string, unknown> = {
           name: updatedTeacher.namaLengkap,
           username: updatedTeacher.nip,
           displayUsername: updatedTeacher.nip,
           email: `${updatedTeacher.nip}@sekolah.id`,
+          banned: isNonaktif,
         };
         if (updatedTeacher.foto !== undefined) {
           userUpdate.image = updatedTeacher.foto;
@@ -95,6 +97,13 @@ export async function PUT(
           .set(userUpdate)
           .where(eq(user.id, updatedTeacher.userId))
           .run();
+
+        if (isNonaktif) {
+          await tx
+            .delete(sessionTable)
+            .where(eq(sessionTable.userId, updatedTeacher.userId))
+            .run();
+        }
       }
 
       return updatedTeacher;

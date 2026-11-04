@@ -65,6 +65,10 @@ interface ScoreStudent {
 
 const AVAILABLE_CATEGORIES = ["Tugas", "UTS", "UAS", "Praktek"];
 
+function formatBobotPct(bobot: number): number {
+  return bobot <= 1 ? Math.round(bobot * 100) : Math.round(bobot);
+}
+
 export default function AdminNilaiPage() {
   const [classes, setClasses] = useState<KelasRow[]>([]);
   const [subjects, setSubjects] = useState<MapelRow[]>([]);
@@ -103,12 +107,14 @@ export default function AdminNilaiPage() {
         }
 
         const manualCriteria = (
-          Array.isArray(criteriaData) ? criteriaData : []
-        ).filter(
-          (c: CriteriaRow) =>
-            c.tipe === "Manual" ||
-            c.namaKriteria.toLowerCase().includes("akademik")
-        );
+          Array.isArray(criteriaData) ? criteriaData : ""
+        )
+          ? (criteriaData as CriteriaRow[]).filter(
+              (c: CriteriaRow) =>
+                c.tipe === "Manual" ||
+                c.namaKriteria.toLowerCase().includes("akademik")
+            )
+          : [];
         setCriteria(manualCriteria);
         if (manualCriteria.length > 0)
           setSelectedCriteria(manualCriteria[0].id);
@@ -254,12 +260,16 @@ export default function AdminNilaiPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Gagal menyimpan");
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || "Gagal menyimpan nilai");
+      }
 
       toast.success("Catatan kategori dan nilai berhasil disimpan!");
       handleLoad();
-    } catch {
-      toast.error("Gagal menyimpan nilai");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menyimpan nilai";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -274,12 +284,16 @@ export default function AdminNilaiPage() {
           method: "DELETE",
         }
       );
-      if (!res.ok) throw new Error("Gagal hapus");
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || "Gagal menghapus nilai");
+      }
       toast.success("Seluruh nilai mapel ini berhasil dihapus");
       handleLoad();
       setDeleteOpen(false);
-    } catch {
-      toast.error("Gagal menghapus nilai");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus nilai";
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -346,6 +360,7 @@ export default function AdminNilaiPage() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
     XLSX.writeFile(wb, `Template_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
+    toast.success("Template nilai berhasil diunduh!");
   };
 
   const handleExportExcel = () => {
@@ -368,6 +383,7 @@ export default function AdminNilaiPage() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Data Nilai");
     XLSX.writeFile(wb, `Data_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
+    toast.success("Data nilai berhasil diekspor!");
   };
 
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -418,7 +434,10 @@ export default function AdminNilaiPage() {
                       : "";
                 const parsed = parseFloat(String(val));
                 if (!isNaN(parsed)) {
-                  next[matchedStudent.studentId][cat] = parsed;
+                  next[matchedStudent.studentId][cat] = Math.min(
+                    100,
+                    Math.max(0, parsed)
+                  );
                 }
               });
               matchCount++;
@@ -515,7 +534,7 @@ export default function AdminNilaiPage() {
           {
             label: "Kriteria",
             value: activeCriteriaObj
-              ? `${activeCriteriaObj.namaKriteria} (${activeCriteriaObj.bobot}%)`
+              ? `${activeCriteriaObj.namaKriteria} (${formatBobotPct(activeCriteriaObj.bobot)}%)`
               : "-",
           },
         ]}
@@ -572,14 +591,14 @@ export default function AdminNilaiPage() {
             <SelectTrigger className="h-9 w-full text-xs">
               <span className="line-clamp-1 truncate">
                 {activeCriteriaObj
-                  ? `${activeCriteriaObj.namaKriteria} (Bobot: ${activeCriteriaObj.bobot}%)`
+                  ? `${activeCriteriaObj.namaKriteria} (Bobot: ${formatBobotPct(activeCriteriaObj.bobot)}%)`
                   : "Pilih Kriteria..."}
               </span>
             </SelectTrigger>
             <SelectContent className="max-w-[100vw] xl:max-w-2xl">
               {criteria.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.namaKriteria} (Bobot: {c.bobot}%)
+                  {c.namaKriteria} (Bobot: {formatBobotPct(c.bobot)}%)
                 </SelectItem>
               ))}
             </SelectContent>
@@ -699,8 +718,8 @@ export default function AdminNilaiPage() {
             </div>
           </div>
 
-          <div className="border-b border-slate-200">
-          <div>
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+            <div>
               {categories.length === 0 && (
                 <div className="flex flex-col items-center justify-center p-8 text-slate-500 bg-slate-50/60 border-b border-slate-200">
                   <BookOpen className="h-6 w-6 mb-2 text-slate-400" />
@@ -791,16 +810,26 @@ export default function AdminNilaiPage() {
                                         ? details[siswa.studentId][cat]
                                         : ""
                                     }
-                                    onChange={(e) =>
-                                      setDetails((p) => ({
-                                        ...p,
-                                        [siswa.studentId]: {
+                                    onChange={(e) => {
+                                      const raw = e.target.value;
+                                      setDetails((p) => {
+                                        const currentStud = {
                                           ...(p[siswa.studentId] || {}),
-                                          [cat]:
-                                            parseFloat(e.target.value) || 0,
-                                        },
-                                      }))
-                                    }
+                                        };
+                                        if (raw === "") {
+                                          delete currentStud[cat];
+                                        } else {
+                                          const num = parseFloat(raw);
+                                          currentStud[cat] = isNaN(num)
+                                            ? 0
+                                            : Math.min(100, Math.max(0, num));
+                                        }
+                                        return {
+                                          ...p,
+                                          [siswa.studentId]: currentStud,
+                                        };
+                                      });
+                                    }}
                                     className="w-20 h-8 text-center font-mono text-xs font-semibold group-hover/row:bg-slate-900/90 group-hover/row:border-slate-700 group-hover/row:text-white group-hover/row:[color-scheme:dark] transition-colors"
                                   />
                                 </div>

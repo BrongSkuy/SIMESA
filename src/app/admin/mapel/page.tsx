@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { BookOpen, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,10 @@ export default function AdminMapelPage() {
   const [classesList, setClassesList] = useState<ClassOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<SubjectRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const ITEMS_PER_PAGE = 15;
 
   // Form State
   const [formName, setFormName] = useState("");
@@ -121,6 +125,17 @@ export default function AdminMapelPage() {
       return matchSearch && matchGuru && matchKelas;
     });
   }, [subjects, search, filterGuru, filterKelas]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedSubjects = filtered.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterGuru, filterKelas]);
 
   const resetForm = () => {
     setFormName("");
@@ -217,23 +232,27 @@ export default function AdminMapelPage() {
     }
   };
 
-  const handleDelete = async (subject: SubjectRow) => {
-    if (
-      !confirm(`Yakin ingin menghapus mata pelajaran ${subject.namaMapel}?`)
-    )
-      return;
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/subjects/${subject.id}`, {
+      const res = await fetch(`/api/subjects/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Gagal menghapus");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal menghapus mata pelajaran");
+      }
 
-      toast.success(`Mata pelajaran ${subject.namaMapel} berhasil dihapus!`);
+      toast.success(`Mata pelajaran ${deleteTarget.namaMapel} berhasil dihapus!`);
+      setDeleteTarget(null);
       fetchData();
-    } catch {
-      toast.error("Gagal menghapus mata pelajaran");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus mata pelajaran";
+      toast.error(msg);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -546,99 +565,174 @@ export default function AdminMapelPage() {
       </div>
 
       {/* Data Table */}
-      <div className="border-b border-slate-200 overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-14 text-center">No</TableHead>
-              <TableHead>Nama Mata Pelajaran</TableHead>
-              <TableHead>Guru Pengampu</TableHead>
-              <TableHead>Alokasi Kelas</TableHead>
-              <TableHead className="text-right pr-5">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="py-10 text-center text-xs text-slate-500"
-                >
-                  Tidak ada data mata pelajaran yang ditemukan.
-                </TableCell>
+                <TableHead className="w-14 text-center">No</TableHead>
+                <TableHead>Nama Mata Pelajaran</TableHead>
+                <TableHead>Guru Pengampu</TableHead>
+                <TableHead>Alokasi Kelas</TableHead>
+                <TableHead className="text-right pr-5">Aksi</TableHead>
               </TableRow>
-            ) : (
-              filtered.map((mapel, i) => (
-                <TableRow
-                  key={mapel.id}
-                  className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
-                >
-                  <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500 transition-colors">
-                    {i + 1}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-md bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-600 group-hover/row:text-blue-300 border border-blue-100 group-hover/row:border-blue-500/30 shrink-0 transition-colors">
-                        <BookOpen className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
-                        {mapel.namaMapel}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium text-slate-700 group-hover/row:text-slate-300 transition-colors">
-                    {mapel.guruPengampu || (
-                      <span className="text-slate-400 group-hover/row:text-slate-500 italic transition-colors">
-                        Belum ditentukan
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {mapel.kelasDiampu ? (
-                        mapel.kelasDiampu.split(",").map((k) => {
-                          const trimmed = k.trim();
-                          if (!trimmed) return null;
-                          return (
-                            <span
-                              key={trimmed}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
-                            >
-                              {trimmed}
-                            </span>
-                          );
-                        })
-                      ) : (
-                        <span className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">-</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right pr-5">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        aria-label={`Edit ${mapel.namaMapel}`}
-                        onClick={() => openEdit(mapel)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Hapus ${mapel.namaMapel}`}
-                        onClick={() => handleDelete(mapel)}
-                        className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-600 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {paginatedSubjects.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="py-10 text-center text-xs text-slate-500"
+                  >
+                    Tidak ada data mata pelajaran yang ditemukan.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                paginatedSubjects.map((mapel, i) => (
+                  <TableRow
+                    key={mapel.id}
+                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                  >
+                    <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500 transition-colors">
+                      {(safePage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-md bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-600 group-hover/row:text-blue-300 border border-blue-100 group-hover/row:border-blue-500/30 shrink-0 transition-colors">
+                          <BookOpen className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                          {mapel.namaMapel}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-slate-700 group-hover/row:text-slate-300 transition-colors">
+                      {mapel.guruPengampu || (
+                        <span className="text-slate-400 group-hover/row:text-slate-500 italic transition-colors">
+                          Belum ditentukan
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {mapel.kelasDiampu ? (
+                          mapel.kelasDiampu.split(",").map((k) => {
+                            const trimmed = k.trim();
+                            if (!trimmed) return null;
+                            return (
+                              <span
+                                key={trimmed}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
+                              >
+                                {trimmed}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">-</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-5">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          aria-label={`Edit ${mapel.namaMapel}`}
+                          onClick={() => openEdit(mapel)}
+                          className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Hapus ${mapel.namaMapel}`}
+                          onClick={() => setDeleteTarget(mapel)}
+                          className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-600 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-slate-500">
+              Halaman <strong className="text-slate-800">{safePage}</strong> dari{" "}
+              <strong className="text-slate-800">{totalPages}</strong> ({filtered.length} mapel)
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+              >
+                <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+              >
+                Selanjutnya
+                <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Dialog Konfirmasi Hapus Mapel */}
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-md rounded-2xl border-slate-200 p-6">
+          <DialogHeader>
+            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Hapus Mata Pelajaran?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 leading-relaxed">
+              Apakah Anda yakin ingin menghapus mata pelajaran{" "}
+              <strong className="text-slate-800">{deleteTarget?.namaMapel}</strong>? Mata pelajaran yang telah memiliki data presensi atau nilai tidak dapat dihapus.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Ya, Hapus Mapel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { attendance, students, academicYears, teachers, subjects, classes, spkPu
 import { and, eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { DEFAULT_PERIODE } from "@/lib/utils";
+import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
 
 // GET /api/attendance — get attendance by kelas and tanggal
 export async function GET(request: NextRequest) {
@@ -30,11 +30,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Get students in this class
+  // Get active students in this class
   const siswaKelas = await db
     .select()
     .from(students)
-    .where(eq(students.kelas, kelas))
+    .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
     .all();
 
   if (siswaKelas.length === 0) {
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayWIB();
     if (body.tanggal > todayStr) {
       return NextResponse.json(
         { error: "Tanggal presensi tidak boleh di masa depan (maksimal hari ini)." },
