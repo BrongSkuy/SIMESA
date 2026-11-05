@@ -126,15 +126,6 @@ export default function SiswaDashboard() {
     );
   }
 
-  const initials =
-    profile.namaLengkap
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "S";
-
   const kelasLeaderboard = leaderboard.filter(
     (e) => e.kelas === profile.kelas
   );
@@ -144,13 +135,13 @@ export default function SiswaDashboard() {
   return (
     <div className="space-y-6">
       {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
-      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs space-y-6">
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
         {/* Subtle Ambient Radial Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10">
           {/* Header Info Row - Centered Executive Layout */}
-          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-3.5">
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center justify-center gap-2.5">
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2.5 drop-shadow-xs">
@@ -158,11 +149,12 @@ export default function SiswaDashboard() {
                   <span>Ringkasan Akademik Siswa</span>
                 </h1>
                 <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-blue-300 border border-white/10 shadow-xs">
-                  Portal Siswa
+                  Kelas {profile.kelas}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
-                Selamat datang, <strong className="text-white">{profile.namaLengkap}</strong> · Pantau presensi dan capaian evaluasi semester Anda
+                Selamat datang, <strong className="text-white">{profile.namaLengkap}</strong>{" "}
+                <span className="text-blue-300/80">(NIS {profile.nis})</span> · Pantau presensi dan capaian evaluasi semester Anda
               </p>
             </div>
 
@@ -181,37 +173,6 @@ export default function SiswaDashboard() {
                   <ClipboardList className="h-3.5 w-3.5 text-blue-100" /> Transkrip Nilai
                 </Button>
               </Link>
-            </div>
-          </div>
-
-          {/* Student Profile Info Card - Sleek Glassmorphism */}
-          <div className="p-4 sm:p-5 rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-amber-400/10 border border-amber-400/30 ring-1 ring-amber-400/20 flex items-center justify-center text-amber-300 text-sm font-bold shrink-0 shadow-xs">
-                {initials}
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    Siswa Aktif
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
-                    NIS: {profile.nis}
-                  </span>
-                </div>
-                <h2 className="text-base sm:text-lg font-bold tracking-tight text-white mt-1">
-                  {profile.namaLengkap}
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 text-blue-300 border border-white/10">
-                Kelas {profile.kelas}
-              </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-white/5 text-slate-300 border border-white/10">
-                Angkatan {profile.angkatan}
-              </span>
             </div>
           </div>
 

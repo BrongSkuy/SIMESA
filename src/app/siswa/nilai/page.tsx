@@ -54,18 +54,6 @@ interface ScoreData {
   totalSkorSPK: number;
 }
 
-function getInitials(name: string): string {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "S"
-  );
-}
-
 export default function SiswaNilaiPage() {
   const [data, setData] = useState<ScoreData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,31 +131,29 @@ export default function SiswaNilaiPage() {
         icon={ClipboardList}
       />
 
-      {/* Score Summary Banner - Executive Dark Hero */}
+      {/* Score Summary Banner - Fokus pada Skor SPK & Periode tanpa duplikasi profil */}
       <div className="rounded-2xl bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] p-5 sm:p-6 border border-slate-800 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-300 font-bold text-base shrink-0">
-            {getInitials(data.student.namaLengkap)}
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              Periode: {data.periode || "Aktif"}
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+              Kelas {data.student.kelas}
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
+              {data.criteria.length} Kriteria SPK
+            </span>
           </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                Periode: {data.periode || "Aktif"}
-              </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
-                NIS {data.student.nis}
-              </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
-                Kelas {data.student.kelas}
-              </span>
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-white mt-1.5">
-              {data.student.namaLengkap}
-            </h2>
-          </div>
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
+            Akumulasi Evaluasi Multi-Kriteria (SAW)
+          </h2>
+          <p className="text-xs text-slate-400">
+            Nilai akhir diperoleh dari penjumlahan skor terbobot seluruh kriteria akademik & kehadiran
+          </p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start">
+        <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
           <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
             <Award className="h-6 w-6" />
           </div>
