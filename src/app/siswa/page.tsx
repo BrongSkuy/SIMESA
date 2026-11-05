@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Loader2,
   ClipboardList,
+  ArrowUpRight,
+  Lock,
 } from "lucide-react";
 import {
   AreaChart,
@@ -70,6 +72,7 @@ export default function SiswaDashboard() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardData[]>([]);
+  const [isLeaderboardPublished, setIsLeaderboardPublished] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -92,7 +95,11 @@ export default function SiswaDashboard() {
         if (leaderboardRes.ok) {
           const lbData = await leaderboardRes.json();
           if (Array.isArray(lbData)) {
+            setIsLeaderboardPublished(true);
             setLeaderboard(lbData);
+          } else if (lbData && typeof lbData === "object") {
+            setIsLeaderboardPublished(lbData.isPublished !== false);
+            setLeaderboard(Array.isArray(lbData.data) ? lbData.data : []);
           }
         }
       } catch (err) {
@@ -128,6 +135,9 @@ export default function SiswaDashboard() {
 
   const kelasLeaderboard = leaderboard.filter(
     (e) => e.kelas === profile.kelas
+  );
+  const myLeaderboardEntry = kelasLeaderboard.find(
+    (e) => e.studentId === profile.id
   );
 
   const chartData = stats?.dailyData || [];
@@ -282,14 +292,36 @@ export default function SiswaDashboard() {
                         allowDecimals={false}
                       />
                       <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#091524",
-                          color: "#F8FAFC",
-                          borderRadius: "8px",
-                          border: "1px solid #1E293B",
-                          fontSize: "12px",
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload || payload.length === 0) {
+                            return null;
+                          }
+                          const row = payload[0]?.payload as
+                            | AttendanceStats["dailyData"][number]
+                            | undefined;
+                          if (!row) return null;
+                          return (
+                            <div className="rounded-lg border border-slate-800 bg-[#091524] px-3 py-2.5 text-xs text-slate-100 shadow-xl space-y-1.5">
+                              <p className="font-bold text-white border-b border-slate-800 pb-1">
+                                Tanggal: {label}
+                              </p>
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                <span className="text-emerald-400 font-medium">
+                                  Hadir: <strong>{row.hadir}</strong>
+                                </span>
+                                <span className="text-amber-400 font-medium">
+                                  Izin: <strong>{row.izin}</strong>
+                                </span>
+                                <span className="text-blue-400 font-medium">
+                                  Sakit: <strong>{row.sakit}</strong>
+                                </span>
+                                <span className="text-rose-400 font-medium">
+                                  Alfa: <strong>{row.alfa}</strong>
+                                </span>
+                              </div>
+                            </div>
+                          );
                         }}
-                        itemStyle={{ color: "#F8FAFC" }}
                       />
                       <Area
                         type="monotone"
@@ -314,14 +346,23 @@ export default function SiswaDashboard() {
         {/* Mini leaderboard kelas */}
         <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm transition-all duration-300 hover:border-slate-300 flex flex-col justify-between">
           <div>
-            <div className="pb-3.5 border-b border-slate-100">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight">
-                <Trophy className="h-4 w-4 text-amber-500" />
-                Top 5 Kelas {profile.kelas}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Peringkat skor SPK resmi di kelas Anda
-              </p>
+            <div className="pb-3.5 border-b border-slate-100 flex items-start justify-between gap-2">
+              <div>
+                <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  Top 5 Kelas {profile.kelas}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Peringkat skor SPK resmi di kelas Anda
+                </p>
+              </div>
+              <Link
+                href="/siswa/leaderboard"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 shrink-0 mt-0.5 transition-colors"
+              >
+                Lihat Semua
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
             <div className="pt-2 overflow-x-auto">
               <Table>
@@ -334,52 +375,79 @@ export default function SiswaDashboard() {
                 </TableHeader>
                 <TableBody>
                   {kelasLeaderboard.length > 0 ? (
-                    kelasLeaderboard.slice(0, 5).map((entry) => {
-                      const isMe = entry.studentId === profile.id;
-                      return (
-                        <TableRow
-                          key={entry.studentId}
-                          className={cn(
-                            "group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0",
-                            isMe && "bg-blue-50/50 hover:bg-[#091524]"
-                          )}
-                        >
+                    <>
+                      {kelasLeaderboard.slice(0, 5).map((entry) => {
+                        const isMe = entry.studentId === profile.id;
+                        return (
+                          <TableRow
+                            key={entry.studentId}
+                            className={cn(
+                              "group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0",
+                              isMe && "bg-blue-50/50 hover:bg-[#091524]"
+                            )}
+                          >
+                            <TableCell className="pl-2">
+                              <span
+                                className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
+                                  entry.rank === 1
+                                    ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:ring-amber-500/40"
+                                    : entry.rank === 2
+                                      ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:ring-slate-700"
+                                      : entry.rank === 3
+                                        ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300 group-hover/row:ring-orange-500/40"
+                                        : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700"
+                                }`}
+                              >
+                                #{entry.rank}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                              <span>{entry.namaLengkap}</span>
+                              {isMe && (
+                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
+                                  Kamu
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
+                              {entry.skorSPK}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {myLeaderboardEntry && myLeaderboardEntry.rank > 5 && (
+                        <TableRow className="group/row transition-all duration-200 bg-blue-50/60 hover:bg-[#091524] hover:shadow-md cursor-pointer border-t-2 border-blue-200/80">
                           <TableCell className="pl-2">
-                            <span
-                              className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
-                                entry.rank === 1
-                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:ring-amber-500/40"
-                                  : entry.rank === 2
-                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:ring-slate-700"
-                                    : entry.rank === 3
-                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300 group-hover/row:ring-orange-500/40"
-                                      : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700"
-                              }`}
-                            >
-                              #{entry.rank}
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/40 transition-colors">
+                              #{myLeaderboardEntry.rank}
                             </span>
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
-                            <span>{entry.namaLengkap}</span>
-                            {isMe && (
-                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
-                                Kamu
-                              </span>
-                            )}
+                          <TableCell className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                            <span>{myLeaderboardEntry.namaLengkap}</span>
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
+                              Kamu
+                            </span>
                           </TableCell>
                           <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
-                            {entry.skorSPK}
+                            {myLeaderboardEntry.skorSPK}
                           </TableCell>
                         </TableRow>
-                      );
-                    })
+                      )}
+                    </>
                   ) : (
                     <TableRow>
                       <TableCell
                         colSpan={3}
                         className="py-10 text-center text-xs text-slate-500"
                       >
-                        Leaderboard semester ini belum dirilis.
+                        {!isLeaderboardPublished ? (
+                          <span className="inline-flex items-center gap-1.5 text-slate-500">
+                            <Lock className="h-3.5 w-3.5 text-amber-500" />
+                            Leaderboard semester ini belum dirilis.
+                          </span>
+                        ) : (
+                          "Belum ada data peringkat untuk kelas ini."
+                        )}
                       </TableCell>
                     </TableRow>
                   )}

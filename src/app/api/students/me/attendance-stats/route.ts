@@ -4,6 +4,7 @@ import { students, attendance, academicYears } from "@/db/schema";
 import { eq, and, sql, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { DEFAULT_PERIODE } from "@/lib/utils";
 
 // GET /api/students/me/attendance-stats — attendance statistics for the logged-in student
 export async function GET() {
@@ -35,7 +36,7 @@ export async function GET() {
     .select()
     .from(academicYears)
     .where(eq(academicYears.isActive, true));
-  const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : "2025/2026-Genap";
+  const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
 
   // Get all attendance records for this student in the active period
   const allRecords = await db

@@ -39,19 +39,27 @@ export async function GET() {
     .where(eq(spkPublishStatus.periode, activePeriode));
 
   if (!publishStatus || !publishStatus.isPublished) {
-    return NextResponse.json({ error: "Leaderboard belum dipublikasikan oleh Admin" }, { status: 403 });
+    return NextResponse.json({
+      isPublished: false,
+      activePeriode,
+      data: [],
+    });
   }
 
   // Fetch from REAL SPK Calculator
   const spkResults = await calculateSPK(student.kelas, activePeriode);
 
-  const leaderboard = spkResults.map(r => ({
-      rank: r.rank,
-      studentId: r.studentId,
-      namaLengkap: r.namaLengkap,
-      kelas: r.kelas,
-      skorSPK: r.persentase,
+  const leaderboard = spkResults.map((r) => ({
+    rank: r.rank,
+    studentId: r.studentId,
+    namaLengkap: r.namaLengkap,
+    kelas: r.kelas,
+    skorSPK: r.persentase,
   }));
 
-  return NextResponse.json(leaderboard);
+  return NextResponse.json({
+    isPublished: true,
+    activePeriode,
+    data: leaderboard,
+  });
 }
