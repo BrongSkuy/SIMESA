@@ -9,6 +9,7 @@ import {
   BookOpen,
   BarChart3,
   List,
+  X,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,7 @@ export default function SiswaAbsensiPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [selectedMapel, setSelectedMapel] = useState("Semua");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"kalender" | "grafik">("kalender");
 
   useEffect(() => {
@@ -98,6 +100,32 @@ export default function SiswaAbsensiPage() {
       .then((data) => {
         if (Array.isArray(data)) {
           setAttendanceRecords(data);
+          if (data.length > 0) {
+            const now = new Date();
+            const currentPrefix = `${now.getFullYear()}-${String(
+              now.getMonth() + 1
+            ).padStart(2, "0")}`;
+            const hasCurrentMonthRecord = data.some(
+              (r: AttendanceRecord) =>
+                typeof r.tanggal === "string" &&
+                r.tanggal.startsWith(currentPrefix)
+            );
+            if (!hasCurrentMonthRecord) {
+              // Cari tanggal presensi terbaru dan arahkan kalender ke bulan tersebut
+              const latest = [...data].sort((a, b) =>
+                (b.tanggal || "").localeCompare(a.tanggal || "")
+              )[0];
+              if (latest?.tanggal) {
+                const parts = latest.tanggal.split("-");
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                if (!isNaN(y) && !isNaN(m) && m >= 0 && m <= 11) {
+                  setCurrentYear(y);
+                  setCurrentMonth(m);
+                }
+              }
+            }
+          }
         }
         setLoading(false);
       })
@@ -133,7 +161,7 @@ export default function SiswaAbsensiPage() {
       string,
       { hadir: number; izin: number; sakit: number; alfa: number }
     > = {};
-    attendanceRecords.forEach((r) => {
+    filteredRecords.forEach((r) => {
       const key = r.mapel || "Umum";
       if (!mapelMap[key])
         mapelMap[key] = { hadir: 0, izin: 0, sakit: 0, alfa: 0 };
@@ -146,7 +174,7 @@ export default function SiswaAbsensiPage() {
       mapel,
       ...val,
     }));
-  }, [attendanceRecords]);
+  }, [filteredRecords]);
 
   const generateCalendarData = (year: number, month: number) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -154,9 +182,11 @@ export default function SiswaAbsensiPage() {
 
     const days: {
       date: number;
+      dateStr: string;
       status: StatusType;
       isWeekend: boolean;
       count: number;
+      tooltip: string | undefined;
     }[] = [];
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -170,7 +200,7 @@ export default function SiswaAbsensiPage() {
       const dayRecords = filteredRecords.filter((r) => r.tanggal === dateStr);
 
       let displayStatus: StatusType = null;
-      if (!isWeekend && dayRecords.length > 0) {
+      if (dayRecords.length > 0) {
         if (dayRecords.some((r) => r.status === "Alfa")) displayStatus = "Alfa";
         else if (dayRecords.some((r) => r.status === "Sakit"))
           displayStatus = "Sakit";
@@ -180,11 +210,20 @@ export default function SiswaAbsensiPage() {
           displayStatus = "Hadir";
       }
 
+      const tooltip =
+        dayRecords.length > 0
+          ? dayRecords
+              .map((r) => `${r.mapel || "Umum"}: ${r.status || "-"}`)
+              .join(" • ")
+          : undefined;
+
       days.push({
         date: d,
-        status: isWeekend ? null : displayStatus,
+        dateStr,
+        status: displayStatus,
         isWeekend,
         count: dayRecords.length,
+        tooltip,
       });
     }
 
@@ -196,14 +235,18 @@ export default function SiswaAbsensiPage() {
 
   const sortedRecords = useMemo(() => {
     return [...filteredRecords].sort((a, b) => {
-      const dateCompare =
-        new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime();
+      const dateCompare = (b.tanggal || "").localeCompare(a.tanggal || "");
       if (dateCompare !== 0) return dateCompare;
       return (a.mapel || "").localeCompare(b.mapel || "");
     });
   }, [filteredRecords]);
 
-  const recentHistory = sortedRecords.slice(0, 15);
+  const recentHistory = useMemo(() => {
+    if (selectedDate) {
+      return sortedRecords.filter((r) => r.tanggal === selectedDate);
+    }
+    return sortedRecords.slice(0, 15);
+  }, [sortedRecords, selectedDate]);
 
   if (loading) {
     return (
@@ -214,6 +257,7 @@ export default function SiswaAbsensiPage() {
   }
 
   const handlePrevMonth = () => {
+    setSelectedDate(null);
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear((y) => y - 1);
@@ -223,6 +267,7 @@ export default function SiswaAbsensiPage() {
   };
 
   const handleNextMonth = () => {
+    setSelectedDate(null);
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear((y) => y + 1);
@@ -250,7 +295,10 @@ export default function SiswaAbsensiPage() {
           <Select
             value={selectedMapel}
             onValueChange={(val) => {
-              if (val) setSelectedMapel(val);
+              if (val) {
+                setSelectedMapel(val);
+                setSelectedDate(null);
+              }
             }}
           >
             <SelectTrigger className="w-[220px] h-9 text-xs">
@@ -350,7 +398,7 @@ export default function SiswaAbsensiPage() {
           <span>Izin</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-[#6366F1]" />
+          <span className="h-2.5 w-2.5 rounded-xs bg-blue-500" />
           <span>Sakit</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -407,44 +455,72 @@ export default function SiswaAbsensiPage() {
                 {Array.from({ length: firstDay }).map((_, i) => (
                   <div key={`empty-${i}`} />
                 ))}
-                {days.map((day) => (
-                  <div
-                    key={day.date}
-                    className={`relative flex h-10 items-center justify-center rounded-lg text-xs font-mono font-semibold transition-colors ${
-                      day.isWeekend
-                        ? "bg-slate-100/70 text-slate-400 group-hover/cal:bg-slate-800/40 group-hover/cal:text-slate-500"
-                        : day.status
+                {days.map((day) => {
+                  const isSelected = selectedDate === day.dateStr;
+                  return (
+                    <button
+                      type="button"
+                      key={day.date}
+                      onClick={() => {
+                        if (day.count > 0) {
+                          setSelectedDate((prev) =>
+                            prev === day.dateStr ? null : day.dateStr
+                          );
+                        }
+                      }}
+                      className={`relative flex h-10 items-center justify-center rounded-lg text-xs font-mono font-semibold transition-all ${
+                        day.count > 0 ? "cursor-pointer" : "cursor-default"
+                      } ${
+                        isSelected
+                          ? "ring-2 ring-blue-600 group-hover/cal:ring-amber-400 scale-[1.03]"
+                          : ""
+                      } ${
+                        day.status
                           ? statusTileMap[day.status]
-                          : "bg-slate-50/70 text-slate-500 border border-slate-100 group-hover/cal:bg-slate-800/70 group-hover/cal:text-slate-300 group-hover/cal:border-slate-700/80"
-                    }`}
-                    title={
-                      day.count > 1
-                        ? `${day.count} catatan absensi`
-                        : undefined
-                    }
-                  >
-                    {day.date}
-                    {day.count > 1 && (
-                      <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] group-hover/cal:bg-blue-500 text-[10px] font-bold text-white shadow-xs transition-colors">
-                        {day.count}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                          : day.isWeekend
+                            ? "bg-slate-100/70 text-slate-400 group-hover/cal:bg-slate-800/40 group-hover/cal:text-slate-500"
+                            : "bg-slate-50/70 text-slate-500 border border-slate-100 group-hover/cal:bg-slate-800/70 group-hover/cal:text-slate-300 group-hover/cal:border-slate-700/80"
+                      }`}
+                      title={day.tooltip}
+                    >
+                      {day.date}
+                      {day.count > 1 && (
+                        <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] group-hover/cal:bg-blue-500 text-[10px] font-bold text-white shadow-xs transition-colors">
+                          {day.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Recent History Card */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="pb-3 border-b border-slate-100">
-              <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <List className="h-4 w-4 text-blue-600" />
-                Log Presensi Terkini
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
-                15 catatan kehadiran terakhir Anda
-              </CardDescription>
+            <div className="pb-3 border-b border-slate-100 flex items-start justify-between gap-2">
+              <div>
+                <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <List className="h-4 w-4 text-blue-600" />
+                  Log Presensi Terkini
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500">
+                  {selectedDate
+                    ? `Menampilkan catatan tanggal ${selectedDate}`
+                    : "15 catatan kehadiran terakhir Anda"}
+                </CardDescription>
+              </div>
+              {selectedDate && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDate(null)}
+                  className="h-7 px-2 text-[11px] gap-1 shrink-0"
+                >
+                  <X className="h-3 w-3" /> Reset
+                </Button>
+              )}
             </div>
             <div>
               <div className="max-h-[430px] overflow-y-auto">
@@ -460,7 +536,9 @@ export default function SiswaAbsensiPage() {
                     {recentHistory.length > 0 ? (
                       recentHistory.map((r, i) => {
                         try {
-                          const parsedDate = new Date(r.tanggal);
+                          const parsedDate = new Date(
+                            `${r.tanggal}T00:00:00`
+                          );
                           const formattedDate = new Intl.DateTimeFormat(
                             "id-ID",
                             {
@@ -589,7 +667,7 @@ export default function SiswaAbsensiPage() {
                       <Bar
                         dataKey="sakit"
                         name="Sakit"
-                        fill="#6366F1"
+                        fill="#3B82F6"
                         radius={[4, 4, 0, 0]}
                       />
                       <Bar
