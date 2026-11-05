@@ -243,11 +243,51 @@ async function seed() {
   }
 
   // ==========================================
-  // 8. Demo Attendance Data (last 2 weeks)
+  // 8. Grading Categories (Tugas, UTS, UAS)
+  // ==========================================
+  console.log("\n📦 Creating SPK Grading Categories...");
+  const academicCrit = kriteria.find((k) => k.namaKriteria === "Nilai Akademik");
+  const allDBCriteria = await db.select().from(schema.spkCriteria);
+  const dbAcadCrit = allDBCriteria.find((c) => c.namaKriteria === "Nilai Akademik");
+
+  if (dbAcadCrit) {
+    const allClasses = await db.select().from(schema.classes);
+    const allSubjectsList = await db.select().from(schema.subjects);
+
+    for (const cls of allClasses) {
+      const classSubjects = allSubjectsList.filter((s) => {
+        const assigned = (s.kelasDiampu || "")
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean);
+        return assigned.includes(cls.namaKelas);
+      });
+
+      for (const subj of classSubjects) {
+        try {
+          await db.insert(schema.spkGradingCategories).values({
+            kelas: cls.namaKelas,
+            criteriaId: dbAcadCrit.id,
+            mapel: subj.namaMapel,
+            categories: JSON.stringify(["Tugas", "UTS", "UAS"]),
+            periode: "2025/2026-Genap",
+          });
+          console.log(`   ✅ Kategori Penilaian: ${cls.namaKelas} - ${subj.namaMapel} (Tugas, UTS, UAS)`);
+        } catch {
+          // skip duplicates
+        }
+      }
+    }
+  }
+
+  // ==========================================
+  // 9. Demo Attendance Data (Curriculum & Umum)
   // ==========================================
   console.log("\n📊 Creating demo attendance data...");
-  if (createdStudentIds.length > 0) {
-    // 80% hadir, 7% izin, 7% sakit, 6% alfa
+  const allStudentsList = await db.select().from(schema.students);
+  const allSubjectsList = await db.select().from(schema.subjects);
+
+  if (allStudentsList.length > 0) {
     // Generate attendance for last 10 school days
     const today = new Date();
     const schoolDays: string[] = [];
@@ -259,43 +299,113 @@ async function seed() {
         schoolDays.push(d.toISOString().split("T")[0]);
       }
     }
+    schoolDays.sort();
 
-    for (const sid of createdStudentIds) {
-      for (const tanggal of schoolDays) {
-        // 80% hadir, 7% izin, 7% sakit, 6% alfa
-        const rand = Math.random();
-        const status = rand < 0.80 ? "Hadir" : rand < 0.87 ? "Izin" : rand < 0.94 ? "Sakit" : "Alfa";
-        try {
-          await db.insert(schema.attendance).values({
-            studentId: sid.studentId,
-            tanggal,
-            mapel: "Umum",
-            status,
-            periode: "2025/2026-Genap",
-          });
-        } catch {
-          // skip duplicates
+    for (const student of allStudentsList) {
+      const classSubjects = allSubjectsList.filter((s) => {
+        const assigned = (s.kelasDiampu || "")
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean);
+        return assigned.includes(student.kelas);
+      });
+
+      // Mapels to record: curriculum subjects + "Umum"
+      const mapelsToRecord = [...classSubjects.map((s) => s.namaMapel), "Umum"];
+
+      for (const mapel of mapelsToRecord) {
+        for (const tanggal of schoolDays) {
+          const rand = Math.random();
+          const status = rand < 0.82 ? "Hadir" : rand < 0.89 ? "Izin" : rand < 0.95 ? "Sakit" : "Alfa";
+          try {
+            await db.insert(schema.attendance).values({
+              studentId: student.id,
+              tanggal,
+              mapel,
+              status,
+              periode: "2025/2026-Genap",
+            });
+          } catch {
+            // skip duplicates
+          }
         }
       }
     }
-    console.log(`   ✅ Generated attendance for ${createdStudentIds.length} students × ${schoolDays.length} days`);
+    console.log(`   ✅ Generated attendance for ${allStudentsList.length} students across subjects & Umum`);
   }
 
   // ==========================================
-  // 9. Demo SPK Scores
+  // 10. Demo SPK Scores (Per-Subject & Umum)
   // ==========================================
-  console.log("\n🏆 Creating demo SPK scores...");
-  if (createdStudentIds.length > 0) {
+  console.log("\n🏆 Creating demo SPK scores with Tugas, UTS, UAS details...");
+  if (allStudentsList.length > 0) {
     const allCriteria = await db.select().from(schema.spkCriteria);
-    for (const sid of createdStudentIds) {
-      for (const crit of allCriteria) {
-        if (crit.tipe === "Otomatis") continue; // Kehadiran is auto-calculated
-        const nilai = Math.floor(Math.random() * 30) + 70; // 70-99
+    const academicCritRow = allCriteria.find((c) => c.namaKriteria === "Nilai Akademik");
+    const nonAcadCritRows = allCriteria.filter((c) => c.tipe === "Manual" && c.namaKriteria !== "Nilai Akademik");
+
+    for (const student of allStudentsList) {
+      const classSubjects = allSubjectsList.filter((s) => {
+        const assigned = (s.kelasDiampu || "")
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean);
+        return assigned.includes(student.kelas);
+      });
+
+      const baseRankFactor = (parseInt(student.nis.slice(-2), 10) || 5) % 15;
+      const studentBase = 88 - (baseRankFactor * 1.2);
+
+      // A. Per-subject scores
+      for (const subj of classSubjects) {
+        // Academic (Tugas, UTS, UAS)
+        if (academicCritRow) {
+          const tugas = Math.min(99, Math.max(68, Math.round(studentBase + (Math.random() * 14 - 6))));
+          const uts = Math.min(98, Math.max(65, Math.round(studentBase + (Math.random() * 12 - 6))));
+          const uas = Math.min(100, Math.max(68, Math.round(studentBase + (Math.random() * 14 - 5))));
+          const avg = Number(((tugas + uts + uas) / 3).toFixed(2));
+
+          try {
+            await db.insert(schema.spkScores).values({
+              studentId: student.id,
+              criteriaId: academicCritRow.id,
+              mapel: subj.namaMapel,
+              nilai: avg,
+              details: JSON.stringify({ Tugas: tugas, UTS: uts, UAS: uas }),
+              periode: "2025/2026-Genap",
+            });
+          } catch {
+            // skip duplicates
+          }
+        }
+
+        // Non-academic per subject
+        for (const nac of nonAcadCritRows) {
+          const val = Math.min(98, Math.max(70, Math.round(studentBase + (Math.random() * 12 - 5))));
+          try {
+            await db.insert(schema.spkScores).values({
+              studentId: student.id,
+              criteriaId: nac.id,
+              mapel: subj.namaMapel,
+              nilai: val,
+              details: JSON.stringify({ Nilai: val }),
+              periode: "2025/2026-Genap",
+            });
+          } catch {
+            // skip duplicates
+          }
+        }
+      }
+
+      // B. General Homeroom Evaluation ("Umum")
+      for (const nac of nonAcadCritRows) {
+        const val = Math.min(98, Math.max(70, Math.round(studentBase + (Math.random() * 10 - 4))));
         try {
           await db.insert(schema.spkScores).values({
-            studentId: sid.studentId,
-            criteriaId: crit.id,
-            nilai,
+            studentId: student.id,
+            criteriaId: nac.id,
+            mapel: "Umum",
+            nilai: val,
+            details: JSON.stringify({ Nilai: val }),
             periode: "2025/2026-Genap",
           });
         } catch {
@@ -303,7 +413,7 @@ async function seed() {
         }
       }
     }
-    console.log(`   ✅ Generated SPK scores for ${createdStudentIds.length} students`);
+    console.log(`   ✅ Generated per-subject SPK scores for ${allStudentsList.length} students`);
   }
 
   // ==========================================
