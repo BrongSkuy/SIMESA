@@ -65,17 +65,21 @@ const months = [
 ];
 
 const statusTileMap: Record<string, string> = {
-  Hadir: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  Izin: "bg-amber-50 text-amber-700 border border-amber-200",
-  Sakit: "bg-blue-50 text-blue-700 border border-blue-200",
-  Alfa: "bg-rose-50 text-rose-700 border border-rose-200",
+  Hadir:
+    "bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover/cal:bg-emerald-500/20 group-hover/cal:text-emerald-300 group-hover/cal:border-emerald-500/30",
+  Izin: "bg-amber-50 text-amber-700 border border-amber-200 group-hover/cal:bg-amber-500/20 group-hover/cal:text-amber-300 group-hover/cal:border-amber-500/30",
+  Sakit:
+    "bg-blue-50 text-blue-700 border border-blue-200 group-hover/cal:bg-blue-500/20 group-hover/cal:text-blue-300 group-hover/cal:border-blue-500/30",
+  Alfa: "bg-rose-50 text-rose-700 border border-rose-200 group-hover/cal:bg-rose-500/20 group-hover/cal:text-rose-300 group-hover/cal:border-rose-500/30",
 };
 
 const statusPillMap: Record<string, string> = {
-  Hadir: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Izin: "bg-amber-50 text-amber-700 border-amber-200",
-  Sakit: "bg-blue-50 text-blue-700 border-blue-200",
-  Alfa: "bg-rose-50 text-rose-700 border-rose-200",
+  Hadir:
+    "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30",
+  Izin: "bg-amber-50 text-amber-700 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30",
+  Sakit:
+    "bg-blue-50 text-blue-700 border-blue-200 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30",
+  Alfa: "bg-rose-50 text-rose-700 border-rose-200 group-hover/row:bg-rose-500/20 group-hover/row:text-rose-300 group-hover/row:border-rose-500/30",
 };
 
 export default function SiswaAbsensiPage() {
@@ -283,51 +287,51 @@ export default function SiswaAbsensiPage() {
         </Tabs>
       </div>
 
-      {/* Summary Stats */}
-      <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid grid-cols-2 sm:grid-cols-5 bg-white">
-        <div className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+      {/* Summary Stats - 5 Interactive Dark Hover Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
             Hadir
           </p>
-          <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1">
+          <p className="text-2xl font-bold tabular-nums text-emerald-600 group-hover:text-emerald-400 mt-1 transition-colors">
             {summary.hadir}
           </p>
         </div>
-        <div className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
             Izin
           </p>
-          <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1">
+          <p className="text-2xl font-bold tabular-nums text-amber-600 group-hover:text-amber-400 mt-1 transition-colors">
             {summary.izin}
           </p>
         </div>
-        <div className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
             Sakit
           </p>
-          <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1">
+          <p className="text-2xl font-bold tabular-nums text-blue-600 group-hover:text-blue-400 mt-1 transition-colors">
             {summary.sakit}
           </p>
         </div>
-        <div className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
             Alfa
           </p>
-          <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1">
+          <p className="text-2xl font-bold tabular-nums text-rose-600 group-hover:text-rose-400 mt-1 transition-colors">
             {summary.alfa}
           </p>
         </div>
-        <div className="p-4 col-span-2 sm:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer col-span-2 sm:col-span-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
             % Kehadiran
           </p>
           <p
-            className={`text-2xl font-bold tabular-nums mt-1 ${
+            className={`text-2xl font-bold tabular-nums mt-1 transition-colors ${
               summary.total > 0
                 ? attendancePct >= 75
-                  ? "text-emerald-600"
-                  : "text-rose-600"
-                : "text-slate-500"
+                  ? "text-emerald-600 group-hover:text-emerald-400"
+                  : "text-rose-600 group-hover:text-rose-400"
+                : "text-slate-500 group-hover:text-slate-300"
             }`}
           >
             {attendancePct}%
@@ -361,10 +365,10 @@ export default function SiswaAbsensiPage() {
 
       {viewMode === "kalender" ? (
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Calendar */}
-          <div className="lg:col-span-2 lg:border-r border-slate-200 lg:pr-8 space-y-4">
-            <div className="flex flex-row items-center justify-between pb-3 border-b border-slate-200">
-              <CardTitle className="text-sm font-semibold text-slate-900">
+          {/* Calendar Card with Dark Hover */}
+          <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group/cal space-y-4">
+            <div className="flex flex-row items-center justify-between pb-3.5 border-b border-slate-100 group-hover/cal:border-slate-800/80 transition-colors">
+              <CardTitle className="text-sm font-semibold text-slate-900 group-hover/cal:text-white transition-colors">
                 {months[currentMonth]} {currentYear}
               </CardTitle>
               <div className="flex items-center gap-1">
@@ -373,6 +377,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handlePrevMonth}
                   aria-label="Bulan sebelumnya"
+                  className="group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
@@ -381,6 +386,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handleNextMonth}
                   aria-label="Bulan selanjutnya"
+                  className="group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -391,7 +397,7 @@ export default function SiswaAbsensiPage() {
                 {dayNames.map((d) => (
                   <div
                     key={d}
-                    className="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 py-1.5"
+                    className="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover/cal:text-slate-400 py-1.5 transition-colors"
                   >
                     {d}
                   </div>
@@ -406,10 +412,10 @@ export default function SiswaAbsensiPage() {
                     key={day.date}
                     className={`relative flex h-10 items-center justify-center rounded-lg text-xs font-mono font-semibold transition-colors ${
                       day.isWeekend
-                        ? "bg-slate-100/70 text-slate-400"
+                        ? "bg-slate-100/70 text-slate-400 group-hover/cal:bg-slate-800/40 group-hover/cal:text-slate-500"
                         : day.status
                           ? statusTileMap[day.status]
-                          : "bg-slate-50/70 text-slate-500 border border-slate-100"
+                          : "bg-slate-50/70 text-slate-500 border border-slate-100 group-hover/cal:bg-slate-800/70 group-hover/cal:text-slate-300 group-hover/cal:border-slate-700/80"
                     }`}
                     title={
                       day.count > 1
@@ -419,7 +425,7 @@ export default function SiswaAbsensiPage() {
                   >
                     {day.date}
                     {day.count > 1 && (
-                      <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] text-[10px] font-bold text-white shadow-xs">
+                      <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] group-hover/cal:bg-blue-500 text-[10px] font-bold text-white shadow-xs transition-colors">
                         {day.count}
                       </span>
                     )}
@@ -429,9 +435,9 @@ export default function SiswaAbsensiPage() {
             </div>
           </div>
 
-          {/* Recent History */}
-          <div className="space-y-4">
-            <div className="pb-3 border-b border-slate-200">
+          {/* Recent History Card */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="pb-3 border-b border-slate-100">
               <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <List className="h-4 w-4 text-blue-600" />
                 Log Presensi Terkini
@@ -440,7 +446,7 @@ export default function SiswaAbsensiPage() {
                 15 catatan kehadiran terakhir Anda
               </CardDescription>
             </div>
-            <div className="border-b border-slate-200">
+            <div>
               <div className="max-h-[430px] overflow-y-auto">
                 <Table>
                   <TableHeader>

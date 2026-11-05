@@ -297,12 +297,12 @@ export default function SiswaDashboard() {
                       </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#E2E8F0"
+                        stroke="rgba(148, 163, 184, 0.18)"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="tanggal"
-                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        tick={{ fontSize: 11, fill: "#94A3B8" }}
                         axisLine={false}
                         tickLine={false}
                         interval={
@@ -315,14 +315,14 @@ export default function SiswaDashboard() {
                         height={chartData.length > 5 ? 60 : 30}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: "#64748B" }}
+                        tick={{ fontSize: 11, fill: "#94A3B8" }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#0F172A",
+                          backgroundColor: "#091524",
                           color: "#F8FAFC",
                           borderRadius: "8px",
                           border: "1px solid #1E293B",
@@ -351,7 +351,7 @@ export default function SiswaDashboard() {
         </div>
 
         {/* Mini leaderboard kelas */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm transition-all duration-300 hover:border-slate-300 flex flex-col justify-between">
           <div>
             <div className="pb-3.5 border-b border-slate-100">
               <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight">
@@ -385,14 +385,14 @@ export default function SiswaDashboard() {
                         >
                           <TableCell className="pl-2">
                             <span
-                              className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold ${
+                              className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
                                 entry.rank === 1
-                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300"
+                                  ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:ring-amber-500/40"
                                   : entry.rank === 2
-                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300"
+                                    ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:ring-slate-700"
                                     : entry.rank === 3
-                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300"
-                                      : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300"
+                                      ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300 group-hover/row:ring-orange-500/40"
+                                      : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700"
                               }`}
                             >
                               #{entry.rank}

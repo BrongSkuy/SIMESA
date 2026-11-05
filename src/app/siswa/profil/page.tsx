@@ -12,6 +12,10 @@ import {
   Trash2,
   CheckCircle2,
   AlertCircle,
+  IdCard,
+  GraduationCap,
+  Mail,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -91,6 +95,11 @@ export default function ProfilSiswaPage() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [studentMeta, setStudentMeta] = useState<{
+    nis?: string;
+    kelas?: string;
+    angkatan?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (session?.user?.name && !displayName) {
@@ -100,6 +109,21 @@ export default function ProfilSiswaPage() {
       setPhotoPreview(session.user.image);
     }
   }, [session, displayName, photoPreview]);
+
+  useEffect(() => {
+    fetch("/api/students/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && !data.error) {
+          setStudentMeta({
+            nis: data.nis,
+            kelas: data.kelas,
+            angkatan: data.angkatan,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Handle Photo Selection -> Buka Interactive Crop Modal
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,7 +251,13 @@ export default function ProfilSiswaPage() {
   };
 
   const username =
-    ((session?.user as Record<string, unknown>)?.username as string) || "-";
+    studentMeta?.nis ||
+    ((session?.user as Record<string, unknown>)?.username as string) ||
+    "-";
+  const userEmail = session?.user?.email || `${username}@siswa.simesa.sch.id`;
+  const kelasLabel = studentMeta?.kelas
+    ? `Kelas ${studentMeta.kelas}${studentMeta.angkatan ? ` · Angkatan ${studentMeta.angkatan}` : ""}`
+    : "Peserta Didik Aktif";
   const appRole =
     ((session?.user as Record<string, unknown>)?.appRole as string) || "SISWA";
 
@@ -244,11 +274,11 @@ export default function ProfilSiswaPage() {
 
       <div className="grid gap-6 md:grid-cols-5">
         {/* Kolom Identitas & Foto */}
-        <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 space-y-6">
+        <div className="md:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             {/* Foto Profil & Info Identitas Bersatu */}
-            <div className="flex items-center gap-3.5">
-              <div className="relative group shrink-0">
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+              <div className="relative shrink-0">
                 <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-xs">
                   {photoPreview ? (
                     <img
@@ -335,36 +365,77 @@ export default function ProfilSiswaPage() {
               isSaving={uploadingPhoto}
             />
 
-            {/* Detail Kredensial & Peran */}
-            <div className="space-y-3 pt-4 border-t border-slate-100 text-xs">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  NIS / Username Login
-                </p>
-                <p className="font-mono text-sm text-slate-800 mt-1 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-md w-fit">
-                  {username}
-                </p>
+            {/* 4 Kartu Detail Kredensial & Peran dengan Dark Hover */}
+            <div className="grid grid-cols-1 gap-2.5 text-xs">
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-lg group cursor-pointer flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-blue-600 shrink-0 transition-colors group-hover:bg-blue-500/20 group-hover:text-blue-400 group-hover:border-blue-500/30">
+                  <IdCard className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                    NIS / Username Login
+                  </p>
+                  <p className="font-mono text-sm font-bold text-slate-900 group-hover:text-white mt-0.5 truncate transition-colors">
+                    {username}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Peran Akses
-                </p>
-                <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-[#1e3a8a] border border-blue-200">
-                  <BookUser className="h-3.5 w-3.5" />
-                  {appRole}
-                </span>
+
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-lg group cursor-pointer flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-emerald-600 shrink-0 transition-colors group-hover:bg-emerald-500/20 group-hover:text-emerald-400 group-hover:border-emerald-500/30">
+                  <GraduationCap className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                    Kelas & Angkatan
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 group-hover:text-white mt-0.5 truncate transition-colors">
+                    {kelasLabel}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-lg group cursor-pointer flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-amber-600 shrink-0 transition-colors group-hover:bg-amber-500/20 group-hover:text-amber-400 group-hover:border-amber-500/30">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                    Email Akun
+                  </p>
+                  <p className="text-xs font-semibold text-slate-800 group-hover:text-white mt-0.5 truncate transition-colors">
+                    {userEmail}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-lg group cursor-pointer flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center text-indigo-600 shrink-0 transition-colors group-hover:bg-indigo-500/20 group-hover:text-indigo-400 group-hover:border-indigo-500/30">
+                  <BookUser className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                    Role Sistem
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 mt-0.5 px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200 group-hover:bg-blue-500/20 group-hover:text-blue-300 group-hover:border-blue-500/30 transition-colors">
+                    {appRole}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="border border-slate-200 bg-slate-50 p-3.5 rounded-md text-xs text-slate-500 leading-relaxed">
-            Jangan bagikan kata sandi akun Anda kepada siapapun. Hubungi Wali Kelas atau Administrator bila lupa kata sandi.
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3.5 text-xs text-slate-500 leading-relaxed transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:text-slate-300 hover:shadow-lg group cursor-pointer flex items-start gap-2.5">
+            <ShieldAlert className="h-4 w-4 text-amber-500 group-hover:text-amber-400 shrink-0 mt-0.5 transition-colors" />
+            <span>
+              Jangan bagikan kata sandi akun Anda kepada siapapun. Hubungi Wali Kelas atau Administrator bila lupa kata sandi.
+            </span>
           </div>
         </div>
 
         {/* Kolom Update Password */}
-        <div className="md:col-span-3 space-y-4">
-          <div className="pb-3 border-b border-slate-200">
+        <div className="md:col-span-3 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="pb-3 border-b border-slate-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <KeyRound className="h-4 w-4 text-blue-600" /> Perbarui Kata Sandi
             </h3>
@@ -374,11 +445,11 @@ export default function ProfilSiswaPage() {
           </div>
 
           <div className="pt-2">
-            <div className="mb-5 border border-slate-200 bg-slate-50 p-3.5 rounded-md text-xs text-slate-600">
-              <p className="font-semibold text-slate-800 mb-1 flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-blue-600" /> Catatan Keamanan:
+            <div className="mb-5 rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 text-xs text-slate-600 transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:text-slate-300 hover:shadow-lg group cursor-pointer">
+              <p className="font-semibold text-slate-800 group-hover:text-white mb-1.5 flex items-center gap-1.5 transition-colors">
+                <AlertCircle className="w-3.5 h-3.5 text-blue-600 group-hover:text-blue-400 transition-colors" /> Catatan Keamanan:
               </p>
-              <ul className="list-disc pl-4 space-y-1 text-xs">
+              <ul className="list-disc pl-4 space-y-1 text-xs text-slate-600 group-hover:text-slate-300 transition-colors">
                 <li>
                   Kata sandi terenkripsi secara kriptografis dan tidak dapat ditampilkan dalam teks biasa.
                 </li>

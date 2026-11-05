@@ -111,25 +111,25 @@ export default function SiswaNilaiPage() {
   const getScoreTone = (score: number) => {
     if (score >= 85)
       return {
-        text: "text-emerald-700",
-        pill: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        text: "text-emerald-700 group-hover:text-emerald-400 group-hover/row:text-emerald-400",
+        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30",
         label: "Sangat Baik",
       };
     if (score >= 70)
       return {
-        text: "text-blue-700",
-        pill: "bg-blue-50 text-blue-700 border-blue-200",
+        text: "text-blue-700 group-hover:text-blue-400 group-hover/row:text-blue-400",
+        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30",
         label: "Baik",
       };
     if (score >= 50)
       return {
-        text: "text-amber-700",
-        pill: "bg-amber-50 text-amber-700 border-amber-200",
+        text: "text-amber-700 group-hover:text-amber-400 group-hover/row:text-amber-400",
+        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30",
         label: "Cukup",
       };
     return {
-      text: "text-rose-700",
-      pill: "bg-rose-50 text-rose-700 border-rose-200",
+      text: "text-rose-700 group-hover:text-rose-400 group-hover/row:text-rose-400",
+      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30",
       label: "Perlu Perbaikan",
     };
   };
@@ -143,86 +143,86 @@ export default function SiswaNilaiPage() {
         icon={ClipboardList}
       />
 
-      {/* Score Summary Banner */}
-      <div className="py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+      {/* Score Summary Banner - Executive Dark Hero */}
+      <div className="rounded-2xl bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] p-5 sm:p-6 border border-slate-800 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-base shrink-0">
+          <div className="h-12 w-12 rounded-xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-300 font-bold text-base shrink-0">
             {getInitials(data.student.namaLengkap)}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 Periode: {data.periode || "Aktif"}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
                 NIS {data.student.nis}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
                 Kelas {data.student.kelas}
               </span>
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-1.5">
+            <h2 className="text-xl font-bold tracking-tight text-white mt-1.5">
               {data.student.namaLengkap}
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-3.5 bg-slate-50 px-4 py-3 border border-slate-200 w-full sm:w-auto justify-between sm:justify-start">
-          <div className="p-2 rounded-lg bg-blue-100 text-blue-700 border border-blue-200">
+        <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
             <Award className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Skor SPK
             </p>
-            <p className="text-2xl font-bold tabular-nums text-slate-900">
+            <p className="text-2xl font-bold tabular-nums text-white">
               {data.totalSkorSPK}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Attendance Summary */}
+      {/* Attendance Summary - 5 Interactive Dark Hover Cards */}
       {data.kehadiran && (
-        <div className="border-y border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid grid-cols-2 sm:grid-cols-5 bg-white">
-          <div className="p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
               Hadir
             </p>
-            <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1">
+            <p className="text-2xl font-bold tabular-nums text-emerald-600 group-hover:text-emerald-400 mt-1 transition-colors">
               {data.kehadiran.hadir}
             </p>
           </div>
-          <div className="p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
               Izin
             </p>
-            <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1">
+            <p className="text-2xl font-bold tabular-nums text-amber-600 group-hover:text-amber-400 mt-1 transition-colors">
               {data.kehadiran.izin}
             </p>
           </div>
-          <div className="p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
               Sakit
             </p>
-            <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1">
+            <p className="text-2xl font-bold tabular-nums text-blue-600 group-hover:text-blue-400 mt-1 transition-colors">
               {data.kehadiran.sakit}
             </p>
           </div>
-          <div className="p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
               Alfa
             </p>
-            <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1">
+            <p className="text-2xl font-bold tabular-nums text-rose-600 group-hover:text-rose-400 mt-1 transition-colors">
               {data.kehadiran.alfa}
             </p>
           </div>
-          <div className="p-4 col-span-2 sm:col-span-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer col-span-2 sm:col-span-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
               % Kehadiran
             </p>
             <p
-              className={`text-2xl font-bold tabular-nums mt-1 ${
+              className={`text-2xl font-bold tabular-nums mt-1 transition-colors ${
                 getScoreTone(data.kehadiran.persentase).text
               }`}
             >
@@ -233,14 +233,14 @@ export default function SiswaNilaiPage() {
       )}
 
       {/* Criteria Detail Cards */}
-      <div className="border-y border-slate-200 divide-y md:divide-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-px md:bg-slate-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {data.criteria.map((c) => {
           const tone = getScoreTone(c.nilaiRataRata);
           const pct = Math.min(100, Math.max(0, c.nilaiRataRata));
           return (
             <div
               key={c.id}
-              className="bg-white p-5 hover:bg-[#091524] transition-all duration-200 group flex flex-col justify-between"
+              className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
             >
               <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800 transition-colors">
                 <div className="flex items-start justify-between gap-2">
@@ -337,8 +337,8 @@ export default function SiswaNilaiPage() {
       </div>
 
       {/* Full Table Summary */}
-      <div className="pt-2 space-y-3">
-        <div className="pb-3 border-b border-slate-200">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+        <div className="pb-3 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-blue-600" />
             Ringkasan Perhitungan Skor SPK SAW
@@ -347,7 +347,7 @@ export default function SiswaNilaiPage() {
             Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
           </p>
         </div>
-        <div className="border-b border-slate-200 overflow-x-auto">
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
