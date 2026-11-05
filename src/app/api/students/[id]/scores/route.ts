@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { students, spkScores, spkCriteria, academicYears, attendance } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { calculateSPK } from "@/lib/spk";
+import { DEFAULT_PERIODE } from "@/lib/utils";
 
 // GET /api/students/[id]/scores
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -33,48 +35,42 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    // Get active academic year
+    // Get active academic year (with fallback to DEFAULT_PERIODE)
     const [activeYear] = await db
       .select()
       .from(academicYears)
       .where(eq(academicYears.isActive, true));
 
-    if (!activeYear) {
-      return NextResponse.json({
-        student: {
-          id: student.id,
-          nis: student.nis,
-          namaLengkap: student.namaLengkap,
-          kelas: student.kelas,
-        },
-        periode: null,
-        criteria: [],
-        kehadiran: null,
-      });
-    }
-
-    const periode = `${activeYear.tahunAjaran}-${activeYear.semester}`;
+    const periode = activeYear
+      ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+      : DEFAULT_PERIODE;
+    const periodeDisplay = activeYear
+      ? `${activeYear.tahunAjaran} - ${activeYear.semester}`
+      : DEFAULT_PERIODE.replace("-", " - ");
 
     // 1. Get all criteria
     const allCriteria = await db.select().from(spkCriteria).all();
 
     // 2. Get all student's scores in this period
-    const studentScores = await db
+    const periodScores = await db
       .select()
       .from(spkScores)
-      .where(eq(spkScores.studentId, student.id))
+      .where(
+        and(eq(spkScores.studentId, student.id), eq(spkScores.periode, periode))
+      )
       .all();
-
-    const periodScores = studentScores.filter((s) => s.periode === periode);
 
     // 3. Get attendance stats for the "Kehadiran" criteria
-    const allAttendance = await db
+    const periodAttendance = await db
       .select()
       .from(attendance)
-      .where(eq(attendance.studentId, student.id))
+      .where(
+        and(
+          eq(attendance.studentId, student.id),
+          eq(attendance.periode, periode)
+        )
+      )
       .all();
-
-    const periodAttendance = allAttendance.filter((a) => a.periode === periode);
 
     let totalHadir = 0;
     let totalIzin = 0;
@@ -89,32 +85,67 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     const totalRecords = totalHadir + totalIzin + totalSakit + totalAlfa;
+    const rawPersentaseKehadiran =
+      totalRecords > 0 ? (totalHadir / totalRecords) * 100 : 0;
     const persentaseKehadiran =
-      totalRecords > 0 ? Math.round((totalHadir / totalRecords) * 100) : 0;
+      totalRecords > 0 ? Math.round(rawPersentaseKehadiran) : 0;
 
-    // 4. Build criteria result with scores
+    // 4. Compute official global SAW normalization via calculateSPK
+    const spkResults = await calculateSPK("umum", periode);
+    const mySpk = spkResults.find((r) => r.studentId === student.id);
+
+    // 5. Build criteria result with raw scores, category details, and SAW normalization
     const criteriaResult = allCriteria.map((c) => {
       const crScores = periodScores.filter((s) => s.criteriaId === c.id);
 
-      // Group by mapel
       const mapelScores: Record<string, number> = {};
+      const detailKategoriMapel: Record<string, Record<string, number>> = {};
+
       crScores.forEach((s) => {
         const key = s.mapel || "Umum";
-        mapelScores[key] = s.nilai;
+        mapelScores[key] = Number(Number(s.nilai).toFixed(2));
+        if (s.details) {
+          try {
+            const parsed = JSON.parse(s.details);
+            if (parsed && typeof parsed === "object") {
+              const cleanObj: Record<string, number> = {};
+              for (const [k, v] of Object.entries(parsed)) {
+                const num = Number(v);
+                if (!isNaN(num)) {
+                  cleanObj[k] = Number(num.toFixed(2));
+                }
+              }
+              if (Object.keys(cleanObj).length > 0) {
+                detailKategoriMapel[key] = cleanObj;
+              }
+            }
+          } catch {
+            // ignore invalid JSON
+          }
+        }
       });
 
-      // Calculate average if multiple scores
-      let nilaiRataRata = 0;
-      if (crScores.length > 0) {
-        nilaiRataRata = Math.round(
-          crScores.reduce((acc, curr) => acc + curr.nilai, 0) / crScores.length
-        );
+      let rawAvg = 0;
+      if (
+        c.tipe === "Otomatis" &&
+        c.namaKriteria.toLowerCase().includes("kehadiran")
+      ) {
+        rawAvg =
+          mySpk?.detailRaw?.[c.id] !== undefined
+            ? mySpk.detailRaw[c.id]
+            : rawPersentaseKehadiran;
+      } else if (crScores.length > 0) {
+        rawAvg =
+          crScores.reduce((acc, curr) => acc + curr.nilai, 0) / crScores.length;
       }
 
-      // For "Kehadiran" (Otomatis), use attendance percentage
-      if (c.tipe === "Otomatis" && c.namaKriteria.toLowerCase().includes("kehadiran")) {
-        nilaiRataRata = persentaseKehadiran;
-      }
+      const nilaiRataRata = Number(rawAvg.toFixed(2));
+      const normVal =
+        mySpk?.detailNormalisasi?.[c.namaKriteria] !== undefined
+          ? mySpk.detailNormalisasi[c.namaKriteria]
+          : rawAvg / 100;
+      const nilaiNormalisasi = Number(normVal.toFixed(4));
+      const nilaiTerbobot = Number((normVal * c.bobot).toFixed(2));
 
       return {
         id: c.id,
@@ -123,16 +154,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         tipe: c.tipe,
         deskripsi: c.deskripsi,
         nilaiRataRata,
+        nilaiNormalisasi,
         detailMapel: mapelScores,
-        nilaiTerbobot: Math.round((nilaiRataRata * c.bobot) / 100),
+        detailKategoriMapel,
+        nilaiTerbobot,
       };
     });
 
-    // 5. Calculate total weighted score
-    const totalSkorSPK = criteriaResult.reduce(
-      (acc, c) => acc + c.nilaiTerbobot,
-      0
+    const fallbackTotal = Number(
+      criteriaResult.reduce((acc, c) => acc + c.nilaiTerbobot, 0).toFixed(2)
     );
+    const totalSkorSPK =
+      mySpk?.persentase !== undefined ? mySpk.persentase : fallbackTotal;
 
     return NextResponse.json({
       student: {
@@ -141,7 +174,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         namaLengkap: student.namaLengkap,
         kelas: student.kelas,
       },
-      periode: `${activeYear.tahunAjaran} - ${activeYear.semester}`,
+      periode: periodeDisplay,
       criteria: criteriaResult,
       kehadiran: {
         hadir: totalHadir,
@@ -152,6 +185,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         persentase: persentaseKehadiran,
       },
       totalSkorSPK,
+      rankUmum: mySpk?.rank ?? null,
     });
   } catch (error: unknown) {
     const message =

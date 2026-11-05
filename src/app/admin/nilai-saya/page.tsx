@@ -52,7 +52,9 @@ interface CriteriaScore {
   tipe: string;
   deskripsi: string | null;
   nilaiRataRata: number;
+  nilaiNormalisasi?: number;
   detailMapel: Record<string, number>;
+  detailKategoriMapel?: Record<string, Record<string, number>>;
   nilaiTerbobot: number;
 }
 
@@ -420,13 +422,13 @@ export default function AdminNilaiSayaPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
-                          Skor Terbobot
+                          Skor Terbobot SAW
                         </p>
                         <p className="text-base font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
                           {c.nilaiTerbobot}
                         </p>
                         <p className="text-xs text-slate-400 group-hover:text-slate-500 tabular-nums transition-colors">
-                          ({c.nilaiRataRata} × {c.bobot}%)
+                          (R: {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)} × {c.bobot}%)
                         </p>
                       </div>
                     </div>
@@ -446,25 +448,43 @@ export default function AdminNilaiSayaPage() {
                           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 mb-2 transition-colors">
                             Rincian Per Mata Pelajaran
                           </p>
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             {Object.entries(c.detailMapel).map(
-                              ([mapel, nilai]) => (
-                                <div
-                                  key={mapel}
-                                  className="flex items-center justify-between text-xs"
-                                >
-                                  <span className="text-slate-600 group-hover:text-slate-300 truncate mr-2 transition-colors">
-                                    {mapel}
-                                  </span>
-                                  <span
-                                    className={`font-mono font-semibold tabular-nums ${
-                                      getScoreTone(nilai).text
-                                    }`}
-                                  >
-                                    {nilai}
-                                  </span>
-                                </div>
-                              )
+                              ([mapel, nilai]) => {
+                                const katMap = c.detailKategoriMapel?.[mapel];
+                                const katEntries = katMap
+                                  ? Object.entries(katMap).filter(
+                                      ([k]) =>
+                                        !(
+                                          Object.keys(katMap).length === 1 &&
+                                          k.toLowerCase() === "nilai"
+                                        )
+                                    )
+                                  : [];
+                                return (
+                                  <div key={mapel} className="space-y-0.5">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <span className="text-slate-700 font-medium group-hover:text-slate-200 truncate mr-2 transition-colors">
+                                        {mapel}
+                                      </span>
+                                      <span
+                                        className={`font-mono font-semibold tabular-nums ${
+                                          getScoreTone(nilai).text
+                                        }`}
+                                      >
+                                        {nilai}
+                                      </span>
+                                    </div>
+                                    {katEntries.length > 0 && (
+                                      <p className="text-[11px] text-slate-400 group-hover:text-slate-400 font-mono truncate transition-colors">
+                                        {katEntries
+                                          .map(([k, v]) => `${k}: ${v}`)
+                                          .join(" · ")}
+                                      </p>
+                                    )}
+                                  </div>
+                                );
+                              }
                             )}
                           </div>
                         </div>
@@ -483,7 +503,7 @@ export default function AdminNilaiSayaPage() {
                 Ringkasan Perhitungan Skor SPK SAW
               </CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Rumus agregasi: Skor Akhir = Σ (Nilai Rata-Rata × Bobot%)
+                Rumus SAW: Skor Akhir = Σ (Normalisasi R_ij × Bobot%), di mana R_ij = Nilai Rata-Rata / Nilai Maksimum Global
               </CardDescription>
             </div>
             <div className="overflow-x-auto">
@@ -493,7 +513,8 @@ export default function AdminNilaiSayaPage() {
                     <TableHead className="pl-6 font-semibold text-slate-600">Kriteria Evaluasi</TableHead>
                     <TableHead className="text-center font-semibold text-slate-600">Tipe Input</TableHead>
                     <TableHead className="text-center font-semibold text-slate-600">Bobot</TableHead>
-                    <TableHead className="text-center font-semibold text-slate-600">Nilai</TableHead>
+                    <TableHead className="text-center font-semibold text-slate-600">Nilai Rata-Rata</TableHead>
+                    <TableHead className="text-center font-semibold text-slate-600">Normalisasi (R)</TableHead>
                     <TableHead className="text-right pr-6 font-semibold text-slate-600">
                       Skor Terbobot
                     </TableHead>
@@ -529,20 +550,23 @@ export default function AdminNilaiSayaPage() {
                       >
                         {c.nilaiRataRata}
                       </TableCell>
+                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                        {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)}
+                      </TableCell>
                       <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
                         {c.nilaiTerbobot}
                       </TableCell>
                     </TableRow>
                   ))}
                   {/* Total Row */}
-                  <TableRow className="bg-slate-50 border-t-2 border-slate-200">
+                  <TableRow className="group/row bg-slate-50/90 hover:bg-[#091524] border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
                     <TableCell
-                      colSpan={4}
-                      className="pl-6 font-bold text-slate-900"
+                      colSpan={5}
+                      className="pl-6 font-bold text-slate-900 group-hover/row:text-white transition-colors"
                     >
-                      Total Akumulasi Skor SPK
+                      Total Akumulasi Skor SPK SAW
                     </TableCell>
-                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600">
+                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 group-hover/row:text-amber-300 transition-colors">
                       {data.totalSkorSPK}
                     </TableCell>
                   </TableRow>
