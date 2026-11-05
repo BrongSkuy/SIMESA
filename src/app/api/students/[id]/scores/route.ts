@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { buildStudentScoreTranscript } from "@/lib/spk";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/students/[id]/scores
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });

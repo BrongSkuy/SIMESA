@@ -591,18 +591,6 @@ export async function buildStudentScoreTranscript(student: {
     }
   }
 
-  // Add Evaluasi Wali Kelas (Umum) if class has waliKelas or has Umum records
-  const hasUmumRecords =
-    periodScores.some((s) => !s.mapel || s.mapel === "Umum") ||
-    periodAttendance.some((a) => !a.mapel || a.mapel === "Umum");
-  if (classInfo?.waliKelas || hasUmumRecords) {
-    subjectEntries.push({
-      namaMapel: "Umum",
-      guruPengampu: classInfo?.waliKelas || "Wali Kelas",
-      isHomeroom: true,
-    });
-  }
-
   const academicCriteria = allCriteria.find(
     (c) =>
       c.tipe === "Manual" && c.namaKriteria.toLowerCase().includes("akademik")

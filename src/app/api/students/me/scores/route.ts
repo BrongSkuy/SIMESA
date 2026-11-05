@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { buildStudentScoreTranscript } from "@/lib/spk";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // GET /api/students/me/scores — get the logged-in student's detailed scores & per-subject transcript
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
