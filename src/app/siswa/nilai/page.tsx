@@ -283,24 +283,12 @@ export default function SiswaNilaiPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <PageHeader
-          title="Transkrip Nilai & Skor SPK Saya"
-          badge="Portal Siswa"
-          description="Rincian nilai per mata pelajaran, komponen Tugas/UTS/UAS, dan akumulasi skor evaluasi SPK SAW"
-          icon={ClipboardList}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportTranscript}
-          className="gap-1.5 self-start sm:self-center shrink-0 cursor-pointer"
-        >
-          <Download className="h-3.5 w-3.5 text-blue-600" />
-          Unduh Transkrip (.xlsx)
-        </Button>
-      </div>
+      <PageHeader
+        title="Transkrip Nilai & Skor SPK Saya"
+        badge="Portal Siswa"
+        description="Rincian nilai per mata pelajaran, komponen Tugas/UTS/UAS, dan akumulasi skor evaluasi SPK SAW"
+        icon={ClipboardList}
+      />
 
       {/* Score Summary Banner - Fokus pada Skor SPK & Progres Kelengkapan Mapel */}
       <div className="rounded-2xl bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] p-5 sm:p-6 border border-slate-800 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
@@ -403,7 +391,7 @@ export default function SiswaNilaiPage() {
         </div>
       )}
 
-      {/* Dual-View Tabs Switcher */}
+      {/* Dual-View Tabs Switcher & Unduh Transkrip Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">
@@ -414,21 +402,31 @@ export default function SiswaNilaiPage() {
             kriteria SPK SAW
           </p>
         </div>
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "mapel" | "kriteria")}
-        >
-          <TabsList>
-            <TabsTrigger value="mapel" className="gap-1.5">
-              <GraduationCap className="h-3.5 w-3.5" /> Rincian Per Mata
-              Pelajaran ({subjectsList.length})
-            </TabsTrigger>
-            <TabsTrigger value="kriteria" className="gap-1.5">
-              <Layers className="h-3.5 w-3.5" /> Evaluasi Per Kriteria SPK (
-              {data.criteria.length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "mapel" | "kriteria")}
+          >
+            <TabsList>
+              <TabsTrigger value="mapel" className="gap-1.5 cursor-pointer">
+                <GraduationCap className="h-3.5 w-3.5" /> Rincian Per Mapel ({subjectsList.length})
+              </TabsTrigger>
+              <TabsTrigger value="kriteria" className="gap-1.5 cursor-pointer">
+                <Layers className="h-3.5 w-3.5" /> Evaluasi SPK SAW ({data.criteria.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportTranscript}
+            className="gap-1.5 cursor-pointer text-xs h-8"
+          >
+            <Download className="h-3.5 w-3.5 text-blue-600" />
+            Unduh Transkrip (.xlsx)
+          </Button>
+        </div>
       </div>
 
       {activeTab === "mapel" ? (

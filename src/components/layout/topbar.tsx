@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -220,6 +220,22 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [academicYearDisplay, setAcademicYearDisplay] = useState("T.A. 2025/2026 • Genap");
+
+  useEffect(() => {
+    fetch("/api/system/academic-years")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const active = data.find((y: any) => y.isActive);
+          if (active) {
+            setAcademicYearDisplay(`T.A. ${active.tahunAjaran} • ${active.semester}`);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const roleMeta = getRoleMeta(user.role);
   const homeHref = `/${user.role.toLowerCase()}`;
 
@@ -401,7 +417,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
             {/* Badge Konteks Tahun Ajaran */}
             <div className="hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-transparent border border-amber-400/30 hover:border-amber-400/60 text-xs text-amber-200/90 font-medium transition-colors shadow-xs whitespace-nowrap shrink-0">
               <CalendarCheck className="w-3.5 h-3.5 text-amber-300" />
-              <span>T.A. 2024/2025 • Ganjil</span>
+              <span>{academicYearDisplay}</span>
             </div>
 
             <DropdownMenu>
