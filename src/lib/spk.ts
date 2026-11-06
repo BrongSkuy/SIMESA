@@ -34,9 +34,10 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
     .all();
 
   // 6. Pre-group attendance by studentId and scores by studentId & criteriaId for O(1) lookups
+  // Only include curriculum subjects (exclude legacy/homeroom "Umum" records)
   const attendanceByStudent = new Map<string, typeof allAttendance>();
   allAttendance.forEach((a) => {
-    if (a.status !== null) {
+    if (a.status !== null && a.mapel && a.mapel !== "Umum") {
       let list = attendanceByStudent.get(a.studentId);
       if (!list) {
         list = [];
@@ -48,6 +49,7 @@ export async function calculateSPK(kelas: string, targetPeriode?: string) {
 
   const scoresByStudentAndCriteria = new Map<string, typeof allScores>();
   allScores.forEach((sc) => {
+    if (!sc.mapel || sc.mapel === "Umum") return;
     const key = `${sc.studentId}-${sc.criteriaId}`;
     let list = scoresByStudentAndCriteria.get(key);
     if (!list) {
@@ -264,12 +266,6 @@ export async function validateSPKCriteriaFilled(kelas: string, targetPeriode?: s
         }
       }
     }
-    
-    // Add "Umum" if class has Wali Kelas
-    const classInfo = classMeta.find(c => c.namaKelas === cName);
-    if (classInfo?.waliKelas) {
-      requiredMapels.add("Umum");
-    }
 
     // Get active students in this class
     const studentsInThisClass = siswaKelas.filter(s => s.kelas === cName);
@@ -456,13 +452,21 @@ export async function buildStudentScoreTranscript(student: {
     calculateSPK("umum", periode),
   ]);
 
-  // 2. Overall attendance stats
+  // Filter out legacy/general "Umum" rows so only curriculum subjects are evaluated
+  const subjectScores = periodScores.filter(
+    (s) => Boolean(s.mapel) && s.mapel !== "Umum"
+  );
+  const subjectAttendance = periodAttendance.filter(
+    (a) => Boolean(a.mapel) && a.mapel !== "Umum"
+  );
+
+  // 2. Overall attendance stats across curriculum subjects
   let totalHadir = 0;
   let totalIzin = 0;
   let totalSakit = 0;
   let totalAlfa = 0;
 
-  periodAttendance.forEach((a) => {
+  subjectAttendance.forEach((a) => {
     if (a.status === "Hadir") totalHadir++;
     else if (a.status === "Izin") totalIzin++;
     else if (a.status === "Sakit") totalSakit++;
@@ -473,19 +477,98 @@ export async function buildStudentScoreTranscript(student: {
   const rawPersentaseKehadiran =
     totalRecords > 0 ? (totalHadir / totalRecords) * 100 : 0;
   const persentaseKehadiran =
-    totalRecords > 0 ? Math.round(rawPersentaseKehadiran) : 0;
+    totalRecords > 0 ? Number(rawPersentaseKehadiran.toFixed(2)) : 0;
 
   const mySpk = spkResults.find((r) => r.studentId === student.id);
 
+  // Identify curriculum subjects assigned to student.kelas
+  const teacherById = new Map<string, string>();
+  allTeachers.forEach((t) => teacherById.set(t.id, t.namaLengkap));
+
+  const subjectEntries: Array<{
+    namaMapel: string;
+    guruPengampu: string;
+    isHomeroom: boolean;
+  }> = [];
+  const seenMapels = new Set<string>();
+
+  for (const subj of allSubjects) {
+    const assignedClasses = (subj.kelasDiampu || "")
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+    if (assignedClasses.includes(student.kelas)) {
+      seenMapels.add(subj.namaMapel);
+      subjectEntries.push({
+        namaMapel: subj.namaMapel,
+        guruPengampu:
+          (subj.teacherId && teacherById.get(subj.teacherId)) ||
+          "Guru Mata Pelajaran",
+        isHomeroom: false,
+      });
+    }
+  }
+
+  // Also include any other non-Umum mapel present in student's scores
+  for (const sc of subjectScores) {
+    const m = sc.mapel!;
+    if (!seenMapels.has(m)) {
+      seenMapels.add(m);
+      const subjRow = allSubjects.find((s) => s.namaMapel === m);
+      subjectEntries.push({
+        namaMapel: m,
+        guruPengampu:
+          (subjRow?.teacherId && teacherById.get(subjRow.teacherId)) ||
+          "Guru Mata Pelajaran",
+        isHomeroom: false,
+      });
+    }
+  }
+
+  // Compute per-subject attendance percentages for the Otomatis (Kehadiran) criterion
+  const attendanceMapelScores: Record<string, number> = {};
+  const attendanceKategoriDetails: Record<string, Record<string, number>> = {};
+  for (const entry of subjectEntries) {
+    const mapelAtt = subjectAttendance.filter(
+      (a) => a.mapel === entry.namaMapel
+    );
+    let mHadir = 0;
+    let mIzin = 0;
+    let mSakit = 0;
+    let mAlfa = 0;
+    mapelAtt.forEach((a) => {
+      if (a.status === "Hadir") mHadir++;
+      else if (a.status === "Izin") mIzin++;
+      else if (a.status === "Sakit") mSakit++;
+      else if (a.status === "Alfa") mAlfa++;
+    });
+    const mTotal = mHadir + mIzin + mSakit + mAlfa;
+    if (mTotal > 0) {
+      attendanceMapelScores[entry.namaMapel] = Math.round(
+        (mHadir / mTotal) * 100
+      );
+      attendanceKategoriDetails[entry.namaMapel] = {
+        Hadir: mHadir,
+        Sesi: mTotal,
+      };
+    }
+  }
+
   // 3. Build criteria result with raw scores, category details, and SAW normalization
   const criteriaResult = allCriteria.map((c) => {
-    const crScores = periodScores.filter((s) => s.criteriaId === c.id);
+    const isAttendanceCrit =
+      c.tipe === "Otomatis" &&
+      c.namaKriteria.toLowerCase().includes("kehadiran");
+    const crScores = subjectScores.filter((s) => s.criteriaId === c.id);
 
-    const mapelScores: Record<string, number> = {};
-    const detailKategoriMapel: Record<string, Record<string, number>> = {};
+    const mapelScores: Record<string, number> = isAttendanceCrit
+      ? { ...attendanceMapelScores }
+      : {};
+    const detailKategoriMapel: Record<string, Record<string, number>> =
+      isAttendanceCrit ? { ...attendanceKategoriDetails } : {};
 
     crScores.forEach((s) => {
-      const key = s.mapel || "Umum";
+      const key = s.mapel!;
       mapelScores[key] = Number(Number(s.nilai).toFixed(2));
       if (s.details) {
         try {
@@ -509,10 +592,7 @@ export async function buildStudentScoreTranscript(student: {
     });
 
     let rawAvg = 0;
-    if (
-      c.tipe === "Otomatis" &&
-      c.namaKriteria.toLowerCase().includes("kehadiran")
-    ) {
+    if (isAttendanceCrit) {
       rawAvg =
         mySpk?.detailRaw?.[c.id] !== undefined
           ? mySpk.detailRaw[c.id]
@@ -545,52 +625,6 @@ export async function buildStudentScoreTranscript(student: {
   });
 
   // 4. Build Per-Subject Transcript (subjectsTranscript)
-  const teacherById = new Map<string, string>();
-  allTeachers.forEach((t) => teacherById.set(t.id, t.namaLengkap));
-
-  const classInfo = allClasses.find((c) => c.namaKelas === student.kelas);
-
-  // Identify curriculum subjects assigned to student.kelas
-  const subjectEntries: Array<{
-    namaMapel: string;
-    guruPengampu: string;
-    isHomeroom: boolean;
-  }> = [];
-  const seenMapels = new Set<string>();
-
-  for (const subj of allSubjects) {
-    const assignedClasses = (subj.kelasDiampu || "")
-      .split(",")
-      .map((k) => k.trim())
-      .filter(Boolean);
-    if (assignedClasses.includes(student.kelas)) {
-      seenMapels.add(subj.namaMapel);
-      subjectEntries.push({
-        namaMapel: subj.namaMapel,
-        guruPengampu:
-          (subj.teacherId && teacherById.get(subj.teacherId)) ||
-          "Guru Mata Pelajaran",
-        isHomeroom: false,
-      });
-    }
-  }
-
-  // Also include any other non-Umum mapel present in student's scores/attendance
-  for (const sc of periodScores) {
-    const m = sc.mapel || "Umum";
-    if (m !== "Umum" && !seenMapels.has(m)) {
-      seenMapels.add(m);
-      const subjRow = allSubjects.find((s) => s.namaMapel === m);
-      subjectEntries.push({
-        namaMapel: m,
-        guruPengampu:
-          (subjRow?.teacherId && teacherById.get(subjRow.teacherId)) ||
-          "Guru Mata Pelajaran",
-        isHomeroom: false,
-      });
-    }
-  }
-
   const academicCriteria = allCriteria.find(
     (c) =>
       c.tipe === "Manual" && c.namaKriteria.toLowerCase().includes("akademik")
@@ -604,9 +638,7 @@ export async function buildStudentScoreTranscript(student: {
     const mapelKey = entry.namaMapel;
 
     // Attendance for this subject
-    const mapelAtt = periodAttendance.filter(
-      (a) => (a.mapel || "Umum") === mapelKey
-    );
+    const mapelAtt = subjectAttendance.filter((a) => a.mapel === mapelKey);
     let mHadir = 0;
     let mIzin = 0;
     let mSakit = 0;

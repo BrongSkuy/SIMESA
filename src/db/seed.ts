@@ -310,8 +310,8 @@ async function seed() {
         return assigned.includes(student.kelas);
       });
 
-      // Mapels to record: curriculum subjects + "Umum"
-      const mapelsToRecord = [...classSubjects.map((s) => s.namaMapel), "Umum"];
+      // Mapels to record: curriculum subjects
+      const mapelsToRecord = classSubjects.map((s) => s.namaMapel);
 
       for (const mapel of mapelsToRecord) {
         for (const tanggal of schoolDays) {
@@ -331,11 +331,11 @@ async function seed() {
         }
       }
     }
-    console.log(`   ✅ Generated attendance for ${allStudentsList.length} students across subjects & Umum`);
+    console.log(`   ✅ Generated attendance for ${allStudentsList.length} students across curriculum subjects`);
   }
 
   // ==========================================
-  // 10. Demo SPK Scores (Per-Subject & Umum)
+  // 10. Demo SPK Scores (Per-Subject)
   // ==========================================
   console.log("\n🏆 Creating demo SPK scores with Tugas, UTS, UAS details...");
   if (allStudentsList.length > 0) {
@@ -355,7 +355,7 @@ async function seed() {
       const baseRankFactor = (parseInt(student.nis.slice(-2), 10) || 5) % 15;
       const studentBase = 88 - (baseRankFactor * 1.2);
 
-      // A. Per-subject scores
+      // Per-subject scores
       for (const subj of classSubjects) {
         // Academic (Tugas, UTS, UAS)
         if (academicCritRow) {
@@ -393,23 +393,6 @@ async function seed() {
           } catch {
             // skip duplicates
           }
-        }
-      }
-
-      // B. General Homeroom Evaluation ("Umum")
-      for (const nac of nonAcadCritRows) {
-        const val = Math.min(98, Math.max(70, Math.round(studentBase + (Math.random() * 10 - 4))));
-        try {
-          await db.insert(schema.spkScores).values({
-            studentId: student.id,
-            criteriaId: nac.id,
-            mapel: "Umum",
-            nilai: val,
-            details: JSON.stringify({ Nilai: val }),
-            periode: "2025/2026-Genap",
-          });
-        } catch {
-          // skip duplicates
         }
       }
     }

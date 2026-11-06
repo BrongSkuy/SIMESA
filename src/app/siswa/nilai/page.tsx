@@ -800,8 +800,7 @@ export default function SiswaNilaiPage() {
                     </div>
 
                     {/* Per-Mapel detail if any */}
-                    {Object.keys(c.detailMapel).length > 0 &&
-                      c.tipe === "Manual" && (
+                    {Object.keys(c.detailMapel).length > 0 && (
                         <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
                           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 mb-2 transition-colors">
                             Rincian Per Mata Pelajaran
@@ -830,7 +829,7 @@ export default function SiswaNilaiPage() {
                                           getScoreTone(nilai).text
                                         }`}
                                       >
-                                        {nilai}
+                                        {c.tipe === "Otomatis" ? `${nilai}%` : nilai}
                                       </span>
                                     </div>
                                     {katEntries.length > 0 && (
