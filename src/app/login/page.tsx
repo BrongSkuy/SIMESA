@@ -47,6 +47,9 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+const SCHOOL_BUILDING_BLUR_DATA_URL =
+  "data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wAARCAAOABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAwb/xAAjEAABBAEEAQUAAAAAAAAAAAABAgMEEQAFEhMhMSJCYaHw/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAECA//EABwRAAICAgMAAAAAAAAAAAAAAAARAQIDBBIUIf/aAAwDAQACEQMRAD8A3YkM7piVJb2shNK8+VV+rGG5EYLAUaJHt7+jk+Poslh0hmUFNqonf0euwKGNDSEiuZ9aqN+nrCdi78M4w1SRWbcjcPJyISkCzuUBhnFzZrTxLTUfj2CkqKyar4wx9ixPCD//2Q==";
+
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -137,11 +140,14 @@ export default function LoginPage() {
               fill
               sizes="50vw"
               priority
-              className="object-cover opacity-30 mix-blend-luminosity filter contrast-125 brightness-90"
+              unoptimized
+              placeholder="blur"
+              blurDataURL={SCHOOL_BUILDING_BLUR_DATA_URL}
+              className="object-cover opacity-40 mix-blend-luminosity filter contrast-125 brightness-95"
               onError={() => setBgLoaded(false)}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a192f]/75 via-[#1e3a8a]/70 to-[#0f172a]/95" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a192f]/70 via-[#1e3a8a]/65 to-[#0f172a]/90" />
         </div>
 
         {/* Brand Header Kiri */}
