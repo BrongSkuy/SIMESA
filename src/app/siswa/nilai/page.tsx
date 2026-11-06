@@ -15,12 +15,25 @@ import {
   GraduationCap,
   Layers,
   Clock,
+  Search,
+  Filter,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -97,11 +110,18 @@ interface ScoreData {
   rankUmum?: number | null;
 }
 
+const CARDS_PER_PAGE = 6;
+
 export default function SiswaNilaiPage() {
   const [data, setData] = useState<ScoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"mapel" | "kriteria">("mapel");
+  const [searchMapel, setSearchMapel] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [cardPage, setCardPage] = useState(1);
+  const [tablePage, setTablePage] = useState(1);
+  const [tablePageSize, setTablePageSize] = useState<number>(6);
 
   useEffect(() => {
     fetch("/api/students/me/scores")
@@ -123,6 +143,47 @@ export default function SiswaNilaiPage() {
   const subjectsList = useMemo(
     () => data?.subjectsTranscript || [],
     [data?.subjectsTranscript]
+  );
+
+  const filteredSubjects = useMemo(() => {
+    const q = searchMapel.trim().toLowerCase();
+    return subjectsList.filter((s) => {
+      const matchQuery =
+        !q ||
+        s.labelMapel.toLowerCase().includes(q) ||
+        s.guruPengampu.toLowerCase().includes(q);
+      const matchStatus =
+        filterStatus === "all" || s.statusPenilaian === filterStatus;
+      return matchQuery && matchStatus;
+    });
+  }, [subjectsList, searchMapel, filterStatus]);
+
+  const totalCardPages = Math.max(
+    1,
+    Math.ceil(filteredSubjects.length / CARDS_PER_PAGE)
+  );
+  const safeCardPage = Math.min(cardPage, totalCardPages);
+  const paginatedCardSubjects = useMemo(
+    () =>
+      filteredSubjects.slice(
+        (safeCardPage - 1) * CARDS_PER_PAGE,
+        safeCardPage * CARDS_PER_PAGE
+      ),
+    [filteredSubjects, safeCardPage]
+  );
+
+  const totalTablePages = Math.max(
+    1,
+    Math.ceil(filteredSubjects.length / tablePageSize)
+  );
+  const safeTablePage = Math.min(tablePage, totalTablePages);
+  const paginatedTableSubjects = useMemo(
+    () =>
+      filteredSubjects.slice(
+        (safeTablePage - 1) * tablePageSize,
+        safeTablePage * tablePageSize
+      ),
+    [filteredSubjects, safeTablePage, tablePageSize]
   );
 
   const completenessStats = useMemo(() => {
@@ -431,181 +492,314 @@ export default function SiswaNilaiPage() {
 
       {activeTab === "mapel" ? (
         <div className="space-y-6">
-          {/* Grid Kartu Rincian Per Mata Pelajaran */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {subjectsList.map((subj) => {
-              const avgTone = getScoreTone(subj.rataRataMapel);
-              const acadTone = getScoreTone(subj.akademik?.nilaiAkhir);
-              const pct =
-                subj.rataRataMapel !== null
-                  ? Math.min(100, Math.max(0, subj.rataRataMapel))
-                  : 0;
-
-              return (
-                <div
-                  key={subj.namaMapel}
-                  className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+          {/* Toolbar Pencarian & Filter Status Mata Pelajaran */}
+          <div className="rounded-xl border border-slate-200/80 bg-white px-4 py-3 shadow-xs flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Cari mata pelajaran atau nama guru pengampu..."
+                className="pl-8.5 h-9 text-xs border-slate-200 bg-slate-50/50 focus:bg-white"
+                value={searchMapel}
+                onChange={(e) => {
+                  setSearchMapel(e.target.value);
+                  setCardPage(1);
+                  setTablePage(1);
+                }}
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <Filter className="h-3.5 w-3.5 text-slate-400" />
+                <span>Status:</span>
+              </div>
+              <Select
+                value={filterStatus}
+                onValueChange={(val) => {
+                  setFilterStatus(val || "all");
+                  setCardPage(1);
+                  setTablePage(1);
+                }}
+              >
+                <SelectTrigger className="w-[148px] h-9 text-xs border-slate-200">
+                  <SelectValue placeholder="Semua Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status ({subjectsList.length})</SelectItem>
+                  <SelectItem value="Lengkap">Lengkap ({completenessStats.lengkap})</SelectItem>
+                  <SelectItem value="Sebagian">Sebagian ({completenessStats.sebagian})</SelectItem>
+                  <SelectItem value="Belum Dinilai">
+                    Belum Dinilai ({completenessStats.total - completenessStats.lengkap - completenessStats.sebagian})
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {(searchMapel || filterStatus !== "all") && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchMapel("");
+                    setFilterStatus("all");
+                    setCardPage(1);
+                    setTablePage(1);
+                  }}
+                  className="h-9 px-2.5 text-xs text-slate-500 hover:text-slate-900 gap-1 cursor-pointer"
                 >
-                  <div>
-                    {/* Header Mapel & Guru */}
-                    <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800 transition-colors flex items-start justify-between gap-2.5">
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
-                          {subj.isHomeroom ? (
-                            <UserCheck className="h-4 w-4 text-amber-500 group-hover:text-amber-400 shrink-0" />
-                          ) : (
-                            <BookOpen className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
-                          )}
-                          <span className="truncate">{subj.labelMapel}</span>
-                        </CardTitle>
-                        <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 truncate transition-colors">
-                          {subj.isHomeroom ? "Wali Kelas" : "Guru Mapel"}:{" "}
-                          <span className="font-medium text-slate-700 group-hover:text-slate-300 transition-colors">
-                            {subj.guruPengampu}
-                          </span>
-                        </CardDescription>
-                      </div>
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border shrink-0 transition-colors ${getStatusBadge(
-                          subj.statusPenilaian
-                        )}`}
-                      >
-                        {subj.statusPenilaian}
-                      </span>
-                    </div>
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
+                </Button>
+              )}
+            </div>
+          </div>
 
-                    {/* Komponen Nilai Akademik (Tugas, UTS, UAS, dll.) */}
-                    {!subj.isHomeroom && subj.akademik && (
-                      <div className="pt-3.5 pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
-                            {subj.akademik.namaKriteria}
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className={`text-base font-bold font-mono tabular-nums transition-colors ${acadTone.text}`}
-                            >
-                              {subj.akademik.nilaiAkhir ?? "-"}
-                            </span>
-                            {subj.akademik.nilaiAkhir !== null && (
-                              <span
-                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-colors ${acadTone.pill}`}
-                              >
-                                {acadTone.label}
-                              </span>
+          {/* Grid Kartu Rincian Per Mata Pelajaran (Maks. 6 Kartu / 2 Baris per Halaman) */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {paginatedCardSubjects.map((subj) => {
+                const avgTone = getScoreTone(subj.rataRataMapel);
+                const acadTone = getScoreTone(subj.akademik?.nilaiAkhir);
+                const pct =
+                  subj.rataRataMapel !== null
+                    ? Math.min(100, Math.max(0, subj.rataRataMapel))
+                    : 0;
+
+                return (
+                  <div
+                    key={subj.namaMapel}
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                  >
+                    <div>
+                      {/* Header Mapel & Guru */}
+                      <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800 transition-colors flex items-start justify-between gap-2.5">
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                            {subj.isHomeroom ? (
+                              <UserCheck className="h-4 w-4 text-amber-500 group-hover:text-amber-400 shrink-0" />
+                            ) : (
+                              <BookOpen className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
                             )}
+                            <span className="truncate">{subj.labelMapel}</span>
+                          </CardTitle>
+                          <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 truncate transition-colors">
+                            {subj.isHomeroom ? "Wali Kelas" : "Guru Mapel"}:{" "}
+                            <span className="font-medium text-slate-700 group-hover:text-slate-300 transition-colors">
+                              {subj.guruPengampu}
+                            </span>
+                          </CardDescription>
+                        </div>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border shrink-0 transition-colors ${getStatusBadge(
+                            subj.statusPenilaian
+                          )}`}
+                        >
+                          {subj.statusPenilaian}
+                        </span>
+                      </div>
+
+                      {/* Komponen Nilai Akademik (Tugas, UTS, UAS, dll.) */}
+                      {!subj.isHomeroom && subj.akademik && (
+                        <div className="pt-3.5 pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                              {subj.akademik.namaKriteria}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`text-base font-bold font-mono tabular-nums transition-colors ${acadTone.text}`}
+                              >
+                                {subj.akademik.nilaiAkhir ?? "-"}
+                              </span>
+                              {subj.akademik.nilaiAkhir !== null && (
+                                <span
+                                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-colors ${acadTone.pill}`}
+                                >
+                                  {acadTone.label}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Kotak Rincian Komponen (Tugas, UTS, UAS, dll.) */}
+                          <div className="grid grid-cols-3 gap-2">
+                            {subj.akademik.kategoriWajib.map((cat) => {
+                              const val = subj.akademik?.komponen[cat];
+                              const hasVal =
+                                val !== undefined &&
+                                val !== null &&
+                                !isNaN(Number(val));
+                              return (
+                                <div
+                                  key={cat}
+                                  className="rounded-xl border border-slate-200/80 bg-slate-50/80 group-hover:bg-slate-800/70 group-hover:border-slate-700/80 px-2.5 py-2 text-center transition-colors"
+                                >
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 truncate">
+                                    {cat}
+                                  </p>
+                                  <p
+                                    className={`text-sm font-bold font-mono tabular-nums mt-0.5 transition-colors ${
+                                      hasVal
+                                        ? getScoreTone(val).text
+                                        : "text-slate-400 group-hover:text-slate-500"
+                                    }`}
+                                  >
+                                    {hasVal ? val : "-"}
+                                  </p>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
+                      )}
 
-                        {/* Kotak Rincian Komponen (Tugas, UTS, UAS, dll.) */}
-                        <div className="grid grid-cols-3 gap-2">
-                          {subj.akademik.kategoriWajib.map((cat) => {
-                            const val = subj.akademik?.komponen[cat];
-                            const hasVal =
-                              val !== undefined &&
-                              val !== null &&
-                              !isNaN(Number(val));
-                            return (
-                              <div
-                                key={cat}
-                                className="rounded-xl border border-slate-200/80 bg-slate-50/80 group-hover:bg-slate-800/70 group-hover:border-slate-700/80 px-2.5 py-2 text-center transition-colors"
+                      {/* Kriteria Non-Akademik & Kehadiran di Mapel Ini */}
+                      <div className="pt-3 space-y-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 transition-colors">
+                          Evaluasi Karakter & Presensi Mapel
+                        </p>
+                        <div className="space-y-1.5">
+                          {subj.kriteriaLain.map((kl) => (
+                            <div
+                              key={kl.criteriaId}
+                              className="flex items-center justify-between text-xs"
+                            >
+                              <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                                {kl.namaKriteria}
+                              </span>
+                              <span
+                                className={`font-mono font-semibold tabular-nums transition-colors ${
+                                  getScoreTone(kl.nilai).text
+                                }`}
                               >
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 truncate">
-                                  {cat}
-                                </p>
-                                <p
-                                  className={`text-sm font-bold font-mono tabular-nums mt-0.5 transition-colors ${
-                                    hasVal
-                                      ? getScoreTone(val).text
-                                      : "text-slate-400 group-hover:text-slate-500"
-                                  }`}
-                                >
-                                  {hasVal ? val : "-"}
-                                </p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Kriteria Non-Akademik & Kehadiran di Mapel Ini */}
-                    <div className="pt-3 space-y-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 transition-colors">
-                        Evaluasi Karakter & Presensi Mapel
-                      </p>
-                      <div className="space-y-1.5">
-                        {subj.kriteriaLain.map((kl) => (
-                          <div
-                            key={kl.criteriaId}
-                            className="flex items-center justify-between text-xs"
-                          >
+                                {kl.nilai !== null ? kl.nilai : "Belum diisi"}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 group-hover:border-slate-800/60 transition-colors">
                             <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
-                              {kl.namaKriteria}
+                              Kehadiran Mapel
                             </span>
                             <span
                               className={`font-mono font-semibold tabular-nums transition-colors ${
-                                getScoreTone(kl.nilai).text
+                                getScoreTone(subj.kehadiran.persentase).text
                               }`}
                             >
-                              {kl.nilai !== null ? kl.nilai : "Belum diisi"}
+                              {subj.kehadiran.total > 0
+                                ? `${subj.kehadiran.persentase}% (${subj.kehadiran.hadir}/${subj.kehadiran.total} sesi)`
+                                : "Belum ada sesi"}
                             </span>
                           </div>
-                        ))}
-                        <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 group-hover:border-slate-800/60 transition-colors">
-                          <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
-                            Kehadiran Mapel
-                          </span>
-                          <span
-                            className={`font-mono font-semibold tabular-nums transition-colors ${
-                              getScoreTone(subj.kehadiran.persentase).text
-                            }`}
-                          >
-                            {subj.kehadiran.total > 0
-                              ? `${subj.kehadiran.persentase}% (${subj.kehadiran.hadir}/${subj.kehadiran.total} sesi)`
-                              : "Belum ada sesi"}
-                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Footer Rata-rata Mapel */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-slate-500 group-hover:text-slate-400 font-medium transition-colors">
-                        Rata-Rata Evaluasi Mapel
-                      </span>
-                      <span
-                        className={`text-sm font-bold font-mono tabular-nums transition-colors ${avgTone.text}`}
-                      >
-                        {subj.rataRataMapel !== null ? subj.rataRataMapel : "-"}
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
-                      <div
-                        className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
+                    {/* Footer Rata-rata Mapel */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-slate-500 group-hover:text-slate-400 font-medium transition-colors">
+                          Rata-Rata Evaluasi Mapel
+                        </span>
+                        <span
+                          className={`text-sm font-bold font-mono tabular-nums transition-colors ${avgTone.text}`}
+                        >
+                          {subj.rataRataMapel !== null ? subj.rataRataMapel : "-"}
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
+                        <div
+                          className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+
+            {totalCardPages > 1 && (
+              <div className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+                <span>
+                  Menampilkan kartu{" "}
+                  <strong className="text-slate-800">
+                    {(safeCardPage - 1) * CARDS_PER_PAGE + 1}–
+                    {Math.min(
+                      safeCardPage * CARDS_PER_PAGE,
+                      filteredSubjects.length
+                    )}
+                  </strong>{" "}
+                  dari{" "}
+                  <strong className="text-slate-800">
+                    {filteredSubjects.length}
+                  </strong>{" "}
+                  mata pelajaran (Maks. {CARDS_PER_PAGE} kartu/halaman)
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2.5 text-xs cursor-pointer"
+                    onClick={() => setCardPage((p) => Math.max(1, p - 1))}
+                    disabled={safeCardPage <= 1}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                    Sebelumnya
+                  </Button>
+                  <span className="px-2 font-mono font-semibold text-slate-700">
+                    {safeCardPage} / {totalCardPages}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2.5 text-xs cursor-pointer"
+                    onClick={() =>
+                      setCardPage((p) => Math.min(totalCardPages, p + 1))
+                    }
+                    disabled={safeCardPage >= totalCardPages}
+                  >
+                    Selanjutnya
+                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
 
           {/* Tabel Matriks Rekapitulasi Seluruh Mata Pelajaran */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
-            <div className="pb-3 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-blue-600" />
-                Tabel Rekapitulasi Nilai Seluruh Mata Pelajaran
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Perbandingan lengkap nilai akademik (Tugas/UTS/UAS), karakter,
-                dan kehadiran di setiap mata pelajaran kelas{" "}
-                {data.student.kelas}
-              </p>
+            <div className="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-blue-600" />
+                  Tabel Rekapitulasi Nilai Seluruh Mata Pelajaran
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Perbandingan lengkap nilai akademik (Tugas/UTS/UAS), karakter,
+                  dan kehadiran di setiap mata pelajaran kelas{" "}
+                  {data.student.kelas}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-slate-500">Tampilkan:</span>
+                <Select
+                  value={String(tablePageSize)}
+                  onValueChange={(val) => {
+                    setTablePageSize(Number(val) || 6);
+                    setTablePage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[125px] h-8 text-xs border-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="6">6 Mapel / Hal</SelectItem>
+                    <SelectItem value="10">10 Mapel / Hal</SelectItem>
+                    <SelectItem value="15">15 Mapel / Hal</SelectItem>
+                    <SelectItem value="50">Semua Mapel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <Table>
@@ -625,7 +819,7 @@ export default function SiswaNilaiPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {subjectsList.map((subj) => {
+                  {paginatedTableSubjects.map((subj) => {
                     const kompItems = subj.akademik
                       ? subj.akademik.kategoriWajib.map((cat) => ({
                           cat,
@@ -706,21 +900,72 @@ export default function SiswaNilaiPage() {
                       </TableRow>
                     );
                   })}
-                  {subjectsList.length === 0 && (
+                  {filteredSubjects.length === 0 && (
                     <TableRow>
                       <TableCell
                         colSpan={8}
                         className="py-10 text-center text-xs text-slate-500"
                       >
                         <Clock className="h-4 w-4 mx-auto mb-1 text-slate-400" />
-                        Belum ada daftar mata pelajaran yang terdaftar untuk
-                        kelas Anda.
+                        {subjectsList.length === 0
+                          ? "Belum ada daftar mata pelajaran yang terdaftar untuk kelas Anda."
+                          : "Tidak ada mata pelajaran yang cocok dengan filter pencarian Anda."}
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
             </div>
+
+            {/* Footer Paginasi Tabel Rekapitulasi */}
+            {filteredSubjects.length > 0 && (
+              <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-slate-500">
+                  Menampilkan{" "}
+                  <strong className="text-slate-800">
+                    {(safeTablePage - 1) * tablePageSize + 1}–
+                    {Math.min(
+                      safeTablePage * tablePageSize,
+                      filteredSubjects.length
+                    )}
+                  </strong>{" "}
+                  dari{" "}
+                  <strong className="text-slate-800">
+                    {filteredSubjects.length}
+                  </strong>{" "}
+                  mata pelajaran (Halaman{" "}
+                  <strong className="text-slate-800">{safeTablePage}</strong>{" "}
+                  dari{" "}
+                  <strong className="text-slate-800">{totalTablePages}</strong>)
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs cursor-pointer"
+                    onClick={() => setTablePage((p) => Math.max(1, p - 1))}
+                    disabled={safeTablePage <= 1}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                    Sebelumnya
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2.5 text-xs cursor-pointer"
+                    onClick={() =>
+                      setTablePage((p) => Math.min(totalTablePages, p + 1))
+                    }
+                    disabled={safeTablePage >= totalTablePages}
+                  >
+                    Selanjutnya
+                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -799,13 +1044,18 @@ export default function SiswaNilaiPage() {
                       />
                     </div>
 
-                    {/* Per-Mapel detail if any */}
+                    {/* Per-Mapel detail if any (with bounded max-height scroll for 20+ mapels) */}
                     {Object.keys(c.detailMapel).length > 0 && (
                         <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 mb-2 transition-colors">
-                            Rincian Per Mata Pelajaran
-                          </p>
-                          <div className="space-y-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                              Rincian Per Mata Pelajaran
+                            </p>
+                            <span className="text-[10px] font-mono text-slate-400 group-hover:text-slate-500">
+                              {Object.keys(c.detailMapel).length} Mapel
+                            </span>
+                          </div>
+                          <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                             {Object.entries(c.detailMapel).map(
                               ([mapel, nilai]) => {
                                 const katMap = c.detailKategoriMapel?.[mapel];
