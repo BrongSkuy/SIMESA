@@ -858,57 +858,62 @@ export default function AdminNilaiSayaPage() {
                 </div>
 
                 {totalCardPages > 1 && (
-                  <div className="rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-                    <span>
-                      Menampilkan kartu{" "}
-                      <strong className="text-slate-800">
-                        {(safeCardPage - 1) * CARDS_PER_PAGE + 1}–
+                  <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-white border border-slate-200/90 font-semibold text-slate-700 shadow-2xs">
+                        Kartu {(safeCardPage - 1) * CARDS_PER_PAGE + 1}–
                         {Math.min(
                           safeCardPage * CARDS_PER_PAGE,
                           filteredSubjects.length
-                        )}
-                      </strong>{" "}
-                      dari{" "}
-                      <strong className="text-slate-800">
-                        {filteredSubjects.length}
-                      </strong>{" "}
-                      mata pelajaran (Maks. {CARDS_PER_PAGE} kartu/halaman)
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Button
+                        )}{" "}
+                        dari {filteredSubjects.length} Mapel
+                      </span>
+                    </div>
+                    <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
+                      <button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 px-2.5 text-xs cursor-pointer"
                         onClick={() => setCardPage((p) => Math.max(1, p - 1))}
                         disabled={safeCardPage <= 1}
+                        className="h-7 w-7 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                        aria-label="Halaman sebelumnya"
                       >
-                        <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-                        Sebelumnya
-                      </Button>
-                      <span className="px-2 font-mono font-semibold text-slate-700">
-                        {safeCardPage} / {totalCardPages}
-                      </span>
-                      <Button
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      {Array.from(
+                        { length: totalCardPages },
+                        (_, idx) => idx + 1
+                      ).map((pageNum) => (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => setCardPage(pageNum)}
+                          className={`h-7 min-w-7 px-2 inline-flex items-center justify-center rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                            pageNum === safeCardPage
+                              ? "bg-[#091524] text-white shadow-xs"
+                              : "text-slate-600 hover:bg-slate-100"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+                      <button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 px-2.5 text-xs cursor-pointer"
                         onClick={() =>
                           setCardPage((p) => Math.min(totalCardPages, p + 1))
                         }
                         disabled={safeCardPage >= totalCardPages}
+                        className="h-7 w-7 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                        aria-label="Halaman selanjutnya"
                       >
-                        Selanjutnya
-                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                      </Button>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Tabel Matriks Rekapitulasi Seluruh Mata Pelajaran */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3 overflow-hidden">
                 <div className="pb-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -920,26 +925,28 @@ export default function AdminNilaiSayaPage() {
                       dan kehadiran di setiap mata pelajaran kelas {data.student.kelas}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-slate-500">Tampilkan:</span>
-                    <Select
-                      value={String(tablePageSize)}
-                      onValueChange={(val) => {
-                        setTablePageSize(Number(val) || 6);
-                        setTablePage(1);
-                      }}
-                    >
-                      <SelectTrigger className="w-[125px] h-8 text-xs border-slate-200">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="6">6 Mapel / Hal</SelectItem>
-                        <SelectItem value="10">10 Mapel / Hal</SelectItem>
-                        <SelectItem value="15">15 Mapel / Hal</SelectItem>
-                        <SelectItem value="50">Semua Mapel</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {subjectsList.length > 6 && (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-slate-500">Baris:</span>
+                      <Select
+                        value={String(tablePageSize)}
+                        onValueChange={(val) => {
+                          setTablePageSize(Number(val) || 6);
+                          setTablePage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[125px] h-8 text-xs border-slate-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="6">6 Mapel / Hal</SelectItem>
+                          <SelectItem value="10">10 Mapel / Hal</SelectItem>
+                          <SelectItem value="15">15 Mapel / Hal</SelectItem>
+                          <SelectItem value="50">Semua Mapel</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
                 <div className="overflow-x-auto">
                   <Table>
@@ -1061,53 +1068,95 @@ export default function AdminNilaiSayaPage() {
                   </Table>
                 </div>
 
-                {/* Footer Paginasi Tabel Rekapitulasi */}
+                {/* Executive Status & Pagination Dock */}
                 {filteredSubjects.length > 0 && (
-                  <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <span className="text-xs text-slate-500">
-                      Menampilkan{" "}
-                      <strong className="text-slate-800">
-                        {(safeTablePage - 1) * tablePageSize + 1}–
-                        {Math.min(
-                          safeTablePage * tablePageSize,
-                          filteredSubjects.length
-                        )}
-                      </strong>{" "}
-                      dari{" "}
-                      <strong className="text-slate-800">
-                        {filteredSubjects.length}
-                      </strong>{" "}
-                      mata pelajaran (Halaman{" "}
-                      <strong className="text-slate-800">{safeTablePage}</strong>{" "}
-                      dari{" "}
-                      <strong className="text-slate-800">{totalTablePages}</strong>)
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2.5 text-xs cursor-pointer"
-                        onClick={() => setTablePage((p) => Math.max(1, p - 1))}
-                        disabled={safeTablePage <= 1}
-                      >
-                        <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-                        Sebelumnya
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2.5 text-xs cursor-pointer"
-                        onClick={() =>
-                          setTablePage((p) => Math.min(totalTablePages, p + 1))
-                        }
-                        disabled={safeTablePage >= totalTablePages}
-                      >
-                        Selanjutnya
-                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                      </Button>
+                  <div className="-mx-5 sm:-mx-6 -mb-5 sm:-mb-6 mt-3 px-5 sm:px-6 py-3 bg-slate-50/80 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    {/* Kiri: Ringkasan Status Kurikulum Berbentuk Pill */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-xs font-semibold text-slate-700 shadow-2xs">
+                        <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                        {totalTablePages > 1
+                          ? `Baris ${(safeTablePage - 1) * tablePageSize + 1}–${Math.min(
+                              safeTablePage * tablePageSize,
+                              filteredSubjects.length
+                            )} dari ${filteredSubjects.length} Mapel`
+                          : `${filteredSubjects.length} Mata Pelajaran Kurikulum`}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/90 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        {completenessStats.lengkap} Lengkap
+                      </span>
+                      {completenessStats.sebagian > 0 && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50/90 border border-amber-200/80 text-[11px] font-semibold text-amber-700">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          {completenessStats.sebagian} Sebagian
+                        </span>
+                      )}
+                      {completenessStats.total -
+                        completenessStats.lengkap -
+                        completenessStats.sebagian >
+                        0 && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 text-[11px] font-medium text-slate-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                          {completenessStats.total -
+                            completenessStats.lengkap -
+                            completenessStats.sebagian}{" "}
+                          Belum Dinilai
+                        </span>
+                      )}
                     </div>
+
+                    {/* Kanan: Segmented Page Pills (jika > 1 halaman) atau Indeks Skor SPK */}
+                    {totalTablePages > 1 ? (
+                      <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => setTablePage((p) => Math.max(1, p - 1))}
+                          disabled={safeTablePage <= 1}
+                          className="h-7 w-7 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                          aria-label="Halaman sebelumnya"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </button>
+                        {Array.from(
+                          { length: totalTablePages },
+                          (_, idx) => idx + 1
+                        ).map((pageNum) => (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => setTablePage(pageNum)}
+                            className={`h-7 min-w-7 px-2 inline-flex items-center justify-center rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                              pageNum === safeTablePage
+                                ? "bg-[#091524] text-white shadow-xs"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTablePage((p) => Math.min(totalTablePages, p + 1))
+                          }
+                          disabled={safeTablePage >= totalTablePages}
+                          className="h-7 w-7 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                          aria-label="Halaman selanjutnya"
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-slate-600 shadow-2xs">
+                          <span>Skor Evaluasi SPK:</span>
+                          <strong className="font-mono text-slate-900">
+                            {data.totalSkorSPK}
+                          </strong>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
