@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { spkScores, students, spkCriteria, attendance, academicYears, classes as classesTable, subjects, spkGradingCategories, teachers } from "@/db/schema";
+import { spkScores, students, spkCriteria, attendance, academicYears, subjects, spkGradingCategories, teachers } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 
@@ -207,11 +207,9 @@ export async function validateSPKCriteriaFilled(kelas: string, targetPeriode?: s
 
   // 6. Fetch metadata for strict validation
   const classNames = [...new Set(siswaKelas.map(s => s.kelas))];
-  const classMeta = await db.select().from(classesTable).all();
 
   // Fetch all curriculum subjects from the subjects table
   const subjectsList = await db.select().from(subjects).all();
-  const curriculumMapels = subjectsList.map(s => s.namaMapel);
 
   // Fetch all dynamic grading category configs
   const allGradingCategories = await db
@@ -242,7 +240,7 @@ export async function validateSPKCriteriaFilled(kelas: string, targetPeriode?: s
     const key = `${gc.kelas}:${gc.criteriaId}:${mapelKey}`;
     try {
       gradingCategoriesMap.set(key, JSON.parse(gc.categories));
-    } catch (e) {
+    } catch {
       gradingCategoriesMap.set(key, []);
     }
   });
@@ -341,7 +339,7 @@ export async function validateSPKCriteriaFilled(kelas: string, targetPeriode?: s
             if (scoreRecord.details) {
               try {
                 detailsObj = JSON.parse(scoreRecord.details);
-              } catch (e) {
+              } catch {
                 detailsObj = {};
               }
             }
@@ -414,7 +412,6 @@ export async function buildStudentScoreTranscript(student: {
     periodAttendance,
     allSubjects,
     allTeachers,
-    allClasses,
     gradingCategories,
     spkResults,
   ] = await Promise.all([
@@ -438,7 +435,6 @@ export async function buildStudentScoreTranscript(student: {
       .all(),
     db.select().from(subjects).all(),
     db.select().from(teachers).all(),
-    db.select().from(classesTable).all(),
     db
       .select()
       .from(spkGradingCategories)

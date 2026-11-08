@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -48,14 +48,19 @@ export function AvatarCropModal({
 
   const imageRef = useRef<HTMLImageElement | null>(null);
 
-  // Reset state saat modal dibuka dengan gambar baru
-  useEffect(() => {
+  const [prevImageSrc, setPrevImageSrc] = useState<string | null>(null);
+  const [prevOpen, setPrevOpen] = useState(false);
+
+  // Reset state saat modal dibuka dengan gambar baru (diatur saat render tanpa efek cascading)
+  if (open !== prevOpen || imageSrc !== prevImageSrc) {
+    setPrevOpen(open);
+    setPrevImageSrc(imageSrc);
     if (open && imageSrc) {
       setScale(1);
       setOffset({ x: 0, y: 0 });
       setNaturalSize(null);
     }
-  }, [open, imageSrc]);
+  }
 
   // Load dimensi asli gambar
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -201,6 +206,7 @@ export function AvatarCropModal({
                 height: displayedHeight,
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 ref={imageRef}
                 src={imageSrc}

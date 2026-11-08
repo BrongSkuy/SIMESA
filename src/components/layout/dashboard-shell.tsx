@@ -22,10 +22,20 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push("/login");
+    if (!isPending) {
+      if (!session) {
+        router.push("/login");
+      } else {
+        const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+        if (userRole && userRole !== role) {
+          if (userRole === "ADMIN") router.push("/admin");
+          else if (userRole === "GURU") router.push("/guru");
+          else if (userRole === "SISWA") router.push("/siswa");
+          else router.push("/login");
+        }
+      }
     }
-  }, [isPending, session, router]);
+  }, [isPending, session, role, router]);
 
   const user: TopbarUser = {
     id: session?.user?.id || "",
@@ -60,7 +70,8 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     );
   }
 
-  if (!session) {
+  const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (!session || (userRole && userRole !== role)) {
     return null;
   }
 

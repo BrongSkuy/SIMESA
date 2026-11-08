@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { calculateSPK, validateSPKCriteriaFilled } from "@/lib/spk";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import Image from "next/image";
 import { GraduationCap, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, Camera, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -299,7 +300,7 @@ export default function AdminGuruPage() {
               <div className="flex items-center gap-3.5 p-3 rounded-lg border border-slate-200 bg-slate-50/50">
                 <div className="w-14 h-14 rounded-xl border border-slate-200 bg-white flex items-center justify-center font-bold text-slate-400 text-sm overflow-hidden shrink-0 shadow-xs">
                   {formFoto ? (
-                    <img src={formFoto} alt="Preview" className="w-full h-full object-cover" />
+                    <Image src={formFoto} alt="Preview" width={56} height={56} unoptimized className="w-full h-full object-cover" />
                   ) : (
                     <GraduationCap className="w-6 h-6 text-slate-300" />
                   )}
@@ -434,7 +435,7 @@ export default function AdminGuruPage() {
               <div className="flex items-center gap-3.5 p-3 rounded-lg border border-slate-200 bg-slate-50/50">
                 <div className="w-14 h-14 rounded-xl border border-slate-200 bg-white flex items-center justify-center font-bold text-slate-400 text-sm overflow-hidden shrink-0 shadow-xs">
                   {formFoto ? (
-                    <img src={formFoto} alt="Preview" className="w-full h-full object-cover" />
+                    <Image src={formFoto} alt="Preview" width={56} height={56} unoptimized className="w-full h-full object-cover" />
                   ) : (
                     <GraduationCap className="w-6 h-6 text-slate-300" />
                   )}
@@ -680,9 +681,12 @@ export default function AdminGuruPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 font-semibold flex items-center justify-center text-xs shrink-0 overflow-hidden transition-colors">
                           {guru.foto ? (
-                            <img
+                            <Image
                               src={guru.foto}
                               alt={guru.namaLengkap}
+                              width={32}
+                              height={32}
+                              unoptimized
                               className="w-full h-full object-cover"
                             />
                           ) : (

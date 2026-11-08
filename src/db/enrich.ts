@@ -1,6 +1,6 @@
 import { db } from "./index";
 import * as schema from "./schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Database from "better-sqlite3";
 import * as dotenv from "dotenv";
 import * as path from "path";
@@ -267,8 +267,9 @@ async function enrich() {
 
     rawSqlite.close();
     console.log(`   ✅ Local sqlite.db successfully synchronized (${latestScores.length} scores, ${latestAtt.length} attendance records)`);
-  } catch (err: any) {
-    console.log("   ℹ️ Local sqlite.db sync skipped or failed:", err.message);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.log("   ℹ️ Local sqlite.db sync skipped or failed:", errorMsg);
   }
 
   console.log("\n🎉 Database enrichment & synchronization completed successfully!");

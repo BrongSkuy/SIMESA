@@ -37,6 +37,22 @@ export default function LoginPage() {
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(true);
 
+  const { data: session, isPending: sessionLoading } = authClient.useSession();
+
+  // Redirect automatically if user already has an active session
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+      if (appRole === "ADMIN") {
+        router.push("/admin");
+      } else if (appRole === "GURU") {
+        router.push("/guru");
+      } else {
+        router.push("/siswa");
+      }
+    }
+  }, [sessionLoading, session, router]);
+
   // Pre-fill username if remembered (scheduled post-hydration to avoid SSR mismatch)
   useEffect(() => {
     const frame = requestAnimationFrame(() => {

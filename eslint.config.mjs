@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "scratch/**",
+    "scratch-clear-db.ts",
+    "test-auth.ts",
   ]),
 ]);
 

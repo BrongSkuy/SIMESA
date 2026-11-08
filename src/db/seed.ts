@@ -246,7 +246,6 @@ async function seed() {
   // 8. Grading Categories (Tugas, UTS, UAS)
   // ==========================================
   console.log("\n📦 Creating SPK Grading Categories...");
-  const academicCrit = kriteria.find((k) => k.namaKriteria === "Nilai Akademik");
   const allDBCriteria = await db.select().from(schema.spkCriteria);
   const dbAcadCrit = allDBCriteria.find((c) => c.namaKriteria === "Nilai Akademik");
 
