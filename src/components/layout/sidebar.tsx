@@ -1,15 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Loader2, LogOut, User as UserIcon } from "lucide-react";
-import { toast } from "sonner";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { UserRole } from "@/lib/mock-data";
-import { authClient } from "@/lib/auth-client";
 import {
   ADMIN_DROPDOWN_GROUPS,
   GURU_NAV_ITEMS,
@@ -24,29 +21,11 @@ interface SidebarProps {
 
 export function Sidebar({ role, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const homeHref = `/${role.toLowerCase()}`;
 
   const isRouteActive = (href: string) => {
     if (href === homeHref) return pathname === homeHref;
     return pathname === href || pathname.startsWith(href + "/");
-  };
-
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-    setIsLoggingOut(true);
-    toast.loading("Mengakhiri sesi...", { id: "logout-toast" });
-    try {
-      await authClient.signOut();
-      toast.success("Berhasil keluar dari sistem", { id: "logout-toast" });
-      onToggle();
-      router.push("/login");
-    } catch {
-      toast.error("Gagal keluar", { id: "logout-toast" });
-    } finally {
-      setIsLoggingOut(false);
-    }
   };
 
   return (
@@ -163,35 +142,6 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
               )}
             </div>
           )}
-
-          <div className="pt-2 border-t border-white/10 space-y-1">
-            <Link
-              href={`${homeHref}/profil`}
-              onClick={onToggle}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
-                isRouteActive(`${homeHref}/profil`)
-                  ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                  : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
-              )}
-            >
-              <UserIcon className={cn("w-4 h-4", isRouteActive(`${homeHref}/profil`) ? "text-amber-300" : "text-blue-200")} />
-              <span>Profil Akun</span>
-            </Link>
-            <button
-              type="button"
-              disabled={isLoggingOut}
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left cursor-pointer disabled:opacity-50"
-            >
-              {isLoggingOut ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <LogOut className="w-4 h-4" />
-              )}
-              <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
-            </button>
-          </div>
         </nav>
       </ScrollArea>
     </div>
