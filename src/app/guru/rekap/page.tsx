@@ -357,7 +357,7 @@ export default function GuruRekapPage() {
                           variant="ghost"
                           size="xs"
                           onClick={() => setSelectedTanggal("")}
-                          className="group-hover:text-slate-300 group-hover:hover:bg-slate-800 transition-colors"
+                          className="group-hover:text-slate-300 group-hover:hover:bg-slate-800 group-hover:hover:text-white transition-colors"
                         >
                           Reset
                         </Button>

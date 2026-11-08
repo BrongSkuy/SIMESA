@@ -235,7 +235,7 @@ export default function GuruDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 group-hover:border-slate-700 group-hover:text-slate-200 group-hover:hover:bg-slate-800 transition-colors"
+                          className="gap-1 group-hover:bg-slate-800/90 group-hover:border-slate-700 group-hover:text-slate-100 group-hover:hover:bg-slate-700 group-hover:hover:border-slate-600 group-hover:hover:text-white transition-colors"
                         >
                           Rekap <ArrowRight className="h-3.5 w-3.5" />
                         </Button>

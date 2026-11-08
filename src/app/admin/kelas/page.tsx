@@ -534,7 +534,7 @@ export default function AdminKelasPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 group-hover:bg-slate-800 group-hover:border-slate-700 group-hover:text-white transition-colors"
+                  className="flex-1 group-hover:bg-slate-800 group-hover:border-slate-700 group-hover:text-white group-hover:hover:bg-slate-700 group-hover:hover:border-slate-600 group-hover:hover:text-white transition-colors"
                   onClick={() => openEdit(kelas)}
                 >
                   <Edit className="h-3.5 w-3.5 text-blue-600 group-hover:text-blue-400" />
