@@ -12,7 +12,6 @@ import {
   Loader2,
   HelpCircle,
 } from "lucide-react";
-import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,29 +22,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-function GoogleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24">
-      <path
-        fill="#4285F4"
-        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.29 21.41 7.36 24 12 24z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.97 0 12s.46 3.84 1.26 5.42l4.02-3.15z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.29 2.59 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-      />
-    </svg>
-  );
-}
 
 const SCHOOL_BUILDING_BLUR_DATA_URL =
   "data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wAARCAAOABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAwb/xAAjEAABBAEEAQUAAAAAAAAAAAABAgMEEQAFEhMhMSJCYaHw/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAECA//EABwRAAICAgMAAAAAAAAAAAAAAAARAQIDBBIUIf/aAAwDAQACEQMRAD8A3YkM7piVJb2shNK8+VV+rGG5EYLAUaJHt7+jk+Poslh0hmUFNqonf0euwKGNDSEiuZ9aqN+nrCdi78M4w1SRWbcjcPJyISkCzuUBhnFzZrTxLTUfj2CkqKyar4wx9ixPCD//2Q==";
@@ -61,17 +37,20 @@ export default function LoginPage() {
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(true);
 
-  // Pre-fill username if remembered
+  // Pre-fill username if remembered (scheduled post-hydration to avoid SSR mismatch)
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem("simesa_remember_user");
-      if (savedUser) {
-        setUsername(savedUser);
-        setRememberMe(true);
+    const frame = requestAnimationFrame(() => {
+      try {
+        const savedUser = localStorage.getItem("simesa_remember_user");
+        if (savedUser) {
+          setUsername(savedUser);
+          setRememberMe(true);
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -120,36 +99,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    toast.info("Integrasi Single Sign-On Google", {
-      description:
-        "Fitur login Google terhubung dengan akun belajar @sekolah.id. Untuk saat ini, silakan gunakan NIP atau NIS Anda.",
-    });
-  };
-
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white">
-      {/* Sisi Kiri: Full Screen Hero & Identitas Institusi (Full Bleed, Bebas Bubble) */}
-      <div className="relative hidden lg:flex lg:w-1/2 min-h-screen flex-col justify-between p-12 xl:p-16 bg-gradient-to-br from-[#0a192f] via-[#1e3a8a] to-[#0f172a] text-white overflow-hidden select-none">
-        {/* Background Gedung Sekolah / Backdrop Tekstur */}
-        <div className="absolute inset-0 z-0">
-          {bgLoaded && (
-            <Image
-              src="/school-building.jpg"
-              alt="Gedung Sekolah SMK Penerbangan Dirgantara"
-              fill
-              sizes="50vw"
-              priority
-              unoptimized
-              placeholder="blur"
-              blurDataURL={SCHOOL_BUILDING_BLUR_DATA_URL}
-              className="object-cover opacity-40 mix-blend-luminosity filter contrast-125 brightness-95"
-              onError={() => setBgLoaded(false)}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a192f]/70 via-[#1e3a8a]/65 to-[#0f172a]/90" />
-        </div>
+    <div className="relative min-h-screen w-full flex flex-col lg:flex-row bg-[#0a192f] lg:bg-white">
+      {/* Background Biru + Gedung Sekolah: Penuh di Mobile (< lg), Separuh Kiri di Desktop (>= lg) */}
+      <div className="absolute inset-0 lg:right-auto lg:w-1/2 z-0 bg-gradient-to-br from-[#0a192f] via-[#1e3a8a] to-[#0f172a] overflow-hidden pointer-events-none">
+        {bgLoaded && (
+          <Image
+            src="/school-building.jpg"
+            alt="Gedung Sekolah SMK Penerbangan Dirgantara"
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            priority
+            unoptimized
+            placeholder="blur"
+            blurDataURL={SCHOOL_BUILDING_BLUR_DATA_URL}
+            className="object-cover object-center opacity-40 mix-blend-luminosity filter contrast-125 brightness-95"
+            onError={() => setBgLoaded(false)}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a192f]/65 via-[#1e3a8a]/60 to-[#0f172a]/90" />
+      </div>
 
+      {/* Sisi Kiri Desktop: Identitas Institusi */}
+      <div className="relative z-10 hidden lg:flex lg:w-1/2 min-h-screen flex-col justify-between p-12 xl:p-16 text-white select-none">
         {/* Brand Header Kiri */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="relative h-10 w-10 shrink-0">
@@ -202,33 +174,36 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Sisi Kanan: Formulir Login (Full Height) */}
-      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-16 xl:p-20 min-h-screen bg-white">
-        {/* Mobile Header (Hanya tampil di layar kecil < lg) */}
-        <div className="flex items-center gap-3.5 pb-6 border-b border-slate-100 mb-6 lg:hidden">
-          <div className="relative h-11 w-11 shrink-0">
+      {/* Sisi Kanan / Mobile Full-Bleed Overlay Container */}
+      <div className="relative z-10 flex-1 flex flex-col justify-between p-5 sm:p-8 lg:p-16 xl:p-20 min-h-screen lg:bg-white">
+        {/* Mobile Hero Branding (Tampil di layar kecil < lg di atas latar biru + gedung) */}
+        <div className="flex flex-col items-center text-center pt-3 pb-6 lg:hidden select-none">
+          <div className="relative h-16 w-16 mb-3 shrink-0 filter drop-shadow-lg">
             <Image
               src="/logo.png?v=2"
-              alt="Logo Sekolah"
+              alt="Logo SMK Penerbangan Dirgantara"
               fill
-              sizes="44px"
+              sizes="64px"
               unoptimized
+              priority
               className="object-contain"
             />
           </div>
-          <div>
-            <span className="text-base font-bold text-slate-900 block leading-tight">
-              SIMESA
-            </span>
-            <span className="text-xs text-slate-500">
-              SMK Penerbangan Dirgantara
-            </span>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-none">
+            SIMESA
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-blue-100/95 mt-2 max-w-xs leading-snug">
+            Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi
+          </p>
+          <p className="text-xs text-blue-200/80 mt-0.5">
+            SMK Penerbangan Dirgantara
+          </p>
+          <div className="h-1 w-10 bg-amber-400 rounded-xs mx-auto mt-3" />
         </div>
 
-        {/* Form Container (Tengah Vertikal) */}
-        <div className="w-full max-w-md mx-auto my-auto py-4">
-          <div className="mb-8">
+        {/* Form Container (Card putih elegan di mobile, full clean di desktop) */}
+        <div className="w-full max-w-md mx-auto my-auto rounded-2xl bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-2xl border border-white/25 lg:rounded-none lg:bg-transparent lg:backdrop-blur-none lg:p-0 lg:py-4 lg:shadow-none lg:border-0">
+          <div className="mb-6 lg:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Selamat Datang
             </h2>
@@ -327,32 +302,10 @@ export default function LoginPage() {
               <span>{loading ? "Memverifikasi..." : "Masuk"}</span>
             </button>
           </form>
-
-          {/* Divider atau */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-slate-400 font-medium">
-                atau
-              </span>
-            </div>
-          </div>
-
-          {/* Tombol Google */}
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="w-full h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm flex items-center justify-center gap-3 transition-colors shadow-2xs cursor-pointer"
-          >
-            <GoogleIcon className="h-4 w-4 shrink-0" />
-            <span>Masuk dengan Google</span>
-          </button>
         </div>
 
         {/* Footer Hak Cipta */}
-        <div className="text-center text-xs text-slate-400 pt-6">
+        <div className="text-center text-xs text-blue-100/75 lg:text-slate-400 pt-6 pb-1">
           © 2026 SIMESA, SMK Penerbangan Dirgantara
         </div>
       </div>
