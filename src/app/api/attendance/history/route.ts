@@ -4,6 +4,8 @@ import { attendance, students, academicYears } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { DEFAULT_PERIODE } from "@/lib/utils";
+import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
 
 // GET /api/attendance/history?kelas=..&mapel=..
 export async function GET(request: NextRequest) {
@@ -18,16 +20,40 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const kelas = searchParams.get("kelas");
-  const mapel = searchParams.get("mapel") || "Umum";
+  const kelas = searchParams.get("kelas")?.trim();
+  const rawMapel = searchParams.get("mapel")?.trim();
 
   if (!kelas) {
-    return NextResponse.json({ error: "Parameter kelas wajib diisi" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Parameter kelas wajib diisi" },
+      { status: 400 }
+    );
   }
 
+  if (appRole === "GURU") {
+    const authCheck = await verifyTeacherSubjectAccess(
+      session.user.id,
+      kelas,
+      rawMapel || ""
+    );
+    if (!authCheck.ok) {
+      return NextResponse.json(
+        { error: authCheck.error },
+        { status: authCheck.status }
+      );
+    }
+  }
+
+  const mapel = rawMapel || "Umum";
+
   try {
-    const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
-    const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : "2025/2026-Genap";
+    const [activeYear] = await db
+      .select()
+      .from(academicYears)
+      .where(eq(academicYears.isActive, true));
+    const periode = activeYear
+      ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+      : DEFAULT_PERIODE;
 
     // 1. Get all active students in the class
     const siswaKelas = await db
@@ -59,16 +85,16 @@ export async function GET(request: NextRequest) {
       )
       .all();
 
-    // 4. Extract unique dates
+    // 3. Extract unique dates
     const uniqueDates = Array.from(new Set(classRecords.map((r) => r.tanggal))).sort();
 
-    // 5. Index classRecords by studentId-tanggal for O(1) lookups
+    // 4. Index classRecords by studentId-tanggal for O(1) lookups
     const recordMap = new Map<string, string>();
     classRecords.forEach((r) => {
       recordMap.set(`${r.studentId}-${r.tanggal}`, r.status);
     });
 
-    // 6. Aggregate data per student
+    // 5. Aggregate data per student
     const result = siswaKelas.map((siswa) => {
       const history: Record<string, string> = {};
       uniqueDates.forEach((date) => {
@@ -86,7 +112,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ dates: uniqueDates, records: result });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal memuat riwayat absensi";
+    const message =
+      error instanceof Error ? error.message : "Gagal memuat riwayat absensi";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { teachers, subjects as mapelSubjects } from "@/db/schema";
+import { classes, teachers, subjects as mapelSubjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -23,7 +23,6 @@ export async function GET() {
   }
 
   // Check if teacher is waliKelas for any class
-  const { classes } = await import("@/db/schema");
   const waliKelasCheck = await db
     .select()
     .from(classes)
@@ -31,37 +30,51 @@ export async function GET() {
 
   const waliClasses = waliKelasCheck.map((c) => c.namaKelas);
 
-  // Get explicitly assigned subjects and classes
+  // Get explicitly assigned curriculum subjects and classes (deduplicated by namaMapel)
   const mySubjects = await db
     .select({ namaMapel: mapelSubjects.namaMapel, kelas: mapelSubjects.kelasDiampu })
     .from(mapelSubjects)
     .where(eq(mapelSubjects.teacherId, teacherProfile.id));
 
+  const subjectClassMap = new Map<string, Set<string>>();
   const assignedClasses = new Set<string>();
-  const subjectNames = new Set<string>();
 
   for (const s of mySubjects) {
-    subjectNames.add(s.namaMapel);
+    if (!s.namaMapel || s.namaMapel === "Umum") continue;
+
+    let classSet = subjectClassMap.get(s.namaMapel);
+    if (!classSet) {
+      classSet = new Set<string>();
+      subjectClassMap.set(s.namaMapel, classSet);
+    }
+
     if (s.kelas) {
-      s.kelas.split(",").forEach(k => {
-        if (k.trim()) assignedClasses.add(k.trim());
+      s.kelas.split(",").forEach((k) => {
+        const trimmed = k.trim();
+        if (trimmed) {
+          classSet!.add(trimmed);
+          assignedClasses.add(trimmed);
+        }
       });
     }
   }
 
-  // Combine waliClasses and assignedClasses uniquely
-  const teacherClassNames = Array.from(new Set([...waliClasses, ...Array.from(assignedClasses)]));
+  const teachingClasses = Array.from(assignedClasses);
+  // Combine waliClasses and teachingClasses uniquely (used by Rekap)
+  const teacherClassNames = Array.from(new Set([...waliClasses, ...teachingClasses]));
 
-  // Get unique subjects mapped to this teacher with class lists
-  const subjects = mySubjects.map(s => ({
-    namaMapel: s.namaMapel,
-    kelas: s.kelas ? s.kelas.split(",").map(k => k.trim()) : []
-  }));
+  const subjects = Array.from(subjectClassMap.entries()).map(
+    ([namaMapel, kelasSet]) => ({
+      namaMapel,
+      kelas: Array.from(kelasSet),
+    })
+  );
 
   return NextResponse.json({
     waliClasses,
-    isWaliKelas: waliClasses.length > 0, // Keep for backward compatibility if needed
+    isWaliKelas: waliClasses.length > 0,
     classes: teacherClassNames,
+    teachingClasses,
     subjects,
   });
 }

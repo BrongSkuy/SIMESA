@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { attendance, students, academicYears, teachers, subjects, classes, spkPublishStatus } from "@/db/schema";
+import { attendance, students, academicYears, spkPublishStatus } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
+import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
+
+const VALID_STATUSES = new Set(["Hadir", "Izin", "Sakit", "Alfa"]);
 
 // GET /api/attendance — get attendance by kelas and tanggal
 export async function GET(request: NextRequest) {
@@ -19,9 +22,9 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const kelas = searchParams.get("kelas");
-  const tanggal = searchParams.get("tanggal");
-  const mapel = searchParams.get("mapel") || "Umum";
+  const kelas = searchParams.get("kelas")?.trim();
+  const tanggal = searchParams.get("tanggal")?.trim();
+  const rawMapel = searchParams.get("mapel")?.trim();
 
   if (!kelas || !tanggal) {
     return NextResponse.json(
@@ -29,6 +32,22 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  if (appRole === "GURU") {
+    const authCheck = await verifyTeacherSubjectAccess(
+      session.user.id,
+      kelas,
+      rawMapel || ""
+    );
+    if (!authCheck.ok) {
+      return NextResponse.json(
+        { error: authCheck.error },
+        { status: authCheck.status }
+      );
+    }
+  }
+
+  const mapel = rawMapel || "Umum";
 
   // Get active students in this class
   const siswaKelas = await db
@@ -41,10 +60,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json([]);
   }
 
-  const studentIds = siswaKelas.map(s => s.id);
+  const studentIds = siswaKelas.map((s) => s.id);
 
-  const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
-  const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
+  const [activeYear] = await db
+    .select()
+    .from(academicYears)
+    .where(eq(academicYears.isActive, true));
+  const periode = activeYear
+    ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+    : DEFAULT_PERIODE;
 
   // Get existing attendance records for this date and mapel and periode
   const existingRecords = await db
@@ -93,11 +117,21 @@ export async function POST(request: NextRequest) {
       }>;
     } = await request.json();
 
-    const mapel = body.mapel || "Umum";
+    const rawMapel = body.mapel?.trim();
 
-    if (!body.tanggal || !body.records?.length) {
+    if (!body.tanggal || !Array.isArray(body.records) || body.records.length === 0) {
       return NextResponse.json(
         { error: "Data absensi tidak valid" },
+        { status: 400 }
+      );
+    }
+
+    const hasInvalidStatus = body.records.some(
+      (r) => !r.studentId || !VALID_STATUSES.has(r.status)
+    );
+    if (hasInvalidStatus) {
+      return NextResponse.json(
+        { error: "Terdapat ID siswa atau status kehadiran yang tidak valid." },
         { status: 400 }
       );
     }
@@ -110,57 +144,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Role Isolation Check
+    const studentIds = body.records.map((r) => r.studentId);
+    const targetStudents = await db
+      .select({ id: students.id, kelas: students.kelas })
+      .from(students)
+      .where(and(inArray(students.id, studentIds), eq(students.status, "aktif")))
+      .all();
+
+    const foundIdSet = new Set(targetStudents.map((s) => s.id));
+    if (studentIds.some((id) => !foundIdSet.has(id))) {
+      return NextResponse.json(
+        { error: "Terdapat siswa yang tidak ditemukan atau berstatus nonaktif." },
+        { status: 404 }
+      );
+    }
+
+    const uniqueClasses = Array.from(new Set(targetStudents.map((s) => s.kelas)));
+
+    // Strict Curriculum Subject & Ownership Check for GURU
     if (appRole === "GURU") {
-      const firstStudentId = body.records[0].studentId;
-      const [firstStudent] = await db.select().from(students).where(eq(students.id, firstStudentId));
-      if (!firstStudent) {
-        return NextResponse.json({ error: "Siswa tidak ditemukan" }, { status: 404 });
-      }
-
-      const [teacherRecord] = await db.select().from(teachers).where(eq(teachers.userId, session.user.id as string));
-      if (!teacherRecord) {
-        return NextResponse.json({ error: "Data guru tidak ditemukan" }, { status: 404 });
-      }
-
-      // Check Subject and Class Assignment
-      if (mapel !== "Umum") {
-        const [subjectAssignment] = await db.select().from(subjects).where(
-          and(eq(subjects.teacherId, teacherRecord.id), eq(subjects.namaMapel, mapel))
+      if (uniqueClasses.length !== 1) {
+        return NextResponse.json(
+          { error: "Semua siswa dalam satu sesi presensi harus berasal dari kelas yang sama." },
+          { status: 400 }
         );
-        if (!subjectAssignment) {
-          return NextResponse.json({ error: "Akses Ditolak: Anda tidak ditugaskan untuk mata pelajaran ini." }, { status: 403 });
-        }
-        const assignedClasses = subjectAssignment.kelasDiampu ? subjectAssignment.kelasDiampu.split(",").map(k => k.trim()) : [];
-        if (!assignedClasses.includes(firstStudent.kelas)) {
-          return NextResponse.json({ error: "Akses Ditolak: Anda tidak ditugaskan untuk mengajar mata pelajaran ini di kelas tersebut." }, { status: 403 });
-        }
-      } else {
-        // "Umum" check: must be Wali Kelas or teach ANY subject in this class
-        const [kelasRecord] = await db.select().from(classes).where(eq(classes.namaKelas, firstStudent.kelas));
-        const isWaliKelas = kelasRecord?.waliKelas === teacherRecord.namaLengkap;
-        
-        const mySubjects = await db.select().from(subjects).where(eq(subjects.teacherId, teacherRecord.id)).all();
-        const teachesAnySubjectInClass = mySubjects.some(ts => ts.kelasDiampu && ts.kelasDiampu.split(",").map(k => k.trim()).includes(firstStudent.kelas));
-        
-        if (!isWaliKelas && !teachesAnySubjectInClass) {
-          return NextResponse.json({ error: "Akses Ditolak: Anda tidak memiliki akses ke kelas ini." }, { status: 403 });
-        }
+      }
+
+      const authCheck = await verifyTeacherSubjectAccess(
+        session.user.id,
+        uniqueClasses[0],
+        rawMapel || ""
+      );
+      if (!authCheck.ok) {
+        return NextResponse.json(
+          { error: authCheck.error },
+          { status: authCheck.status }
+        );
       }
     }
 
-    const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
-    const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
+    const mapel = rawMapel || "Umum";
+
+    const [activeYear] = await db
+      .select()
+      .from(academicYears)
+      .where(eq(academicYears.isActive, true));
+    const periode = activeYear
+      ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+      : DEFAULT_PERIODE;
 
     // Lockdown Check
-    const [pubStatus] = await db.select().from(spkPublishStatus).where(eq(spkPublishStatus.periode, periode));
+    const [pubStatus] = await db
+      .select()
+      .from(spkPublishStatus)
+      .where(eq(spkPublishStatus.periode, periode));
     if (pubStatus?.isPublished) {
-      return NextResponse.json({ error: "Periode ini telah dikunci (Finalized). Data absensi tidak dapat diubah lagi." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Periode ini telah dikunci (Finalized). Data absensi tidak dapat diubah lagi." },
+        { status: 403 }
+      );
     }
 
     // Delete existing records for this date + these students, then insert new ones in transaction
     await db.transaction(async (tx) => {
-      const studentIds = body.records.map(r => r.studentId);
       await tx
         .delete(attendance)
         .where(
@@ -172,11 +218,11 @@ export async function POST(request: NextRequest) {
           )
         );
 
-      const valuesToInsert = body.records.map(record => ({
+      const valuesToInsert = body.records.map((record) => ({
         studentId: record.studentId,
         tanggal: body.tanggal,
-        mapel: mapel,
-        periode: periode,
+        mapel,
+        periode,
         status: record.status,
         recordedBy: session.user.id,
       }));
@@ -205,72 +251,73 @@ export async function DELETE(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const kelas = searchParams.get("kelas");
-  const tanggal = searchParams.get("tanggal");
-  const mapel = searchParams.get("mapel") || "Umum";
+  const kelas = searchParams.get("kelas")?.trim();
+  const tanggal = searchParams.get("tanggal")?.trim();
+  const rawMapel = searchParams.get("mapel")?.trim();
 
   if (!kelas || !tanggal) {
-    return NextResponse.json({ error: "Parameter kelas dan tanggal wajib" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Parameter kelas dan tanggal wajib" },
+      { status: 400 }
+    );
   }
 
-  // Role Isolation Check for DELETE
+  // Strict Role & Ownership Check for DELETE
   if (appRole === "GURU") {
-    const [teacherRecord] = await db.select().from(teachers).where(eq(teachers.userId, session.user.id as string));
-    if (!teacherRecord) {
-      return NextResponse.json({ error: "Data guru tidak ditemukan" }, { status: 404 });
-    }
-
-    // Check Subject and Class Assignment
-    if (mapel !== "Umum") {
-      const [subjectAssignment] = await db.select().from(subjects).where(
-        and(eq(subjects.teacherId, teacherRecord.id), eq(subjects.namaMapel, mapel))
+    const authCheck = await verifyTeacherSubjectAccess(
+      session.user.id,
+      kelas,
+      rawMapel || ""
+    );
+    if (!authCheck.ok) {
+      return NextResponse.json(
+        { error: authCheck.error },
+        { status: authCheck.status }
       );
-      if (!subjectAssignment) {
-        return NextResponse.json({ error: "Akses Ditolak: Anda tidak ditugaskan untuk mata pelajaran ini." }, { status: 403 });
-      }
-      const assignedClasses = subjectAssignment.kelasDiampu ? subjectAssignment.kelasDiampu.split(",").map(k => k.trim()) : [];
-      if (!assignedClasses.includes(kelas)) {
-        return NextResponse.json({ error: "Akses Ditolak: Anda tidak ditugaskan untuk mengajar mata pelajaran ini di kelas tersebut." }, { status: 403 });
-      }
-    } else {
-      // "Umum" check: must be Wali Kelas or teach ANY subject in this class
-      const [kelasRecord] = await db.select().from(classes).where(eq(classes.namaKelas, kelas));
-      const isWaliKelas = kelasRecord?.waliKelas === teacherRecord.namaLengkap;
-      
-      const mySubjects = await db.select().from(subjects).where(eq(subjects.teacherId, teacherRecord.id)).all();
-      const teachesAnySubjectInClass = mySubjects.some(ts => ts.kelasDiampu && ts.kelasDiampu.split(",").map(k => k.trim()).includes(kelas));
-      
-      if (!isWaliKelas && !teachesAnySubjectInClass) {
-        return NextResponse.json({ error: "Akses Ditolak: Anda tidak memiliki akses ke kelas ini." }, { status: 403 });
-      }
     }
   }
+
+  const mapel = rawMapel || "Umum";
 
   try {
-    const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
-    const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
+    const [activeYear] = await db
+      .select()
+      .from(academicYears)
+      .where(eq(academicYears.isActive, true));
+    const periode = activeYear
+      ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+      : DEFAULT_PERIODE;
 
     // Lockdown Check
-    const [pubStatus] = await db.select().from(spkPublishStatus).where(eq(spkPublishStatus.periode, periode));
+    const [pubStatus] = await db
+      .select()
+      .from(spkPublishStatus)
+      .where(eq(spkPublishStatus.periode, periode));
     if (pubStatus?.isPublished) {
-      return NextResponse.json({ error: "Periode ini telah dikunci (Finalized). Data absensi tidak dapat dihapus lagi." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Periode ini telah dikunci (Finalized). Data absensi tidak dapat dihapus lagi." },
+        { status: 403 }
+      );
     }
 
-    // We need to delete records of students in that class
-    const siswaKelas = await db.select().from(students).where(eq(students.kelas, kelas)).all();
-    const siswaIds = siswaKelas.map(s => s.id);
+    const siswaKelas = await db
+      .select()
+      .from(students)
+      .where(eq(students.kelas, kelas))
+      .all();
+    const siswaIds = siswaKelas.map((s) => s.id);
 
     if (siswaIds.length > 0) {
-       await db
-          .delete(attendance)
-          .where(
-              and(
-                 inArray(attendance.studentId, siswaIds),
-                 eq(attendance.tanggal, tanggal),
-                 eq(attendance.mapel, mapel),
-                 eq(attendance.periode, periode)
-              )
-          );
+      await db
+        .delete(attendance)
+        .where(
+          and(
+            inArray(attendance.studentId, siswaIds),
+            eq(attendance.tanggal, tanggal),
+            eq(attendance.mapel, mapel),
+            eq(attendance.periode, periode)
+          )
+        );
     }
 
     return NextResponse.json({ success: true });

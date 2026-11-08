@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import { BarChart3, Loader2, Download, Users, CheckCircle2 } from "lucide-react";
 import {
   BarChart,
@@ -44,7 +45,7 @@ interface StudentRekap {
   sakit: number;
   alfa: number;
   persen: number;
-  nilai?: Record<string, number>;
+  nilai?: Record<string, number | null>;
 }
 
 interface ClassData {
@@ -72,11 +73,14 @@ export default function GuruRekapPage() {
     "Semua Mata Pelajaran"
   );
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
-  const [isWaliKelas, setIsWaliKelas] = useState(false);
-  const [waliClasses, setWaliClasses] = useState<string[]>([]);
   const [rekapData, setRekapData] = useState<StudentRekap[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingRekap, setLoadingRekap] = useState(false);
+  const [loadedQueryKey, setLoadedQueryKey] = useState<string>("");
+
+  const queryKey = selectedClass
+    ? `${selectedClass}|${selectedTanggal}|${selectedMapel}`
+    : "";
+  const loadingRekap = Boolean(queryKey) && loadedQueryKey !== queryKey;
 
   useEffect(() => {
     const queryKelas =
@@ -85,30 +89,30 @@ export default function GuruRekapPage() {
         : null;
 
     Promise.all([
-      fetch("/api/classes").then((res) => res.json()),
-      fetch("/api/teachers/me/subjects")
-        .then((res) => res.json())
-        .catch(() => ({
-          classes: [],
-          subjects: [],
-          waliClasses: [],
-          isWaliKelas: false,
-        })),
+      fetch("/api/classes").then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat daftar kelas");
+        return res.json();
+      }),
+      fetch("/api/teachers/me/subjects").then((res) => {
+        if (!res.ok) throw new Error("Gagal memuat data penugasan guru");
+        return res.json();
+      }),
     ])
       .then(([classesData, subjectsRes]) => {
         if (!Array.isArray(classesData)) {
           setClasses([]);
-          setLoading(false);
           return;
         }
 
-        const isWali = subjectsRes.isWaliKelas || false;
-        const wClasses = subjectsRes.waliClasses || [];
-        const assignedClasses = subjectsRes.classes || [];
-        const subjectsData = subjectsRes.subjects || [];
+        const assignedClasses: string[] = Array.isArray(subjectsRes?.classes)
+          ? subjectsRes.classes
+          : [];
+        const subjectsData: SubjectData[] = Array.isArray(subjectsRes?.subjects)
+          ? subjectsRes.subjects.filter(
+              (s: SubjectData) => s.namaMapel && s.namaMapel !== "Umum"
+            )
+          : [];
 
-        setIsWaliKelas(isWali);
-        setWaliClasses(wClasses);
         setSubjects(subjectsData);
 
         const filteredClasses = classesData.filter((c: ClassData) =>
@@ -124,10 +128,14 @@ export default function GuruRekapPage() {
               : filteredClasses[0].namaKelas;
           setSelectedClass(matched);
         }
-        setLoading(false);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error(err);
+        toast.error(
+          err instanceof Error ? err.message : "Gagal memuat data rekap"
+        );
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, []);
@@ -135,29 +143,46 @@ export default function GuruRekapPage() {
   useEffect(() => {
     if (!selectedClass) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoadingRekap(true);
+    let cancelled = false;
+    const currentKey = `${selectedClass}|${selectedTanggal}|${selectedMapel}`;
+
     let url = `/api/attendance/rekap?kelas=${encodeURIComponent(selectedClass)}`;
     if (selectedTanggal) url += `&tanggal=${selectedTanggal}`;
-    if (selectedMapel && selectedMapel !== "Semua Mata Pelajaran")
+    if (selectedMapel && selectedMapel !== "Semua Mata Pelajaran") {
       url += `&mapel=${encodeURIComponent(selectedMapel)}`;
+    }
 
     fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!Array.isArray(data)) {
-          console.error("API Error: ", data);
-          setRekapData([]);
-          setLoadingRekap(false);
-          return;
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !Array.isArray(data)) {
+          throw new Error(data?.error || "Gagal memuat rekap kelas");
         }
-        setRekapData(data);
-        setLoadingRekap(false);
+        return data as StudentRekap[];
       })
-      .catch((err) => {
+      .then((data) => {
+        if (!cancelled) {
+          setRekapData(data);
+        }
+      })
+      .catch((err: unknown) => {
         console.error(err);
-        setLoadingRekap(false);
+        if (!cancelled) {
+          toast.error(
+            err instanceof Error ? err.message : "Gagal memuat rekap kelas"
+          );
+          setRekapData([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadedQueryKey(currentKey);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedClass, selectedTanggal, selectedMapel]);
 
   const { chartData, avgPersen, totalHadir, totalAbsen } = useMemo(() => {
@@ -204,6 +229,18 @@ export default function GuruRekapPage() {
     );
   }
 
+  const handleClassTabChange = (val: string) => {
+    setSelectedClass(val);
+    if (
+      selectedMapel !== "Semua Mata Pelajaran" &&
+      !subjects.some(
+        (m) => m.namaMapel === selectedMapel && m.kelas?.includes(val)
+      )
+    ) {
+      setSelectedMapel("Semua Mata Pelajaran");
+    }
+  };
+
   const handleExport = () => {
     if (!rekapData || rekapData.length === 0) return;
     const templateData = rekapData.map((s, i) => {
@@ -218,7 +255,9 @@ export default function GuruRekapPage() {
         "Persentase (%)": s.persen,
       };
       criteriaKeys.forEach((k) => {
-        baseRow[`Nilai ${k}`] = s.nilai?.[k] || 0;
+        const val = s.nilai?.[k];
+        baseRow[`Nilai ${k}`] =
+          val !== null && val !== undefined ? val : "-";
       });
       return baseRow;
     });
@@ -226,6 +265,7 @@ export default function GuruRekapPage() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Rekap Kelas");
     XLSX.writeFile(wb, `Rekap_Kehadiran_Nilai_Kelas_${selectedClass}.xlsx`);
+    toast.success("Rekapitulasi kelas berhasil diekspor!");
   };
 
   return (
@@ -248,21 +288,20 @@ export default function GuruRekapPage() {
       </PageHeader>
 
       {classes.length === 0 ? (
-        <div className="border border-slate-200 py-12 text-center text-xs text-slate-500">
-
-            Anda belum memiliki penugasan kelas.
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
+            <Users className="h-5 w-5" />
+          </div>
+          <p className="text-xs font-semibold text-slate-700">
+            Anda Belum Memiliki Penugasan Kelas
+          </p>
+          <p className="text-xs text-slate-500">
+            Hubungi Administrator Sekolah apabila jadwal kelas Anda belum
+            terdaftar.
+          </p>
         </div>
-
       ) : (
-        <Tabs
-          value={selectedClass}
-          onValueChange={(val) => {
-            setSelectedClass(val);
-            if (selectedMapel === "Umum" && !waliClasses.includes(val)) {
-              setSelectedMapel("Semua Mata Pelajaran");
-            }
-          }}
-        >
+        <Tabs value={selectedClass} onValueChange={handleClassTabChange}>
           <TabsList className="flex flex-wrap h-auto">
             {classes.map((c) => (
               <TabsTrigger key={c.id} value={c.namaKelas}>
@@ -278,7 +317,7 @@ export default function GuruRekapPage() {
               </div>
             ) : (
               <>
-                {/* Dark KPI Row */}
+                {/* KPI Row */}
                 <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white overflow-hidden shadow-xs">
                   <StatCard
                     title={`Siswa Kelas ${selectedClass}`}
@@ -304,7 +343,7 @@ export default function GuruRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3 cursor-pointer">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
                     <div>
                       <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
@@ -331,16 +370,10 @@ export default function GuruRekapPage() {
                           <SelectItem value="Semua Mata Pelajaran">
                             Semua Mata Pelajaran
                           </SelectItem>
-                          {isWaliKelas &&
-                            waliClasses.includes(selectedClass) && (
-                              <SelectItem value="Umum">
-                                Umum / Wali Kelas
-                              </SelectItem>
-                            )}
                           {subjects
                             .filter((m) => m.kelas?.includes(selectedClass))
-                            .map((m, i) => (
-                              <SelectItem key={i} value={m.namaMapel}>
+                            .map((m) => (
+                              <SelectItem key={m.namaMapel} value={m.namaMapel}>
                                 {m.namaMapel}
                               </SelectItem>
                             ))}
@@ -350,7 +383,7 @@ export default function GuruRekapPage() {
                         type="date"
                         value={selectedTanggal}
                         onChange={(e) => setSelectedTanggal(e.target.value)}
-                        className="w-auto h-8 text-xs group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:text-white transition-colors"
+                        className="w-auto h-8 text-xs group-hover:bg-slate-900/90 group-hover:border-slate-700 group-hover:text-white group-hover:[color-scheme:dark] transition-colors"
                       />
                       {selectedTanggal && (
                         <Button
@@ -448,7 +481,11 @@ export default function GuruRekapPage() {
                           <TableHead className="text-center whitespace-nowrap">
                             Alfa
                           </TableHead>
-                          <TableHead className="text-right whitespace-nowrap pr-6">
+                          <TableHead
+                            className={`text-right whitespace-nowrap ${
+                              criteriaKeys.length === 0 ? "pr-6" : ""
+                            }`}
+                          >
                             % Kehadiran
                           </TableHead>
                           {criteriaKeys.map((k, idx) => (
@@ -468,7 +505,7 @@ export default function GuruRekapPage() {
                           rekapData.map((r) => (
                             <TableRow
                               key={r.id}
-                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md border-b border-slate-100 last:border-0"
                             >
                               <TableCell className="pl-6 font-mono text-slate-600 group-hover/row:text-slate-400 whitespace-nowrap transition-colors">
                                 {r.nis}
@@ -496,7 +533,11 @@ export default function GuruRekapPage() {
                                   {r.alfa}
                                 </span>
                               </TableCell>
-                              <TableCell className="text-right whitespace-nowrap pr-6">
+                              <TableCell
+                                className={`text-right whitespace-nowrap ${
+                                  criteriaKeys.length === 0 ? "pr-6" : ""
+                                }`}
+                              >
                                 <div className="inline-flex items-center justify-end gap-2">
                                   <div className="w-14 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                     <div
@@ -519,18 +560,27 @@ export default function GuruRekapPage() {
                                   </span>
                                 </div>
                               </TableCell>
-                              {criteriaKeys.map((k, idx) => (
-                                <TableCell
-                                  key={k}
-                                  className={`text-right font-mono font-semibold text-slate-700 group-hover/row:text-slate-300 whitespace-nowrap transition-colors ${
-                                    idx === criteriaKeys.length - 1
-                                      ? "pr-6"
-                                      : ""
-                                  }`}
-                                >
-                                  {r.nilai?.[k] || 0}
-                                </TableCell>
-                              ))}
+                              {criteriaKeys.map((k, idx) => {
+                                const scoreVal = r.nilai?.[k];
+                                return (
+                                  <TableCell
+                                    key={k}
+                                    className={`text-right font-mono font-semibold whitespace-nowrap transition-colors ${
+                                      scoreVal !== null && scoreVal !== undefined
+                                        ? "text-slate-700 group-hover/row:text-slate-300"
+                                        : "text-slate-400 group-hover/row:text-slate-500"
+                                    } ${
+                                      idx === criteriaKeys.length - 1
+                                        ? "pr-6"
+                                        : ""
+                                    }`}
+                                  >
+                                    {scoreVal !== null && scoreVal !== undefined
+                                      ? scoreVal
+                                      : "-"}
+                                  </TableCell>
+                                );
+                              })}
                             </TableRow>
                           ))
                         ) : (

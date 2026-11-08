@@ -4,6 +4,7 @@ import { attendance, students, academicYears, spkScores, spkCriteria } from "@/d
 import { eq, inArray, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { verifyTeacherClassAccess } from "@/lib/teacher-auth";
 
 // GET /api/attendance/rekap?kelas=X-A
 export async function GET(request: NextRequest) {
@@ -18,13 +19,56 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const kelas = searchParams.get("kelas");
+  const kelas = searchParams.get("kelas")?.trim();
+  const mapel = searchParams.get("mapel")?.trim();
+
   if (!kelas) {
-    return NextResponse.json({ error: "Kelas waji diisi" }, { status: 400 });
+    return NextResponse.json({ error: "Kelas wajib diisi" }, { status: 400 });
+  }
+
+  let guruScopeMapels: string[] | null = null;
+
+  if (appRole === "GURU") {
+    if (mapel === "Umum") {
+      return NextResponse.json(
+        { error: "Akses Ditolak: Kategori Umum tidak berlaku untuk akun Guru." },
+        { status: 403 }
+      );
+    }
+
+    const authCheck = await verifyTeacherClassAccess(session.user.id, kelas);
+    if (!authCheck.ok) {
+      return NextResponse.json(
+        { error: authCheck.error },
+        { status: authCheck.status }
+      );
+    }
+
+    if (!authCheck.isWaliKelas) {
+      guruScopeMapels = authCheck.taughtMapelsInClass;
+    }
+
+    if (
+      mapel &&
+      mapel !== "Semua Mata Pelajaran" &&
+      !authCheck.isWaliKelas &&
+      !authCheck.taughtMapelsInClass.includes(mapel)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Akses Ditolak: Anda tidak ditugaskan untuk mata pelajaran ini di kelas tersebut.",
+        },
+        { status: 403 }
+      );
+    }
   }
 
   try {
-    const [activeYear] = await db.select().from(academicYears).where(eq(academicYears.isActive, true));
+    const [activeYear] = await db
+      .select()
+      .from(academicYears)
+      .where(eq(academicYears.isActive, true));
     if (!activeYear) return NextResponse.json([]); // Strict active year requirement
     const periode = `${activeYear.tahunAjaran}-${activeYear.semester}`;
 
@@ -73,16 +117,36 @@ export async function GET(request: NextRequest) {
         )
       )
       .all();
-    const mCriteria = await db.select().from(spkCriteria).where(eq(spkCriteria.tipe, "Manual")).all();
+    const mCriteria = await db
+      .select()
+      .from(spkCriteria)
+      .where(eq(spkCriteria.tipe, "Manual"))
+      .all();
 
-    const mapel = searchParams.get("mapel");
     if (mapel && mapel !== "Semua Mata Pelajaran") {
       existingRecords = existingRecords.filter((a) => a.mapel === mapel);
       if (mapel === "Umum") {
-        existingScores = existingScores.filter((sc) => sc.mapel === "Umum" || !sc.mapel);
+        existingScores = existingScores.filter(
+          (sc) => sc.mapel === "Umum" || !sc.mapel
+        );
       } else {
         existingScores = existingScores.filter((sc) => sc.mapel === mapel);
       }
+    } else {
+      // Align with curriculum-subject-only policy in SPK & Student Transcript;
+      // non-homeroom GURU only sees subjects they actually teach in this class.
+      existingRecords = existingRecords.filter(
+        (a) =>
+          Boolean(a.mapel) &&
+          a.mapel !== "Umum" &&
+          (guruScopeMapels === null || guruScopeMapels.includes(a.mapel!))
+      );
+      existingScores = existingScores.filter(
+        (sc) =>
+          Boolean(sc.mapel) &&
+          sc.mapel !== "Umum" &&
+          (guruScopeMapels === null || guruScopeMapels.includes(sc.mapel!))
+      );
     }
 
     // 4. Pre-group attendance records by studentId and scores by studentId & criteriaId for O(1) lookups
@@ -115,7 +179,7 @@ export async function GET(request: NextRequest) {
       let alfa = 0;
 
       const records = attendanceByStudent.get(siswa.id) || [];
-      
+
       records.forEach((r) => {
         if (r.status === "Hadir") hadir++;
         else if (r.status === "Izin") izin++;
@@ -126,16 +190,17 @@ export async function GET(request: NextRequest) {
       const total = hadir + izin + sakit + alfa;
       const persen = total > 0 ? Math.round((hadir / total) * 100) : 0;
 
-      // Extract specific scores logic
-      const studentScores: Record<string, number> = {};
-      mCriteria.forEach(c => {
-         const crScores = scoresByStudentAndCriteria.get(`${siswa.id}-${c.id}`) || [];
-         if (crScores.length > 0) {
-            const sum = crScores.reduce((acc, curr) => acc + curr.nilai, 0);
-            studentScores[c.namaKriteria] = Math.round(sum / crScores.length);
-         } else {
-            studentScores[c.namaKriteria] = 0;
-         }
+      // Extract specific scores logic (null when ungraded so UI can distinguish null vs 0)
+      const studentScores: Record<string, number | null> = {};
+      mCriteria.forEach((c) => {
+        const crScores =
+          scoresByStudentAndCriteria.get(`${siswa.id}-${c.id}`) || [];
+        if (crScores.length > 0) {
+          const sum = crScores.reduce((acc, curr) => acc + curr.nilai, 0);
+          studentScores[c.namaKriteria] = Math.round(sum / crScores.length);
+        } else {
+          studentScores[c.namaKriteria] = null;
+        }
       });
 
       return {
@@ -153,7 +218,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal memuat rekap kelas";
+    const message =
+      error instanceof Error ? error.message : "Gagal memuat rekap kelas";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

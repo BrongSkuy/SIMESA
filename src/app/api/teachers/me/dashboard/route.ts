@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { teachers, classes, attendance, students, subjects, academicYears } from "@/db/schema";
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and, isNotNull, ne } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getTodayWIB } from "@/lib/utils";
+import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
 
 // GET /api/teachers/me/dashboard — get dashboard stats & classes for logged in teacher
 export async function GET() {
@@ -30,59 +30,51 @@ export async function GET() {
       .select()
       .from(academicYears)
       .where(eq(academicYears.isActive, true));
-    const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : "2025/2026-Genap";
+    const periode = activeYear
+      ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+      : DEFAULT_PERIODE;
 
-    let assignedClasses: { id: string; namaKelas: string; tingkat: string; waliKelas: string | null; subjects: string[] }[] = [];
-    let teacherSubjectNames: string[] = [];
+    let assignedClasses: {
+      id: string;
+      namaKelas: string;
+      tingkat: string;
+      waliKelas: string | null;
+      subjects: string[];
+    }[] = [];
 
     if (teacher) {
-      // 1. Get subjects & classes explicitly assigned to teacher
+      // Get subjects & classes explicitly assigned to teacher (curriculum only, exclude "Umum")
       const mySubjects = await db
         .select({ mapel: subjects.namaMapel, kelas: subjects.kelasDiampu })
         .from(subjects)
         .where(eq(subjects.teacherId, teacher.id))
         .all();
-      
-      teacherSubjectNames = mySubjects.map(s => s.mapel);
+
+      const curriculumSubjects = mySubjects.filter(
+        (s) => Boolean(s.mapel) && s.mapel !== "Umum"
+      );
 
       const assignedKelasNamesSet = new Set<string>();
-      for (const s of mySubjects) {
-         if (s.kelas) {
-            s.kelas.split(",").forEach(k => {
-               if (k.trim()) assignedKelasNamesSet.add(k.trim());
-            });
-         }
+      for (const s of curriculumSubjects) {
+        if (s.kelas) {
+          s.kelas.split(",").forEach((k) => {
+            if (k.trim()) assignedKelasNamesSet.add(k.trim());
+          });
+        }
       }
       const assignedKelasNames = Array.from(assignedKelasNamesSet);
 
-      // 3. Get classes where teacher is Wali Kelas
+      // Get classes where teacher is Wali Kelas
       const myWaliClasses = await db
         .select()
         .from(classes)
         .where(eq(classes.waliKelas, teacher.namaLengkap))
         .all();
-      
-      const waliKelasNames = myWaliClasses.map(c => c.namaKelas);
 
-      // 4. Find classes where attendance has been taken (legacy fallback)
-      let attendedKelasNames: string[] = [];
-      if (teacherSubjectNames.length > 0) {
-         const attRows = await db
-            .select({ kelas: students.kelas })
-            .from(attendance)
-            .innerJoin(students, eq(attendance.studentId, students.id))
-            .where(
-               and(
-                 inArray(attendance.mapel, teacherSubjectNames),
-                 eq(attendance.periode, periode)
-               )
-            )
-            .all();
-         attendedKelasNames = [...new Set(attRows.map(r => r.kelas))];
-      }
+      const waliKelasNames = myWaliClasses.map((c) => c.namaKelas);
 
-      // Combine all unique class names
-      const allClassNames = [...new Set([...assignedKelasNames, ...waliKelasNames, ...attendedKelasNames])];
+      // Combine teaching classes + homeroom classes
+      const allClassNames = [...new Set([...assignedKelasNames, ...waliKelasNames])];
 
       if (allClassNames.length > 0) {
         const fullClasses = await db
@@ -90,24 +82,20 @@ export async function GET() {
           .from(classes)
           .where(inArray(classes.namaKelas, allClassNames))
           .all();
-        
+
         assignedClasses = fullClasses
-          .map(c => {
+          .map((c) => {
             const classSubjects: string[] = [];
-            
-            // Filter mySubjects that apply to this class c.namaKelas
-            for (const s of mySubjects) {
+
+            for (const s of curriculumSubjects) {
               if (s.kelas) {
-                const classesList = s.kelas.split(",").map(k => k.trim());
+                const classesList = s.kelas
+                  .split(",")
+                  .map((k) => k.trim())
+                  .filter(Boolean);
                 if (classesList.includes(c.namaKelas)) {
                   classSubjects.push(s.mapel);
                 }
-              }
-            }
-
-            if (c.waliKelas === teacher.namaLengkap) {
-              if (!classSubjects.includes("Umum")) {
-                 classSubjects.push("Umum");
               }
             }
 
@@ -119,81 +107,122 @@ export async function GET() {
               subjects: [...new Set(classSubjects)],
             };
           })
-          .filter(c => c.subjects.length > 0);
+          .filter(
+            (c) => c.subjects.length > 0 || c.waliKelas === teacher.namaLengkap
+          );
       }
     } else if (appRole === "ADMIN") {
-       const allFullClasses = await db.select().from(classes).all();
-       assignedClasses = allFullClasses.map(c => ({
-          id: c.id,
-          namaKelas: c.namaKelas,
-          tingkat: c.tingkat,
-          waliKelas: c.waliKelas,
-          subjects: ["Semua Mapel (Admin)"],
-       }));
+      const allFullClasses = await db.select().from(classes).all();
+      assignedClasses = allFullClasses.map((c) => ({
+        id: c.id,
+        namaKelas: c.namaKelas,
+        tingkat: c.tingkat,
+        waliKelas: c.waliKelas,
+        subjects: ["Semua Mapel (Admin)"],
+      }));
     }
 
-    // 2. Check today's attendance for those classes
+    // 2. Check today's curriculum attendance for those classes
     const today = getTodayWIB();
     const classesStatus = [];
     let classesDiabsen = 0;
 
-    const classNames = assignedClasses.map(c => c.namaKelas);
-    let allAttendanceToday: Array<{ id: string, kelas: string, mapel: string | null }> = [];
-    
+    const classNames = assignedClasses.map((c) => c.namaKelas);
+    let allAttendanceToday: Array<{
+      id: string;
+      kelas: string;
+      mapel: string | null;
+    }> = [];
+
     if (classNames.length > 0) {
       allAttendanceToday = await db
-        .select({ id: attendance.id, kelas: students.kelas, mapel: attendance.mapel })
+        .select({
+          id: attendance.id,
+          kelas: students.kelas,
+          mapel: attendance.mapel,
+        })
         .from(attendance)
         .innerJoin(students, eq(attendance.studentId, students.id))
         .where(
-           and(
-              inArray(students.kelas, classNames),
-              eq(attendance.tanggal, today)
-           )
+          and(
+            inArray(students.kelas, classNames),
+            eq(attendance.tanggal, today),
+            eq(attendance.periode, periode),
+            isNotNull(attendance.mapel),
+            ne(attendance.mapel, "Umum")
+          )
         )
         .all();
     }
 
     for (const c of assignedClasses) {
-      const relevantMapels = [...c.subjects];
-      
       let hasAttendance = false;
-      if (relevantMapels.length > 0) {
-         hasAttendance = allAttendanceToday.some(a => a.kelas === c.namaKelas && relevantMapels.includes(a.mapel || ""));
-      } else if (appRole === "ADMIN") {
-         hasAttendance = allAttendanceToday.some(a => a.kelas === c.namaKelas);
+      if (appRole === "ADMIN") {
+        hasAttendance = allAttendanceToday.some((a) => a.kelas === c.namaKelas);
+      } else if (c.subjects.length > 0) {
+        hasAttendance = c.subjects.every((m) =>
+          allAttendanceToday.some(
+            (a) => a.kelas === c.namaKelas && a.mapel === m
+          )
+        );
+      } else {
+        // Pure homeroom class (no subject taught by this teacher in this class)
+        hasAttendance = allAttendanceToday.some((a) => a.kelas === c.namaKelas);
       }
 
       if (hasAttendance) {
-         classesDiabsen++;
-         classesStatus.push({ ...c, statusAbsensiHariIni: "Sudah Diabsen" });
+        classesDiabsen++;
+        classesStatus.push({ ...c, statusAbsensiHariIni: "Sudah Diabsen" });
       } else {
-         classesStatus.push({ ...c, statusAbsensiHariIni: "Belum Diabsen" });
+        classesStatus.push({ ...c, statusAbsensiHariIni: "Belum Diabsen" });
       }
     }
 
-    // Calculate generic rata-rata kehadiran
+    // 3. Calculate rata-rata kehadiran strictly scoped to teacher's curriculum subjects
     let rataRataKehadiran = "-";
     if (assignedClasses.length > 0) {
-       const classNames = assignedClasses.map(c => c.namaKelas);
-       const properAtt = await db
-          .select({ status: attendance.status })
-          .from(attendance)
-          .innerJoin(students, eq(attendance.studentId, students.id))
-          .where(
-             and(
-               inArray(students.kelas, classNames.length > 0 ? classNames : ["__empty__"]),
-               eq(attendance.periode, periode)
-             )
+      const properAtt = await db
+        .select({
+          kelas: students.kelas,
+          mapel: attendance.mapel,
+          status: attendance.status,
+        })
+        .from(attendance)
+        .innerJoin(students, eq(attendance.studentId, students.id))
+        .where(
+          and(
+            inArray(students.kelas, classNames),
+            eq(attendance.periode, periode),
+            isNotNull(attendance.mapel),
+            ne(attendance.mapel, "Umum")
           )
-          .all();
-          
-       if (properAtt.length > 0) {
-          const hadir = properAtt.filter(a => a.status === "Hadir").length;
-          rataRataKehadiran = Math.round((hadir / properAtt.length) * 100) + "%";
-       } else {
-          rataRataKehadiran = "0%";
-       }
+        )
+        .all();
+
+      const classSubjectLookup = new Map<string, Set<string>>();
+      assignedClasses.forEach((c) => {
+        classSubjectLookup.set(c.namaKelas, new Set(c.subjects));
+      });
+
+      const scopedAtt =
+        appRole === "ADMIN"
+          ? properAtt
+          : properAtt.filter((row) => {
+              const taughtSet = classSubjectLookup.get(row.kelas);
+              if (!taughtSet || taughtSet.size === 0) {
+                // Pure homeroom class: aggregate all curriculum attendance in this class
+                return true;
+              }
+              return taughtSet.has(row.mapel || "");
+            });
+
+      if (scopedAtt.length > 0) {
+        const hadir = scopedAtt.filter((a) => a.status === "Hadir").length;
+        rataRataKehadiran =
+          Math.round((hadir / scopedAtt.length) * 100) + "%";
+      } else {
+        rataRataKehadiran = "0%";
+      }
     }
 
     return NextResponse.json({
@@ -203,7 +232,8 @@ export async function GET() {
       classes: classesStatus,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Gagal mengambil data dashboard";
+    const message =
+      error instanceof Error ? error.message : "Gagal mengambil data dashboard";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

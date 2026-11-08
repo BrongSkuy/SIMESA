@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { students, attendance, academicYears } from "@/db/schema";
-import { eq, and, sql, count } from "drizzle-orm";
+import { eq, and, isNotNull, ne } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 
-// GET /api/students/me/attendance-stats — attendance statistics for the logged-in student
+// GET /api/students/me/attendance-stats — curriculum attendance statistics for logged-in student
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
@@ -36,16 +36,20 @@ export async function GET() {
     .select()
     .from(academicYears)
     .where(eq(academicYears.isActive, true));
-  const periode = activeYear ? `${activeYear.tahunAjaran}-${activeYear.semester}` : DEFAULT_PERIODE;
+  const periode = activeYear
+    ? `${activeYear.tahunAjaran}-${activeYear.semester}`
+    : DEFAULT_PERIODE;
 
-  // Get all attendance records for this student in the active period
+  // Get curriculum attendance records in active period (excluding legacy "Umum" / null records)
   const allRecords = await db
     .select()
     .from(attendance)
     .where(
       and(
         eq(attendance.studentId, student.id),
-        eq(attendance.periode, periode)
+        eq(attendance.periode, periode),
+        isNotNull(attendance.mapel),
+        ne(attendance.mapel, "Umum")
       )
     );
 
