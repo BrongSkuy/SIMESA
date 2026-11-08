@@ -832,7 +832,8 @@ export default function AdminSiswaPage() {
 
       {/* Data Table */}
       <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -954,6 +955,112 @@ export default function AdminSiswaPage() {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Student Cards View (< md) */}
+        <div className="block md:hidden divide-y divide-slate-100">
+          {paginatedStudents.length === 0 ? (
+            <div className="py-10 text-center text-xs text-slate-500">
+              {search || filterKelas !== "all"
+                ? "Tidak ada siswa yang sesuai dengan filter pencarian."
+                : "Belum ada data siswa terdaftar di sistem."}
+            </div>
+          ) : (
+            paginatedStudents.map((siswa, i) => (
+              <div
+                key={siswa.id}
+                className="p-4 space-y-3 bg-white hover:bg-slate-50/75 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs text-slate-400 w-5 shrink-0">
+                      #{(safePage - 1) * ITEMS_PER_PAGE + i + 1}
+                    </span>
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0 overflow-hidden">
+                      {siswa.foto ? (
+                        <Image
+                          src={siswa.foto}
+                          alt={siswa.namaLengkap}
+                          width={40}
+                          height={40}
+                          unoptimized
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        getInitials(siswa.namaLengkap)
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 text-sm truncate">
+                        {siswa.namaLengkap}
+                      </p>
+                      <p className="font-mono text-xs text-slate-500">
+                        NIS: {siswa.nis}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border shrink-0 ${
+                      siswa.status === "aktif"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    {siswa.status === "aktif" ? "Aktif" : "Nonaktif"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-xs pt-1">
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                      Kelas
+                    </span>
+                    <span className="font-medium text-slate-700">
+                      {siswa.kelas}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                      Angkatan
+                    </span>
+                    <span className="font-medium text-slate-700">
+                      {siswa.angkatan}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                      Kelamin
+                    </span>
+                    <span className="font-medium text-slate-700">
+                      {siswa.jenisKelamin === "L" ? "Laki-laki" : "Perempuan"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEdit(siswa)}
+                    className="h-8 text-xs gap-1.5"
+                  >
+                    <Edit className="h-3.5 w-3.5 text-blue-600" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteTarget(siswa)}
+                    className="h-8 text-xs gap-1.5 text-rose-600 border-rose-200 hover:bg-rose-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Hapus
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {totalPages > 1 && (

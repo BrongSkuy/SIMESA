@@ -884,8 +884,8 @@ export default function GuruAbsensiPage() {
                 </div>
               </div>
 
-              {/* Grid Table */}
-              <div className="border-b border-slate-200 overflow-x-auto">
+              {/* Grid Table Desktop (>= md) */}
+              <div className="hidden md:block border-b border-slate-200 overflow-x-auto">
                 <table className="w-full min-w-max border-collapse text-left">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-500 uppercase tracking-wider text-xs">
@@ -969,7 +969,70 @@ export default function GuruAbsensiPage() {
                 </table>
               </div>
 
-              {/* Save Button */}
+              {/* Grid Cards Mobile (< md) */}
+              <div className="block md:hidden border-b border-slate-200 divide-y divide-slate-100 bg-white">
+                {siswaList.length === 0 ? (
+                  <div className="py-10 text-center text-slate-500 text-xs">
+                    Tidak ada siswa terdaftar di kelas ini.
+                  </div>
+                ) : (
+                  siswaList.map((siswa, i) => {
+                    const currentStatus =
+                      attendanceData[siswa.studentId] || "Hadir";
+                    return (
+                      <div
+                        key={siswa.studentId}
+                        className="p-3.5 space-y-2.5 bg-white hover:bg-slate-50/75 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="font-mono text-xs text-slate-400 w-5 shrink-0">
+                              #{i + 1}
+                            </span>
+                            <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0">
+                              {getInitials(siswa.namaLengkap)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-slate-800 text-sm truncate">
+                                {siswa.namaLengkap}
+                              </p>
+                              <p className="font-mono text-[11px] text-slate-500">
+                                {siswa.nis}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Buttons Grid: Large Touch Targets */}
+                        <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+                          {statusList.map((status) => {
+                            const isActive = currentStatus === status;
+                            return (
+                              <button
+                                key={status}
+                                type="button"
+                                onClick={() =>
+                                  handleStatusChange(siswa.studentId, status)
+                                }
+                                className={`py-2 px-1 text-xs font-semibold rounded-lg border text-center transition-all cursor-pointer ${
+                                  isActive
+                                    ? statusActiveStyles[status] + " shadow-xs font-bold"
+                                    : "border-slate-200 bg-slate-50/60 text-slate-600 hover:bg-slate-100 active:scale-95"
+                                }`}
+                                aria-label={`Tandai ${siswa.namaLengkap} ${status}`}
+                              >
+                                {status}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Save Button Desktop / In-flow */}
               <div className="flex justify-end">
                 <Button
                   size="lg"
@@ -985,6 +1048,34 @@ export default function GuruAbsensiPage() {
                   {saving ? "Menyimpan..." : "Simpan Semua Absensi"}
                 </Button>
               </div>
+
+              {/* Floating Mobile Sticky Save Bar (Visible only on mobile < md when students are present) */}
+              {siswaList.length > 0 && (
+                <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl md:hidden flex items-center justify-between gap-2.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 text-xs gap-1.5 shrink-0 border-slate-300"
+                    onClick={handleMarkAllPresent}
+                  >
+                    <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    Semua Hadir
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-10 text-xs font-semibold gap-1.5 flex-1 bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white shadow-xs"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Save className="h-3.5 w-3.5" />
+                    )}
+                    {saving ? "Menyimpan..." : "Simpan Presensi"}
+                  </Button>
+                </div>
+              )}
 
               {/* History Table */}
               <div className="pt-2 space-y-4">

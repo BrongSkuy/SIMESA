@@ -830,7 +830,8 @@ export default function SiswaNilaiPage() {
                 </div>
               )}
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
@@ -956,6 +957,138 @@ export default function SiswaNilaiPage() {
                   )}
                 </TableBody>
               </Table>
+            </div>
+
+            {/* Mobile Cards View (< md) */}
+            <div className="block md:hidden divide-y divide-slate-100">
+              {paginatedTableSubjects.length === 0 ? (
+                <div className="py-10 text-center text-xs text-slate-500">
+                  <Clock className="h-4 w-4 mx-auto mb-1 text-slate-400" />
+                  {subjectsList.length === 0
+                    ? "Belum ada daftar mata pelajaran yang terdaftar untuk kelas Anda."
+                    : "Tidak ada mata pelajaran yang cocok dengan filter pencarian Anda."}
+                </div>
+              ) : (
+                paginatedTableSubjects.map((subj) => {
+                  const kompItems = subj.akademik
+                    ? subj.akademik.kategoriWajib.map((cat) => ({
+                        cat,
+                        val: subj.akademik?.komponen[cat],
+                      }))
+                    : [];
+                  return (
+                    <div
+                      key={subj.namaMapel}
+                      className="p-4 space-y-3 bg-white hover:bg-slate-50/75 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-900 text-sm truncate">
+                            {subj.labelMapel}
+                          </h4>
+                          <p className="text-xs text-slate-500 truncate">
+                            {subj.guruPengampu}
+                          </p>
+                        </div>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border shrink-0 ${getStatusBadge(
+                            subj.statusPenilaian
+                          )}`}
+                        >
+                          {subj.statusPenilaian}
+                        </span>
+                      </div>
+
+                      {/* Nilai Summary Row */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                          <span className="text-slate-500 font-medium">
+                            Nilai Akhir:
+                          </span>
+                          <span
+                            className={`font-mono font-bold text-sm ${
+                              getScoreTone(subj.akademik?.nilaiAkhir).text
+                            }`}
+                          >
+                            {subj.isHomeroom
+                              ? "-"
+                              : (subj.akademik?.nilaiAkhir ?? "-")}
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                          <span className="text-slate-500 font-medium">
+                            Kehadiran:
+                          </span>
+                          <span
+                            className={`font-mono font-semibold text-sm ${
+                              getScoreTone(subj.kehadiran.persentase).text
+                            }`}
+                          >
+                            {subj.kehadiran.persentase !== null
+                              ? `${subj.kehadiran.persentase}%`
+                              : "-"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Komponen Akademik Details */}
+                      {kompItems.length > 0 && (
+                        <div className="pt-0.5">
+                          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                            Rincian Komponen
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {kompItems.map(({ cat, val }) => (
+                              <span
+                                key={cat}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono bg-slate-50 border border-slate-200"
+                              >
+                                <span className="text-slate-500 font-sans">
+                                  {cat}:
+                                </span>
+                                <span
+                                  className={`font-bold ${
+                                    val !== undefined && val !== null
+                                      ? getScoreTone(val).text
+                                      : "text-slate-400"
+                                  }`}
+                                >
+                                  {val !== undefined && val !== null
+                                    ? val
+                                    : "-"}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Kriteria Non-Akademik */}
+                      {subj.kriteriaLain.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 border-t border-slate-100 text-xs">
+                          {subj.kriteriaLain.map((kl) => (
+                            <div
+                              key={kl.criteriaId}
+                              className="flex items-center gap-1.5 text-slate-600"
+                            >
+                              <span className="text-slate-400">
+                                {kl.namaKriteria}:
+                              </span>
+                              <span
+                                className={`font-mono font-semibold ${
+                                  getScoreTone(kl.nilai).text
+                                }`}
+                              >
+                                {kl.nilai ?? "-"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             {/* Executive Status & Pagination Dock */}
