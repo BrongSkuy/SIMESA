@@ -545,7 +545,12 @@ export default function ProfilGuruPage() {
                   <button
                     type="button"
                     onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    aria-label={
+                      showCurrent
+                        ? "Sembunyikan kata sandi saat ini"
+                        : "Tampilkan kata sandi saat ini"
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
                   >
                     {showCurrent ? (
                       <EyeOff className="h-4 w-4" />
@@ -574,7 +579,12 @@ export default function ProfilGuruPage() {
                   <button
                     type="button"
                     onClick={() => setShowNew(!showNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    aria-label={
+                      showNew
+                        ? "Sembunyikan kata sandi baru"
+                        : "Tampilkan kata sandi baru"
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
                   >
                     {showNew ? (
                       <EyeOff className="h-4 w-4" />
@@ -643,7 +653,12 @@ export default function ProfilGuruPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    aria-label={
+                      showConfirm
+                        ? "Sembunyikan konfirmasi kata sandi"
+                        : "Tampilkan konfirmasi kata sandi"
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
                   >
                     {showConfirm ? (
                       <EyeOff className="h-4 w-4" />

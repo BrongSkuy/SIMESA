@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   Trophy,
-  Medal,
   Download,
   Upload,
   FileSpreadsheet,
@@ -114,7 +113,7 @@ function RankBadge({ rank }: { rank: number }) {
     );
   }
   return (
-    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 text-slate-600 font-semibold text-xs border border-slate-200/80">
+    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 group-hover/row:bg-slate-800 text-slate-600 group-hover/row:text-slate-300 font-semibold text-xs border border-slate-200/80 group-hover/row:border-slate-700 transition-colors">
       {rank}
     </span>
   );
@@ -124,18 +123,21 @@ function getPredikatBadge(rawScore: number) {
   if (rawScore >= 0.9) {
     return {
       label: "Sangat Baik",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      className:
+        "bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border-emerald-200 group-hover/row:border-emerald-500/30",
     };
   }
   if (rawScore >= 0.8) {
     return {
       label: "Baik",
-      className: "bg-blue-50 text-blue-700 border-blue-200",
+      className:
+        "bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border-blue-200 group-hover/row:border-blue-500/30",
     };
   }
   return {
     label: "Cukup",
-    className: "bg-slate-100 text-slate-700 border-slate-200",
+    className:
+      "bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border-slate-200 group-hover/row:border-slate-700",
   };
 }
 
@@ -849,7 +851,7 @@ export default function AdminLeaderboardPage() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="text-center py-10 text-slate-500 group-hover:text-slate-400"
+                      className="text-center py-10 text-slate-500"
                     >
                       Belum ada data perhitungan SPK untuk filter ini.
                     </TableCell>

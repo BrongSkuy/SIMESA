@@ -74,7 +74,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-[280px] p-0 bg-[#0a192f] border-blue-900/60 text-white"
+            className="w-[280px] p-0 bg-[#091424] border-white/10 text-white"
           >
             <SheetTitle className="sr-only">Menu Navigasi SIMESA SMK Penerbangan Dirgantara</SheetTitle>
             <Sidebar role={role} onToggle={() => setMobileOpen(false)} />

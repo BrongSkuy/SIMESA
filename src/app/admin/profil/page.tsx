@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   User,
   KeyRound,
@@ -20,6 +22,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { AvatarCropModal } from "@/components/shared/avatar-crop-modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB source image before crop
 
 function getInitials(name: string): string {
   return (
@@ -71,14 +85,18 @@ function translateAuthError(message: string): string {
 }
 
 export default function AdminProfilPage() {
-  const { data: session } = authClient.useSession();
+  const router = useRouter();
+  const { data: session, refetch } = authClient.useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Profile data state
-  const [displayName, setDisplayName] = useState("");
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  // Profile data state with null/undefined sentinels
+  const [editedName, setEditedName] = useState<string | null>(null);
+  const [editedPhoto, setEditedPhoto] = useState<string | null | undefined>(
+    undefined
+  );
   const [savingName, setSavingName] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [removePhotoOpen, setRemovePhotoOpen] = useState(false);
 
   // Avatar Crop Modal state
   const [cropModalOpen, setCropModalOpen] = useState(false);
@@ -94,14 +112,11 @@ export default function AdminProfilPage() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    if (session?.user?.name && !displayName) {
-      setDisplayName(session.user.name);
-    }
-    if (session?.user?.image && !photoPreview) {
-      setPhotoPreview(session.user.image);
-    }
-  }, [session, displayName, photoPreview]);
+  const sessionName = session?.user?.name || "";
+  const sessionPhoto = session?.user?.image || null;
+  const displayName = editedName ?? sessionName;
+  const photoPreview =
+    editedPhoto !== undefined ? editedPhoto : sessionPhoto;
 
   // Handle Photo Selection -> Buka Interactive Crop Modal
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +125,13 @@ export default function AdminProfilPage() {
 
     if (!file.type.startsWith("image/")) {
       toast.error("File yang dipilih harus berupa gambar.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast.error("Ukuran gambar maksimal 5 MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -127,23 +149,23 @@ export default function AdminProfilPage() {
   const handleApplyCroppedPhoto = async (croppedDataUrl: string) => {
     setUploadingPhoto(true);
     try {
-      setPhotoPreview(croppedDataUrl);
-
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: croppedDataUrl }),
       });
 
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Gagal memperbarui foto profil");
+        throw new Error(data?.error || "Gagal memperbarui foto profil");
       }
 
+      setEditedPhoto(croppedDataUrl);
+      await refetch();
+      router.refresh();
       toast.success("Foto profil berhasil diperbarui!");
       setCropModalOpen(false);
       setSelectedImageSrc(null);
-      window.location.reload();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal mengunggah foto";
       toast.error(msg);
@@ -154,8 +176,6 @@ export default function AdminProfilPage() {
 
   // Handle Remove Photo
   const handleRemovePhoto = async () => {
-    if (!confirm("Apakah Anda yakin ingin menghapus foto profil?")) return;
-
     setUploadingPhoto(true);
     try {
       const res = await fetch("/api/user/profile", {
@@ -164,14 +184,16 @@ export default function AdminProfilPage() {
         body: JSON.stringify({ image: null }),
       });
 
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Gagal menghapus foto profil");
+        throw new Error(data?.error || "Gagal menghapus foto profil");
       }
 
-      setPhotoPreview(null);
+      setEditedPhoto(null);
+      await refetch();
+      router.refresh();
+      setRemovePhotoOpen(false);
       toast.success("Foto profil berhasil dihapus!");
-      window.location.reload();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal menghapus foto";
       toast.error(msg);
@@ -183,7 +205,8 @@ export default function AdminProfilPage() {
   // Handle Save Name
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!displayName.trim()) {
+    const trimmed = displayName.trim();
+    if (!trimmed) {
       toast.error("Nama lengkap tidak boleh kosong.");
       return;
     }
@@ -193,16 +216,18 @@ export default function AdminProfilPage() {
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: displayName.trim() }),
+        body: JSON.stringify({ name: trimmed }),
       });
 
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Gagal memperbarui nama");
+        throw new Error(data?.error || "Gagal memperbarui nama");
       }
 
+      setEditedName(trimmed);
+      await refetch();
+      router.refresh();
       toast.success("Nama profil berhasil disimpan!");
-      window.location.reload();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal menyimpan nama";
       toast.error(msg);
@@ -284,16 +309,19 @@ export default function AdminProfilPage() {
             {/* Foto Profil & Info Identitas Bersatu */}
             <div className="flex items-center gap-3.5">
               <div className="relative group shrink-0">
-                <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-xs">
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-xs">
                   {photoPreview ? (
-                    <img
+                    <Image
                       src={photoPreview}
                       alt="Foto Profil"
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="64px"
+                      unoptimized
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-[#1e3a8a] text-white font-bold text-xl flex items-center justify-center">
-                      {getInitials(displayName || session?.user?.name || "Admin")}
+                      {getInitials(displayName || sessionName || "Admin")}
                     </div>
                   )}
                 </div>
@@ -339,7 +367,7 @@ export default function AdminProfilPage() {
                       variant="ghost"
                       size="sm"
                       className="h-7 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs"
-                      onClick={handleRemovePhoto}
+                      onClick={() => setRemovePhotoOpen(true)}
                       disabled={uploadingPhoto}
                       title="Hapus Foto Profil"
                     >
@@ -357,6 +385,37 @@ export default function AdminProfilPage() {
               className="hidden"
               onChange={handlePhotoChange}
             />
+
+            {/* AlertDialog Hapus Foto Profil */}
+            <AlertDialog
+              open={removePhotoOpen}
+              onOpenChange={setRemovePhotoOpen}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Hapus Foto Profil?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Foto profil Anda akan dihapus dan kembali menggunakan inisial
+                    nama. Anda dapat mengunggah foto baru kapan saja.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={uploadingPhoto}>
+                    Batal
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={uploadingPhoto}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRemovePhoto();
+                    }}
+                    className="bg-rose-600 hover:bg-rose-700 text-white"
+                  >
+                    {uploadingPhoto ? "Menghapus..." : "Ya, Hapus Foto"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {/* Modal Dialog Interaktif untuk Penyesuaian Foto Profil (Crop, Zoom, Geser) */}
             <AvatarCropModal
@@ -380,7 +439,7 @@ export default function AdminProfilPage() {
                   <Input
                     id="displayName"
                     value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    onChange={(e) => setEditedName(e.target.value)}
                     placeholder="Nama Lengkap Administrator"
                     className="h-9 text-xs"
                     required
@@ -389,7 +448,7 @@ export default function AdminProfilPage() {
                     type="submit"
                     size="sm"
                     className="h-9 text-xs shrink-0"
-                    disabled={savingName || displayName === (session?.user?.name || "")}
+                    disabled={savingName || !displayName.trim() || displayName.trim() === sessionName.trim()}
                   >
                     {savingName ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Simpan"}
                   </Button>
@@ -469,7 +528,8 @@ export default function AdminProfilPage() {
                   <button
                     type="button"
                     onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    aria-label={showCurrent ? "Sembunyikan sandi saat ini" : "Tampilkan sandi saat ini"}
                   >
                     {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -494,7 +554,8 @@ export default function AdminProfilPage() {
                   <button
                     type="button"
                     onClick={() => setShowNew(!showNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    aria-label={showNew ? "Sembunyikan sandi baru" : "Tampilkan sandi baru"}
                   >
                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -551,7 +612,8 @@ export default function AdminProfilPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    aria-label={showConfirm ? "Sembunyikan konfirmasi sandi" : "Tampilkan konfirmasi sandi"}
                   >
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

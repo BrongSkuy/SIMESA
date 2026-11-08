@@ -216,6 +216,13 @@ interface TopbarProps {
   onMenuClick: () => void;
 }
 
+interface AcademicYearItem {
+  id: string;
+  tahunAjaran: string;
+  semester: string;
+  isActive: boolean;
+}
+
 export function Topbar({ user, onMenuClick }: TopbarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -223,17 +230,20 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   const [academicYearDisplay, setAcademicYearDisplay] = useState("T.A. 2025/2026 • Genap");
 
   useEffect(() => {
+    let cancelled = false;
     fetch("/api/system/academic-years")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          const active = data.find((y: any) => y.isActive);
-          if (active) {
-            setAcademicYearDisplay(`T.A. ${active.tahunAjaran} • ${active.semester}`);
-          }
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: unknown) => {
+        if (cancelled || !Array.isArray(data)) return;
+        const active = (data as AcademicYearItem[]).find((y) => y.isActive);
+        if (active) {
+          setAcademicYearDisplay(`T.A. ${active.tahunAjaran} • ${active.semester}`);
         }
       })
       .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const roleMeta = getRoleMeta(user.role);
@@ -422,22 +432,25 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex items-center justify-between gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-2 rounded-2xl bg-transparent hover:bg-amber-400/5 border border-amber-400/40 hover:border-amber-400/80 hover:shadow-[0_0_15px_rgba(251,191,36,0.12)] transition-all focus:outline-none cursor-pointer w-auto max-w-[180px] min-[390px]:max-w-[210px] sm:max-w-[240px] xl:w-56 shadow-xs group shrink-0"
+                className="flex items-center justify-between gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-2 rounded-2xl bg-transparent hover:bg-amber-400/5 border border-amber-400/40 hover:border-amber-400/80 hover:shadow-[0_0_15px_rgba(251,191,36,0.12)] transition-all focus:outline-none cursor-pointer w-auto max-w-[180px] min-[390px]:max-w-[210px] sm:w-64 sm:max-w-none lg:w-auto lg:max-w-[200px] xl:w-64 xl:max-w-none shadow-xs group shrink-0"
               >
-                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                   <div className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 ring-1 ring-amber-400/20 group-hover:bg-amber-400/15 group-hover:border-amber-400/50 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 overflow-hidden relative shadow-xs transition-colors">
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.nama}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="40px"
+                        unoptimized
+                        className="object-cover"
                       />
                     ) : (
                       getInitials(user.nama)
                     )}
                   </div>
-                  <div className="block text-left leading-tight min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-amber-100 truncate max-w-[75px] min-[390px]:max-w-[100px] sm:max-w-[110px] xl:max-w-[130px] transition-colors">
+                  <div className="block text-left leading-tight min-w-0 flex-1">
+                    <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-amber-100 truncate max-w-[85px] min-[390px]:max-w-[110px] sm:max-w-none lg:max-w-[115px] xl:max-w-none transition-colors">
                       {user.nama}
                     </div>
                     <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-emerald-400 font-medium mt-0.5">
@@ -455,12 +468,15 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
               >
                 {/* Header Identitas Pengguna */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100/80 mb-1 flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-center font-bold text-sm text-[#1e3a8a] shrink-0 overflow-hidden">
+                  <div className="relative w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-center font-bold text-sm text-[#1e3a8a] shrink-0 overflow-hidden">
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.nama}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="44px"
+                        unoptimized
+                        className="object-cover"
                       />
                     ) : (
                       getInitials(user.nama)

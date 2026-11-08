@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { LayoutDashboard, Loader2, LogOut, User as UserIcon } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { UserRole } from "@/lib/mock-data";
@@ -23,6 +25,7 @@ interface SidebarProps {
 export function Sidebar({ role, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const homeHref = `/${role.toLowerCase()}`;
 
   const isRouteActive = (href: string) => {
@@ -30,10 +33,26 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    toast.loading("Mengakhiri sesi...", { id: "logout-toast" });
+    try {
+      await authClient.signOut();
+      toast.success("Berhasil keluar dari sistem", { id: "logout-toast" });
+      onToggle();
+      router.push("/login");
+    } catch {
+      toast.error("Gagal keluar", { id: "logout-toast" });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#0a192f] via-[#1e3a8a] to-[#0f172a] text-white">
+    <div className="flex h-full flex-col bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] text-white">
       {/* Header Brand */}
-      <div className="flex items-center gap-3 border-b border-blue-900/60 px-4 h-16 shrink-0">
+      <div className="flex items-center gap-3 border-b border-white/10 px-4 h-16 shrink-0">
         <div className="relative h-9 w-9 shrink-0">
           <Image
             src="/logo.png?v=2"
@@ -73,13 +92,13 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/admin"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-xs transition-colors",
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
                     pathname === "/admin"
-                      ? "bg-white/15 text-white font-semibold"
-                      : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                   )}
                 >
-                  <LayoutDashboard className="w-4 h-4 text-blue-200" />
+                  <LayoutDashboard className={cn("w-4 h-4", pathname === "/admin" ? "text-amber-300" : "text-blue-200")} />
                   Beranda
                 </Link>
               </div>
@@ -99,14 +118,14 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         href={item.href}
                         onClick={onToggle}
                         className={cn(
-                          "flex items-center justify-between rounded-md px-3 py-2 text-xs transition-colors",
+                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
                           active
-                            ? "bg-white/15 text-white font-semibold"
-                            : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                            ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                            : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                         )}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Icon className="w-4 h-4 text-blue-200" />
+                          <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
                           <span>{item.label}</span>
                         </div>
                       </Link>
@@ -128,14 +147,14 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                       href={item.href}
                       onClick={onToggle}
                       className={cn(
-                        "flex items-center justify-between rounded-md px-3 py-2 text-xs transition-colors",
+                        "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
                         active
-                          ? "bg-white/15 text-white font-semibold"
-                          : "text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                          ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                          : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
                       )}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className="w-4 h-4 text-blue-200" />
+                        <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
                         <span>{item.label}</span>
                       </div>
                     </Link>
@@ -145,25 +164,32 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
             </div>
           )}
 
-          <div className="pt-2 border-t border-blue-900/60 space-y-1">
+          <div className="pt-2 border-t border-white/10 space-y-1">
             <Link
               href={`${homeHref}/profil`}
               onClick={onToggle}
-              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-blue-100/80 hover:bg-white/10 hover:text-white transition-colors"
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
+                isRouteActive(`${homeHref}/profil`)
+                  ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                  : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+              )}
             >
-              <UserIcon className="w-4 h-4 text-blue-200" />
+              <UserIcon className={cn("w-4 h-4", isRouteActive(`${homeHref}/profil`) ? "text-amber-300" : "text-blue-200")} />
               <span>Profil Akun</span>
             </Link>
             <button
               type="button"
-              onClick={async () => {
-                await authClient.signOut();
-                router.push("/login");
-              }}
-              className="w-full flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left"
+              disabled={isLoggingOut}
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-rose-300 hover:bg-white/10 hover:text-rose-200 transition-colors text-left cursor-pointer disabled:opacity-50"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Keluar</span>
+              {isLoggingOut ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <LogOut className="w-4 h-4" />
+              )}
+              <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
             </button>
           </div>
         </nav>

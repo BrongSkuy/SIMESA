@@ -18,11 +18,11 @@ function validateTahunAjaranFormat(tahunAjaran: string): string | null {
   return null;
 }
 
-// GET /api/system/academic-years — Get all academic years
+// GET /api/system/academic-years — Get all academic years (readable by any authenticated role)
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || (session.user as Record<string, unknown>).appRole !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {

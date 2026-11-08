@@ -95,9 +95,11 @@ export default function SiswaAbsensiPage() {
   const [viewMode, setViewMode] = useState<"kalender" | "grafik">("kalender");
 
   useEffect(() => {
+    let cancelled = false;
     fetch("/api/students/me/attendance")
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
+        if (cancelled) return;
         if (Array.isArray(data)) {
           setAttendanceRecords(data);
           if (data.length > 0) {
@@ -127,12 +129,19 @@ export default function SiswaAbsensiPage() {
             }
           }
         }
-        setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        setLoading(false);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const mapelList = useMemo(() => {
@@ -301,7 +310,7 @@ export default function SiswaAbsensiPage() {
               }
             }}
           >
-            <SelectTrigger className="w-[220px] h-9 text-xs">
+            <SelectTrigger className="w-[220px] h-9 text-xs cursor-pointer">
               <SelectValue placeholder="Filter Mata Pelajaran" />
             </SelectTrigger>
             <SelectContent>
@@ -325,10 +334,10 @@ export default function SiswaAbsensiPage() {
           onValueChange={(v) => setViewMode(v as "kalender" | "grafik")}
         >
           <TabsList>
-            <TabsTrigger value="kalender" className="gap-1.5">
+            <TabsTrigger value="kalender" className="gap-1.5 cursor-pointer">
               <CalendarCheck className="h-3.5 w-3.5" /> Kalender Bulanan
             </TabsTrigger>
-            <TabsTrigger value="grafik" className="gap-1.5">
+            <TabsTrigger value="grafik" className="gap-1.5 cursor-pointer">
               <BarChart3 className="h-3.5 w-3.5" /> Grafik Per Mapel
             </TabsTrigger>
           </TabsList>
@@ -425,7 +434,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handlePrevMonth}
                   aria-label="Bulan sebelumnya"
-                  className="group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
+                  className="cursor-pointer group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
@@ -434,7 +443,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handleNextMonth}
                   aria-label="Bulan selanjutnya"
-                  className="group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
+                  className="cursor-pointer group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -516,7 +525,7 @@ export default function SiswaAbsensiPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSelectedDate(null)}
-                  className="h-7 px-2 text-[11px] gap-1 shrink-0"
+                  className="h-7 px-2 text-[11px] gap-1 shrink-0 cursor-pointer"
                 >
                   <X className="h-3 w-3" /> Reset
                 </Button>
@@ -572,12 +581,12 @@ export default function SiswaAbsensiPage() {
                               <TableCell className="text-right pr-5">
                                 <span
                                   className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
-                                    r.status
+                                    r.status && statusPillMap[r.status]
                                       ? statusPillMap[r.status]
-                                      : "bg-slate-100 text-slate-500 border-slate-200"
+                                      : "bg-slate-100 text-slate-500 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
                                   }`}
                                 >
-                                  {r.status}
+                                  {r.status || "Belum"}
                                 </span>
                               </TableCell>
                             </TableRow>
@@ -651,6 +660,11 @@ export default function SiswaAbsensiPage() {
                       <Legend
                         iconType="circle"
                         wrapperStyle={{ fontSize: "12px" }}
+                        formatter={(value) => (
+                          <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                            {value}
+                          </span>
+                        )}
                       />
                       <Bar
                         dataKey="hadir"
@@ -679,7 +693,7 @@ export default function SiswaAbsensiPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400">
+                  <div className="flex h-full items-center justify-center text-slate-400 group-hover:text-slate-500 transition-colors">
                     <p className="text-xs">Belum ada data untuk ditampilkan</p>
                   </div>
                 )}

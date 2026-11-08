@@ -916,7 +916,7 @@ export default function GuruAbsensiPage() {
                         return (
                           <tr
                             key={siswa.studentId}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md"
+                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer"
                           >
                             <td className="px-5 py-3 text-slate-500 group-hover/row:text-slate-400 font-mono transition-colors">
                               {i + 1}
@@ -948,7 +948,7 @@ export default function GuruAbsensiPage() {
                                           status
                                         )
                                       }
-                                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                                         isActive
                                           ? statusActiveStyles[status]
                                           : "border-slate-200 bg-white group-hover/row:bg-slate-900/80 group-hover/row:border-slate-700 text-slate-500 group-hover/row:text-slate-300 hover:bg-slate-50 hover:text-slate-700 group-hover/row:hover:bg-slate-800 group-hover/row:hover:text-white"
@@ -1249,7 +1249,7 @@ export default function GuruAbsensiPage() {
                             return (
                               <tr
                                 key={siswa.id}
-                                className="group/matrix transition-all duration-200 hover:bg-[#091524]"
+                                className="group/matrix transition-all duration-200 hover:bg-[#091524] cursor-pointer"
                               >
                                 {/* Sticky Left Body Cells */}
                                 <td className="sticky left-0 z-10 w-12 min-w-[48px] bg-white group-hover/matrix:bg-[#091524] px-3 py-2.5 text-slate-500 group-hover/matrix:text-slate-400 tabular-nums text-center border-r border-slate-200 group-hover/matrix:border-slate-800 font-mono transition-colors">

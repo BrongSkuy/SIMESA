@@ -269,7 +269,7 @@ export default function GuruLeaderboardPage() {
         </div>
       ) : isPublished === false ? (
         <div className="flex flex-col items-center justify-center py-10">
-          <div className="max-w-xl w-full rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group">
+          <div className="max-w-xl w-full rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
             <div className="bg-slate-50/80 group-hover:bg-white/[0.03] p-6 border-b border-slate-200 group-hover:border-slate-800/80 flex items-center gap-4 transition-colors">
               <div className="h-12 w-12 rounded-xl bg-amber-50 group-hover:bg-amber-500/15 border border-amber-200 group-hover:border-amber-500/30 flex items-center justify-center text-amber-600 group-hover:text-amber-300 shrink-0 transition-colors">
                 <Lock className="h-5 w-5" />
@@ -343,7 +343,7 @@ export default function GuruLeaderboardPage() {
               {data.slice(0, 3).map((student, i) => (
                 <div
                   key={student.studentId}
-                  className="rounded-2xl border border-slate-200/80 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+                  className="rounded-2xl border border-slate-200/80 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group cursor-pointer flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -454,7 +454,7 @@ export default function GuruLeaderboardPage() {
                           return (
                             <TableRow
                               key={entry.studentId}
-                              className={`group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md border-b border-slate-100 last:border-0 ${rowAccent}`}
+                              className={`group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0 ${rowAccent}`}
                             >
                               <TableCell className="pl-6">
                                 <RankBadge rank={entry.rank} />

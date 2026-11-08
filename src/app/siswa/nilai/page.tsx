@@ -124,20 +124,31 @@ export default function SiswaNilaiPage() {
   const [tablePageSize, setTablePageSize] = useState<number>(6);
 
   useEffect(() => {
+    let cancelled = false;
     fetch("/api/students/me/scores")
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.error) {
-          setError(result.error);
+      .then(async (res) => {
+        const result = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (!res.ok || !result || result.error) {
+          setError(result?.error || "Gagal memuat data nilai");
         } else {
           setData(result);
         }
-        setLoading(false);
       })
       .catch(() => {
-        setError("Gagal memuat data nilai");
-        setLoading(false);
+        if (!cancelled) {
+          setError("Gagal memuat data nilai");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const subjectsList = useMemo(
@@ -221,31 +232,31 @@ export default function SiswaNilaiPage() {
     if (score === null || score === undefined) {
       return {
         text: "text-slate-400 group-hover:text-slate-500 group-hover/row:text-slate-500",
-        pill: "bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-400 group-hover:border-slate-700",
+        pill: "bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-400 group-hover:border-slate-700 group-hover/row:bg-slate-800 group-hover/row:text-slate-400 group-hover/row:border-slate-700",
         label: "Belum Dinilai",
       };
     }
     if (score >= 85)
       return {
         text: "text-emerald-700 group-hover:text-emerald-400 group-hover/row:text-emerald-400",
-        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30",
+        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30",
         label: "Sangat Baik",
       };
     if (score >= 70)
       return {
         text: "text-blue-700 group-hover:text-blue-400 group-hover/row:text-blue-400",
-        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30",
+        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30",
         label: "Baik",
       };
     if (score >= 50)
       return {
         text: "text-amber-700 group-hover:text-amber-400 group-hover/row:text-amber-400",
-        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30",
+        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30",
         label: "Cukup",
       };
     return {
       text: "text-rose-700 group-hover:text-rose-400 group-hover/row:text-rose-400",
-      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30",
+      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30 group-hover/row:bg-rose-500/15 group-hover/row:text-rose-300 group-hover/row:border-rose-500/30",
       label: "Perlu Perbaikan",
     };
   };
@@ -395,9 +406,12 @@ export default function SiswaNilaiPage() {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Skor SPK SAW
             </p>
-            <p className="text-2xl font-bold tabular-nums text-white">
-              {data.totalSkorSPK}
-            </p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-2xl font-bold tabular-nums text-white">
+                {data.totalSkorSPK}
+              </p>
+              <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+            </div>
           </div>
         </div>
       </div>
@@ -520,7 +534,7 @@ export default function SiswaNilaiPage() {
                   setTablePage(1);
                 }}
               >
-                <SelectTrigger className="w-[148px] h-9 text-xs border-slate-200">
+                <SelectTrigger className="w-[148px] h-9 text-xs border-slate-200 cursor-pointer">
                   <SelectValue placeholder="Semua Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -554,6 +568,14 @@ export default function SiswaNilaiPage() {
 
           {/* Grid Kartu Rincian Per Mata Pelajaran (Maks. 6 Kartu / 2 Baris per Halaman) */}
           <div className="space-y-3">
+            {paginatedCardSubjects.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 py-10 px-4 text-center text-xs text-slate-500">
+                <Clock className="h-5 w-5 mx-auto mb-1.5 text-slate-400" />
+                {subjectsList.length === 0
+                  ? "Belum ada daftar mata pelajaran yang terdaftar untuk kelas Anda."
+                  : "Tidak ada mata pelajaran yang cocok dengan filter pencarian Anda."}
+              </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {paginatedCardSubjects.map((subj) => {
                 const avgTone = getScoreTone(subj.rataRataMapel);
@@ -715,6 +737,7 @@ export default function SiswaNilaiPage() {
                 );
               })}
             </div>
+            )}
 
             {totalCardPages > 1 && (
               <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
@@ -794,7 +817,7 @@ export default function SiswaNilaiPage() {
                       setTablePage(1);
                     }}
                   >
-                    <SelectTrigger className="w-[125px] h-8 text-xs border-slate-200">
+                    <SelectTrigger className="w-[125px] h-8 text-xs border-slate-200 cursor-pointer">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -849,21 +872,33 @@ export default function SiswaNilaiPage() {
                               Non-Akademik (Wali Kelas)
                             </span>
                           ) : kompItems.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1.5">
                               {kompItems.map(({ cat, val }) => (
                                 <span
                                   key={cat}
-                                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
                                 >
-                                  {cat}:{" "}
-                                  <strong className="ml-1">
-                                    {val !== undefined ? val : "-"}
-                                  </strong>
+                                  <span className="text-slate-500 group-hover/row:text-slate-400 font-sans">
+                                    {cat}:
+                                  </span>
+                                  <span
+                                    className={`font-bold ${
+                                      val !== undefined && val !== null
+                                        ? getScoreTone(val).text
+                                        : "text-slate-400 group-hover/row:text-slate-500"
+                                    }`}
+                                  >
+                                    {val !== undefined && val !== null
+                                      ? val
+                                      : "-"}
+                                  </span>
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <span className="text-xs text-slate-400">-</span>
+                            <span className="text-xs text-slate-400 group-hover/row:text-slate-500">
+                              -
+                            </span>
                           )}
                         </TableCell>
                         <TableCell
@@ -909,7 +944,7 @@ export default function SiswaNilaiPage() {
                   {filteredSubjects.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={6 + (subjectsList[0]?.kriteriaLain.length || 0)}
                         className="py-10 text-center text-xs text-slate-500"
                       >
                         <Clock className="h-4 w-4 mx-auto mb-1 text-slate-400" />
@@ -1009,6 +1044,9 @@ export default function SiswaNilaiPage() {
                       <strong className="font-mono text-slate-900">
                         {data.totalSkorSPK}
                       </strong>
+                      <span className="text-slate-400 font-mono text-[11px]">
+                        / 100
+                      </span>
                     </span>
                   </div>
                 )}

@@ -304,7 +304,7 @@ export default function GuruRekapPage() {
         <Tabs value={selectedClass} onValueChange={handleClassTabChange}>
           <TabsList className="flex flex-wrap h-auto">
             {classes.map((c) => (
-              <TabsTrigger key={c.id} value={c.namaKelas}>
+              <TabsTrigger key={c.id} value={c.namaKelas} className="cursor-pointer">
                 Kelas {c.namaKelas}
               </TabsTrigger>
             ))}
@@ -325,6 +325,7 @@ export default function GuruRekapPage() {
                     icon={Users}
                     color="blue"
                     footerLeft="Peserta didik terdaftar"
+                    footerRight="Kelas Aktif"
                   />
                   <StatCard
                     title="Rata-rata Kehadiran"
@@ -332,6 +333,7 @@ export default function GuruRekapPage() {
                     icon={CheckCircle2}
                     color="emerald"
                     footerLeft={`${totalHadir} total presensi hadir`}
+                    footerRight="Akumulasi"
                   />
                   <StatCard
                     title="Total Ketidakhadiran"
@@ -339,11 +341,12 @@ export default function GuruRekapPage() {
                     icon={BarChart3}
                     color="amber"
                     footerLeft="Gabungan Izin, Sakit & Alfa"
+                    footerRight="Log Sesi"
                   />
                 </div>
 
                 {/* Chart */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3">
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3 cursor-pointer">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
                     <div>
                       <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
@@ -505,7 +508,7 @@ export default function GuruRekapPage() {
                           rekapData.map((r) => (
                             <TableRow
                               key={r.id}
-                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md border-b border-slate-100 last:border-0"
+                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                             >
                               <TableCell className="pl-6 font-mono text-slate-600 group-hover/row:text-slate-400 whitespace-nowrap transition-colors">
                                 {r.nis}

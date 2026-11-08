@@ -76,6 +76,7 @@ export default function SiswaDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchData() {
       try {
         const [profileRes, statsRes, leaderboardRes] = await Promise.all([
@@ -84,32 +85,39 @@ export default function SiswaDashboard() {
           fetch("/api/students/me/class-leaderboard"),
         ]);
 
+        if (cancelled) return;
+
         if (profileRes.ok) {
           const profileData = await profileRes.json();
-          setProfile(profileData);
+          if (!cancelled) setProfile(profileData);
         }
         if (statsRes.ok) {
           const statsData = await statsRes.json();
-          setStats(statsData);
+          if (!cancelled) setStats(statsData);
         }
         if (leaderboardRes.ok) {
           const lbData = await leaderboardRes.json();
-          if (Array.isArray(lbData)) {
-            setIsLeaderboardPublished(true);
-            setLeaderboard(lbData);
-          } else if (lbData && typeof lbData === "object") {
-            setIsLeaderboardPublished(lbData.isPublished !== false);
-            setLeaderboard(Array.isArray(lbData.data) ? lbData.data : []);
+          if (!cancelled) {
+            if (Array.isArray(lbData)) {
+              setIsLeaderboardPublished(true);
+              setLeaderboard(lbData);
+            } else if (lbData && typeof lbData === "object") {
+              setIsLeaderboardPublished(lbData.isPublished !== false);
+              setLeaderboard(Array.isArray(lbData.data) ? lbData.data : []);
+            }
           }
         }
       } catch (err) {
         console.error("Failed to fetch student data:", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading) {
@@ -370,7 +378,7 @@ export default function SiswaDashboard() {
                   <TableRow className="border-b border-slate-100 bg-slate-50/60 hover:bg-slate-50/60">
                     <TableHead className="w-14 pl-2 font-semibold text-slate-600">#</TableHead>
                     <TableHead className="font-semibold text-slate-600">Siswa</TableHead>
-                    <TableHead className="text-right pr-2 font-semibold text-slate-600">Skor</TableHead>
+                    <TableHead className="text-right pr-2 font-semibold text-slate-600">Skor (%)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -404,13 +412,13 @@ export default function SiswaDashboard() {
                             <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
                               <span>{entry.namaLengkap}</span>
                               {isMe && (
-                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
+                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] group-hover/row:bg-blue-600 text-white transition-colors">
                                   Kamu
                                 </span>
                               )}
                             </TableCell>
                             <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
-                              {entry.skorSPK}
+                              {entry.skorSPK}%
                             </TableCell>
                           </TableRow>
                         );
@@ -424,12 +432,12 @@ export default function SiswaDashboard() {
                           </TableCell>
                           <TableCell className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
                             <span>{myLeaderboardEntry.namaLengkap}</span>
-                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white">
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] group-hover/row:bg-blue-600 text-white transition-colors">
                               Kamu
                             </span>
                           </TableCell>
                           <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
-                            {myLeaderboardEntry.skorSPK}
+                            {myLeaderboardEntry.skorSPK}%
                           </TableCell>
                         </TableRow>
                       )}
