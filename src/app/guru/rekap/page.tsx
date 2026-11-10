@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface StudentRekap {
   id: string;
@@ -78,45 +79,76 @@ interface CustomRekapTooltipProps {
     };
   }>;
   label?: string;
-  totalPresensi?: number;
+  summary?: {
+    hadir: number;
+    izin: number;
+    sakit: number;
+    alfa: number;
+    total: number;
+    selectedClass: string;
+  };
 }
 
 const CustomRekapTooltip = ({
   active,
   payload,
   label,
-  totalPresensi = 0,
+  summary,
 }: CustomRekapTooltipProps) => {
-  if (!active || !payload || !payload.length) return null;
-  const currentItem = payload[0];
-  const statusName = (label || currentItem.payload?.status || currentItem.name || "Status") as string;
-  const val = Number(currentItem.value) || 0;
-  const total = totalPresensi;
-  const pct = total > 0 ? ((val / total) * 100).toFixed(0) : "0";
-  const color = CHART_COLORS[statusName] || currentItem.color || "#10B981";
+  if (!active || !payload || !payload.length || !summary) return null;
+  const total = summary.total;
+  const items = [
+    { name: "Hadir", value: summary.hadir, color: "#10B981" },
+    { name: "Izin", value: summary.izin, color: "#F59E0B" },
+    { name: "Sakit", value: summary.sakit, color: "#6366F1" },
+    { name: "Alfa", value: summary.alfa, color: "#F43F5E" },
+  ];
 
   return (
-    <div className="rounded-md border border-slate-200 bg-white p-3 shadow-lg text-xs min-w-[190px] pointer-events-none">
+    <div className="rounded-md border border-slate-200 bg-white p-3 shadow-lg text-xs min-w-[200px] pointer-events-none">
       <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-        <span className="font-semibold text-slate-800">{statusName}</span>
+        <span className="font-semibold text-slate-800">
+          Kelas {summary.selectedClass}
+        </span>
         <span className="text-[11px] font-medium text-slate-500 tabular-nums">
           Total: <strong className="text-slate-900 font-semibold">{total}</strong> Siswa
         </span>
       </div>
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="h-2.5 w-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: color }}
-            />
-            <span className="text-slate-600 font-medium">Jumlah</span>
-          </div>
-          <div className="flex items-center gap-1.5 tabular-nums">
-            <span className="font-semibold text-slate-900">{val}</span>
-            <span className="text-[10px] text-slate-400">({pct}%)</span>
-          </div>
-        </div>
+        {items.map((item) => {
+          const val = item.value;
+          const pct = total > 0 ? ((val / total) * 100).toFixed(0) : "0";
+          const isCurrent = label === item.name;
+          return (
+            <div
+              key={item.name}
+              className={cn(
+                "flex items-center justify-between gap-3 px-1.5 py-0.5 rounded transition-colors",
+                isCurrent ? "bg-slate-100/90 font-semibold" : ""
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span
+                  className={
+                    isCurrent
+                      ? "text-slate-900 font-semibold"
+                      : "text-slate-600 font-medium"
+                  }
+                >
+                  {item.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 tabular-nums">
+                <span className="font-semibold text-slate-900">{val}</span>
+                <span className="text-[10px] text-slate-400">({pct}%)</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -242,7 +274,7 @@ export default function GuruRekapPage() {
     };
   }, [selectedClass, selectedTanggal, selectedMapel]);
 
-  const { chartData, avgPersen, totalHadir, totalAbsen } = useMemo(() => {
+  const { chartData, avgPersen, totalHadir, totalAbsen, summaryData } = useMemo(() => {
     let hadir = 0,
       izin = 0,
       sakit = 0,
@@ -266,6 +298,13 @@ export default function GuruRekapPage() {
         rekapData.length > 0 ? Math.round(sumPersen / rekapData.length) : 0,
       totalHadir: hadir,
       totalAbsen: izin + sakit + alfa,
+      summaryData: {
+        hadir,
+        izin,
+        sakit,
+        alfa,
+        total: hadir + izin + sakit + alfa,
+      },
     };
   }, [rekapData]);
 
@@ -457,46 +496,72 @@ export default function GuruRekapPage() {
                       )}
                     </div>
                   </div>
+                  {/* Custom Modern Legend Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 pt-1 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                    <div className="flex items-center gap-4 text-xs font-medium text-slate-600 group-hover:text-slate-300 transition-colors">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
+                        <span>Hadir</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#F59E0B]" />
+                        <span>Izin</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#6366F1]" />
+                        <span>Sakit</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]" />
+                        <span>Alfa</span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-slate-400 group-hover:text-slate-400 font-normal transition-colors">
+                      Perbandingan jumlah per kategori kehadiran
+                    </span>
+                  </div>
+
                   <div className="pt-2">
-                    <div className="h-[230px]">
+                    <div className="h-[260px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={chartData}
-                          layout="vertical"
-                          barSize={26}
+                          margin={{ top: 16, right: 16, left: -20, bottom: 4 }}
+                          barCategoryGap="28%"
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
+                            vertical={false}
                             stroke="rgba(148, 163, 184, 0.18)"
-                            horizontal={false}
                           />
                           <XAxis
-                            type="number"
-                            tick={{ fontSize: 11, fill: "#94A3B8" }}
-                            axisLine={false}
+                            dataKey="status"
+                            tick={{ fontSize: 12, fill: "#94A3B8", fontWeight: 600 }}
+                            axisLine={{ stroke: "#94A3B8", strokeOpacity: 0.3 }}
                             tickLine={false}
                           />
                           <YAxis
-                            type="category"
-                            dataKey="status"
-                            tick={{
-                              fontSize: 12,
-                              fill: "#94A3B8",
-                              fontWeight: 600,
-                            }}
+                            tick={{ fontSize: 11, fill: "#94A3B8" }}
                             axisLine={false}
                             tickLine={false}
-                            width={65}
+                            allowDecimals={false}
                           />
                           <Tooltip
                             content={
                               <CustomRekapTooltip
-                                totalPresensi={totalHadir + totalAbsen}
+                                summary={{
+                                  ...summaryData,
+                                  selectedClass,
+                                }}
                               />
                             }
                             cursor={{ fill: "rgba(148, 163, 184, 0.1)" }}
                           />
-                          <Bar dataKey="jumlah" radius={[0, 6, 6, 0]}>
+                          <Bar
+                            dataKey="jumlah"
+                            radius={[6, 6, 0, 0]}
+                            maxBarSize={48}
+                          >
                             {chartData.map((entry) => (
                               <Cell
                                 key={entry.status}
