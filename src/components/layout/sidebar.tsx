@@ -7,6 +7,7 @@ import { LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { UserRole } from "@/lib/mock-data";
+import { getPortalForRole, ROLE_CONFIGS, type AppRole } from "@/lib/rbac";
 import {
   ADMIN_DROPDOWN_GROUPS,
   GURU_NAV_ITEMS,
@@ -21,12 +22,17 @@ interface SidebarProps {
 
 export function Sidebar({ role, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const homeHref = `/${role.toLowerCase()}`;
+  const currentPortal = getPortalForRole(role);
+  const homeHref = currentPortal;
+  const roleConfig = ROLE_CONFIGS[role as AppRole];
 
   const isRouteActive = (href: string) => {
     if (href === homeHref) return pathname === homeHref;
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  const isPortalAdmin = currentPortal === "/admin";
+  const isPortalGuru = currentPortal === "/guru";
 
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] text-white">
@@ -52,11 +58,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
             </span>
           </div>
           <p className="text-[11px] text-blue-200/80 truncate mt-0.5">
-            {role === "ADMIN"
-              ? "Sistem Administrasi"
-              : role === "GURU"
-                ? "Portal Guru"
-                : "Portal Siswa"}
+            {roleConfig ? roleConfig.label : "Portal Pengguna"}
           </p>
         </div>
       </div>
@@ -64,7 +66,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
       {/* Navigation Links */}
       <ScrollArea className="flex-1 py-4">
         <nav className="px-3 space-y-4">
-          {role === "ADMIN" ? (
+          {isPortalAdmin ? (
             <>
               <div>
                 <Link
@@ -115,7 +117,7 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
             </>
           ) : (
             <div className="space-y-1">
-              {(role === "GURU" ? GURU_NAV_ITEMS : SISWA_NAV_ITEMS).map(
+              {(isPortalGuru ? GURU_NAV_ITEMS : SISWA_NAV_ITEMS).map(
                 (item) => {
                   const Icon = item.icon;
                   const active = isRouteActive(item.href);

@@ -44,15 +44,38 @@ async function seed() {
   console.log("🌱 Seeding database...\n");
 
   // ==========================================
-  // 1. Create Admin user (skip if already exists)
   // ==========================================
-  console.log("👤 Creating Admin user...");
+  // 1. Create Core System & Admin Users
+  // ==========================================
+  console.log("👤 Creating Core System & Admin users...");
+
+  // A. Superadmin
+  try {
+    const superUser = await auth.api.signUpEmail({
+      body: {
+        email: "superadmin@sekolah.id",
+        password: "admin123",
+        name: "Super Administrator SIMESA",
+        username: "superadmin",
+        appRole: "SUPERADMIN",
+      },
+    });
+    await client.execute({
+      sql: "UPDATE user SET role = ? WHERE id = ?",
+      args: ["admin", superUser.user.id],
+    });
+    console.log(`   ✅ Superadmin : superadmin / admin123`);
+  } catch {
+    console.log(`   ⏭️ Superadmin already exists, skipping...`);
+  }
+
+  // B. Admin Sekolah
   try {
     const adminUser = await auth.api.signUpEmail({
       body: {
         email: "admin@sekolah.id",
         password: "admin123",
-        name: "Administrator",
+        name: "Administrator Sekolah",
         username: "admin001",
         appRole: "ADMIN",
       },
@@ -61,35 +84,126 @@ async function seed() {
       sql: "UPDATE user SET role = ? WHERE id = ?",
       args: ["admin", adminUser.user.id],
     });
-    console.log(`   ✅ Admin: admin001 / admin123`);
+    console.log(`   ✅ Admin       : admin001 / admin123`);
   } catch {
     console.log(`   ⏭️ Admin already exists, skipping...`);
   }
 
+  // C. Kepala Sekolah
+  try {
+    await auth.api.signUpEmail({
+      body: {
+        email: "kepsek@sekolah.id",
+        password: "kepsek123",
+        name: "Drs. H. Mulyadi, M.M.",
+        username: "kepsek01",
+        appRole: "KEPALA_SEKOLAH",
+      },
+    });
+    console.log(`   ✅ Kepsek      : kepsek01 / kepsek123 — Drs. H. Mulyadi, M.M.`);
+  } catch {
+    console.log(`   ⏭️ Kepsek already exists, skipping...`);
+  }
+
+  // D. Staf Perpustakaan
+  try {
+    await auth.api.signUpEmail({
+      body: {
+        email: "perpus@sekolah.id",
+        password: "perpus123",
+        name: "Nurul Hidayah, A.Md.",
+        username: "perpus01",
+        appRole: "STAF_PERPUS",
+      },
+    });
+    console.log(`   ✅ Staf Perpus : perpus01 / perpus123 — Nurul Hidayah, A.Md.`);
+  } catch {
+    console.log(`   ⏭️ Staf Perpus already exists, skipping...`);
+  }
+
+  // E. Staf Sarpras
+  try {
+    await auth.api.signUpEmail({
+      body: {
+        email: "sarpras@sekolah.id",
+        password: "sarpras123",
+        name: "Bambang Irawan, S.T.",
+        username: "sarpras01",
+        appRole: "STAF_SARPRAS",
+      },
+    });
+    console.log(`   ✅ Staf Sarpras: sarpras01 / sarpras123 — Bambang Irawan, S.T.`);
+  } catch {
+    console.log(`   ⏭️ Staf Sarpras already exists, skipping...`);
+  }
+
+  // F. Guru BK Murni
+  try {
+    const bkUser = await auth.api.signUpEmail({
+      body: {
+        email: "bk@sekolah.id",
+        password: "198507102010",
+        name: "Dra. Endang Lestari, S.Psi.",
+        username: "198507102010",
+        appRole: "GURU_BK",
+      },
+    });
+    await db.insert(schema.teachers).values({
+      userId: bkUser.user.id,
+      nip: "198507102010",
+      namaLengkap: "Dra. Endang Lestari, S.Psi.",
+      status: "aktif",
+    });
+    console.log(`   ✅ Guru BK     : 198507102010 / 198507102010 — Dra. Endang Lestari, S.Psi.`);
+  } catch {
+    console.log(`   ⏭️ Guru BK already exists, skipping...`);
+  }
+
   // ==========================================
-  // 2. Create Teacher users + profiles
+  // 2. Create Teacher users + profiles + roles
   // ==========================================
   console.log("\n👨‍🏫 Creating Teacher users...");
   const teacherData = [
-    { nip: "197601012005", nama: "Budi Santoso, S.Pd." },
-    { nip: "198203152008", nama: "Siti Rahayu, M.Pd." },
-    { nip: "199005202012", nama: "Ahmad Fauzi, S.Pd." },
+    {
+      nip: "197601012005",
+      nama: "Budi Santoso, S.Pd.",
+      additionalRoles: [{ role: "WALI_KELAS", metadata: JSON.stringify({ kelas: "X-A" }) }],
+    },
+    {
+      nip: "198203152008",
+      nama: "Siti Rahayu, M.Pd.",
+      additionalRoles: [
+        { role: "WALI_KELAS", metadata: JSON.stringify({ kelas: "X-B" }) },
+        { role: "GURU_BK" },
+      ],
+    },
+    {
+      nip: "199005202012",
+      nama: "Ahmad Fauzi, S.Pd.",
+      additionalRoles: [
+        { role: "WALI_KELAS", metadata: JSON.stringify({ kelas: "XI-A" }) },
+        { role: "PEMBINA_EKSKUL", metadata: JSON.stringify({ ekskul: "Pramuka" }) },
+        { role: "GURU_PIKET" },
+      ],
+    },
   ];
 
   for (const t of teacherData) {
+    let currentUserId: string | null = null;
     try {
       const user = await auth.api.signUpEmail({
         body: {
           email: `${t.nip}@sekolah.id`,
-          password: t.nip, // default password set to NIP
+          password: t.nip,
           name: t.nama,
           username: t.nip,
           appRole: "GURU",
         },
       });
+      currentUserId = user.user.id;
 
       await db.insert(schema.teachers).values({
-        userId: user.user.id,
+        userId: currentUserId,
         nip: t.nip,
         namaLengkap: t.nama,
         status: "aktif",
@@ -97,7 +211,37 @@ async function seed() {
 
       console.log(`   ✅ Guru: ${t.nip} / ${t.nip} — ${t.nama}`);
     } catch {
-      console.log(`   ⏭️ Guru ${t.nip} already exists, skipping...`);
+      console.log(`   ⏭️ Guru ${t.nip} already exists, checking role assignments...`);
+      const existing = await client.execute({
+        sql: "SELECT id FROM user WHERE username = ?",
+        args: [t.nip],
+      });
+      if (existing.rows.length > 0) {
+        currentUserId = existing.rows[0].id as string;
+      }
+    }
+
+    // Insert additional multi-roles if present
+    if (currentUserId && t.additionalRoles) {
+      for (const ar of t.additionalRoles) {
+        const roleExists = await client.execute({
+          sql: "SELECT id FROM user_roles WHERE user_id = ? AND role = ?",
+          args: [currentUserId, ar.role],
+        });
+        if (roleExists.rows.length === 0) {
+          await client.execute({
+            sql: "INSERT INTO user_roles (id, user_id, role, metadata, created_at) VALUES (?, ?, ?, ?, ?)",
+            args: [
+              crypto.randomUUID(),
+              currentUserId,
+              ar.role,
+              ar.metadata || null,
+              Date.now(),
+            ],
+          });
+          console.log(`      ↳ Ditambahkan peran: ${ar.role}`);
+        }
+      }
     }
   }
 
@@ -403,12 +547,17 @@ async function seed() {
   // ==========================================
   console.log("\n✨ Seeding complete!\n");
   console.log("=== LOGIN CREDENTIALS ===");
-  console.log("Admin  : admin001 / admin123");
-  console.log("Guru   : 197601012005 / 197601012005 (Budi Santoso)");
-  console.log("Guru   : 198203152008 / 198203152008 (Siti Rahayu)");
-  console.log("Guru   : 199005202012 / 199005202012 (Ahmad Fauzi)");
-  console.log("Siswa  : 2024001 / 2024001 (Andi Prasetyo, X-A)");
-  console.log("Siswa  : 2024002 / 2024002 (Dewi Lestari, X-A)");
+  console.log("Superadmin   : superadmin / admin123");
+  console.log("Admin        : admin001 / admin123");
+  console.log("Kepala Sekolah : kepsek01 / kepsek123");
+  console.log("Guru (Wali)  : 197601012005 / 197601012005 (Budi Santoso, S.Pd.)");
+  console.log("Guru (+BK)   : 198203152008 / 198203152008 (Siti Rahayu, M.Pd.)");
+  console.log("Guru (+Ekskul/Piket) : 199005202012 / 199005202012 (Ahmad Fauzi, S.Pd.)");
+  console.log("Guru BK Murni: 198507102010 / 198507102010 (Dra. Endang Lestari)");
+  console.log("Staf Perpus  : perpus01 / perpus123");
+  console.log("Staf Sarpras : sarpras01 / sarpras123");
+  console.log("Siswa & Ortu : 2024001 / 2024001 (Andi Prasetyo, X-A)");
+  console.log("Siswa & Ortu : 2024002 / 2024002 (Dewi Lestari, X-A)");
   console.log("...dan 13 siswa lainnya (NIS = password)");
   console.log("=========================\n");
 }
