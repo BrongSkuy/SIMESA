@@ -65,6 +65,63 @@ const CHART_COLORS: Record<string, string> = {
   Alfa: "#F43F5E",
 };
 
+interface CustomRekapTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name?: string;
+    value?: number;
+    color?: string;
+    dataKey?: string;
+    payload?: {
+      status?: string;
+      jumlah?: number;
+    };
+  }>;
+  label?: string;
+  totalPresensi?: number;
+}
+
+const CustomRekapTooltip = ({
+  active,
+  payload,
+  label,
+  totalPresensi = 0,
+}: CustomRekapTooltipProps) => {
+  if (!active || !payload || !payload.length) return null;
+  const currentItem = payload[0];
+  const statusName = (label || currentItem.payload?.status || currentItem.name || "Status") as string;
+  const val = Number(currentItem.value) || 0;
+  const total = totalPresensi;
+  const pct = total > 0 ? ((val / total) * 100).toFixed(0) : "0";
+  const color = CHART_COLORS[statusName] || currentItem.color || "#10B981";
+
+  return (
+    <div className="rounded-md border border-slate-200 bg-white p-3 shadow-lg text-xs min-w-[190px] pointer-events-none">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+        <span className="font-semibold text-slate-800">{statusName}</span>
+        <span className="text-[11px] font-medium text-slate-500 tabular-nums">
+          Total: <strong className="text-slate-900 font-semibold">{total}</strong> Siswa
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: color }}
+            />
+            <span className="text-slate-600 font-medium">Jumlah</span>
+          </div>
+          <div className="flex items-center gap-1.5 tabular-nums">
+            <span className="font-semibold text-slate-900">{val}</span>
+            <span className="text-[10px] text-slate-400">({pct}%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function GuruRekapPage() {
   const [classes, setClasses] = useState<ClassData[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -432,14 +489,12 @@ export default function GuruRekapPage() {
                             width={65}
                           />
                           <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#091524",
-                              color: "#F8FAFC",
-                              borderRadius: "8px",
-                              border: "1px solid #1E293B",
-                              fontSize: "12px",
-                            }}
-                            itemStyle={{ color: "#F8FAFC" }}
+                            content={
+                              <CustomRekapTooltip
+                                totalPresensi={totalHadir + totalAbsen}
+                              />
+                            }
+                            cursor={{ fill: "rgba(148, 163, 184, 0.1)" }}
                           />
                           <Bar dataKey="jumlah" radius={[0, 6, 6, 0]}>
                             {chartData.map((entry) => (
