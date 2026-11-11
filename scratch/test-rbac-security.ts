@@ -1,5 +1,5 @@
 import { checkLoginStatus, recordFailedAttempt, resetLoginAttempts } from "../src/lib/rate-limiter";
-import { getUserFullRoles } from "../src/lib/rbac";
+import { getUserFullRoles } from "../src/lib/rbac-server";
 import { db } from "../src/db";
 import { user } from "../src/db/auth-schema";
 import { eq } from "drizzle-orm";
@@ -66,3 +66,4 @@ runTests().catch((e) => {
   console.error("❌ Test failed:", e);
   process.exit(1);
 });
+

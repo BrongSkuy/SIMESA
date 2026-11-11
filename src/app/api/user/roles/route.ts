@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getUserFullRoles, ROLE_CONFIGS, ROLE_PERMISSIONS } from "@/lib/rbac";
+import { getUserFullRoles } from "@/lib/rbac-server";
+import { ROLE_CONFIGS, ROLE_PERMISSIONS } from "@/lib/rbac";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });

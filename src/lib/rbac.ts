@@ -1,9 +1,18 @@
-import { APP_ROLES, type AppRole } from "@/db/auth-schema";
-import { db } from "@/db";
-import { user, userRoles } from "@/db/auth-schema";
-import { eq } from "drizzle-orm";
+export const APP_ROLES = [
+  "SUPERADMIN",
+  "ADMIN",
+  "KEPALA_SEKOLAH",
+  "GURU",
+  "WALI_KELAS",
+  "GURU_PIKET",
+  "GURU_BK",
+  "PEMBINA_EKSKUL",
+  "SISWA",
+  "STAF_PERPUS",
+  "STAF_SARPRAS",
+] as const;
 
-export { APP_ROLES, type AppRole };
+export type AppRole = (typeof APP_ROLES)[number];
 
 export type Permission =
   | "manage:system"
@@ -145,13 +154,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "manage:library",
     "manage:sarpras",
   ],
-  KEPALA_SEKOLAH: [
-    "view:analytics",
-  ],
-  GURU: [
-    "record:attendance_siswa",
-    "manage:academic_grades",
-  ],
+  KEPALA_SEKOLAH: ["view:analytics"],
+  GURU: ["record:attendance_siswa", "manage:academic_grades"],
   WALI_KELAS: [
     "record:attendance_siswa",
     "manage:academic_grades",
@@ -162,26 +166,15 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "record:attendance_siswa",
     "manage:violation_points",
   ],
-  GURU_BK: [
-    "manage:counseling_bk",
-    "manage:violation_points",
-  ],
-  PEMBINA_EKSKUL: [
-    "manage:extracurricular",
-  ],
-  SISWA: [
-    "view:student_portal",
-  ],
-  STAF_PERPUS: [
-    "manage:library",
-  ],
-  STAF_SARPRAS: [
-    "manage:sarpras",
-  ],
+  GURU_BK: ["manage:counseling_bk", "manage:violation_points"],
+  PEMBINA_EKSKUL: ["manage:extracurricular"],
+  SISWA: ["view:student_portal"],
+  STAF_PERPUS: ["manage:library"],
+  STAF_SARPRAS: ["manage:sarpras"],
 };
 
 /**
- * Mendapatkan portal utama tujuan login berdasarkan peran
+ * Mendapatkan portal utama tujuan login berdasarkan peran (Client-safe)
  */
 export function getPortalForRole(role: string): string {
   const normalized = role?.toUpperCase() as AppRole;
@@ -190,7 +183,7 @@ export function getPortalForRole(role: string): string {
 }
 
 /**
- * Cek apakah peran pengguna memiliki akses ke peran target
+ * Cek apakah peran pengguna memiliki akses ke peran target (Client-safe)
  */
 export function hasRole(
   primaryRole: string,
@@ -203,7 +196,7 @@ export function hasRole(
 }
 
 /**
- * Cek apakah salah satu peran cocok
+ * Cek apakah salah satu peran cocok (Client-safe)
  */
 export function hasAnyRole(
   primaryRole: string,
@@ -214,35 +207,3 @@ export function hasAnyRole(
   if (targetRoles.includes(primaryRole as AppRole)) return true;
   return additionalRoles.some((r) => targetRoles.includes(r as AppRole));
 }
-
-/**
- * Mengambil daftar peran lengkap milik seorang user dari database
- */
-export async function getUserFullRoles(userId: string): Promise<{
-  primaryRole: AppRole;
-  additionalRoles: AppRole[];
-  allRoles: AppRole[];
-}> {
-  const [userRecord] = await db
-    .select({ appRole: user.appRole })
-    .from(user)
-    .where(eq(user.id, userId))
-    .limit(1);
-
-  const primaryRole = (userRecord?.appRole?.toUpperCase() as AppRole) || "SISWA";
-
-  const additionalRows = await db
-    .select({ role: userRoles.role })
-    .from(userRoles)
-    .where(eq(userRoles.userId, userId));
-
-  const additionalRoles = additionalRows.map(
-    (row) => row.role.toUpperCase() as AppRole
-  );
-
-  const allRolesSet = new Set<AppRole>([primaryRole, ...additionalRoles]);
-  const allRoles = Array.from(allRolesSet);
-
-  return { primaryRole, additionalRoles, allRoles };
-}
-
