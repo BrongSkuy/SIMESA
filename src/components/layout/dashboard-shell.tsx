@@ -91,7 +91,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
             className="w-[280px] p-0 bg-[#091424] border-white/10 text-white"
           >
             <SheetTitle className="sr-only">Menu Navigasi SIMESA SMK Penerbangan Dirgantara</SheetTitle>
-            <Sidebar role={role} onToggle={() => setMobileOpen(false)} />
+            <Sidebar role={user.role} onToggle={() => setMobileOpen(false)} />
           </SheetContent>
         </Sheet>
 
