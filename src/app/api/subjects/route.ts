@@ -4,6 +4,7 @@ import { subjects, teachers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/subjects — list all subjects
 export async function GET() {
@@ -29,7 +30,8 @@ export async function GET() {
 // POST /api/subjects — create a new subject
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || (session.user as Record<string, unknown>).appRole !== "ADMIN") {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (!session || getPortalForRole(appRole || "") !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

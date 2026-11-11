@@ -5,6 +5,7 @@ import { eq, inArray, and, isNotNull, ne } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/teachers/me/dashboard — get dashboard stats & classes for logged in teacher
 export async function GET() {
@@ -13,8 +14,10 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
-  if (appRole !== "GURU" && appRole !== "ADMIN") {
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+
+  if (portal !== "/guru" && portal !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -111,7 +114,7 @@ export async function GET() {
             (c) => c.subjects.length > 0 || c.waliKelas === teacher.namaLengkap
           );
       }
-    } else if (appRole === "ADMIN") {
+    } else if (portal === "/admin") {
       const allFullClasses = await db.select().from(classes).all();
       assignedClasses = allFullClasses.map((c) => ({
         id: c.id,
@@ -157,7 +160,7 @@ export async function GET() {
 
     for (const c of assignedClasses) {
       let hasAttendance = false;
-      if (appRole === "ADMIN") {
+      if (portal === "/admin") {
         hasAttendance = allAttendanceToday.some((a) => a.kelas === c.namaKelas);
       } else if (c.subjects.length > 0) {
         hasAttendance = c.subjects.every((m) =>
@@ -205,7 +208,7 @@ export async function GET() {
       });
 
       const scopedAtt =
-        appRole === "ADMIN"
+        portal === "/admin"
           ? properAtt
           : properAtt.filter((row) => {
               const taughtSet = classSubjectLookup.get(row.kelas);

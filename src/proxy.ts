@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPortalForRole } from "@/lib/rbac";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -43,23 +44,22 @@ export async function proxy(request: NextRequest) {
     }
 
     const session = await sessionRes.json();
-    const appRole = session?.user?.appRole as string | undefined;
+    const appRole = (session?.user as Record<string, unknown>)?.appRole as
+      | string
+      | undefined;
+    const userPortal = getPortalForRole(appRole || "SISWA");
 
-    // RBAC: check if user has access to the requested route
-    if (pathname.startsWith("/admin") && appRole !== "ADMIN") {
-      // Redirect to their correct dashboard
-      const redirectPath = appRole === "GURU" ? "/guru" : "/siswa";
-      return NextResponse.redirect(new URL(redirectPath, request.url));
+    // RBAC: check if user has access to the requested route based on their assigned portal
+    if (pathname.startsWith("/admin") && userPortal !== "/admin") {
+      return NextResponse.redirect(new URL(userPortal, request.url));
     }
 
-    if (pathname.startsWith("/guru") && appRole !== "GURU") {
-      const redirectPath = appRole === "ADMIN" ? "/admin" : "/siswa";
-      return NextResponse.redirect(new URL(redirectPath, request.url));
+    if (pathname.startsWith("/guru") && userPortal !== "/guru") {
+      return NextResponse.redirect(new URL(userPortal, request.url));
     }
 
-    if (pathname.startsWith("/siswa") && appRole !== "SISWA") {
-      const redirectPath = appRole === "ADMIN" ? "/admin" : "/guru";
-      return NextResponse.redirect(new URL(redirectPath, request.url));
+    if (pathname.startsWith("/siswa") && userPortal !== "/siswa") {
+      return NextResponse.redirect(new URL(userPortal, request.url));
     }
 
     return NextResponse.next();

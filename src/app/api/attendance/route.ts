@@ -5,6 +5,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
+import { getPortalForRole } from "@/lib/rbac";
 import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
 
 const VALID_STATUSES = new Set(["Hadir", "Izin", "Sakit", "Alfa"]);
@@ -16,8 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
-  if (appRole !== "ADMIN" && appRole !== "GURU") {
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (portal !== "/admin" && portal !== "/guru") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (appRole === "GURU") {
+  if (portal === "/guru") {
     const authCheck = await verifyTeacherSubjectAccess(
       session.user.id,
       kelas,
@@ -102,8 +104,9 @@ export async function GET(request: NextRequest) {
 // POST /api/attendance — batch save attendance for a class/date
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole;
-  if (!session || (appRole !== "GURU" && appRole !== "ADMIN")) {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (!session || (portal !== "/guru" && portal !== "/admin")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
     const uniqueClasses = Array.from(new Set(targetStudents.map((s) => s.kelas)));
 
     // Strict Curriculum Subject & Ownership Check for GURU
-    if (appRole === "GURU") {
+    if (portal === "/guru") {
       if (uniqueClasses.length !== 1) {
         return NextResponse.json(
           { error: "Semua siswa dalam satu sesi presensi harus berasal dari kelas yang sama." },
@@ -245,8 +248,9 @@ export async function POST(request: NextRequest) {
 // DELETE /api/attendance?kelas=..&tanggal=..&mapel=.. — clear attendance for a specific class day
 export async function DELETE(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole;
-  if (!session || (appRole !== "GURU" && appRole !== "ADMIN")) {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (!session || (portal !== "/guru" && portal !== "/admin")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -263,7 +267,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   // Strict Role & Ownership Check for DELETE
-  if (appRole === "GURU") {
+  if (portal === "/guru") {
     const authCheck = await verifyTeacherSubjectAccess(
       session.user.id,
       kelas,

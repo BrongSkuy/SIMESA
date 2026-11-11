@@ -4,11 +4,14 @@ import { classes, teachers, subjects as mapelSubjects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getPortalForRole } from "@/lib/rbac";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole;
-  if (!session || appRole !== "GURU") {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+
+  if (!session || (portal !== "/guru" && portal !== "/admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

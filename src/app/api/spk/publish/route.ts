@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { calculateSPK, validateSPKCriteriaFilled } from "@/lib/spk";
 import { DEFAULT_PERIODE } from "@/lib/utils";
+import { getPortalForRole } from "@/lib/rbac";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -32,12 +33,11 @@ export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin = 
     session.user.role === "admin" || 
     session.user.role === "super_admin" || 
-    appRole === "ADMIN" || 
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!isAdmin) {
      return NextResponse.json({ error: "Forbidden: Hanya admin yang dapat mempublikasikan leaderboard" }, { status: 403 });
@@ -120,12 +120,11 @@ export async function DELETE(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin = 
     session.user.role === "admin" || 
     session.user.role === "super_admin" || 
-    appRole === "ADMIN" || 
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!isAdmin) {
      return NextResponse.json({ error: "Forbidden: Hanya admin yang dapat membatalkan publikasi leaderboard" }, { status: 403 });

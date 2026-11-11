@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 
 import { calculateSPK, validateSPKCriteriaFilled } from "@/lib/spk";
+import { getPortalForRole } from "@/lib/rbac";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -16,12 +17,11 @@ export async function GET(request: NextRequest) {
   const kelas = searchParams.get("kelas");
   if (!kelas) return NextResponse.json({ error: "Parameter kelas wajib" }, { status: 400 });
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin = 
     session.user.role === "admin" || 
     session.user.role === "super_admin" || 
-    appRole === "ADMIN" || 
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   try {
     // 1. Get active academic period
@@ -121,12 +121,11 @@ export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin =
     session.user.role === "admin" ||
     session.user.role === "super_admin" ||
-    appRole === "ADMIN" ||
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

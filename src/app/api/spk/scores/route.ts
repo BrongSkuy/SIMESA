@@ -12,6 +12,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/spk/scores?kelas=..&criteriaId=..&mapel=..
 export async function GET(request: NextRequest) {
@@ -20,8 +21,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
-  if (appRole !== "ADMIN" && appRole !== "GURU") {
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (portal !== "/admin" && portal !== "/guru") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -37,7 +39,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (appRole === "GURU") {
+  if (portal === "/guru") {
     const authCheck = await verifyTeacherSubjectAccess(
       session.user.id,
       kelas,
@@ -158,8 +160,9 @@ export async function GET(request: NextRequest) {
 // POST /api/spk/scores
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole;
-  if (!session || (appRole !== "GURU" && appRole !== "ADMIN")) {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (!session || (portal !== "/admin" && portal !== "/guru")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -187,7 +190,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Strict Curriculum Subject & Ownership Check for GURU
-    if (appRole === "GURU") {
+    if (portal === "/guru") {
       const authCheck = await verifyTeacherSubjectAccess(
         session.user.id,
         kelas,
@@ -350,8 +353,9 @@ export async function POST(request: NextRequest) {
 // DELETE /api/spk/scores
 export async function DELETE(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole;
-  if (!session || (appRole !== "GURU" && appRole !== "ADMIN")) {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (!session || (portal !== "/admin" && portal !== "/guru")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -368,7 +372,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   // Strict Curriculum Subject & Ownership Check for DELETE
-  if (appRole === "GURU") {
+  if (portal === "/guru") {
     const authCheck = await verifyTeacherSubjectAccess(
       session.user.id,
       kelas,

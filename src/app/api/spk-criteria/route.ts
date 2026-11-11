@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { calculateSPK } from "@/lib/spk";
 import { DEFAULT_PERIODE } from "@/lib/utils";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/spk-criteria — list all criteria
 export async function GET() {
@@ -21,12 +22,11 @@ export async function GET() {
 // PUT /api/spk-criteria — batch update bobot & auto-sync published leaderboard cache
 export async function PUT(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown> | undefined)?.appRole;
+  const appRole = (session?.user as Record<string, unknown> | undefined)?.appRole as string | undefined;
   const isAdmin =
     session?.user?.role === "admin" ||
     session?.user?.role === "super_admin" ||
-    appRole === "ADMIN" ||
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!session || !isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

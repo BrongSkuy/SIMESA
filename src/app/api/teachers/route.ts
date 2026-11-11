@@ -4,6 +4,7 @@ import { teachers } from "@/db/schema";
 import { like, or, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/teachers — list all teachers
 export async function GET(request: NextRequest) {
@@ -12,8 +13,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
-  if (appRole !== "ADMIN") {
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (getPortalForRole(appRole || "") !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -39,7 +40,8 @@ export async function GET(request: NextRequest) {
 // POST /api/teachers — create a new teacher
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || (session.user as Record<string, unknown>).appRole !== "ADMIN") {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (!session || getPortalForRole(appRole || "") !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
