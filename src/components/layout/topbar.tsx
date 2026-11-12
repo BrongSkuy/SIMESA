@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { UserRole } from "@/lib/mock-data";
 import { authClient } from "@/lib/auth-client";
+import { ROLE_CONFIGS, type AppRole, getPortalForRole } from "@/lib/rbac";
 
 export interface TopbarUser {
   id: string;
@@ -47,6 +48,7 @@ export interface TopbarUser {
   email?: string;
   role: UserRole;
   image?: string | null;
+  additionalRoles?: string[];
 }
 
 interface DropdownNavLink {
@@ -189,26 +191,17 @@ function getInitials(name: string): string {
 }
 
 function getRoleMeta(role: UserRole) {
-  switch (role) {
-    case "ADMIN":
-      return {
-        label: "Administrator",
-        subtitle:
-          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
-      };
-    case "GURU":
-      return {
-        label: "Guru Pengajar",
-        subtitle:
-          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
-      };
-    case "SISWA":
-      return {
-        label: "Siswa",
-        subtitle:
-          "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
-      };
+  const cfg = ROLE_CONFIGS[role as AppRole];
+  if (cfg) {
+    return {
+      label: cfg.label,
+      subtitle: "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
+    };
   }
+  return {
+    label: role,
+    subtitle: "Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi",
+  };
 }
 
 interface TopbarProps {
@@ -246,8 +239,27 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
     };
   }, []);
 
+  const [extraRoles, setExtraRoles] = useState<AppRole[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/user/roles")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.additionalRoles)) {
+          setExtraRoles(data.additionalRoles);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const roleMeta = getRoleMeta(user.role);
-  const homeHref = `/${user.role.toLowerCase()}`;
+  const homeHref = getPortalForRole(user.role);
+  const isPortalAdmin = homeHref === "/admin";
+  const isPortalGuru = homeHref === "/guru";
 
   const isRouteActive = (href: string) => {
     if (href === homeHref) return pathname === homeHref;
@@ -313,7 +325,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
           {/* Sisi Tengah: Menu Navigasi Horizontal */}
           <nav className="hidden lg:flex items-center space-x-1 xl:space-x-1.5 shrink-0">
-            {user.role === "ADMIN" ? (
+            {isPortalAdmin ? (
               <>
                 <Link
                   href="/admin"
@@ -398,7 +410,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 })}
               </>
             ) : (
-              (user.role === "GURU" ? GURU_NAV_ITEMS : SISWA_NAV_ITEMS).map(
+              (isPortalGuru ? GURU_NAV_ITEMS : SISWA_NAV_ITEMS).map(
                 (item) => {
                   const ItemIcon = item.icon;
                   const active = isRouteActive(item.href);
@@ -489,13 +501,25 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                     <p className="text-[11px] font-mono text-slate-500 truncate leading-tight">
                       {user.username || user.email}
                     </p>
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-wrap gap-1">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
-                        {user.role === "ADMIN" && <ShieldCheck className="w-3 h-3 text-blue-600" />}
-                        {user.role === "GURU" && <GraduationCap className="w-3 h-3 text-blue-600" />}
-                        {user.role === "SISWA" && <UserIcon className="w-3 h-3 text-blue-600" />}
+                        <ShieldCheck className="w-3 h-3 text-blue-600" />
                         {roleMeta.label}
                       </span>
+                      {extraRoles.map((r) => {
+                        const cfg = ROLE_CONFIGS[r];
+                        return (
+                          <span
+                            key={r}
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                              cfg ? cfg.badgeColor : "bg-amber-50 text-amber-700 border-amber-200"
+                            )}
+                          >
+                            +{cfg ? cfg.label : r}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

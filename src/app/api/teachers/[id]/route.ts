@@ -4,6 +4,7 @@ import { teachers, classes } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getPortalForRole } from "@/lib/rbac";
 
 // PUT /api/teachers/[id] — update teacher
 export async function PUT(
@@ -11,7 +12,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || (session.user as Record<string, unknown>).appRole !== "ADMIN") {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (!session || getPortalForRole(appRole || "") !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -131,7 +133,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || (session.user as Record<string, unknown>).appRole !== "ADMIN") {
+  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+  if (!session || getPortalForRole(appRole || "") !== "/admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -95,9 +95,75 @@ export const verification = sqliteTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+// ============================================================
+// SIMESA RBAC & Security Tables
+// ============================================================
+
+export const APP_ROLES = [
+  "SUPERADMIN",
+  "ADMIN",
+  "KEPALA_SEKOLAH",
+  "GURU",
+  "WALI_KELAS",
+  "GURU_PIKET",
+  "GURU_BK",
+  "PEMBINA_EKSKUL",
+  "SISWA",
+  "STAF_PERPUS",
+  "STAF_SARPRAS",
+] as const;
+
+export type AppRole = (typeof APP_ROLES)[number];
+
+export const userRoles = sqliteTable(
+  "user_roles",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: text("role").notNull(),
+    metadata: text("metadata"), // JSON metadata e.g. { kelas: "X-A" } or { namaEkskul: "Pramuka" }
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    index("user_roles_userId_idx").on(table.userId),
+    index("user_roles_role_idx").on(table.role),
+  ]
+);
+
+export const loginAttempts = sqliteTable(
+  "login_attempts",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    identifier: text("identifier").notNull(),
+    ipAddress: text("ip_address"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    lastAttemptAt: integer("last_attempt_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    lockedUntil: integer("locked_until", { mode: "timestamp_ms" }),
+  },
+  (table) => [
+    index("login_attempts_identifier_idx").on(table.identifier),
+    index("login_attempts_ip_idx").on(table.ipAddress),
+  ]
+);
+
+// ============================================================
+// Relations
+// ============================================================
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  roles: many(userRoles),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -113,3 +179,12 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
+  user: one(user, {
+    fields: [userRoles.userId],
+    references: [user.id],
+  }),
+}));
+
+

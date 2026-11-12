@@ -4,6 +4,7 @@ import { leaderboardArchives } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { getPortalForRole } from "@/lib/rbac";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -30,12 +31,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin =
     session.user.role === "admin" ||
     session.user.role === "super_admin" ||
-    appRole === "ADMIN" ||
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -82,12 +82,11 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
   const isAdmin =
     session.user.role === "admin" ||
     session.user.role === "super_admin" ||
-    appRole === "ADMIN" ||
-    appRole === "SUPER_ADMIN";
+    getPortalForRole(appRole || "") === "/admin";
 
   if (!isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

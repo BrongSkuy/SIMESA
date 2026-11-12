@@ -11,9 +11,12 @@ import {
   ArrowRight,
   Loader2,
   HelpCircle,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
+import { getPortalForRole } from "@/lib/rbac";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +39,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(true);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   const { data: session, isPending: sessionLoading } = authClient.useSession();
 
@@ -43,15 +47,30 @@ export default function LoginPage() {
   useEffect(() => {
     if (!sessionLoading && session) {
       const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-      if (appRole === "ADMIN") {
-        router.push("/admin");
-      } else if (appRole === "GURU") {
-        router.push("/guru");
-      } else {
-        router.push("/siswa");
-      }
+      router.push(getPortalForRole(appRole || "SISWA"));
     }
   }, [sessionLoading, session, router]);
+
+  // Countdown timer effect for lockout
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev <= 1) {
+          setError("");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockoutSeconds]);
+
+  const formatCountdown = (totalSeconds: number): string => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
 
   // Pre-fill username if remembered (scheduled post-hydration to avoid SSR mismatch)
   useEffect(() => {
@@ -72,24 +91,100 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (lockoutSeconds > 0) {
+      setError(`Akun sedang dalam masa jeda penguncian. Tunggu ${formatCountdown(lockoutSeconds)}`);
+      return;
+    }
+
+    const cleanUsername = username.trim();
+    if (!cleanUsername) return;
+
     setLoading(true);
 
     try {
+      // 1. Cek apakah username sedang terkena rate limiting lockout di server
+      try {
+        const secRes = await fetch(
+          `/api/auth/login-security?identifier=${encodeURIComponent(cleanUsername)}`
+        );
+        if (secRes.ok) {
+          const secData = await secRes.json();
+          if (secData.isLocked && secData.remainingSeconds > 0) {
+            setLockoutSeconds(secData.remainingSeconds);
+            setError(
+              `Terlalu banyak percobaan gagal. Akun dikunci sementara. Silakan tunggu jeda waktu.`
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // Abaikan jika network check gagal, lanjutkan verifikasi auth
+      }
+
+      // 2. Eksekusi sign-in Better Auth
       const { error: signInError } = await authClient.signIn.username({
-        username: username.trim(),
+        username: cleanUsername,
         password,
       });
 
       if (signInError) {
+        // Catat percobaan gagal di server
+        try {
+          const failRes = await fetch("/api/auth/login-security", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "failed",
+              identifier: cleanUsername,
+            }),
+          });
+
+          if (failRes.ok) {
+            const failData = await failRes.json();
+            if (failData.isLocked) {
+              setLockoutSeconds(failData.remainingSeconds || 300);
+              setError(
+                "Batas 5 kali percobaan terlampaui. Akun dikunci sementara selama 5 menit."
+              );
+              setLoading(false);
+              return;
+            } else if (failData.remainingAttempts !== undefined) {
+              setError(
+                `Username atau kata sandi tidak sesuai. Sisa kesempatan: ${failData.remainingAttempts} kali.`
+              );
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {
+          // fallback jika endpoint fail gagal
+        }
+
         setError(signInError.message || "Username atau kata sandi tidak sesuai");
         setLoading(false);
         return;
       }
 
+      // 3. Login sukses: Reset catatan percobaan gagal
+      try {
+        await fetch("/api/auth/login-security", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "reset",
+            identifier: cleanUsername,
+          }),
+        });
+      } catch {
+        // non-blocking
+      }
+
       // Handle remember me preference
       try {
         if (rememberMe) {
-          localStorage.setItem("simesa_remember_user", username.trim());
+          localStorage.setItem("simesa_remember_user", cleanUsername);
         } else {
           localStorage.removeItem("simesa_remember_user");
         }
@@ -102,13 +197,7 @@ export default function LoginPage() {
         | string
         | undefined;
 
-      if (appRole === "ADMIN") {
-        router.push("/admin");
-      } else if (appRole === "GURU") {
-        router.push("/guru");
-      } else {
-        router.push("/siswa");
-      }
+      router.push(getPortalForRole(appRole || "SISWA"));
     } catch {
       setError("Terjadi kesalahan koneksi. Silakan coba kembali.");
       setLoading(false);
@@ -239,8 +328,9 @@ export default function LoginPage() {
                   placeholder="NIP atau Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading || lockoutSeconds > 0}
                   required
-                  className="h-12 rounded-xl pl-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs"
+                  className="h-12 rounded-xl pl-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs disabled:bg-slate-100 disabled:text-slate-400"
                 />
               </div>
             </div>
@@ -255,8 +345,9 @@ export default function LoginPage() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading || lockoutSeconds > 0}
                   required
-                  className="h-12 rounded-xl pl-11 pr-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs"
+                  className="h-12 rounded-xl pl-11 pr-11 text-sm border-slate-200 bg-white focus-visible:ring-blue-600 shadow-2xs disabled:bg-slate-100 disabled:text-slate-400"
                 />
                 <button
                   type="button"
@@ -297,25 +388,49 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Pesan Error */}
-            {error && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700">
-                {error}
+            {/* Status Lockout (Timer Mundur) atau Pesan Error */}
+            {lockoutSeconds > 0 ? (
+              <div className="rounded-xl border border-amber-300 bg-amber-50/95 p-3.5 text-xs text-amber-900 shadow-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-950">
+                  <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
+                  <span>Akses Masuk Terkunci Sementara</span>
+                </div>
+                <p className="text-amber-800 text-[11px] leading-relaxed">
+                  Batas percobaan kata sandi salah (5x) tercapai. Demi keamanan sistem, silakan tunggu jeda waktu:
+                </p>
+                <div className="text-center py-1">
+                  <span className="font-mono text-xl font-extrabold tracking-wider text-amber-950 bg-amber-100/90 px-3.5 py-1 rounded-lg border border-amber-300 inline-block">
+                    {formatCountdown(lockoutSeconds)}
+                  </span>
+                </div>
               </div>
-            )}
+            ) : error ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-700 flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            ) : null}
 
             {/* Tombol Utama: Masuk */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || lockoutSeconds > 0}
               className="w-full h-12 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50 mt-3"
             >
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
+              ) : lockoutSeconds > 0 ? (
+                <Clock className="h-5 w-5" />
               ) : (
                 <ArrowRight className="h-5 w-5" />
               )}
-              <span>{loading ? "Memverifikasi..." : "Masuk"}</span>
+              <span>
+                {loading
+                  ? "Memverifikasi..."
+                  : lockoutSeconds > 0
+                  ? `Terkunci (${formatCountdown(lockoutSeconds)})`
+                  : "Masuk"}
+              </span>
             </button>
           </form>
         </div>

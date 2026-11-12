@@ -42,6 +42,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# documents
+*.docx
+Bagi_Fitur_SIMESA.docx
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -32,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ROLE_CONFIGS, type AppRole } from "@/lib/rbac";
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB source image before crop
 
@@ -472,7 +473,7 @@ export default function AdminProfilPage() {
                 </p>
                 <span className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-[#1e3a8a] border border-blue-200">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  {appRole}
+                  {ROLE_CONFIGS[appRole as AppRole]?.label || appRole}
                 </span>
               </div>
             </div>

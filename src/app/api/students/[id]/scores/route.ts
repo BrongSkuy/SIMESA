@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { buildStudentScoreTranscript } from "@/lib/spk";
+import { getPortalForRole } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,8 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appRole = (session.user as Record<string, unknown>)?.appRole;
-  if (appRole !== "ADMIN" && appRole !== "GURU") {
+  const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+  const portal = getPortalForRole(appRole || "");
+  if (portal !== "/admin" && portal !== "/guru") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

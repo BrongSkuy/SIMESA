@@ -2,7 +2,18 @@
 // Mock Data untuk Development Frontend
 // ============================================================
 
-export type UserRole = "ADMIN" | "GURU" | "SISWA";
+export type UserRole =
+  | "SUPERADMIN"
+  | "ADMIN"
+  | "KEPALA_SEKOLAH"
+  | "GURU"
+  | "WALI_KELAS"
+  | "GURU_PIKET"
+  | "GURU_BK"
+  | "PEMBINA_EKSKUL"
+  | "SISWA"
+  | "STAF_PERPUS"
+  | "STAF_SARPRAS";
 
 export interface User {
   id: string;

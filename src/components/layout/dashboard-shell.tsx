@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import type { UserRole } from "@/lib/mock-data";
+import { getPortalForRole } from "@/lib/rbac";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -27,23 +28,25 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
         router.push("/login");
       } else {
         const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-        if (userRole && userRole !== role) {
-          if (userRole === "ADMIN") router.push("/admin");
-          else if (userRole === "GURU") router.push("/guru");
-          else if (userRole === "SISWA") router.push("/siswa");
-          else router.push("/login");
+        if (userRole) {
+          const userPortal = getPortalForRole(userRole);
+          const expectedPortal = getPortalForRole(role);
+          if (userPortal !== expectedPortal) {
+            router.push(userPortal);
+          }
         }
       }
     }
   }, [isPending, session, role, router]);
 
+  const rawRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
   const user: TopbarUser = {
     id: session?.user?.id || "",
     nama: session?.user?.name || "Pengguna",
     username:
       ((session?.user as Record<string, unknown>)?.username as string) || "",
     email: session?.user?.email || "",
-    role,
+    role: (rawRole as UserRole) || role,
     image: session?.user?.image || null,
   };
 
@@ -71,7 +74,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   }
 
   const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-  if (!session || (userRole && userRole !== role)) {
+  if (!session || (userRole && getPortalForRole(userRole) !== getPortalForRole(role))) {
     return null;
   }
 
@@ -88,7 +91,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
             className="w-[280px] p-0 bg-[#091424] border-white/10 text-white"
           >
             <SheetTitle className="sr-only">Menu Navigasi SIMESA SMK Penerbangan Dirgantara</SheetTitle>
-            <Sidebar role={role} onToggle={() => setMobileOpen(false)} />
+            <Sidebar role={user.role} onToggle={() => setMobileOpen(false)} />
           </SheetContent>
         </Sheet>
 

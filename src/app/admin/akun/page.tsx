@@ -56,6 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ROLE_CONFIGS, APP_ROLES, type AppRole } from "@/lib/rbac";
 
 interface AccountRow {
   id: string;
@@ -237,8 +238,8 @@ export default function AdminAkunPage() {
     return matchSearch && matchRole;
   });
 
-  const totalAdminGuru = accounts.filter((a) =>
-    ["ADMIN", "GURU"].includes((a.appRole || "").toUpperCase())
+  const totalStaff = accounts.filter(
+    (a) => (a.appRole || "").toUpperCase() !== "SISWA"
   ).length;
   const totalSiswa = accounts.filter(
     (a) => (a.appRole || "").toUpperCase() === "SISWA"
@@ -255,10 +256,18 @@ export default function AdminAkunPage() {
 
   const getRolePill = (role: string | null) => {
     const r = (role || "").toUpperCase();
-    if (r === "ADMIN") {
+    if (
+      ["SUPERADMIN", "ADMIN", "KEPALA_SEKOLAH", "STAF_PERPUS", "STAF_SARPRAS"].includes(
+        r
+      )
+    ) {
       return "bg-slate-100 text-slate-800 border-slate-300";
     }
-    if (r === "GURU") {
+    if (
+      ["GURU", "WALI_KELAS", "GURU_PIKET", "GURU_BK", "PEMBINA_EKSKUL"].includes(
+        r
+      )
+    ) {
       return "bg-blue-50 text-blue-700 border-blue-200";
     }
     return "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -284,10 +293,10 @@ export default function AdminAkunPage() {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500">
-              Admin & Tenaga Pendidik
+              Guru & Tenaga Kependidikan
             </p>
             <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
-              {totalAdminGuru}{" "}
+              {totalStaff}{" "}
               <span className="text-xs font-normal text-slate-500">Akun</span>
             </p>
           </div>
@@ -355,9 +364,11 @@ export default function AdminAkunPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Peran</SelectItem>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="GURU">Guru</SelectItem>
-                <SelectItem value="SISWA">Siswa</SelectItem>
+                {APP_ROLES.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {ROLE_CONFIGS[role]?.label || role}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -420,7 +431,7 @@ export default function AdminAkunPage() {
                           a.appRole
                         )} group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700`}
                       >
-                        {a.appRole || "-"}
+                        {ROLE_CONFIGS[a.appRole as AppRole]?.label || a.appRole || "-"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -585,13 +596,7 @@ export default function AdminAkunPage() {
                 </code>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Sandi bawaan akun baru sama dengan Username (
-                {resetItem?.appRole === "ADMIN"
-                  ? "admin"
-                  : resetItem?.appRole === "GURU"
-                    ? "NIP"
-                    : "NIS"}
-                ). Kata sandi aktif terenkripsi satu arah sehingga tidak dapat
+                Sandi bawaan akun baru sama dengan Username. Kata sandi aktif terenkripsi satu arah sehingga tidak dapat
                 dibaca langsung.
               </p>
             </div>
