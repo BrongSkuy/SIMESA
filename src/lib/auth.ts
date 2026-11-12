@@ -3,6 +3,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
 import { admin } from "better-auth/plugins";
 import { db } from "@/db";
+import { user, session as sessionTable } from "@/db/auth-schema";
+import { eq } from "drizzle-orm";
 
 export const auth = betterAuth({
   secret:
@@ -48,8 +50,78 @@ export const auth = betterAuth({
   ],
 
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    expiresIn: 60 * 60 * 24 * 7, // 7 days (default maximum)
     updateAge: 60 * 60 * 24, // update session every 24 hours
+  },
+
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (sessionData) => {
+          try {
+            const [userData] = await db
+              .select({ appRole: user.appRole })
+              .from(user)
+              .where(eq(user.id, sessionData.userId))
+              .limit(1);
+
+            const role = (userData?.appRole || "SISWA").toUpperCase();
+            const isStudent = role === "SISWA";
+            // Siswa & Orang Tua: 7 hari (604.800.000 ms), Admin & Guru: 24 jam (86.400.000 ms)
+            const durationMs = isStudent
+              ? 7 * 24 * 60 * 60 * 1000
+              : 24 * 60 * 60 * 1000;
+
+            return {
+              data: {
+                ...sessionData,
+                expiresAt: new Date(Date.now() + durationMs),
+              },
+            };
+          } catch {
+            return;
+          }
+        },
+      },
+      update: {
+        before: async (sessionData) => {
+          try {
+            let userId = sessionData.userId;
+            if (!userId && sessionData.id) {
+              const [existing] = await db
+                .select({ userId: sessionTable.userId })
+                .from(sessionTable)
+                .where(eq(sessionTable.id, sessionData.id))
+                .limit(1);
+              userId = existing?.userId;
+            }
+
+            if (!userId) return;
+
+            const [userData] = await db
+              .select({ appRole: user.appRole })
+              .from(user)
+              .where(eq(user.id, userId))
+              .limit(1);
+
+            const role = (userData?.appRole || "SISWA").toUpperCase();
+            const isStudent = role === "SISWA";
+            const durationMs = isStudent
+              ? 7 * 24 * 60 * 60 * 1000
+              : 24 * 60 * 60 * 1000;
+
+            return {
+              data: {
+                ...sessionData,
+                expiresAt: new Date(Date.now() + durationMs),
+              },
+            };
+          } catch {
+            return;
+          }
+        },
+      },
+    },
   },
 
   user: {
