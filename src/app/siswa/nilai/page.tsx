@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import * as XLSX from "xlsx";
 import {
   ClipboardList,
@@ -20,6 +21,7 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  FileSpreadsheet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -398,19 +400,32 @@ export default function SiswaNilaiPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
-          <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Skor SPK SAW
-            </p>
-            <div className="flex items-baseline gap-1.5">
-              <p className="text-2xl font-bold tabular-nums text-white">
-                {data.totalSkorSPK}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <Link href="/siswa/erapor" className="self-center sm:self-auto">
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-2 text-xs shadow-md w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Lihat E-Rapor Internal
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
+            <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
+              <Award className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Total Skor SPK SAW
               </p>
-              <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-2xl font-bold tabular-nums text-white">
+                  {data.totalSkorSPK}
+                </p>
+                <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+              </div>
             </div>
           </div>
         </div>
