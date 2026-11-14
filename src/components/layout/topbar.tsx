@@ -125,7 +125,7 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
       {
         label: "E-Rapor Internal",
         description: "Evaluasi rapor dan pencetakan lembar hasil belajar",
-        href: "/guru/erapor",
+        href: "/admin/erapor",
         icon: FileSpreadsheet,
       },
       {
