@@ -493,7 +493,7 @@ export async function buildStudentScoreTranscript(student: {
       .split(",")
       .map((k) => k.trim())
       .filter(Boolean);
-    if (assignedClasses.includes(student.kelas)) {
+    if (assignedClasses.includes(student.kelas) && !seenMapels.has(subj.namaMapel)) {
       seenMapels.add(subj.namaMapel);
       subjectEntries.push({
         namaMapel: subj.namaMapel,

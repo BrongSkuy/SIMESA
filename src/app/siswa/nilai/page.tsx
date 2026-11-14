@@ -592,7 +592,7 @@ export default function SiswaNilaiPage() {
               </div>
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {paginatedCardSubjects.map((subj) => {
+              {paginatedCardSubjects.map((subj, idx) => {
                 const avgTone = getScoreTone(subj.rataRataMapel);
                 const acadTone = getScoreTone(subj.akademik?.nilaiAkhir);
                 const pct =
@@ -602,7 +602,7 @@ export default function SiswaNilaiPage() {
 
                 return (
                   <div
-                    key={subj.namaMapel}
+                    key={`${subj.namaMapel}-${idx}`}
                     className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
                   >
                     <div>
@@ -864,7 +864,7 @@ export default function SiswaNilaiPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedTableSubjects.map((subj) => {
+                  {paginatedTableSubjects.map((subj, idx) => {
                     const kompItems = subj.akademik
                       ? subj.akademik.kategoriWajib.map((cat) => ({
                           cat,
@@ -873,7 +873,7 @@ export default function SiswaNilaiPage() {
                       : [];
                     return (
                       <TableRow
-                        key={subj.namaMapel}
+                        key={`${subj.namaMapel}-${idx}`}
                         className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                       >
                         <TableCell className="pl-5 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
@@ -984,7 +984,7 @@ export default function SiswaNilaiPage() {
                     : "Tidak ada mata pelajaran yang cocok dengan filter pencarian Anda."}
                 </div>
               ) : (
-                paginatedTableSubjects.map((subj) => {
+                paginatedTableSubjects.map((subj, idx) => {
                   const kompItems = subj.akademik
                     ? subj.akademik.kategoriWajib.map((cat) => ({
                         cat,
@@ -993,7 +993,7 @@ export default function SiswaNilaiPage() {
                     : [];
                   return (
                     <div
-                      key={subj.namaMapel}
+                      key={`${subj.namaMapel}-${idx}`}
                       className="p-4 space-y-3 bg-white hover:bg-slate-50/75 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2">

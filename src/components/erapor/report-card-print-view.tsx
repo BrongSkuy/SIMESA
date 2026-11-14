@@ -19,26 +19,26 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
   return (
     <div className="w-full max-w-4xl mx-auto my-6">
       {/* Tombol Aksi di Luar Print Area */}
-      <div className="print:hidden flex items-center justify-between gap-4 p-4 mb-6 bg-card border rounded-xl shadow-sm">
+      <div className="print:hidden flex items-center justify-between gap-4 p-4 mb-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
         <div className="flex items-center gap-3">
           {onBack && (
-            <Button variant="outline" size="sm" onClick={onBack}>
-              <ArrowLeft className="w-4 h-4 mr-1.5" />
+            <Button variant="outline" size="sm" onClick={onBack} className="gap-1.5 text-xs">
+              <ArrowLeft className="w-4 h-4" />
               Kembali
             </Button>
           )}
           <div>
-            <h3 className="font-semibold text-foreground text-sm">
+            <h3 className="font-semibold text-slate-900 text-sm">
               Pratinjau E-Rapor Internal
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-500">
               Dokumen hasil belajar siswa siap cetak format A4 standar resmi sekolah
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handlePrint} className="bg-primary text-primary-foreground gap-2">
+          <Button onClick={handlePrint} size="sm" className="gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white">
             <Printer className="w-4 h-4" />
             Cetak Dokumen (A4)
           </Button>
@@ -155,10 +155,10 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                         <div className="font-semibold text-zinc-950">{sub.mapel}</div>
                         <div className="text-[10px] text-zinc-500">{sub.guruPengampu}</div>
                       </td>
-                      <td className="border border-zinc-400 px-2 py-2 text-center font-medium">
+                      <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-medium">
                         {sub.kkm}
                       </td>
-                      <td className="border border-zinc-400 px-2 py-2 text-center font-bold text-zinc-900">
+                      <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-bold text-zinc-900">
                         {sub.nilaiAkhir !== null ? sub.nilaiAkhir.toFixed(2) : "-"}
                       </td>
                       <td className="border border-zinc-400 px-2 py-2 text-center font-bold">
@@ -190,7 +190,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                   <td colSpan={3} className="border border-zinc-400 px-3 py-2 text-right">
                     Total Nilai / Rata-rata Rapor:
                   </td>
-                  <td className="border border-zinc-400 px-2 py-2 text-center font-bold text-zinc-950">
+                  <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-bold text-zinc-950">
                     {data.rekapNilai.rataRata.toFixed(2)}
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-bold">
@@ -344,3 +344,4 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
     </div>
   );
 }
+

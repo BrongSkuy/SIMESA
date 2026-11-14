@@ -527,16 +527,19 @@ export async function getClassReportSummary(
     .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
     .all();
 
-  // 4. Ambil subjek kelas
+  // 4. Ambil subjek unik untuk kelas ini
   const allSubjects = await db.select().from(subjects).all();
-  const classSubjects = allSubjects.filter((s) => {
+  const seenClassMapels = new Set<string>();
+  allSubjects.forEach((s) => {
     const assigned = (s.kelasDiampu || "")
       .split(",")
       .map((k) => k.trim())
       .filter(Boolean);
-    return assigned.includes(kelas) || assigned.length === 0;
+    if (assigned.includes(kelas) || assigned.length === 0) {
+      seenClassMapels.add(s.namaMapel.trim().toLowerCase());
+    }
   });
-  const totalMapel = classSubjects.length;
+  const totalMapel = seenClassMapels.size;
 
   // 5. Ambil data notes, scores, dan attendance untuk kelas ini
   const studentIds = activeStudents.map((s) => s.id);
@@ -588,12 +591,13 @@ export async function getClassReportSummary(
     const note = noteByStudent.get(s.id);
     const studentAtt = attByStudent.get(s.id) || [];
 
-    // Kalkulasi nilai bagi rata
-    let totalScoreSum = 0;
-    let scoredSubjectCount = 0;
-    let belowKkmCount = 0;
+    // Kelompokkan nilai berdasarkan mapel unik untuk siswa ini (prioritas akademik)
+    const mapelScoreMap = new Map<string, number>();
 
     studentScores.forEach((sc) => {
+      if (!sc.mapel || sc.mapel === "Umum") return;
+      const lowerMapel = sc.mapel.trim().toLowerCase();
+
       let finalVal: number | null = null;
       if (sc.details) {
         try {
@@ -610,14 +614,25 @@ export async function getClassReportSummary(
       }
 
       if (finalVal !== null && Number.isFinite(finalVal)) {
-        totalScoreSum += finalVal;
-        scoredSubjectCount++;
-        if (finalVal < DEFAULT_KKM) {
-          belowKkmCount++;
+        if (
+          !mapelScoreMap.has(lowerMapel) ||
+          (sc.details && (sc.details.includes("UTS") || sc.details.includes("Tugas")))
+        ) {
+          mapelScoreMap.set(lowerMapel, finalVal);
         }
       }
     });
 
+    let totalScoreSum = 0;
+    let belowKkmCount = 0;
+    mapelScoreMap.forEach((val) => {
+      totalScoreSum += val;
+      if (val < DEFAULT_KKM) {
+        belowKkmCount++;
+      }
+    });
+
+    const scoredSubjectCount = mapelScoreMap.size;
     const rataRata =
       scoredSubjectCount > 0
         ? Number((totalScoreSum / scoredSubjectCount).toFixed(2))
@@ -665,3 +680,4 @@ export async function getClassReportSummary(
     students: resultStudents,
   };
 }
+

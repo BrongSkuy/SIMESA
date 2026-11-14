@@ -14,14 +14,23 @@ import {
   Loader2,
   Save,
   BookOpen,
-  X,
-  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
+import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CardDescription, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -172,7 +181,9 @@ export default function GuruEraporPage() {
     const total = list.length;
     const tuntas = list.filter((s) => s.statusKetuntasan === "Semua Tuntas").length;
     const remidi = list.filter((s) => s.statusKetuntasan === "Perlu Perbaikan").length;
-    const disahkan = list.filter((s) => s.statusRapor === "Disahkan" || s.statusRapor === "Diterbitkan").length;
+    const disahkan = list.filter(
+      (s) => s.statusRapor === "Disahkan" || s.statusRapor === "Diterbitkan"
+    ).length;
     const adaCatatan = list.filter((s) => s.hasCatatan).length;
     return { total, tuntas, remidi, disahkan, adaCatatan };
   }, [summaryData]);
@@ -294,7 +305,6 @@ export default function GuruEraporPage() {
       if (!res.ok) throw new Error(json.error || "Gagal menyimpan target KKM");
 
       toast.success(json.message);
-      // Refresh list
       const updated = await fetch("/api/academic/curriculum").then((r) => r.json());
       if (Array.isArray(updated.data)) setCurriculumList(updated.data);
       if (selectedKelas) loadClassSummary(selectedKelas);
@@ -318,318 +328,321 @@ export default function GuruEraporPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
+      {/* 1. SEAMLESS HERO PAGE HEADER (Flush with topbar, matches Rekap Kelas) */}
       <PageHeader
         title="Manajemen E-Rapor Internal"
+        badge="Portal Guru"
         description="Rekapitulasi capaian nilai akhir bagi rata, catatan wali kelas, dan pencetakan dokumen hasil belajar siswa"
-      />
+        icon={FileSpreadsheet}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOpenKkmModal}
+          className="gap-1.5 text-xs"
+        >
+          <Settings className="h-3.5 w-3.5 text-slate-400" /> Target KKM Mapel
+        </Button>
 
-      {/* FILTER & SELECTOR KELAS */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-card border rounded-xl p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="w-56">
-            <Label className="text-xs font-semibold text-muted-foreground mb-1 block">
-              Pilih Kelas Binaan:
-            </Label>
-            <Select
-              value={selectedKelas}
-              onValueChange={(val) => {
-                if (val) setSelectedKelas(val);
-              }}
-              disabled={loadingClasses}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih Kelas" />
-              </SelectTrigger>
-              <SelectContent>
-                {kelasList.map((k) => (
-                  <SelectItem key={k.id} value={k.namaKelas}>
-                    Kelas {k.namaKelas} {k.waliKelas ? `— ${k.waliKelas}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (filteredStudents.length > 0) {
+              handlePreviewReport(filteredStudents[0].studentId);
+            } else {
+              toast.info("Pilih siswa terlebih dahulu");
+            }
+          }}
+          disabled={loadingPrint || !summaryData || filteredStudents.length === 0}
+          className="gap-1.5 text-xs"
+        >
+          {loadingPrint ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
+          ) : (
+            <Printer className="h-3.5 w-3.5 text-slate-400" />
+          )}
+          Pratinjau Contoh Rapor
+        </Button>
+      </PageHeader>
+
+      {/* 2. CLASS TABS & HOMEROOM INFO (Consistent pill tabs) */}
+      {kelasList.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
+            <Users className="h-5 w-5" />
           </div>
+          <p className="text-xs font-semibold text-slate-700">
+            Belum Ada Data Kelas Terdaftar
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <Tabs
+            value={selectedKelas}
+            onValueChange={(val) => {
+              if (val) setSelectedKelas(val);
+            }}
+          >
+            <TabsList className="flex flex-wrap h-auto">
+              {kelasList.map((c) => (
+                <TabsTrigger
+                  key={c.id}
+                  value={c.namaKelas}
+                  className="cursor-pointer"
+                >
+                  Kelas {c.namaKelas}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
           {summaryData && (
-            <div className="border-l pl-3 ml-1 hidden md:block">
-              <p className="text-xs font-semibold text-foreground">
-                Wali Kelas: <span className="text-primary font-bold">{summaryData.waliKelas}</span>
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Periode: {summaryData.periode.replace("-", " ")}
-              </p>
+            <div className="flex items-center gap-2 text-xs bg-white border border-slate-200/80 rounded-xl px-4 py-2 shadow-xs">
+              <span className="text-slate-500 font-medium">Wali Kelas:</span>
+              <span className="font-semibold text-slate-900">
+                {summaryData.waliKelas}
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500">Periode:</span>
+              <span className="font-semibold text-blue-700">
+                {summaryData.periode.replace("-", " ")}
+              </span>
             </div>
           )}
         </div>
+      )}
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenKkmModal}
-            className="gap-2 text-xs"
-          >
-            <Settings className="w-4 h-4 text-muted-foreground" />
-            Target KKM Mapel
-          </Button>
-
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => {
-              if (filteredStudents.length > 0) {
-                handlePreviewReport(filteredStudents[0].studentId);
-              } else {
-                toast.info("Tidak ada siswa yang dipilih");
-              }
-            }}
-            disabled={loadingPrint || !summaryData || filteredStudents.length === 0}
-            className="gap-2 text-xs"
-          >
-            {loadingPrint ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Printer className="w-4 h-4" />
-            )}
-            Cetak Contoh Rapor
-          </Button>
-        </div>
+      {/* 3. KPI STAT CARDS (Standard SIMESA StatCard row) */}
+      <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-4 bg-white overflow-hidden shadow-xs">
+        <StatCard
+          title="Total Siswa"
+          value={stats.total}
+          icon={Users}
+          color="blue"
+          footerLeft="Taruna/taruni aktif"
+          footerRight="Kelas Terpilih"
+        />
+        <StatCard
+          title="Tuntas KKM"
+          value={stats.tuntas}
+          icon={CheckCircle2}
+          color="emerald"
+          footerLeft="Semua mapel ≥ 75"
+          footerRight="KKM Tercapai"
+        />
+        <StatCard
+          title="Perlu Perbaikan"
+          value={stats.remidi}
+          icon={AlertCircle}
+          color="amber"
+          footerLeft="Ada nilai di bawah 75"
+          footerRight="Perlu Remidi"
+        />
+        <StatCard
+          title="Rapor Disahkan"
+          value={`${stats.disahkan} / ${stats.total}`}
+          icon={GraduationCap}
+          color="navy"
+          footerLeft={`${stats.adaCatatan} siswa ber-catatan`}
+          footerRight="Status Final"
+        />
       </div>
 
-      {/* STATISTIK KELAS */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-card border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-            <span>Total Siswa</span>
-            <Users className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-2xl font-black text-foreground mt-1">
-            {stats.total}
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Taruna/taruni aktif
-          </p>
-        </div>
-
-        <div className="bg-card border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-            <span>Tuntas KKM</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="text-2xl font-black text-emerald-600 mt-1">
-            {stats.tuntas}
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Semua mapel $\ge 75$
-          </p>
-        </div>
-
-        <div className="bg-card border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-            <span>Perlu Perbaikan</span>
-            <AlertCircle className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="text-2xl font-black text-amber-600 mt-1">
-            {stats.remidi}
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Ada nilai di bawah 75
-          </p>
-        </div>
-
-        <div className="bg-card border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-medium">
-            <span>Rapor Disahkan</span>
-            <GraduationCap className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="text-2xl font-black text-blue-600 mt-1">
-            {stats.disahkan} <span className="text-xs font-normal text-muted-foreground">/ {stats.total}</span>
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {stats.adaCatatan} siswa ber-catatan
-          </p>
-        </div>
-      </div>
-
-      {/* SEARCH & FILTER BAR */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Cari nama atau NIS siswa..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-xs"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Select
-            value={statusFilter}
-            onValueChange={(val) => {
-              if (val) setStatusFilter(val);
-            }}
-          >
-            <SelectTrigger className="w-40 text-xs">
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Status</SelectItem>
-              <SelectItem value="tuntas">Semua Tuntas</SelectItem>
-              <SelectItem value="remidi">Perlu Perbaikan</SelectItem>
-              <SelectItem value="disahkan">Sudah Disahkan</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* TABEL SISWA */}
-      <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between">
+      {/* 4. DETAIL MATRIKS RAPOR SISWA TABLE (Standard SIMESA styling) */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h3 className="font-semibold text-foreground text-sm">
+            <CardTitle className="text-base font-semibold text-slate-900 tracking-tight">
               Rekapitulasi Rapor Siswa Kelas {selectedKelas}
-            </h3>
-            <p className="text-xs text-muted-foreground">
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500 mt-0.5">
               Nilai akhir dihitung otomatis dengan metode bagi rata murni seluruh komponen
-            </p>
+            </CardDescription>
           </div>
-          <span className="text-xs font-medium text-muted-foreground">
-            {filteredStudents.length} siswa ditemukan
-          </span>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-full sm:w-60">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder="Cari nama atau NIS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 text-xs"
+              />
+            </div>
+
+            <Select
+              value={statusFilter}
+              onValueChange={(val) => {
+                if (val) setStatusFilter(val);
+              }}
+            >
+              <SelectTrigger className="w-36 h-8 text-xs">
+                <SelectValue placeholder="Semua Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Status</SelectItem>
+                <SelectItem value="tuntas">Semua Tuntas</SelectItem>
+                <SelectItem value="remidi">Perlu Perbaikan</SelectItem>
+                <SelectItem value="disahkan">Sudah Disahkan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {loadingSummary ? (
           <div className="py-16 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <p className="text-xs">Memuat data nilai dan catatan kelas...</p>
+            <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+            <p className="text-xs text-slate-500">Memuat data nilai dan catatan kelas...</p>
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="py-16 text-center text-muted-foreground">
+          <div className="py-16 text-center text-slate-400">
             <FileSpreadsheet className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            <p className="text-sm font-medium">Tidak ada data siswa</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm font-semibold text-slate-700">Tidak ada data siswa</p>
+            <p className="text-xs text-slate-500 mt-1">
               Pilih kelas lain atau sesuaikan kata kunci pencarian.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-muted/50 text-muted-foreground border-b uppercase text-[10px] tracking-wider font-semibold">
-                <tr>
-                  <th className="px-3 py-3 text-center w-10">No</th>
-                  <th className="px-3 py-3 w-28">NIS</th>
-                  <th className="px-4 py-3">Nama Lengkap</th>
-                  <th className="px-3 py-3 text-center w-28">Rata-rata</th>
-                  <th className="px-3 py-3 text-center w-32">Mapel Terisi</th>
-                  <th className="px-3 py-3 text-center w-32">Status Nilai</th>
-                  <th className="px-3 py-3 text-center w-32">Catatan Wali</th>
-                  <th className="px-3 py-3 text-center w-28">Status Rapor</th>
-                  <th className="px-4 py-3 text-right w-44">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6 text-center w-12 whitespace-nowrap">
+                    No
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap w-28">NIS</TableHead>
+                  <TableHead className="whitespace-nowrap min-w-[200px]">
+                    Nama Siswa
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap w-28">
+                    Rata-rata
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap w-32">
+                    Mapel Terisi
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap w-32">
+                    Status Nilai
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap w-32">
+                    Catatan Wali
+                  </TableHead>
+                  <TableHead className="text-center whitespace-nowrap w-28">
+                    Status Rapor
+                  </TableHead>
+                  <TableHead className="text-right pr-6 whitespace-nowrap w-36">
+                    Aksi
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredStudents.map((s, idx) => (
-                  <tr key={s.studentId} className="hover:bg-muted/40 transition-colors">
-                    <td className="px-3 py-3 text-center font-medium text-muted-foreground">
+                  <TableRow
+                    key={`${s.studentId}-${idx}`}
+                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                  >
+                    <TableCell className="pl-6 text-center font-mono text-xs text-slate-500 group-hover/row:text-slate-400 whitespace-nowrap">
                       {idx + 1}
-                    </td>
-                    <td className="px-3 py-3 font-mono font-medium text-foreground">
+                    </TableCell>
+                    <TableCell className="font-mono text-xs font-semibold text-slate-700 group-hover/row:text-slate-300 tabular-nums whitespace-nowrap">
                       {s.nis}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-foreground">{s.namaLengkap}</div>
-                      <div className="text-[10px] text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                        {s.namaLengkap}
+                      </div>
+                      <div className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
                         {s.jenisKelamin === "L" ? "Taruna" : "Taruni"} • H:{s.presensi.hadir} S:{s.presensi.sakit} I:{s.presensi.izin} A:{s.presensi.alfa}
                       </div>
-                    </td>
-                    <td className="px-3 py-3 text-center font-bold">
+                    </TableCell>
+                    <TableCell className="text-center font-mono font-bold text-sm tabular-nums whitespace-nowrap">
                       {s.rataRata !== null ? (
                         <span
                           className={
                             s.rataRata >= 90
-                              ? "text-emerald-600"
+                              ? "text-emerald-600 group-hover/row:text-emerald-400"
                               : s.rataRata >= 80
-                              ? "text-blue-600"
+                              ? "text-blue-600 group-hover/row:text-blue-400"
                               : s.rataRata >= 75
-                              ? "text-amber-600"
-                              : "text-red-600"
+                              ? "text-amber-600 group-hover/row:text-amber-400"
+                              : "text-rose-600 group-hover/row:text-rose-400"
                           }
                         >
                           {s.rataRata.toFixed(2)}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">-</span>
+                        <span className="text-slate-400">-</span>
                       )}
-                    </td>
-                    <td className="px-3 py-3 text-center font-medium text-foreground">
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-xs font-medium text-slate-700 group-hover/row:text-slate-300 whitespace-nowrap tabular-nums">
                       {s.jumlahMapelTerisi} / {s.totalMapel} Mapel
-                    </td>
-                    <td className="px-3 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-colors ${
                           s.statusKetuntasan === "Semua Tuntas"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30"
                             : s.statusKetuntasan === "Perlu Perbaikan"
-                            ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-                            : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                            ? "bg-amber-50 text-amber-700 border-amber-200 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30"
+                            : "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
                         }`}
                       >
                         {s.statusKetuntasan}
                       </span>
-                    </td>
-                    <td className="px-3 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
                       {s.hasCatatan ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+                        <span className="inline-flex items-center gap-1 text-xs text-emerald-600 group-hover/row:text-emerald-400 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Terisi
                         </span>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground italic">
+                        <span className="text-xs text-slate-400 group-hover/row:text-slate-500 italic">
                           Belum Diisi
                         </span>
                       )}
-                    </td>
-                    <td className="px-3 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors ${
                           s.statusRapor === "Disahkan" || s.statusRapor === "Diterbitkan"
-                            ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            ? "bg-blue-50 text-[#1e3a8a] border-blue-200 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30"
+                            : "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
                         }`}
                       >
                         {s.statusRapor}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-right pr-6 whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="xs"
                           onClick={() => handleOpenNoteModal(s)}
-                          className="h-8 px-2 text-xs gap-1"
+                          className="h-7 px-2 text-xs gap-1 group-hover/row:text-slate-200 group-hover/row:hover:bg-slate-800"
                           title="Input Catatan Wali Kelas & Ekskul"
                         >
-                          <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+                          <Edit3 className="w-3.5 h-3.5 text-blue-500 group-hover/row:text-blue-400" />
                           Catatan
                         </Button>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="xs"
                           onClick={() => handlePreviewReport(s.studentId)}
                           disabled={loadingPrint}
-                          className="h-8 px-2 text-xs gap-1"
+                          className="h-7 px-2 text-xs gap-1 group-hover/row:bg-slate-800 group-hover/row:border-slate-700 group-hover/row:text-white"
                           title="Pratinjau & Cetak Rapor"
                         >
-                          <Printer className="w-3.5 h-3.5 text-zinc-600" />
+                          <Printer className="w-3.5 h-3.5 text-slate-500 group-hover/row:text-slate-400" />
                           Rapor
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
@@ -754,7 +767,11 @@ export default function GuruEraporPage() {
               disabled={savingNote}
               className="gap-2"
             >
-              {savingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              {savingNote ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Save className="w-3.5 h-3.5" />
+              )}
               Simpan Catatan
             </Button>
           </DialogFooter>
@@ -825,7 +842,11 @@ export default function GuruEraporPage() {
                   disabled={savingKkm}
                   className="gap-1.5 text-xs h-8"
                 >
-                  {savingKkm ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  {savingKkm ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
                   Simpan KKM
                 </Button>
               </div>
