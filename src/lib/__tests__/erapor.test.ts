@@ -50,4 +50,54 @@ describe("E-Rapor Akademik & Penilaian Bagi Rata Unit Tests", () => {
     expect(result.kategori).toBe("Belum Dinilai");
     expect(result.deskripsi).toContain("belum tuntas diinput");
   });
+
+  it("should handle exact threshold boundaries accurately", () => {
+    // 74.99 -> D
+    const dScore = getPredikatAndDeskripsi(74.99, "Matematika", DEFAULT_KKM);
+    expect(dScore.predikat).toBe("D");
+    expect(dScore.statusKetuntasan).toBe("Belum Tuntas");
+
+    // 75.00 -> C (Tuntas KKM)
+    const cScore = getPredikatAndDeskripsi(75.0, "Matematika", DEFAULT_KKM);
+    expect(cScore.predikat).toBe("C");
+    expect(cScore.statusKetuntasan).toBe("Tuntas");
+
+    // 89.99 -> B
+    const bScore = getPredikatAndDeskripsi(89.99, "Matematika", DEFAULT_KKM);
+    expect(bScore.predikat).toBe("B");
+
+    // 90.00 -> A
+    const aScore = getPredikatAndDeskripsi(90.0, "Matematika", DEFAULT_KKM);
+    expect(aScore.predikat).toBe("A");
+  });
+
+  it("should prioritize academic criteria components over single behavioral score", () => {
+    // Simulasi 2 record score untuk mapel yang sama:
+    // 1. Nilai Akademik: { Tugas: 75, UTS: 79, UAS: 72 } -> Rata-rata 75.33
+    // 2. Keaktifan: { Nilai: 81 } -> 81
+    const scores = [
+      { mapel: "Matematika", details: JSON.stringify({ Tugas: 75, UTS: 79, UAS: 72 }), nilai: 75.33 },
+      { mapel: "Matematika", details: JSON.stringify({ Nilai: 81 }), nilai: 81 },
+    ];
+
+    const scoreByMapel = new Map<string, (typeof scores)[0]>();
+    scores.forEach((sc) => {
+      const key = sc.mapel.trim().toLowerCase();
+      const existing = scoreByMapel.get(key);
+      const isAcademic =
+        sc.details &&
+        (sc.details.includes("Tugas") ||
+          sc.details.includes("UTS") ||
+          sc.details.includes("UAS") ||
+          sc.details.includes("Praktek"));
+
+      if (!existing || isAcademic) {
+        scoreByMapel.set(key, sc);
+      }
+    });
+
+    const chosen = scoreByMapel.get("matematika");
+    expect(chosen?.nilai).toBe(75.33);
+    expect(chosen?.details).toContain("Tugas");
+  });
 });

@@ -191,7 +191,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                     Total Nilai / Rata-rata Rapor:
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-bold text-zinc-950">
-                    {data.rekapNilai.rataRata.toFixed(2)}
+                    {data.rekapNilai.rataRata > 0 ? data.rekapNilai.rataRata.toFixed(2) : "-"}
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-bold">
                     {data.rekapNilai.rataRata >= 90
@@ -200,7 +200,9 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                       ? "B"
                       : data.rekapNilai.rataRata >= 75
                       ? "C"
-                      : "D"}
+                      : data.rekapNilai.rataRata > 0
+                      ? "D"
+                      : "-"}
                   </td>
                   <td className="border border-zinc-400 px-3 py-2 text-[11px] text-zinc-600">
                     Total {data.rekapNilai.jumlahTuntas} mapel tuntas KKM dari {data.rekapNilai.jumlahMapel} mata pelajaran.

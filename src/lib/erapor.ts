@@ -262,11 +262,22 @@ export async function getStudentReportCard(
     }
   });
 
-  // Map scores by mapel name
+  // Map scores by mapel name — prioritaskan nilai akademik (komponen Tugas/UTS/UAS/Praktek)
   const scoreByMapel = new Map<string, typeof scoresRows[0]>();
   scoresRows.forEach((sc) => {
     if (sc.mapel && sc.mapel !== "Umum") {
-      scoreByMapel.set(sc.mapel.toLowerCase(), sc);
+      const key = sc.mapel.trim().toLowerCase();
+      const existing = scoreByMapel.get(key);
+      const isAcademic =
+        sc.details &&
+        (sc.details.includes("Tugas") ||
+          sc.details.includes("UTS") ||
+          sc.details.includes("UAS") ||
+          sc.details.includes("Praktek"));
+
+      if (!existing || isAcademic) {
+        scoreByMapel.set(key, sc);
+      }
     }
   });
 

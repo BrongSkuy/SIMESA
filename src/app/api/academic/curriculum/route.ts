@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const mapel = body.mapel?.trim();
-    const kkm = Number(body.kkm) || 75;
+    const kkm = Number.isFinite(Number(body.kkm)) ? Number(body.kkm) : 75;
     const tingkat = body.tingkat?.trim() || "Semua";
     const capaianKompetensi = body.capaianKompetensi?.trim() || null;
 

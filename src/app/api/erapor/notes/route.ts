@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { studentReportNotes, academicYears } from "@/db/schema";
+import { studentReportNotes, academicYears, students } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -82,6 +82,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "ID Siswa wajib diisi" },
         { status: 400 }
+      );
+    }
+
+    const [existingStudent] = await db
+      .select({ id: students.id })
+      .from(students)
+      .where(eq(students.id, studentId));
+    if (!existingStudent) {
+      return NextResponse.json(
+        { error: "Siswa tidak ditemukan" },
+        { status: 404 }
       );
     }
 
