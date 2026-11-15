@@ -543,6 +543,225 @@ async function seed() {
   }
 
   // ==========================================
+  // 8. Violation Types & Sample Disciplinary Records
+  // ==========================================
+  console.log("\n⚖️ Seeding Violation Types & Disciplinary Records...");
+  const defaultViolationTypes = [
+    {
+      kode: "TATIB-01",
+      namaPelanggaran: "Keterlambatan Masuk Sekolah (<15 menit)",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Teguran lisan & pembinaan disiplin apel pagi",
+    },
+    {
+      kode: "TATIB-02",
+      namaPelanggaran: "Atribut Seragam Tidak Lengkap (Topi/Dasi/Sepatu)",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Pembinaan kerapian taruna",
+    },
+    {
+      kode: "TATIB-03",
+      namaPelanggaran: "Rambut Tidak Sesuai Standar Taruna Penerbangan",
+      kategori: "Ringan" as const,
+      poinDefault: 10,
+      deskripsiSanksi: "Peringatan lisan & batas cukur 1x24 jam",
+    },
+    {
+      kode: "TATIB-04",
+      namaPelanggaran: "Makan/Minum Saat KBM Berlangsung Tanpa Izin",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Teguran langsung guru mapel",
+    },
+    {
+      kode: "TATIB-05",
+      namaPelanggaran: "Membuang Sampah Sembarangan di Koridor/Kelas",
+      kategori: "Ringan" as const,
+      poinDefault: 10,
+      deskripsiSanksi: "Tugas kebersihan mandiri 30 menit",
+    },
+    {
+      kode: "KBM-01",
+      namaPelanggaran: "Meninggalkan Kelas Tanpa Izin (Bolos Jam Mapel)",
+      kategori: "Sedang" as const,
+      poinDefault: 25,
+      deskripsiSanksi: "Bimbingan Wali Kelas & tugas refleksi disiplin",
+    },
+    {
+      kode: "KBM-02",
+      namaPelanggaran: "Penggunaan Gadget Non-Instruksional Saat KBM",
+      kategori: "Sedang" as const,
+      poinDefault: 20,
+      deskripsiSanksi: "Penyitaan sementara sampai jam kepulangan",
+    },
+    {
+      kode: "TATIB-06",
+      namaPelanggaran: "Tidak Mengikuti Upacara Bendera / Apel Taruna",
+      kategori: "Sedang" as const,
+      poinDefault: 20,
+      deskripsiSanksi: "Pembinaan kedisiplinan terarah",
+    },
+    {
+      kode: "TATIB-07",
+      namaPelanggaran: "Merokok / Membawa Rokok/Vape di Lingkungan Sekolah",
+      kategori: "Sedang" as const,
+      poinDefault: 40,
+      deskripsiSanksi: "Penyitaan barang & pemanggilan orang tua",
+    },
+    {
+      kode: "KDR-01",
+      namaPelanggaran: "Perkelahian Fisik / Pemicu Konflik Antar Taruna",
+      kategori: "Berat" as const,
+      poinDefault: 75,
+      deskripsiSanksi: "Skorsing akademik 3 hari & penerbitan SP resmi",
+    },
+    {
+      kode: "KDR-02",
+      namaPelanggaran: "Membawa Senjata Tajam / Barang Terlarang",
+      kategori: "Berat" as const,
+      poinDefault: 100,
+      deskripsiSanksi: "Konferensi dewan kehormatan taruna & sanksi berat",
+    },
+    {
+      kode: "KDR-03",
+      namaPelanggaran: "Tindakan Asusila / Perundungan (Bullying) Berat",
+      kategori: "Berat" as const,
+      poinDefault: 80,
+      deskripsiSanksi: "Bimbingan mendalam BK & penerbitan SP tingkat lanjut",
+    },
+    {
+      kode: "KDR-04",
+      namaPelanggaran: "Pemalsuan Tanda Tangan Dokumen / Surat Izin",
+      kategori: "Berat" as const,
+      poinDefault: 60,
+      deskripsiSanksi: "Pemanggilan orang tua & penerbitan SP",
+    },
+  ];
+
+  const insertedTypes: Record<string, string> = {};
+  for (const vt of defaultViolationTypes) {
+    try {
+      const [row] = await db
+        .insert(schema.violationTypes)
+        .values({
+          ...vt,
+          isActive: true,
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (row) {
+        insertedTypes[vt.kode] = row.id;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Tarik ulang ID jika sudah ada sebelumnya
+  const allVTypes = await db.select().from(schema.violationTypes);
+  for (const t of allVTypes) {
+    insertedTypes[t.kode] = t.id;
+  }
+  console.log(`   ✅ Seeded ${allVTypes.length} master violation types`);
+
+  // Buat sample catatan pelanggaran untuk demonstrasi
+  const allStuds = await db.select().from(schema.students);
+  const andi = allStuds.find((s) => s.nis === "2024001");
+  const rizki = allStuds.find((s) => s.nis === "2024003");
+  const dimas = allStuds.find((s) => s.nis === "2024011");
+
+  if (andi && insertedTypes["TATIB-01"]) {
+    await db.insert(schema.studentViolations).values({
+      studentId: andi.id,
+      violationTypeId: insertedTypes["TATIB-01"],
+      reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+      tanggal: "2026-11-10",
+      poin: 5,
+      lokasi: "Gerbang Utama",
+      keterangan: "Terlambat 8 menit karena kendala transportasi",
+      status: "Selesai Dibina",
+      tindakLanjut: "Diberi teguran lisan dan doa apel mandiri",
+    }).catch(() => {});
+  }
+
+  if (rizki && insertedTypes["TATIB-02"] && insertedTypes["KBM-01"]) {
+    await db.insert(schema.studentViolations).values([
+      {
+        studentId: rizki.id,
+        violationTypeId: insertedTypes["TATIB-02"],
+        reportedBy: "Budi Santoso, S.Pd.",
+        tanggal: "2026-11-08",
+        poin: 5,
+        lokasi: "Ruang Kelas X-A",
+        keterangan: "Tidak memakai sabuk logo resmi taruna",
+        status: "Tercatat",
+      },
+      {
+        studentId: rizki.id,
+        violationTypeId: insertedTypes["KBM-01"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-12",
+        poin: 25,
+        lokasi: "Kantin Belakang",
+        keterangan: "Meninggalkan jam pelajaran Matematika tanpa izin",
+        status: "Diproses BK",
+        tindakLanjut: "Dipanggil konseling BK sesi pembinaan lisan",
+      },
+    ]).catch(() => {});
+  }
+
+  if (dimas && insertedTypes["TATIB-07"] && insertedTypes["KBM-02"] && insertedTypes["TATIB-01"]) {
+    await db.insert(schema.studentViolations).values([
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["TATIB-01"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-04",
+        poin: 5,
+        lokasi: "Gerbang Depan",
+        keterangan: "Terlambat hadir apel pagi",
+        status: "Selesai Dibina",
+      },
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["KBM-02"],
+        reportedBy: "Siti Rahayu, M.Pd.",
+        tanggal: "2026-11-07",
+        poin: 20,
+        lokasi: "Lab Komputer",
+        keterangan: "Bermain game online saat praktikum berlangsung",
+        status: "Tercatat",
+      },
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["TATIB-07"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-11",
+        poin: 40,
+        lokasi: "Toilet Gedung B",
+        keterangan: "Ditemukan membawa rokok elektrik di area sekolah",
+        status: "Diproses BK",
+        tindakLanjut: "Rekomendasi penerbitan Surat Peringatan I",
+      },
+    ]).catch(() => {});
+
+    // Sample warning letter SP 1 untuk Dimas (total poin: 65)
+    await db.insert(schema.warningLetters).values({
+      studentId: dimas.id,
+      nomorSurat: "001/SP-I/SMK-DIRGANTARA/XI/2026",
+      tingkatSp: 1,
+      totalPoinSaatSp: 65,
+      tanggalTerbit: "2026-11-12",
+      diterbitkanOleh: "Dra. Endang Lestari, S.Psi. (Guru BK)",
+      statusPanggilan: "Menunggu Panggilan",
+      catatanMediasi: "Jadwal pemanggilan orang tua direncanakan hari Senin, 17 November 2026 pukul 09.00 WIB",
+    }).catch(() => {});
+  }
+  console.log(`   ✅ Seeded sample disciplinary records & warning letter`);
+
+  // ==========================================
   // Done
   // ==========================================
   console.log("\n✨ Seeding complete!\n");

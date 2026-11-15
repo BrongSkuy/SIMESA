@@ -138,6 +138,57 @@ export const spkResults = sqliteTable("spk_results", {
   index("spk_results_periode_idx").on(table.periode),
 ]);
 
+// --- Master Jenis Pelanggaran (Katalog Poin & Sanksi) ---
+export const violationTypes = sqliteTable("violation_types", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  kode: text("kode").notNull().unique(), // e.g. "TATIB-01", "KBM-02", "KDR-01"
+  namaPelanggaran: text("nama_pelanggaran").notNull(),
+  kategori: text("kategori", { enum: ["Ringan", "Sedang", "Berat"] }).notNull(),
+  poinDefault: integer("poin_default").notNull().default(10),
+  deskripsiSanksi: text("deskripsi_sanksi"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+}, (table) => [
+  index("violation_types_kategori_idx").on(table.kategori),
+  index("violation_types_kode_idx").on(table.kode),
+]);
+
+// --- Buku Catatan Pelanggaran Siswa ---
+export const studentViolations = sqliteTable("student_violations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  violationTypeId: text("violation_type_id").notNull(),
+  reportedBy: text("reported_by").notNull(), // User ID / Nama Guru Piket / BK
+  tanggal: text("tanggal").notNull(), // YYYY-MM-DD
+  poin: integer("poin").notNull(),
+  lokasi: text("lokasi"),
+  keterangan: text("keterangan"),
+  status: text("status", { enum: ["Tercatat", "Diproses BK", "Selesai Dibina"] }).notNull().default("Tercatat"),
+  tindakLanjut: text("tindak_lanjut"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+}, (table) => [
+  index("student_violations_student_idx").on(table.studentId),
+  index("student_violations_type_idx").on(table.violationTypeId),
+  index("student_violations_tanggal_idx").on(table.tanggal),
+  index("student_violations_status_idx").on(table.status),
+]);
+
+// --- Surat Peringatan (SP 1, SP 2, SP 3) ---
+export const warningLetters = sqliteTable("warning_letters", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  nomorSurat: text("nomor_surat").notNull().unique(), // e.g. "042/SP-I/SMK-DIRGANTARA/XI/2026"
+  tingkatSp: integer("tingkat_sp").notNull(), // 1, 2, or 3
+  totalPoinSaatSp: integer("total_poin_saat_sp").notNull(),
+  tanggalTerbit: text("tanggal_terbit").notNull(), // YYYY-MM-DD
+  diterbitkanOleh: text("diterbitkan_oleh").notNull(), // User ID / Nama Penerbit (Guru BK / Kepala Sekolah)
+  statusPanggilan: text("status_panggilan", { enum: ["Menunggu Panggilan", "Hadir", "Tidak Hadir"] }).notNull().default("Menunggu Panggilan"),
+  catatanMediasi: text("catatan_mediasi"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+}, (table) => [
+  index("warning_letters_student_idx").on(table.studentId),
+  index("warning_letters_tingkat_idx").on(table.tingkatSp),
+]);
+
 // ============================================================
 // Type exports
 // ============================================================
@@ -152,3 +203,9 @@ export type SpkScoreRow = typeof spkScores.$inferSelect;
 export type SpkGradingCategoryRow = typeof spkGradingCategories.$inferSelect;
 export type SpkPublishStatusRow = typeof spkPublishStatus.$inferSelect;
 export type SpkResultRow = typeof spkResults.$inferSelect;
+export type ViolationType = typeof violationTypes.$inferSelect;
+export type NewViolationType = typeof violationTypes.$inferInsert;
+export type StudentViolation = typeof studentViolations.$inferSelect;
+export type NewStudentViolation = typeof studentViolations.$inferInsert;
+export type WarningLetter = typeof warningLetters.$inferSelect;
+export type NewWarningLetter = typeof warningLetters.$inferInsert;

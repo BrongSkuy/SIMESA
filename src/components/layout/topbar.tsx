@@ -25,6 +25,7 @@ import {
   User as UserIcon,
   LogOut,
   ShieldCheck,
+  ShieldAlert,
   Loader2,
   type LucideIcon,
 } from "lucide-react";
@@ -128,6 +129,12 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
         icon: BarChart3,
       },
       {
+        label: "Buku Poin & Sanksi",
+        description: "Catatan pelanggaran siswa & draf SP",
+        href: "/admin/pelanggaran",
+        icon: ShieldAlert,
+      },
+      {
         label: "Leaderboard",
         description: "Peringkat prestasi siswa",
         href: "/admin/leaderboard",
@@ -167,6 +174,7 @@ export const GURU_NAV_ITEMS = [
   { label: "Beranda", href: "/guru", icon: LayoutDashboard },
   { label: "Absensi", href: "/guru/absensi", icon: ClipboardCheck },
   { label: "Input Nilai", href: "/guru/nilai", icon: PenLine },
+  { label: "Buku Poin", href: "/guru/pelanggaran", icon: ShieldAlert },
   { label: "Rekap Kelas", href: "/guru/rekap", icon: BarChart3 },
   { label: "Leaderboard", href: "/guru/leaderboard", icon: Trophy },
 ];
@@ -175,6 +183,7 @@ export const SISWA_NAV_ITEMS = [
   { label: "Beranda", href: "/siswa", icon: LayoutDashboard },
   { label: "Riwayat Absensi", href: "/siswa/absensi", icon: CalendarCheck },
   { label: "Nilai Saya", href: "/siswa/nilai", icon: FileText },
+  { label: "Buku Poin", href: "/siswa/pelanggaran", icon: ShieldAlert },
   { label: "Leaderboard", href: "/siswa/leaderboard", icon: Trophy },
 ];
 
