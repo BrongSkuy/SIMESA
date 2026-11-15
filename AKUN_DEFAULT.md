@@ -45,3 +45,11 @@ Setelah menjalankan perintah database seed (`npx tsx src/db/seed.ts`), Anda dapa
 
 *(Catatan Siswa: Password default siswa adalah Nomor Induk Siswa / NIS masing-masing).*
 
+---
+
+### 5. Kebijakan Keamanan & Masa Aktif Sesi Akun
+| Kategori Akun | Batas Masa Aktif Sesi | Batas Percobaan Gagal | Keterangan & Karakteristik |
+| :--- | :---: | :---: | :--- |
+| **Siswa & Orang Tua** (`SISWA`) | **7 Hari** (168 Jam) | 5 Kali (Kunci 5 Menit) | Multi-device aktif (dapat diakses bersama oleh siswa dan orang tua dari HP keluarga tanpa saling mengeluarkan). |
+| **Staf & Dewan Guru** (`ADMIN`, `GURU`, `KEPALA_SEKOLAH`, dll.) | **24 Jam** (1 Hari Kerja) | 5 Kali (Kunci 5 Menit) | Mencegah akun tertinggal di komputer Lab atau TU sekolah. Sesi otomatis kedaluwarsa setelah 24 jam. |
+

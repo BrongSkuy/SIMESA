@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   PenLine,
   FileText,
+  FileSpreadsheet,
   BarChart3,
   Trophy,
   Settings,
@@ -122,6 +123,12 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
         icon: FileText,
       },
       {
+        label: "E-Rapor Internal",
+        description: "Evaluasi rapor dan pencetakan lembar hasil belajar",
+        href: "/admin/erapor",
+        icon: FileSpreadsheet,
+      },
+      {
         label: "Rekap Kelas",
         description: "Ringkasan perbandingan nilai antar kelas",
         href: "/admin/rekap",
@@ -167,6 +174,7 @@ export const GURU_NAV_ITEMS = [
   { label: "Beranda", href: "/guru", icon: LayoutDashboard },
   { label: "Absensi", href: "/guru/absensi", icon: ClipboardCheck },
   { label: "Input Nilai", href: "/guru/nilai", icon: PenLine },
+  { label: "E-Rapor", href: "/guru/erapor", icon: FileSpreadsheet },
   { label: "Rekap Kelas", href: "/guru/rekap", icon: BarChart3 },
   { label: "Leaderboard", href: "/guru/leaderboard", icon: Trophy },
 ];
@@ -175,6 +183,7 @@ export const SISWA_NAV_ITEMS = [
   { label: "Beranda", href: "/siswa", icon: LayoutDashboard },
   { label: "Riwayat Absensi", href: "/siswa/absensi", icon: CalendarCheck },
   { label: "Nilai Saya", href: "/siswa/nilai", icon: FileText },
+  { label: "E-Rapor", href: "/siswa/erapor", icon: FileSpreadsheet },
   { label: "Leaderboard", href: "/siswa/leaderboard", icon: Trophy },
 ];
 

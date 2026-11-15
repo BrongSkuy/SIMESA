@@ -138,6 +138,34 @@ export const spkResults = sqliteTable("spk_results", {
   index("spk_results_periode_idx").on(table.periode),
 ]);
 
+// --- Curriculum Targets (KKM & Capaian Materi per Mapel) ---
+export const curriculumTargets = sqliteTable("curriculum_targets", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  mapel: text("mapel").notNull(),
+  tingkat: text("tingkat").notNull().default("Semua"), // "X", "XI", "XII", atau "Semua"
+  kkm: integer("kkm").notNull().default(75),
+  capaianKompetensi: text("capaian_kompetensi"),
+  updatedAt: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+}, (table) => [
+  index("curriculum_mapel_idx").on(table.mapel),
+]);
+
+// --- Student Report Notes (Catatan Rapor Wali Kelas & Ekstrakurikuler) ---
+export const studentReportNotes = sqliteTable("student_report_notes", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  periode: text("periode").notNull(), // e.g. "2025/2026-Genap"
+  catatanWaliKelas: text("catatan_wali_kelas"),
+  ekskulNama: text("ekskul_nama"),
+  ekskulNilai: text("ekskul_nilai"), // "Sangat Baik" | "Baik" | "Cukup"
+  ekskulKeterangan: text("ekskul_keterangan"),
+  statusRapor: text("status_rapor", { enum: ["Draf", "Disahkan", "Diterbitkan"] }).notNull().default("Draf"),
+  updatedAt: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+}, (table) => [
+  index("report_notes_student_idx").on(table.studentId),
+  index("report_notes_periode_idx").on(table.periode),
+]);
+
 // ============================================================
 // Type exports
 // ============================================================
@@ -152,3 +180,7 @@ export type SpkScoreRow = typeof spkScores.$inferSelect;
 export type SpkGradingCategoryRow = typeof spkGradingCategories.$inferSelect;
 export type SpkPublishStatusRow = typeof spkPublishStatus.$inferSelect;
 export type SpkResultRow = typeof spkResults.$inferSelect;
+export type CurriculumTarget = typeof curriculumTargets.$inferSelect;
+export type NewCurriculumTarget = typeof curriculumTargets.$inferInsert;
+export type StudentReportNote = typeof studentReportNotes.$inferSelect;
+export type NewStudentReportNote = typeof studentReportNotes.$inferInsert;

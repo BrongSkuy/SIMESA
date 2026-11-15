@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import * as XLSX from "xlsx";
 import {
   ClipboardList,
@@ -20,6 +21,7 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  FileSpreadsheet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -398,19 +400,32 @@ export default function SiswaNilaiPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
-          <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Skor SPK SAW
-            </p>
-            <div className="flex items-baseline gap-1.5">
-              <p className="text-2xl font-bold tabular-nums text-white">
-                {data.totalSkorSPK}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <Link href="/siswa/erapor" className="self-center sm:self-auto">
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-2 text-xs shadow-md w-full sm:w-auto"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Lihat E-Rapor Internal
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
+            <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
+              <Award className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Total Skor SPK SAW
               </p>
-              <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-2xl font-bold tabular-nums text-white">
+                  {data.totalSkorSPK}
+                </p>
+                <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+              </div>
             </div>
           </div>
         </div>
@@ -577,7 +592,7 @@ export default function SiswaNilaiPage() {
               </div>
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {paginatedCardSubjects.map((subj) => {
+              {paginatedCardSubjects.map((subj, idx) => {
                 const avgTone = getScoreTone(subj.rataRataMapel);
                 const acadTone = getScoreTone(subj.akademik?.nilaiAkhir);
                 const pct =
@@ -587,7 +602,7 @@ export default function SiswaNilaiPage() {
 
                 return (
                   <div
-                    key={subj.namaMapel}
+                    key={`${subj.namaMapel}-${idx}`}
                     className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
                   >
                     <div>
@@ -849,7 +864,7 @@ export default function SiswaNilaiPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedTableSubjects.map((subj) => {
+                  {paginatedTableSubjects.map((subj, idx) => {
                     const kompItems = subj.akademik
                       ? subj.akademik.kategoriWajib.map((cat) => ({
                           cat,
@@ -858,7 +873,7 @@ export default function SiswaNilaiPage() {
                       : [];
                     return (
                       <TableRow
-                        key={subj.namaMapel}
+                        key={`${subj.namaMapel}-${idx}`}
                         className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
                       >
                         <TableCell className="pl-5 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
@@ -969,7 +984,7 @@ export default function SiswaNilaiPage() {
                     : "Tidak ada mata pelajaran yang cocok dengan filter pencarian Anda."}
                 </div>
               ) : (
-                paginatedTableSubjects.map((subj) => {
+                paginatedTableSubjects.map((subj, idx) => {
                   const kompItems = subj.akademik
                     ? subj.akademik.kategoriWajib.map((cat) => ({
                         cat,
@@ -978,7 +993,7 @@ export default function SiswaNilaiPage() {
                     : [];
                   return (
                     <div
-                      key={subj.namaMapel}
+                      key={`${subj.namaMapel}-${idx}`}
                       className="p-4 space-y-3 bg-white hover:bg-slate-50/75 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2">

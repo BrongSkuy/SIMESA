@@ -48,4 +48,7 @@ Bagi_Fitur_SIMESA.docx
 
 # typescript
 *.tsbuildinfo
+
+# temporary test scratch
+scratch/
 next-env.d.ts
