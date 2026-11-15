@@ -58,14 +58,7 @@ export function StudentViolationView() {
   useEffect(() => {
     async function fetchMyDiscipline() {
       try {
-        // Ambil profil user login
-        const resUser = await fetch("/api/user/profile");
-        if (!resUser.ok) return;
-        const userData = await resUser.json();
-
-        // Cari student id yang cocok
-        const studentId = userData.studentId || userData.id;
-        const resDiscipline = await fetch(`/api/violations/student/${studentId}`);
+        const resDiscipline = await fetch("/api/violations/student/me");
         if (resDiscipline.ok) {
           const d = await resDiscipline.json();
           setProfile(d);

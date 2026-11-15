@@ -8,7 +8,7 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq, desc, and, like, or } from "drizzle-orm";
-import { getClassDisciplineSummary } from "@/lib/violations";
+import { getClassDisciplineSummary } from "@/lib/violations-server";
 
 // GET /api/violations — List violations with filters or class summary
 export async function GET(req: NextRequest) {
