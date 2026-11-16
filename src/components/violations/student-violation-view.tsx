@@ -75,7 +75,7 @@ export function StudentViolationView() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Catatan Kedisiplinan Taruna"
+        title="Catatan Kedisiplinan Siswa"
         description="Transparansi buku poin tata tertib dan riwayat evaluasi pembinaan karakter"
         badge="Portal Siswa & Orang Tua"
         icon={profile?.totalPoints === 0 ? ShieldCheck : ShieldAlert}
@@ -89,7 +89,7 @@ export function StudentViolationView() {
           </div>
         ) : !profile ? (
           <div className="p-8 text-center text-xs text-slate-500 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-            Data profil taruna belum ditemukan.
+            Data profil siswa belum ditemukan.
           </div>
         ) : (
           <>
@@ -150,7 +150,7 @@ export function StudentViolationView() {
                             Tidak Ada Catatan Pelanggaran
                           </p>
                           <p className="text-[11px] text-slate-400 mt-0.5">
-                            Taruna menjaga kedisiplinan dan tata tertib sekolah dengan sangat baik.
+                            Siswa menjaga kedisiplinan dan tata tertib sekolah dengan sangat baik.
                           </p>
                         </div>
                       </TableCell>

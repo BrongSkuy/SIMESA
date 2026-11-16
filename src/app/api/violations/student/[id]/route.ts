@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
       if (!student) {
         return NextResponse.json(
-          { error: "Profil data taruna tidak ditemukan untuk akun ini" },
+          { error: "Profil data siswa tidak ditemukan untuk akun ini" },
           { status: 404 }
         );
       }

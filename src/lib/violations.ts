@@ -62,7 +62,7 @@ export function evaluateSanctionTier(totalPoints: number): SanctionTier {
       badgeBorder: "border-emerald-200 dark:border-emerald-500/20",
       recommendedSp: null,
       nextThreshold: SANCTION_THRESHOLDS.PEMBINAAN_LISAN,
-      actionRequired: "Pertahankan ketertiban & disiplin taruna",
+      actionRequired: "Pertahankan ketertiban & kedisiplinan siswa",
     };
   }
   if (totalPoints < SANCTION_THRESHOLDS.PEMBINAAN_LISAN) {

@@ -369,7 +369,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
       {/* 1. Header Banner Menyatu (Flush Edge-to-Edge) */}
       <PageHeader
         title="Buku Poin & Catatan Kedisiplinan"
-        description="Monitoring akumulasi poin pelanggaran tata tertib taruna dan penerbitan surat peringatan (SP) resmi"
+        description="Monitoring akumulasi poin pelanggaran tata tertib siswa dan penerbitan surat peringatan (SP) resmi"
         badge={portal === "admin" ? "Portal Admin" : "Portal Guru & BK"}
         icon={ShieldAlert}
       >
@@ -409,7 +409,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
             color="navy"
           />
           <StatCard
-            title="Taruna Berpoin"
+            title="Siswa Berpoin"
             value={stats.studentsWithPoints}
             subtitle="Memiliki catatan aktif"
             icon={Users}
@@ -436,7 +436,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
             <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
               <TabsTrigger value="students" className="text-xs font-semibold rounded-lg">
-                Rekap Taruna & Poin
+                Rekap Siswa & Poin
               </TabsTrigger>
               <TabsTrigger value="logs" className="text-xs font-semibold rounded-lg">
                 Riwayat Pelanggaran
@@ -489,14 +489,14 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <Input
                   type="text"
-                  placeholder="Cari nama taruna atau NIS..."
+                  placeholder="Cari nama siswa atau NIS..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
                 />
               </div>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {filteredStudents.length} taruna terdaftar
+                {filteredStudents.length} siswa terdaftar
               </span>
             </div>
 
@@ -519,13 +519,13 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-10 text-xs text-slate-500">
                         <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-[#1F4E78]" />
-                        Memuat data buku poin taruna...
+                        Memuat data buku poin siswa...
                       </TableCell>
                     </TableRow>
                   ) : filteredStudents.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-10 text-xs text-slate-500">
-                        Tidak ada data taruna yang cocok dengan filter.
+                        Tidak ada data siswa yang cocok dengan filter.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -628,7 +628,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                   <TableRow className="bg-slate-50/75 dark:bg-slate-800/50">
                     <TableHead className="w-12 text-center text-xs">No</TableHead>
                     <TableHead className="text-xs">Tanggal</TableHead>
-                    <TableHead className="text-xs">Taruna / Siswa</TableHead>
+                    <TableHead className="text-xs">Siswa</TableHead>
                     <TableHead className="text-xs">Kelas</TableHead>
                     <TableHead className="text-xs">Pelanggaran Disiplin</TableHead>
                     <TableHead className="text-center text-xs">Kategori</TableHead>
@@ -745,7 +745,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                     <TableHead className="w-12 text-center text-xs">No</TableHead>
                     <TableHead className="text-xs">Nomor Surat SP</TableHead>
                     <TableHead className="text-center text-xs">Tingkat</TableHead>
-                    <TableHead className="text-xs">Taruna / Siswa</TableHead>
+                    <TableHead className="text-xs">Siswa</TableHead>
                     <TableHead className="text-xs">Kelas</TableHead>
                     <TableHead className="text-center text-xs">Akumulasi Poin</TableHead>
                     <TableHead className="text-xs">Tanggal Terbit</TableHead>
@@ -920,7 +920,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
         letterData={currentPrintLetter}
       />
 
-      {/* MODAL 3: Riwayat Pelanggaran Individual Taruna */}
+      {/* MODAL 3: Riwayat Pelanggaran Individual Siswa */}
       <Dialog open={historyModalOpen} onOpenChange={setHistoryModalOpen}>
         <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           <DialogHeader>
@@ -937,7 +937,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
           <div className="max-h-96 overflow-y-auto space-y-2 pt-2">
             {violationsList.filter((v) => v.studentId === selectedStudentForHistory?.studentId).length === 0 ? (
               <p className="text-xs text-slate-500 py-6 text-center">
-                Taruna ini tidak memiliki catatan pelanggaran (Disiplin Bersih).
+                Siswa ini tidak memiliki catatan pelanggaran (Disiplin Bersih).
               </p>
             ) : (
               violationsList
@@ -1068,7 +1068,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
               <span>Terbitkan Surat Peringatan (SP)</span>
             </DialogTitle>
             <p className="text-xs text-slate-500">
-              Taruna: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) • Akumulasi:{" "}
+              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) • Akumulasi:{" "}
               <strong className="text-red-600">{targetStudentForSp?.totalPoints} Poin</strong>
             </p>
           </DialogHeader>

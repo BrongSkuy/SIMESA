@@ -60,12 +60,12 @@ export function WarningLetterPrintModal({
   const getSanksiText = (level: number) => {
     switch (level) {
       case 1:
-        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua / Wali Taruna ke sekolah untuk pembinaan terpadu.";
+        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua / Wali Siswa ke sekolah untuk pembinaan terpadu.";
       case 2:
         return "Peringatan tertulis kedua (SP II), skorsing akademik selama 3 (tiga) hari kerja, serta penandatanganan pakta integritas kedisiplinan bermaterai bersama Orang Tua / Wali.";
       case 3:
       default:
-        return "Peringatan tertulis ketiga (SP III / Terakhir), pelaksanaan Konferensi Kasus Dewan Kehormatan Guru, serta evaluasi pengembalian taruna kepada Orang Tua / Wali.";
+        return "Peringatan tertulis ketiga (SP III / Terakhir), pelaksanaan Konferensi Kasus Dewan Guru, serta evaluasi pengembalian siswa kepada Orang Tua / Wali.";
     }
   };
 
@@ -154,7 +154,7 @@ export function WarningLetterPrintModal({
             {/* PENGANTAR */}
             <p className="mb-4 text-justify">
               Surat Peringatan ini diterbitkan oleh pihak sekolah sehubungan dengan hasil evaluasi akumulasi
-              catatan pelanggaran tata tertib dan disiplin sekolah yang telah dicapai oleh taruna/siswi di bawah ini:
+              catatan pelanggaran tata tertib dan disiplin sekolah yang telah dicapai oleh siswa di bawah ini:
             </p>
 
             {/* DATA SISWA */}
@@ -220,7 +220,7 @@ export function WarningLetterPrintModal({
             </div>
 
             <p className="mb-6 text-justify">
-              Demikian Surat Peringatan ini dibuat agar menjadi perhatian sungguh-sungguh bagi taruna/siswi
+              Demikian Surat Peringatan ini dibuat agar menjadi perhatian sungguh-sungguh bagi siswa
               yang bersangkutan serta pihak Orang Tua / Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
             </p>
 

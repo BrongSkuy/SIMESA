@@ -128,7 +128,7 @@ export function QuickViolationModal({
             </div>
             <div>
               <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-                Catat Pelanggaran Taruna / Siswa
+                Catat Pelanggaran Siswa
               </DialogTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Pencatatan buku poin kedisiplinan dan tata tertib sekolah
@@ -147,7 +147,7 @@ export function QuickViolationModal({
           {/* Pilih Siswa */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Pilih Taruna / Siswa <span className="text-red-500">*</span>
+              Pilih Siswa <span className="text-red-500">*</span>
             </Label>
             <Select
               value={selectedStudentId}

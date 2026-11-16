@@ -559,11 +559,11 @@ async function seed() {
       namaPelanggaran: "Atribut Seragam Tidak Lengkap (Topi/Dasi/Sepatu)",
       kategori: "Ringan" as const,
       poinDefault: 5,
-      deskripsiSanksi: "Pembinaan kerapian taruna",
+      deskripsiSanksi: "Pembinaan kerapian siswa",
     },
     {
       kode: "TATIB-03",
-      namaPelanggaran: "Rambut Tidak Sesuai Standar Taruna Penerbangan",
+      namaPelanggaran: "Rambut Tidak Rapi / Melebihi Batas Ketentuan",
       kategori: "Ringan" as const,
       poinDefault: 10,
       deskripsiSanksi: "Peringatan lisan & batas cukur 1x24 jam",
@@ -598,7 +598,7 @@ async function seed() {
     },
     {
       kode: "TATIB-06",
-      namaPelanggaran: "Tidak Mengikuti Upacara Bendera / Apel Taruna",
+      namaPelanggaran: "Tidak Mengikuti Upacara Bendera / Apel Pagi",
       kategori: "Sedang" as const,
       poinDefault: 20,
       deskripsiSanksi: "Pembinaan kedisiplinan terarah",
@@ -612,7 +612,7 @@ async function seed() {
     },
     {
       kode: "KDR-01",
-      namaPelanggaran: "Perkelahian Fisik / Pemicu Konflik Antar Taruna",
+      namaPelanggaran: "Perkelahian Fisik / Pemicu Konflik Antar Siswa",
       kategori: "Berat" as const,
       poinDefault: 75,
       deskripsiSanksi: "Skorsing akademik 3 hari & penerbitan SP resmi",
@@ -622,7 +622,7 @@ async function seed() {
       namaPelanggaran: "Membawa Senjata Tajam / Barang Terlarang",
       kategori: "Berat" as const,
       poinDefault: 100,
-      deskripsiSanksi: "Konferensi dewan kehormatan taruna & sanksi berat",
+      deskripsiSanksi: "Konferensi kasus dewan guru & sanksi berat",
     },
     {
       kode: "KDR-03",
@@ -695,7 +695,7 @@ async function seed() {
         tanggal: "2026-11-08",
         poin: 5,
         lokasi: "Ruang Kelas X-A",
-        keterangan: "Tidak memakai sabuk logo resmi taruna",
+        keterangan: "Tidak memakai sabuk logo resmi sekolah",
         status: "Tercatat",
       },
       {

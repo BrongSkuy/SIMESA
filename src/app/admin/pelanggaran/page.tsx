@@ -1,7 +1,7 @@
 import { ViolationManagementView } from "@/components/violations/violation-management-view";
 
 export const metadata = {
-  title: "Buku Poin & Kedisiplinan Taruna | Portal Admin",
+  title: "Buku Poin & Kedisiplinan Siswa | Portal Admin",
 };
 
 export default function AdminPelanggaranPage() {
