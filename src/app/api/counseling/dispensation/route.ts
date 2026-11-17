@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { db } from "@/db";
+import { students } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import {
   getDispensationLetters,
   createDispensationLetter,
   updateDispensationLetter,
 } from "@/lib/counseling-server";
+import { logActivity } from "@/lib/audit-server";
 
 // GET /api/counseling/dispensation — Mengambil daftar surat dispensasi kelas
 export async function GET(req: NextRequest) {
@@ -75,6 +79,31 @@ export async function POST(req: NextRequest) {
       keperluan,
       keterangan,
       diterbitkanOleh,
+    });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Petugas BK",
+      userRole: (session.user as any).role || "guru_bk",
+      action: "APPROVE",
+      module: "KONSELING_BK",
+      targetId: studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Menerbitkan Surat Dispensasi (${created.nomorSurat}) untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      details: {
+        dispensationId: created.id,
+        nomorSurat: created.nomorSurat,
+        keperluan,
+        jamMulai,
+        jamSelesai,
+      },
     });
 
     return NextResponse.json(created, { status: 201 });

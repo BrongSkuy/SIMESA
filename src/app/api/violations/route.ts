@@ -9,6 +9,7 @@ import {
 import { auth } from "@/lib/auth";
 import { eq, desc, and, like, or } from "drizzle-orm";
 import { getClassDisciplineSummary } from "@/lib/violations-server";
+import { logActivity } from "@/lib/audit-server";
 
 // GET /api/violations — List violations with filters or class summary
 export async function GET(req: NextRequest) {
@@ -156,6 +157,31 @@ export async function POST(req: NextRequest) {
         status: "Tercatat",
       })
       .returning();
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru",
+      userRole: (session.user as any).role || "guru",
+      action: "CREATE",
+      module: "BUKU_POIN",
+      targetId: studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Mencatat pelanggaran tata tertib (${vType.namaPelanggaran}, ${realPoint} poin) untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      details: {
+        violationId: inserted.id,
+        kodePelanggaran: vType.kode,
+        namaPelanggaran: vType.namaPelanggaran,
+        poin: realPoint,
+        lokasi: lokasi || "Lingkungan Sekolah",
+      },
+    });
 
     return NextResponse.json({
       success: true,

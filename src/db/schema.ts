@@ -292,6 +292,40 @@ export const studentReportNotes = sqliteTable("student_report_notes", {
   index("report_notes_periode_idx").on(table.periode),
 ]);
 
+// --- Activity Logs (Riwayat Aktivitas & Audit Trail) ---
+export const activityLogs = sqliteTable("activity_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),
+  userName: text("user_name").notNull(),
+  userRole: text("user_role").notNull(),
+  action: text("action", {
+    enum: ["LOGIN", "LOGOUT", "CREATE", "UPDATE", "DELETE", "APPROVE", "PRINT", "EXPORT"],
+  }).notNull(),
+  module: text("module", {
+    enum: [
+      "AUTENTIKASI",
+      "AKADEMIK_NILAI",
+      "PRESENSI",
+      "BUKU_POIN",
+      "KONSELING_BK",
+      "E_RAPOR",
+      "MANAJEMEN_PENGGUNA",
+      "SISTEM",
+    ],
+  }).notNull(),
+  targetId: text("target_id"),
+  targetName: text("target_name"),
+  description: text("description").notNull(),
+  details: text("details"), // JSON payload snapshot (before/after/metadata)
+  ipAddress: text("ip_address"),
+  createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+}, (table) => [
+  index("activity_logs_user_idx").on(table.userId),
+  index("activity_logs_module_idx").on(table.module),
+  index("activity_logs_action_idx").on(table.action),
+  index("activity_logs_created_at_idx").on(table.createdAt),
+]);
+
 // ============================================================
 // Type exports
 // ============================================================
@@ -322,3 +356,5 @@ export type CurriculumTarget = typeof curriculumTargets.$inferSelect;
 export type NewCurriculumTarget = typeof curriculumTargets.$inferInsert;
 export type StudentReportNote = typeof studentReportNotes.$inferSelect;
 export type NewStudentReportNote = typeof studentReportNotes.$inferInsert;
+export type ActivityLog = typeof activityLogs.$inferSelect;
+export type NewActivityLog = typeof activityLogs.$inferInsert;

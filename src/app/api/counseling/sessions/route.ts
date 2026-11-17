@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getUserFullRoles } from "@/lib/rbac-server";
+import { db } from "@/db";
+import { students } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import {
   getCounselingSessions,
   createCounselingSession,
 } from "@/lib/counseling-server";
+import { logActivity } from "@/lib/audit-server";
 
 // GET /api/counseling/sessions — Mengambil daftar riwayat sesi konseling
 export async function GET(req: NextRequest) {
@@ -97,6 +101,31 @@ export async function POST(req: NextRequest) {
       tindakLanjut,
       statusKasus,
       createDispensation: Boolean(createDispensation),
+    });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru BK",
+      userRole: (session.user as any).role || "guru_bk",
+      action: "CREATE",
+      module: "KONSELING_BK",
+      targetId: studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Mencatat sesi konseling ${jenisLayanan} (${kategori}) untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      details: {
+        sessionId: result.session?.id,
+        kategori,
+        jenisLayanan,
+        statusKasus,
+        adaDispensasi: Boolean(createDispensation),
+      },
     });
 
     return NextResponse.json(result, { status: 201 });

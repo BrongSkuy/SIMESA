@@ -9,6 +9,7 @@ import {
 import { auth } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 import { generateWarningLetterNumber } from "@/lib/violations";
+import { logActivity } from "@/lib/audit-server";
 
 // GET /api/violations/warning-letters — Ambil riwayat surat peringatan
 export async function GET(req: NextRequest) {
@@ -105,6 +106,30 @@ export async function POST(req: NextRequest) {
         catatanMediasi: catatanMediasi || "",
       })
       .returning();
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru BK",
+      userRole: (session.user as any).role || "guru_bk",
+      action: "APPROVE",
+      module: "BUKU_POIN",
+      targetId: studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Menerbitkan Surat Peringatan (SP ${tingkatSp}) Nomor ${realNomor} untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      details: {
+        letterId: inserted.id,
+        nomorSurat: realNomor,
+        tingkatSp: Number(tingkatSp),
+        totalPoinSaatSp: totalPoints,
+      },
+    });
 
     return NextResponse.json({
       success: true,

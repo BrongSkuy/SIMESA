@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getPortalForRole } from "@/lib/rbac";
 import { DEFAULT_PERIODE } from "@/lib/utils";
+import { logActivity } from "@/lib/audit-server";
 
 export const dynamic = "force-dynamic";
 
@@ -146,6 +147,30 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       });
     }
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Wali Kelas",
+      userRole: (session.user as any).role || (session.user as any).appRole || "wali_kelas",
+      action: "UPDATE",
+      module: "E_RAPOR",
+      targetId: studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Menyimpan catatan wali kelas dan status rapor (${statusRapor}) untuk siswa ${targetStudent?.namaLengkap || "Siswa"} (Periode ${periode})`,
+      details: {
+        periode,
+        statusRapor,
+        ekskulNama,
+        ekskulNilai,
+      },
+    });
 
     return NextResponse.json({
       success: true,

@@ -5,6 +5,7 @@ import { admin } from "better-auth/plugins";
 import { db } from "@/db";
 import { user, session as sessionTable } from "@/db/auth-schema";
 import { eq } from "drizzle-orm";
+import { logActivity } from "@/lib/audit-server";
 
 export const auth = betterAuth({
   secret:
@@ -80,6 +81,29 @@ export const auth = betterAuth({
             };
           } catch {
             return;
+          }
+        },
+        after: async (createdSession) => {
+          try {
+            const [userData] = await db
+              .select({ name: user.name, appRole: user.appRole })
+              .from(user)
+              .where(eq(user.id, createdSession.userId))
+              .limit(1);
+
+            await logActivity({
+              userId: createdSession.userId,
+              userName: userData?.name || "Pengguna",
+              userRole: (userData?.appRole || "SISWA").toLowerCase(),
+              action: "LOGIN",
+              module: "AUTENTIKASI",
+              targetId: createdSession.userId,
+              targetName: userData?.name || "Pengguna",
+              description: `Pengguna ${userData?.name || "Pengguna"} berhasil masuk ke sistem`,
+              ipAddress: createdSession.ipAddress || null,
+            });
+          } catch {
+            // Fail safe, do not disrupt login
           }
         },
       },
