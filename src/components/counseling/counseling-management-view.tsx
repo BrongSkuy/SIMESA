@@ -64,6 +64,18 @@ import {
 } from "./quick-counseling-modal";
 import { DispensationPrintModal } from "./dispensation-print-modal";
 
+function getInitials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() || "S"
+  );
+}
+
 export function CounselingManagementView() {
   const [activeTab, setActiveTab] = useState("sessions");
   const [loading, setLoading] = useState(true);
@@ -479,32 +491,50 @@ export function CounselingManagementView() {
                     const kerahasiaanBadge = getKerahasiaanBadge(item.tingkatKerahasiaan);
 
                     return (
-                      <TableRow key={item.id} className="hover:bg-muted/40 transition">
+                      <TableRow
+                        key={item.id}
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
                         <TableCell className="text-xs align-top">
-                          <span className="font-semibold">{formatTanggalIndonesia(item.tanggal)}</span>
-                          <span className="block text-[11px] text-muted-foreground mt-0.5">
+                          <span className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                            {formatTanggalIndonesia(item.tanggal)}
+                          </span>
+                          <span className="block text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors mt-0.5">
                             {item.waktuMulai} - {item.waktuSelesai}
                           </span>
                         </TableCell>
 
                         <TableCell className="align-top">
-                          <span className="text-xs font-bold text-foreground block">
-                            {item.studentName}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            NIS {item.studentNis} • Kelas {item.studentKelas}
-                          </span>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                              {getInitials(item.studentName || "")}
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                                {item.studentName}
+                              </span>
+                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                                NIS: {item.studentNis} • Kelas {item.studentKelas}
+                              </span>
+                            </div>
+                          </div>
                         </TableCell>
 
                         <TableCell className="align-top text-xs">
-                          <span className="font-medium text-foreground block">{item.kategori}</span>
-                          <span className="text-[11px] text-muted-foreground">{item.jenisLayanan}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                            {item.kategori}
+                          </span>
+                          <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                            {item.jenisLayanan}
+                          </span>
                         </TableCell>
 
                         <TableCell className="align-top text-xs max-w-xs">
-                          <p className="line-clamp-2 text-foreground">{item.pokokMasalah}</p>
+                          <p className="line-clamp-2 text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 transition-colors">
+                            {item.pokokMasalah}
+                          </p>
                           {item.tindakLanjut && (
-                            <span className="block text-[11px] text-muted-foreground mt-1 italic">
+                            <span className="block text-[11px] text-slate-500 group-hover/row:text-slate-400 italic transition-colors mt-1">
                               Tindak lanjut: {item.tindakLanjut}
                             </span>
                           )}
@@ -527,7 +557,7 @@ export function CounselingManagementView() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenDetailSession(item)}
-                            className="h-7 px-2 text-xs text-blue-800 dark:text-blue-300"
+                            className="h-7 px-2 text-xs text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300 hover:text-blue-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
                             title="Lihat Detail Bimbingan"
                           >
                             <Eye className="w-3.5 h-3.5 mr-1" />
@@ -537,7 +567,7 @@ export function CounselingManagementView() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteSession(item.id)}
-                            className="h-7 px-2 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                            className="h-7 px-2 text-xs text-slate-500 dark:text-slate-400 group-hover/row:text-slate-400 hover:text-rose-400 hover:bg-slate-800 border border-transparent transition-colors cursor-pointer"
                             title="Hapus Sesi"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -628,28 +658,38 @@ export function CounselingManagementView() {
                   </TableRow>
                 ) : (
                   filteredLogs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-muted/40 transition">
-                      <TableCell className="text-xs align-top font-medium">
+                    <TableRow
+                      key={log.id}
+                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                    >
+                      <TableCell className="text-xs align-top font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">
                         {formatTanggalIndonesia(log.tanggal)}
                       </TableCell>
                       <TableCell className="align-top">
-                        <span className="text-xs font-bold block text-foreground">
-                          {log.studentName}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          NIS {log.studentNis} • Kelas {log.studentKelas}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                            {getInitials(log.studentName || "")}
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                              {log.studentName}
+                            </span>
+                            <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                              NIS: {log.studentNis} • Kelas {log.studentKelas}
+                            </span>
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-xs align-top text-foreground">
+                      <TableCell className="text-xs align-top text-slate-700 dark:text-slate-300 group-hover/row:text-slate-300 transition-colors">
                         {log.recorderName}
                       </TableCell>
-                      <TableCell className="text-xs align-top font-semibold text-blue-900 dark:text-blue-300">
+                      <TableCell className="text-xs align-top font-semibold text-blue-900 dark:text-blue-300 group-hover/row:text-blue-300 transition-colors">
                         {log.aspekPengamatan}
                       </TableCell>
-                      <TableCell className="text-xs align-top max-w-sm text-foreground">
+                      <TableCell className="text-xs align-top max-w-sm text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 transition-colors">
                         {log.catatanPerkembangan}
                       </TableCell>
-                      <TableCell className="text-xs align-top text-muted-foreground italic">
+                      <TableCell className="text-xs align-top text-slate-500 group-hover/row:text-slate-400 italic transition-colors">
                         {log.rekomendasi || "-"}
                       </TableCell>
                     </TableRow>
@@ -724,39 +764,51 @@ export function CounselingManagementView() {
                     const statusBadge = getDispensasiStatusBadge(disp.statusDispensasi);
 
                     return (
-                      <TableRow key={disp.id} className="hover:bg-muted/40 transition">
-                        <TableCell className="align-top font-mono text-xs font-semibold text-blue-950 dark:text-blue-200">
+                      <TableRow
+                        key={disp.id}
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
+                        <TableCell className="align-top font-mono text-xs font-bold text-blue-900 dark:text-blue-300 group-hover/row:text-blue-300 transition-colors">
                           {disp.nomorSurat}
                         </TableCell>
 
                         <TableCell className="align-top">
-                          <span className="text-xs font-bold block text-foreground">
-                            {disp.studentName}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            NIS {disp.studentNis} • Kelas {disp.studentKelas}
-                          </span>
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                              {getInitials(disp.studentName || "")}
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                                {disp.studentName}
+                              </span>
+                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                                NIS: {disp.studentNis} • Kelas {disp.studentKelas}
+                              </span>
+                            </div>
+                          </div>
                         </TableCell>
 
                         <TableCell className="align-top text-xs">
-                          <span className="font-medium text-foreground block">
+                          <span className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
                             {formatTanggalIndonesia(disp.tanggal)}
                           </span>
-                          <span className="text-[11px] text-muted-foreground">
+                          <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
                             {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                           </span>
                         </TableCell>
 
                         <TableCell className="align-top text-xs max-w-xs">
-                          <span className="font-semibold text-foreground block">{disp.keperluan}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                            {disp.keperluan}
+                          </span>
                           {disp.keterangan && (
-                            <span className="text-[11px] text-muted-foreground italic">
+                            <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 italic transition-colors">
                               {disp.keterangan}
                             </span>
                           )}
                         </TableCell>
 
-                        <TableCell className="align-top text-xs text-foreground">
+                        <TableCell className="align-top text-xs text-slate-700 dark:text-slate-300 group-hover/row:text-slate-300 transition-colors">
                           {disp.issuerName}
                         </TableCell>
 
@@ -771,7 +823,7 @@ export function CounselingManagementView() {
                             variant="outline"
                             size="sm"
                             onClick={() => handlePrintDispensation(disp)}
-                            className="h-7 px-2 text-xs gap-1 border-blue-200 text-blue-900 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-200"
+                            className="h-7 px-2 text-xs gap-1 border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Cetak Surat Izin"
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -782,7 +834,7 @@ export function CounselingManagementView() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleUpdateDispensationStatus(disp.id, "Selesai")}
-                              className="h-7 px-2 text-xs text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300"
+                              className="h-7 px-2 text-xs text-emerald-600 group-hover/row:text-emerald-400 hover:bg-slate-800 transition-colors cursor-pointer"
                               title="Tandai Selesai"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1" />

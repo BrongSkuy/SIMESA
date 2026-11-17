@@ -195,23 +195,23 @@ export function StudentCounselingView() {
                 return (
                   <div
                     key={disp.id}
-                    className="p-3.5 rounded-lg border bg-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-blue-300 transition"
+                    className="p-3.5 rounded-lg border bg-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer"
                   >
                     <div className="space-y-1 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-blue-950 dark:text-blue-200">
+                        <span className="font-mono font-bold text-blue-900 dark:text-blue-300 group-hover/row:text-blue-300 transition-colors">
                           {disp.nomorSurat}
                         </span>
                         <Badge variant="outline" className={`text-[10px] ${statusBadge.badgeClass}`}>
                           {statusBadge.label}
                         </Badge>
                       </div>
-                      <p className="font-semibold text-foreground">{disp.keperluan}</p>
-                      <p className="text-muted-foreground">
+                      <p className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">{disp.keperluan}</p>
+                      <p className="text-slate-500 group-hover/row:text-slate-400 transition-colors">
                         {formatTanggalIndonesia(disp.tanggal)} • {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                       </p>
                       {disp.keterangan && (
-                        <p className="text-muted-foreground italic text-[11px]">{disp.keterangan}</p>
+                        <p className="text-slate-500 group-hover/row:text-slate-400 italic text-[11px] transition-colors">{disp.keterangan}</p>
                       )}
                     </div>
 
@@ -219,7 +219,7 @@ export function StudentCounselingView() {
                       variant="outline"
                       size="sm"
                       onClick={() => handlePrint(disp)}
-                      className="text-xs gap-1.5 shrink-0 border-blue-200 text-blue-900 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-200"
+                      className="text-xs gap-1.5 shrink-0 border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       Lihat Lembar Dispensasi
@@ -356,20 +356,20 @@ export function StudentCounselingView() {
                   return (
                     <div
                       key={item.id}
-                      className="p-3 rounded-lg border bg-card text-xs space-y-1.5 hover:border-border/80 transition"
+                      className="p-3 rounded-lg border bg-card text-xs space-y-1.5 group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer"
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-foreground">{item.kategori}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">{item.kategori}</span>
                         <Badge variant="outline" className={`text-[10px] ${statusBadge.badgeClass}`}>
                           {statusBadge.label}
                         </Badge>
                       </div>
-                      <p className="text-muted-foreground text-[11px]">
+                      <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] transition-colors">
                         {formatTanggalIndonesia(item.tanggal)} • Pukul {item.waktuMulai} - {item.waktuSelesai}
                       </p>
-                      <p className="text-foreground line-clamp-2">{item.pokokMasalah}</p>
+                      <p className="text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 line-clamp-2 transition-colors">{item.pokokMasalah}</p>
                       {item.tindakLanjut && (
-                        <p className="text-muted-foreground italic text-[11px]">
+                        <p className="text-slate-500 group-hover/row:text-slate-400 italic text-[11px] transition-colors">
                           Tindak lanjut: {item.tindakLanjut}
                         </p>
                       )}
