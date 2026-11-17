@@ -177,13 +177,60 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
   },
 ];
 
+export const GURU_DROPDOWN_GROUPS: NavDropdownGroup[] = [
+  {
+    label: "Akademik",
+    sectionTitle: "Pembelajaran dan Penilaian",
+    icon: GraduationCap,
+    items: [
+      {
+        label: "Absensi Siswa",
+        description: "Pencatatan presensi harian kelas",
+        href: "/guru/absensi",
+        icon: ClipboardCheck,
+      },
+      {
+        label: "Input Nilai",
+        description: "Pengisian nilai tugas, UTS, dan UAS",
+        href: "/guru/nilai",
+        icon: PenLine,
+      },
+      {
+        label: "Rekap Kelas",
+        description: "Ringkasan capaian dan nilai kelas",
+        href: "/guru/rekap",
+        icon: BarChart3,
+      },
+    ],
+  },
+  {
+    label: "Kesiswaan",
+    sectionTitle: "Bimbingan dan Kedisiplinan",
+    icon: HeartHandshake,
+    items: [
+      {
+        label: "Buku Poin",
+        description: "Catatan pelanggaran dan sanksi siswa",
+        href: "/guru/pelanggaran",
+        icon: ShieldAlert,
+      },
+      {
+        label: "Konseling BK",
+        description: "Sesi bimbingan konseling dan dispensasi",
+        href: "/guru/konseling",
+        icon: HeartHandshake,
+      },
+    ],
+  },
+];
+
 export const GURU_NAV_ITEMS = [
   { label: "Beranda", href: "/guru", icon: LayoutDashboard },
   { label: "Absensi", href: "/guru/absensi", icon: ClipboardCheck },
   { label: "Input Nilai", href: "/guru/nilai", icon: PenLine },
+  { label: "Rekap Kelas", href: "/guru/rekap", icon: BarChart3 },
   { label: "Buku Poin", href: "/guru/pelanggaran", icon: ShieldAlert },
   { label: "Konseling BK", href: "/guru/konseling", icon: HeartHandshake },
-  { label: "Rekap Kelas", href: "/guru/rekap", icon: BarChart3 },
   { label: "Leaderboard", href: "/guru/leaderboard", icon: Trophy },
 ];
 
@@ -299,6 +346,75 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
     }
   };
 
+  const renderDropdownGroup = (group: NavDropdownGroup) => {
+    const groupActive = group.items.some((item) =>
+      isRouteActive(item.href)
+    );
+    const GroupIcon = group.icon;
+
+    return (
+      <div key={group.label} className="relative group">
+        <button
+          type="button"
+          className={cn(
+            "inline-flex items-center gap-1 xl:gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all focus:outline-none cursor-pointer whitespace-nowrap",
+            groupActive
+              ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+              : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+          )}
+        >
+          <GroupIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", groupActive ? "text-amber-300" : "text-blue-200")} />
+          {group.label}
+          <ChevronDown className={cn("w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 group-hover:rotate-180", groupActive ? "text-amber-300" : "text-blue-200 group-hover:text-white")} />
+        </button>
+
+        {/* Dropdown Container dengan Invisible Bridge */}
+        <div className="absolute left-0 top-full pt-2 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
+          <div className="rounded-2xl bg-white/98 backdrop-blur-lg p-2 shadow-2xl border border-slate-200/90 text-slate-800">
+            <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+              {group.sectionTitle}
+            </div>
+            {group.items.map((item) => {
+              const ItemIcon = item.icon;
+              const active = isRouteActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-start gap-3 p-2 rounded-xl transition-colors",
+                    item.dividerBefore &&
+                      "border-t border-slate-100 mt-1 pt-2",
+                    active
+                      ? "bg-blue-50 text-[#1e3a8a]"
+                      : "hover:bg-slate-50 text-slate-700"
+                  )}
+                >
+                  <div className="p-1.5 rounded-lg bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
+                    <ItemIcon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={cn(
+                        "text-xs font-semibold",
+                        active ? "text-[#1e3a8a]" : "text-slate-900"
+                      )}
+                    >
+                      {item.label}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {item.description}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-md backdrop-blur-md">
       <div className="w-full px-3 sm:px-5 lg:px-6 xl:px-8">
@@ -358,97 +474,58 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   Beranda
                 </Link>
 
-                {ADMIN_DROPDOWN_GROUPS.map((group) => {
-                  const groupActive = group.items.some((item) =>
-                    isRouteActive(item.href)
-                  );
-                  const GroupIcon = group.icon;
+                {ADMIN_DROPDOWN_GROUPS.map(renderDropdownGroup)}
+              </>
+            ) : isPortalGuru ? (
+              <>
+                <Link
+                  href="/guru"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    pathname === "/guru"
+                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                  )}
+                >
+                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru" ? "text-amber-300" : "text-blue-200")} />
+                  Beranda
+                </Link>
 
-                  return (
-                    <div key={group.label} className="relative group">
-                      <button
-                        type="button"
-                        className={cn(
-                          "inline-flex items-center gap-1 xl:gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all focus:outline-none cursor-pointer whitespace-nowrap",
-                          groupActive
-                            ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                            : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
-                        )}
-                      >
-                        <GroupIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", groupActive ? "text-amber-300" : "text-blue-200")} />
-                        {group.label}
-                        <ChevronDown className={cn("w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 group-hover:rotate-180", groupActive ? "text-amber-300" : "text-blue-200 group-hover:text-white")} />
-                      </button>
+                {GURU_DROPDOWN_GROUPS.map(renderDropdownGroup)}
 
-                      {/* Dropdown Container dengan Invisible Bridge */}
-                      <div className="absolute left-0 top-full pt-2 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
-                        <div className="rounded-2xl bg-white/98 backdrop-blur-lg p-2 shadow-2xl border border-slate-200/90 text-slate-800">
-                          <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
-                            {group.sectionTitle}
-                          </div>
-                          {group.items.map((item) => {
-                            const ItemIcon = item.icon;
-                            const active = isRouteActive(item.href);
-                            return (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                  "flex items-start gap-3 p-2 rounded-xl transition-colors",
-                                  item.dividerBefore &&
-                                    "border-t border-slate-100 mt-1 pt-2",
-                                  active
-                                    ? "bg-blue-50 text-[#1e3a8a]"
-                                    : "hover:bg-slate-50 text-slate-700"
-                                )}
-                              >
-                                <div className="p-1.5 rounded-lg bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
-                                  <ItemIcon className="w-4 h-4" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p
-                                    className={cn(
-                                      "text-xs font-semibold",
-                                      active ? "text-[#1e3a8a]" : "text-slate-900"
-                                    )}
-                                  >
-                                    {item.label}
-                                  </p>
-                                  <p className="text-xs text-slate-500 mt-0.5">
-                                    {item.description}
-                                  </p>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                <Link
+                  href="/guru/leaderboard"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    pathname === "/guru/leaderboard"
+                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                  )}
+                >
+                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  Leaderboard
+                </Link>
               </>
             ) : (
-              (isPortalGuru ? GURU_NAV_ITEMS : SISWA_NAV_ITEMS).map(
-                (item) => {
-                  const ItemIcon = item.icon;
-                  const active = isRouteActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
-                        active
-                          ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                          : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
-                      )}
-                    >
-                      <ItemIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", active ? "text-amber-300" : "text-blue-200")} />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                }
-              )
+              SISWA_NAV_ITEMS.map((item) => {
+                const ItemIcon = item.icon;
+                const active = isRouteActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                      active
+                        ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+                        : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                    )}
+                  >
+                    <ItemIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", active ? "text-amber-300" : "text-blue-200")} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })
             )}
           </nav>
 
