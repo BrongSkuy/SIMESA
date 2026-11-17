@@ -105,7 +105,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
     catatanWaliKelas: "",
     ekskulNama: "Pramuka Dirgantara",
     ekskulNilai: "Sangat Baik",
-    ekskulKeterangan: "Aktif mengikuti latihan rutin dan kegiatan kedisiplinan taruna.",
+    ekskulKeterangan: "Aktif mengikuti latihan rutin dan kegiatan kedisiplinan siswa.",
     statusRapor: "Draf" as "Draf" | "Disahkan" | "Diterbitkan",
   });
   const [savingNote, setSavingNote] = useState(false);
@@ -233,7 +233,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
       } else {
         setNoteForm({
           catatanWaliKelas:
-            "Pertahankan kedisiplinan dan semangat belajar taruna/taruni. Terus tingkatkan prestasi akademik dan keterampilan kejuruan.",
+            "Pertahankan kedisiplinan dan semangat belajar siswa atau siswi. Terus tingkatkan prestasi akademik dan keterampilan kejuruan.",
           ekskulNama: "Pramuka Dirgantara",
           ekskulNilai: "Sangat Baik",
           ekskulKeterangan: "Aktif mengikuti kegiatan pembinaan kedisiplinan.",
@@ -401,7 +401,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
               value={stats.total}
               icon={Users}
               color="blue"
-              footerLeft="Taruna atau Taruni Aktif"
+              footerLeft="Siswa atau Siswi Aktif"
               footerRight="Kelas Terpilih"
             />
             <StatCard
@@ -597,7 +597,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                             {s.namaLengkap}
                           </span>
                           <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                            {s.jenisKelamin === "L" ? "Taruna" : "Taruni"} • Hadir: {s.presensi.hadir} • Sakit: {s.presensi.sakit} • Izin: {s.presensi.izin} • Alfa: {s.presensi.alfa}
+                            {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} • Hadir: {s.presensi.hadir} • Sakit: {s.presensi.sakit} • Izin: {s.presensi.izin} • Alfa: {s.presensi.alfa}
                           </span>
                         </div>
                       </div>
@@ -713,7 +713,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
               <textarea
                 rows={3}
                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="Tuliskan catatan motivasi, kedisiplinan, dan perkembangan sikap taruna atau taruni..."
+                placeholder="Tuliskan catatan motivasi, kedisiplinan, dan perkembangan sikap siswa atau siswi..."
                 value={noteForm.catatanWaliKelas}
                 onChange={(e) =>
                   setNoteForm({ ...noteForm, catatanWaliKelas: e.target.value })

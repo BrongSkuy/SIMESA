@@ -240,7 +240,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               </div>
               <div class="identitas-row">
                 <span class="identitas-label">Jenis Kelamin</span>
-                <span class="identitas-val">: ${data.student.jenisKelamin === "L" ? "Laki-laki (Taruna)" : "Perempuan (Taruni)"}</span>
+                <span class="identitas-val">: ${data.student.jenisKelamin === "L" ? "Laki-laki (Siswa)" : "Perempuan (Siswi)"}</span>
               </div>
               <div class="identitas-row">
                 <span class="identitas-label">Program Keahlian</span>
@@ -520,7 +520,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
             <div className="flex">
               <span className="w-28 font-medium text-zinc-600">Jenis Kelamin</span>
               <span className="text-zinc-800">
-                : {data.student.jenisKelamin === "L" ? "Laki-laki (Taruna)" : "Perempuan (Taruni)"}
+                : {data.student.jenisKelamin === "L" ? "Laki-laki (Siswa)" : "Perempuan (Siswi)"}
               </span>
             </div>
             <div className="flex">
