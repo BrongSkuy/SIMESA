@@ -52,7 +52,302 @@ export function WarningLetterPrintModal({
   if (!letterData) return null;
 
   const handlePrint = () => {
-    window.print();
+    // Siapkan dokumen HTML mandiri dalam iframe terisolasi agar 100% presisi A4 tanpa header/footer browser
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "fixed";
+    printFrame.style.right = "0";
+    printFrame.style.bottom = "0";
+    printFrame.style.width = "0";
+    printFrame.style.height = "0";
+    printFrame.style.border = "none";
+    document.body.appendChild(printFrame);
+
+    const frameDoc = printFrame.contentWindow?.document;
+    if (!frameDoc) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="id">
+        <head>
+          <meta charset="utf-8" />
+          <title>Surat Peringatan ${letterData.tingkatSp} - ${letterData.nomorSurat}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            * {
+              box-sizing: border-box;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              color: #000;
+              margin: 0;
+              padding: 12mm 18mm 12mm 18mm;
+              font-size: 10.5pt;
+              line-height: 1.4;
+              background: #fff;
+            }
+            .kop-container {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 16px;
+              border-bottom: 3px double #000;
+              padding-bottom: 8px;
+              margin-bottom: 14px;
+              text-align: center;
+            }
+            .kop-logo {
+              width: 65px;
+              height: 65px;
+              object-fit: contain;
+            }
+            .kop-text h3 {
+              font-size: 10.5pt;
+              font-weight: 600;
+              margin: 0;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .kop-text h2 {
+              font-size: 14.5pt;
+              font-weight: 900;
+              margin: 2px 0 3px 0;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .kop-text p {
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 8.5pt;
+              margin: 1px 0;
+              color: #333;
+            }
+            .judul-surat {
+              text-align: center;
+              margin: 12px 0 14px 0;
+            }
+            .judul-surat h4 {
+              font-size: 12pt;
+              font-weight: bold;
+              text-transform: uppercase;
+              text-decoration: underline;
+              margin: 0;
+            }
+            .judul-surat p {
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 9.5pt;
+              color: #444;
+              margin: 3px 0 0 0;
+            }
+            p.paragraf {
+              text-align: justify;
+              margin: 8px 0;
+              text-indent: 28px;
+            }
+            table.biodata {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 10px 0 12px 0;
+              font-size: 10.5pt;
+            }
+            table.biodata td {
+              padding: 3px 2px;
+              vertical-align: top;
+            }
+            .label-col {
+              width: 210px;
+              font-weight: 600;
+            }
+            .separator-col {
+              width: 15px;
+              text-align: center;
+            }
+            table.violations-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 10px 0;
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 9pt;
+            }
+            table.violations-table th, table.violations-table td {
+              border: 1px solid #333;
+              padding: 4px 6px;
+            }
+            table.violations-table th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+              text-align: center;
+            }
+            .sanksi-box {
+              background-color: #f9f9f9;
+              border-left: 3px solid #b91c1c;
+              padding: 8px 12px;
+              margin: 10px 0;
+              font-size: 9.5pt;
+            }
+            .tanda-tangan-grid {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 16px;
+              text-align: center;
+              margin-top: 14px;
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 9pt;
+            }
+            .ttd-box {
+              display: flex;
+              flex-col: column;
+              justify-content: space-between;
+              min-height: 95px;
+            }
+            .nama-pejabat {
+              font-weight: bold;
+              text-decoration: underline;
+              margin: 0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="kop-container">
+            <img src="/logo.png" alt="Logo Sekolah" class="kop-logo" />
+            <div class="kop-text">
+              <h3>Yayasan Pendidikan Kedirgantaraan Nusantara</h3>
+              <h2>SMK Penerbangan Dirgantara</h2>
+              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara, Tangerang • Telp. (021) 876-5432</p>
+              <p>Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A</p>
+            </div>
+          </div>
+
+          <div class="judul-surat">
+            <h4>SURAT PERINGATAN ${tingkatRomawi} (SP ${tingkatRomawi})</h4>
+            <p>Nomor: ${letterData.nomorSurat}</p>
+          </div>
+
+          <p class="paragraf">
+            Sehubungan dengan rekapitulasi data pelanggaran tata tertib dan buku kedisiplinan siswa SMK Penerbangan Dirgantara, dengan ini pihak sekolah menerbitkan Surat Peringatan ${tingkatRomawi} kepada siswa:
+          </p>
+
+          <table class="biodata">
+            <tbody>
+              <tr>
+                <td class="label-col">Nama Lengkap Siswa</td>
+                <td class="separator-col">:</td>
+                <td><strong>${letterData.student.namaLengkap}</strong></td>
+              </tr>
+              <tr>
+                <td class="label-col">Nomor Induk Siswa (NIS)</td>
+                <td class="separator-col">:</td>
+                <td>${letterData.student.nis}</td>
+              </tr>
+              <tr>
+                <td class="label-col">Kelas dan Jurusan</td>
+                <td class="separator-col">:</td>
+                <td>${letterData.student.kelas}</td>
+              </tr>
+              <tr>
+                <td class="label-col">Total Akumulasi Poin</td>
+                <td class="separator-col">:</td>
+                <td><strong style="color: #b91c1c;">${letterData.totalPoinSaatSp} Poin Pelanggaran</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          ${
+            letterData.violationsList && letterData.violationsList.length > 0
+              ? `
+              <p style="font-weight: bold; margin: 8px 0 4px 0; font-size: 10pt;">
+                Ringkasan Pelanggaran Tata Tertib Terakhir:
+              </p>
+              <table class="violations-table">
+                <thead>
+                  <tr>
+                    <th style="width: 25px;">No</th>
+                    <th style="text-align: left;">Pelanggaran Disiplin</th>
+                    <th style="width: 80px;">Tanggal</th>
+                    <th style="width: 50px;">Poin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${letterData.violationsList
+                    .map(
+                      (v, i) => `
+                    <tr>
+                      <td style="text-align: center;">${i + 1}</td>
+                      <td>${v.namaPelanggaran}${v.keterangan ? ` <em>(${v.keterangan})</em>` : ""}</td>
+                      <td style="text-align: center;">${v.tanggal}</td>
+                      <td style="text-align: center; font-weight: bold; color: #b91c1c;">+${v.poin}</td>
+                    </tr>
+                  `
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            `
+              : ""
+          }
+
+          <div class="sanksi-box">
+            <strong>Ketentuan dan Tindak Lanjut Sanksi:</strong><br />
+            ${getSanksiText(letterData.tingkatSp)}
+          </div>
+
+          <p class="paragraf">
+            Demikian Surat Peringatan ini dibuat agar menjadi perhatian sungguh-sungguh bagi siswa yang bersangkutan serta pihak Orang Tua atau Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
+          </p>
+
+          <div style="text-align: right; margin: 12px 0 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt;">
+            Tangerang, ${letterData.tanggalTerbit || new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          </div>
+
+          <div class="tanda-tangan-grid">
+            <div class="ttd-box">
+              <p style="margin: 0; color: #555;">Wali Kelas,</p>
+              <div style="height: 50px;"></div>
+              <div>
+                <p class="nama-pejabat">Budi Santoso, S.Pd.</p>
+                <p style="margin: 2px 0 0 0; font-size: 8pt; color: #666;">NIP. 197601012005</p>
+              </div>
+            </div>
+
+            <div class="ttd-box">
+              <p style="margin: 0; color: #555;">Guru Bimbingan Konseling,</p>
+              <div style="height: 50px;"></div>
+              <div>
+                <p class="nama-pejabat">${letterData.diterbitkanOleh || "Dra. Endang Lestari, S.Psi."}</p>
+                <p style="margin: 2px 0 0 0; font-size: 8pt; color: #666;">NIP. 198507102010</p>
+              </div>
+            </div>
+
+            <div class="ttd-box">
+              <p style="margin: 0; color: #555;">Mengetahui,<br />Kepala Sekolah,</p>
+              <div style="height: 40px;"></div>
+              <div>
+                <p class="nama-pejabat">Drs. H. Mulyadi, M.M.</p>
+                <p style="margin: 2px 0 0 0; font-size: 8pt; color: #666;">NIP. 196805121994031002</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    frameDoc.open();
+    frameDoc.write(htmlContent);
+    frameDoc.close();
+
+    setTimeout(() => {
+      printFrame.contentWindow?.focus();
+      printFrame.contentWindow?.print();
+
+      setTimeout(() => {
+        if (document.body.contains(printFrame)) {
+          document.body.removeChild(printFrame);
+        }
+      }, 1000);
+    }, 300);
   };
 
   const tingkatRomawi = toRomanNumeral(letterData.tingkatSp);
@@ -90,10 +385,10 @@ export function WarningLetterPrintModal({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm"
+              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm font-semibold"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak / PDF</span>
+              <span>Cetak Dokumen Resmi</span>
             </Button>
             <Button
               variant="outline"
@@ -227,7 +522,7 @@ export function WarningLetterPrintModal({
             {/* TANDA TANGAN */}
             <div className="mt-8 font-sans text-xs">
               <div className="text-right mb-4">
-                Jakarta, {letterData.tanggalTerbit || new Date().toLocaleDateString("id-ID")}
+                Tangerang, {letterData.tanggalTerbit || new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
               </div>
 
               <div className="grid grid-cols-3 gap-4 text-center">

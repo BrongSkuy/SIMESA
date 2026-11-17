@@ -59,7 +59,7 @@ export function DispensationPrintModal({
           <style>
             @page {
               size: A4 portrait;
-              margin: 15mm 20mm 15mm 20mm;
+              margin: 0;
             }
             * {
               box-sizing: border-box;
@@ -70,9 +70,9 @@ export function DispensationPrintModal({
               font-family: 'Times New Roman', Times, serif;
               color: #000;
               margin: 0;
-              padding: 0;
-              font-size: 12pt;
-              line-height: 1.5;
+              padding: 12mm 18mm 12mm 18mm;
+              font-size: 11pt;
+              line-height: 1.45;
               background: #fff;
             }
             .kop-container {
@@ -285,7 +285,7 @@ export function DispensationPrintModal({
           <!-- TANDA TANGAN -->
           <div class="tanda-tangan-wrapper">
             <div class="tanda-tangan-box">
-              <p style="margin: 0;">Bandung, ${formatTanggalIndonesia(data.tanggal)}</p>
+              <p style="margin: 0;">Tangerang, ${formatTanggalIndonesia(data.tanggal)}</p>
               <p style="font-weight: 600; margin: 4px 0 0 0;">Petugas Penerbit Dispensasi,</p>
               <div class="stempel-space">
                 <span style="font-size: 26pt; color: #059669; opacity: 0.65;">✓</span>
@@ -458,7 +458,7 @@ export function DispensationPrintModal({
             {/* TANDA TANGAN */}
             <div className="flex justify-end mt-8 font-sans text-xs">
               <div className="text-center w-64">
-                <p className="text-slate-700">Bandung, {formatTanggalIndonesia(data.tanggal)}</p>
+                <p className="text-slate-700">Tangerang, {formatTanggalIndonesia(data.tanggal)}</p>
                 <p className="font-semibold text-slate-900 mt-1">Petugas Penerbit Dispensasi,</p>
                 <div className="h-16 flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 opacity-60" />

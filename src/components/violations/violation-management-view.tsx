@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -53,6 +52,18 @@ import {
   WarningLetterData,
 } from "./warning-letter-print-modal";
 import { SANCTION_THRESHOLDS } from "@/lib/violations";
+
+function getInitials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() || "S"
+  );
+}
 
 interface StudentSummaryItem {
   studentId: string;
@@ -366,77 +377,100 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Banner Menyatu (Flush Edge-to-Edge) */}
-      <PageHeader
-        title="Buku Poin & Catatan Kedisiplinan"
-        description="Monitoring akumulasi poin pelanggaran tata tertib siswa dan penerbitan surat peringatan (SP) resmi"
-        badge={portal === "admin" ? "Portal Admin" : "Portal Guru & BK"}
-        icon={ShieldAlert}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => handleOpenQuickModal()}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold shadow-xs flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Catat Pelanggaran</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setEditingRule({ kategori: "Ringan", poinDefault: 10 });
-              setRuleModalOpen(true);
-            }}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20 flex items-center gap-1.5"
-          >
-            <Settings className="w-4 h-4" />
-            <span>Aturan Pelanggaran</span>
-          </Button>
+      {/* 1. Header Cockpit Banner Menyatu - Persis Beranda Dashboard & Konseling BK */}
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Ambient Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Header Title, Subtitle & Action Pills */}
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
+                Buku Poin dan Kedisiplinan Siswa
+              </h1>
+              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
+                Monitoring akumulasi poin pelanggaran tata tertib siswa dan penerbitan surat peringatan resmi
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingRule({ kategori: "Ringan", poinDefault: 10 });
+                  setRuleModalOpen(true);
+                }}
+                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+              >
+                <Settings className="w-3.5 h-3.5 mr-2 text-blue-300" />
+                Aturan Pelanggaran
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenQuickModal()}
+                className="inline-flex items-center bg-amber-500 hover:bg-amber-400 active:bg-amber-600 border border-amber-300/40 rounded-xl px-4 py-2 text-xs font-semibold text-slate-950 shadow-xs hover:shadow-[0_0_15px_rgba(245,158,11,0.35)] transition-all cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 mr-2 text-slate-950" />
+                Catat Pelanggaran
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards (Persis Dashboard & Konseling) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="TOTAL KASUS PELANGGARAN"
+              value={loading ? "..." : stats.totalCases}
+              icon={AlertTriangle}
+              color="blue"
+              footerLeft="Tercatat dalam Sistem"
+              footerRight="Tahun Ajaran Aktif"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-slate-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(148,163,184,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="SISWA BERPOIN"
+              value={loading ? "..." : stats.studentsWithPoints}
+              icon={Users}
+              color="slate"
+              footerLeft="Memiliki Catatan Aktif"
+              footerRight="Perlu Evaluasi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="PERLU PEMBINAAN"
+              value={loading ? "..." : stats.studentsNeedIntervention}
+              icon={ShieldAlert}
+              color="amber"
+              footerLeft="Akumulasi ≥ 30 Poin"
+              footerRight="Atensi Khusus BK"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-rose-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(244,63,94,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="SURAT PERINGATAN TERBIT"
+              value={loading ? "..." : stats.spCount}
+              icon={FileCheck2}
+              color="rose"
+              footerLeft="SP 1, SP 2, dan SP 3"
+              footerRight="Tindak Lanjut Wali"
+            />
+          </div>
         </div>
-      </PageHeader>
+      </section>
 
       {/* 2. Container Konten Utama */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* KPI Stat Cards Standar SIMESA */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatCard
-            title="Total Kasus Pelanggaran"
-            value={stats.totalCases}
-            subtitle="Tercatat dalam sistem"
-            icon={AlertTriangle}
-            color="navy"
-          />
-          <StatCard
-            title="Siswa Berpoin"
-            value={stats.studentsWithPoints}
-            subtitle="Memiliki catatan aktif"
-            icon={Users}
-            color="slate"
-          />
-          <StatCard
-            title="Perlu Pembinaan"
-            value={stats.studentsNeedIntervention}
-            subtitle="Akumulasi ≥ 30 poin"
-            icon={ShieldAlert}
-            color="amber"
-          />
-          <StatCard
-            title="Surat Peringatan Terbit"
-            value={stats.spCount}
-            subtitle="SP 1, SP 2, dan SP 3"
-            icon={FileCheck2}
-            color="rose"
-          />
-        </div>
-
         {/* Tab Navigasi & Filter */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
             <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
               <TabsTrigger value="students" className="text-xs font-semibold rounded-lg">
-                Rekap Siswa & Poin
+                Rekap Siswa dan Poin
               </TabsTrigger>
               <TabsTrigger value="logs" className="text-xs font-semibold rounded-lg">
                 Riwayat Pelanggaran
@@ -445,7 +479,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 Arsip Surat Peringatan (SP)
               </TabsTrigger>
               <TabsTrigger value="rules" className="text-xs font-semibold rounded-lg">
-                Katalog & Aturan Sanksi
+                Katalog dan Aturan Sanksi
               </TabsTrigger>
             </TabsList>
 
@@ -530,16 +564,33 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                     </TableRow>
                   ) : (
                     filteredStudents.map((s, idx) => (
-                      <TableRow key={s.studentId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                        <TableCell className="text-center text-xs text-slate-500">{idx + 1}</TableCell>
-                        <TableCell className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <TableRow
+                        key={s.studentId}
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
+                        <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">
+                          {idx + 1}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200">
                           {s.nis}
                         </TableCell>
-                        <TableCell className="text-xs font-medium text-slate-900 dark:text-white">
-                          {s.namaLengkap}
+                        <TableCell className="text-xs">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                              {getInitials(s.namaLengkap || "")}
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                                {s.namaLengkap}
+                              </span>
+                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                                Kelas {s.kelas}
+                              </span>
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell className="text-xs">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 text-[11px] font-semibold transition-colors">
                             {s.kelas}
                           </span>
                         </TableCell>
@@ -569,16 +620,18 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                         </TableCell>
                         <TableCell className="text-xs">
                           {s.latestLetter ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 group-hover/row:text-rose-300 transition-colors">
                               <FileCheck2 className="w-3.5 h-3.5" />
                               <span>SP {s.latestLetter.tingkatSp} Terbit</span>
                             </span>
                           ) : s.totalPoints >= SANCTION_THRESHOLDS.SP_1 ? (
-                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 group-hover/row:text-amber-300 transition-colors">
                               Rekomendasi SP {s.tier.recommendedSp}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-slate-400">Belum Ada SP</span>
+                            <span className="text-[11px] text-slate-400 group-hover/row:text-slate-400 transition-colors">
+                              Belum Ada SP
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-right pr-4 space-x-1.5">
@@ -586,7 +639,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             size="sm"
                             variant="ghost"
                             onClick={() => handleOpenQuickModal(s.studentId)}
-                            className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 group-hover/row:text-blue-300 group-hover/row:hover:bg-blue-900/50"
                           >
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             Catat
@@ -595,7 +648,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             size="sm"
                             variant="ghost"
                             onClick={() => handleOpenHistoryModal(s)}
-                            className="h-7 px-2 text-xs text-slate-600 hover:text-slate-900"
+                            className="h-7 px-2 text-xs text-slate-600 hover:text-slate-900 dark:text-slate-300 group-hover/row:text-slate-200 group-hover/row:hover:bg-slate-800"
                           >
                             <History className="w-3.5 h-3.5 mr-1" />
                             Riwayat
@@ -605,7 +658,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                               size="sm"
                               variant="outline"
                               onClick={() => handleOpenSpIssueModal(s)}
-                              className="h-7 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              className="h-7 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 group-hover/row:border-red-500/50 group-hover/row:text-red-300 group-hover/row:hover:bg-red-900/40"
                             >
                               <FileText className="w-3.5 h-3.5 mr-1" />
                               Terbitkan SP
@@ -647,22 +700,38 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                     </TableRow>
                   ) : (
                     violationsList.map((v, i) => (
-                      <TableRow key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                        <TableCell className="text-center text-xs text-slate-500">{i + 1}</TableCell>
-                        <TableCell className="text-xs font-mono text-slate-600 dark:text-slate-400">
+                      <TableRow
+                        key={v.id}
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
+                        <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">{i + 1}</TableCell>
+                        <TableCell className="text-xs font-mono text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300">
                           {v.tanggal}
                         </TableCell>
-                        <TableCell className="text-xs font-medium text-slate-900 dark:text-white">
-                          {v.namaSiswa}
-                          <span className="block text-[10px] text-slate-400 font-mono">{v.nis}</span>
-                        </TableCell>
-                        <TableCell className="text-xs">{v.kelas}</TableCell>
                         <TableCell className="text-xs">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-[11px] border border-slate-200 dark:border-slate-700 shrink-0 transition-colors">
+                              {getInitials(v.namaSiswa || "")}
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-900 dark:text-white group-hover/row:text-white block transition-colors">
+                                {v.namaSiswa}
+                              </span>
+                              <span className="text-[10px] text-slate-400 group-hover/row:text-slate-400 font-mono">
+                                NIS: {v.nis}
+                              </span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200">
+                          {v.kelas}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 group-hover/row:text-white block transition-colors">
                             {v.namaPelanggaran}
                           </span>
                           {v.keterangan && (
-                            <span className="block text-[11px] text-slate-500 italic mt-0.5">
+                            <span className="block text-[11px] text-slate-500 group-hover/row:text-slate-400 italic mt-0.5">
                               &ldquo;{v.keterangan}&rdquo;
                             </span>
                           )}
@@ -681,10 +750,10 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             {v.kategori}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-center font-bold text-red-600 text-xs">
+                        <TableCell className="text-center font-bold text-red-600 group-hover/row:text-red-400 text-xs">
                           +{v.poin}
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600 dark:text-slate-400">
+                        <TableCell className="text-xs text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300">
                           {v.lokasi || "-"}
                         </TableCell>
                         <TableCell className="text-xs">
@@ -711,7 +780,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                               size="sm"
                               variant="ghost"
                               onClick={() => handleUpdateViolationStatus(v.id, "Selesai Dibina")}
-                              className="h-7 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              className="h-7 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 group-hover/row:text-emerald-300 group-hover/row:hover:bg-emerald-900/50"
                               title="Tandai Selesai Dibina"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
@@ -722,7 +791,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteViolation(v.id)}
-                            className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 group-hover/row:text-red-300 group-hover/row:hover:bg-red-900/50"
                             title="Hapus Catatan"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -763,9 +832,12 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                     </TableRow>
                   ) : (
                     warningLettersList.map((l, i) => (
-                      <TableRow key={l.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                        <TableCell className="text-center text-xs text-slate-500">{i + 1}</TableCell>
-                        <TableCell className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      <TableRow
+                        key={l.id}
+                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
+                        <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">{i + 1}</TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover/row:text-white">
                           {l.nomorSurat}
                         </TableCell>
                         <TableCell className="text-center">
@@ -773,22 +845,33 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             SP {l.tingkatSp}
                           </span>
                         </TableCell>
-                        <TableCell className="text-xs font-medium text-slate-900 dark:text-white">
-                          {l.namaSiswa}
-                          <span className="block text-[10px] text-slate-400 font-mono">{l.nis}</span>
+                        <TableCell className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-[11px] border border-slate-200 dark:border-slate-700 shrink-0 transition-colors">
+                              {getInitials(l.namaSiswa || "")}
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-900 dark:text-white group-hover/row:text-white block transition-colors">
+                                {l.namaSiswa}
+                              </span>
+                              <span className="text-[10px] text-slate-400 group-hover/row:text-slate-400 font-mono">
+                                NIS: {l.nis}
+                              </span>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-xs">{l.kelas}</TableCell>
-                        <TableCell className="text-center text-xs font-bold text-red-600">
+                        <TableCell className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200">{l.kelas}</TableCell>
+                        <TableCell className="text-center text-xs font-bold text-red-600 group-hover/row:text-red-400">
                           {l.totalPoinSaatSp} Poin
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600 dark:text-slate-400 font-mono">
+                        <TableCell className="text-xs text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300 font-mono">
                           {l.tanggalTerbit}
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600 dark:text-slate-400">
+                        <TableCell className="text-xs text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300">
                           {l.diterbitkanOleh}
                         </TableCell>
                         <TableCell className="text-xs">
-                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200">
                             {l.statusPanggilan}
                           </span>
                         </TableCell>
@@ -797,7 +880,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             size="sm"
                             variant="outline"
                             onClick={() => handleOpenPrintPreview(l)}
-                            className="h-7 px-2.5 text-xs text-[#1F4E78] hover:bg-blue-50 border-blue-200 flex items-center gap-1"
+                            className="h-7 px-2.5 text-xs text-[#1F4E78] hover:bg-blue-50 border-blue-200 dark:text-blue-400 dark:border-blue-800 flex items-center gap-1 group-hover/row:border-blue-400/50 group-hover/row:text-blue-200 group-hover/row:hover:bg-blue-900/50"
                           >
                             <Printer className="w-3.5 h-3.5" />
                             <span>Cetak Surat</span>
@@ -816,7 +899,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Katalog Jenis Pelanggaran & Bobot Poin Baku
+                  Katalog Jenis Pelanggaran dan Bobot Poin Baku
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Dapat disesuaikan sewaktu-waktu saat pihak sekolah menerbitkan buku tata tertib resmi
@@ -849,11 +932,14 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 </TableHeader>
                 <TableBody>
                   {violationTypesList.map((t) => (
-                    <TableRow key={t.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                      <TableCell className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <TableRow
+                      key={t.id}
+                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                    >
+                      <TableCell className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200">
                         {t.kode}
                       </TableCell>
-                      <TableCell className="text-xs font-medium text-slate-900 dark:text-white">
+                      <TableCell className="text-xs font-semibold text-slate-900 dark:text-white group-hover/row:text-white">
                         {t.namaPelanggaran}
                       </TableCell>
                       <TableCell className="text-center text-xs">
@@ -870,10 +956,10 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                           {t.kategori}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center text-xs font-bold text-red-600">
+                      <TableCell className="text-center text-xs font-bold text-red-600 group-hover/row:text-red-400">
                         +{t.poinDefault} Poin
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600 dark:text-slate-400">
+                      <TableCell className="text-xs text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300">
                         {t.deskripsiSanksi || "-"}
                       </TableCell>
                       <TableCell className="text-right pr-4">
@@ -884,7 +970,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             setEditingRule(t);
                             setRuleModalOpen(true);
                           }}
-                          className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700"
+                          className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 group-hover/row:text-blue-300 group-hover/row:hover:bg-blue-900/50"
                         >
                           Edit
                         </Button>
@@ -1038,7 +1124,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs">Arahan Tindakan Sanksi / Pembinaan</Label>
+              <Label className="text-xs">Arahan Tindakan Sanksi atau Pembinaan</Label>
               <Input
                 placeholder="Contoh: Teguran lisan & pemanggilan orang tua"
                 value={editingRule?.deskripsiSanksi || ""}
@@ -1086,13 +1172,13 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 <SelectContent>
                   <SelectItem value="1" className="text-xs">Surat Peringatan I (SP 1)</SelectItem>
                   <SelectItem value="2" className="text-xs">Surat Peringatan II (SP 2)</SelectItem>
-                  <SelectItem value="3" className="text-xs">Surat Peringatan III (SP 3 / Terakhir)</SelectItem>
+                  <SelectItem value="3" className="text-xs">Surat Peringatan III (SP 3 atau Terakhir)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs">Catatan Mediasi / Jadwal Pemanggilan Ortu</Label>
+              <Label className="text-xs">Catatan Mediasi atau Jadwal Pemanggilan Orang Tua</Label>
               <Input
                 placeholder="Contoh: Pemanggilan wali murid hari Senin jam 09.00 WIB"
                 value={spCatatan}
