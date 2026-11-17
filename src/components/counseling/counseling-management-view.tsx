@@ -43,7 +43,6 @@ import {
   UserCheck,
   Shield,
   RotateCcw,
-  Calendar,
 } from "lucide-react";
 import {
   CounselingSessionItem,
@@ -279,10 +278,6 @@ export function CounselingManagementView() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-              <div className="inline-flex items-center bg-white/[0.04] border border-white/10 rounded-full px-4 py-1.5 text-xs text-slate-300 shadow-xs backdrop-blur-xs">
-                <Calendar className="w-3.5 h-3.5 text-amber-300 mr-2" />
-                <span>Periode: Semester Genap 2025-2026</span>
-              </div>
               <button
                 type="button"
                 onClick={openNewDispensation}
