@@ -240,12 +240,6 @@ export const GURU_DROPDOWN_GROUPS: NavDropdownGroup[] = [
         href: "/guru/konseling",
         icon: HeartHandshake,
       },
-      {
-        label: "Riwayat Aktivitas",
-        description: "Catatan aktivitas dan audit trail",
-        href: "/guru/riwayat-aktivitas",
-        icon: Activity,
-      },
     ],
   },
 ];
@@ -258,7 +252,6 @@ export const GURU_NAV_ITEMS = [
   { label: "Rekap Kelas", href: "/guru/rekap", icon: BarChart3 },
   { label: "Buku Poin", href: "/guru/pelanggaran", icon: ShieldAlert },
   { label: "Konseling BK", href: "/guru/konseling", icon: HeartHandshake },
-  { label: "Riwayat Aktivitas", href: "/guru/riwayat-aktivitas", icon: Activity },
   { label: "Leaderboard", href: "/guru/leaderboard", icon: Trophy },
 ];
 
