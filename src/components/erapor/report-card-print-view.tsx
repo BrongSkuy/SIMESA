@@ -262,19 +262,19 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               </tr>
             </thead>
             <tbody>
-              ${data.subjects
+              ${(data.subjects || [])
                 .map(
                   (sub, idx) => `
                 <tr>
                   <td style="text-align: center;">${idx + 1}</td>
                   <td>
                     <strong>${sub.mapel}</strong><br />
-                    <span style="font-size: 7pt; color: #555;">${sub.guruPengampu}</span>
+                    <span style="font-size: 7pt; color: #555;">${sub.guruPengampu || "-"}</span>
                   </td>
                   <td style="text-align: center;">${sub.kkm}</td>
-                  <td style="text-align: center; font-weight: bold;">${sub.nilaiAkhir !== null ? sub.nilaiAkhir.toFixed(2) : "-"}</td>
-                  <td style="text-align: center; font-weight: bold;">${sub.predikat}</td>
-                  <td style="font-size: 7.5pt; color: #333;">${sub.deskripsi}</td>
+                  <td style="text-align: center; font-weight: bold;">${sub.nilaiAkhir !== null && sub.nilaiAkhir !== undefined ? sub.nilaiAkhir.toFixed(2) : "-"}</td>
+                  <td style="text-align: center; font-weight: bold;">${sub.predikat || "-"}</td>
+                  <td style="font-size: 7.5pt; color: #333;">${sub.deskripsi || "-"}</td>
                 </tr>
               `
                 )
@@ -283,22 +283,22 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
             <tfoot>
               <tr style="background-color: #fafafa; font-weight: bold;">
                 <td colspan="3" style="text-align: right;">Total Nilai dan Rata-rata Rapor:</td>
-                <td style="text-align: center;">${data.rekapNilai.rataRata > 0 ? data.rekapNilai.rataRata.toFixed(2) : "-"}</td>
+                <td style="text-align: center;">${data.rekapNilai?.rataRata ? data.rekapNilai.rataRata.toFixed(2) : "-"}</td>
                 <td style="text-align: center;">
                   ${
-                    data.rekapNilai.rataRata >= 90
+                    (data.rekapNilai?.rataRata || 0) >= 90
                       ? "A"
-                      : data.rekapNilai.rataRata >= 80
+                      : (data.rekapNilai?.rataRata || 0) >= 80
                       ? "B"
-                      : data.rekapNilai.rataRata >= 75
+                      : (data.rekapNilai?.rataRata || 0) >= 75
                       ? "C"
-                      : data.rekapNilai.rataRata > 0
+                      : (data.rekapNilai?.rataRata || 0) > 0
                       ? "D"
                       : "-"
                   }
                 </td>
                 <td style="font-size: 7.5pt; font-weight: normal; color: #555;">
-                  Total ${data.rekapNilai.jumlahTuntas} mapel tuntas KKM dari ${data.rekapNilai.jumlahMapel} mata pelajaran.
+                  Total ${data.rekapNilai?.jumlahTuntas || 0} mapel tuntas KKM dari ${data.rekapNilai?.jumlahMapel || 0} mata pelajaran.
                 </td>
               </tr>
             </tfoot>
@@ -319,9 +319,9 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                 <tbody>
                   <tr>
                     <td style="text-align: center;">1</td>
-                    <td><strong>${data.ekskul.nama}</strong></td>
-                    <td style="text-align: center; font-weight: bold; color: #047857;">${data.ekskul.nilai}</td>
-                    <td style="font-size: 7.5pt;">${data.ekskul.keterangan}</td>
+                    <td><strong>${data.ekskul?.nama || "-"}</strong></td>
+                    <td style="text-align: center; font-weight: bold; color: #047857;">${data.ekskul?.nilai || "-"}</td>
+                    <td style="font-size: 7.5pt;">${data.ekskul?.keterangan || "-"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -339,15 +339,15 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                 <tbody>
                   <tr>
                     <td>Sakit (S)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi.sakit} hari</td>
+                    <td style="text-align: center; font-weight: 500;">${data.presensi?.sakit ?? 0} hari</td>
                   </tr>
                   <tr>
                     <td>Izin (I)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi.izin} hari</td>
+                    <td style="text-align: center; font-weight: 500;">${data.presensi?.izin ?? 0} hari</td>
                   </tr>
                   <tr>
                     <td>Tanpa Keterangan atau Alfa (A)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi.alfa} hari</td>
+                    <td style="text-align: center; font-weight: 500;">${data.presensi?.alfa ?? 0} hari</td>
                   </tr>
                 </tbody>
               </table>
@@ -356,7 +356,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
 
           <div class="section-title">D. Catatan Perkembangan Karakter dan Kedisiplinan Wali Kelas</div>
           <div class="catatan-box">
-            "${data.catatanWaliKelas}"
+            "${data.catatanWaliKelas || "Tetap pertahankan kedisiplinan dan semangat belajar."}"
           </div>
 
           <div class="ttd-section">
