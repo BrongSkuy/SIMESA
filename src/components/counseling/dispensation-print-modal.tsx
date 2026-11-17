@@ -464,7 +464,7 @@ export function DispensationPrintModal({
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 opacity-60" />
                 </div>
                 <p className="font-bold underline uppercase text-slate-950">
-                  {data.issuerName || "Petugas BK dan Kesiswaan"}
+                  {data.issuerName || data.diterbitkanOleh || "Petugas BK dan Kesiswaan"}
                 </p>
                 <p className="text-[11px] text-slate-600">SMK Penerbangan Dirgantara</p>
               </div>

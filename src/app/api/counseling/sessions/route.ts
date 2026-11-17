@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getUserFullRoles } from "@/lib/rbac-server";
 import {
   getCounselingSessions,
   createCounselingSession,
@@ -21,9 +22,11 @@ export async function GET(req: NextRequest) {
     const kelas = searchParams.get("kelas") || undefined;
     const studentId = searchParams.get("studentId") || undefined;
 
-    // Akses catatan rahasia hanya untuk Superadmin, Admin, Kepala Sekolah, dan Guru BK
-    const appRole = session.user?.appRole || session.user?.role || "";
-    const canViewConfidential = ["SUPERADMIN", "ADMIN", "KEPALA_SEKOLAH", "GURU_BK"].includes(appRole);
+    // Akses catatan rahasia hanya untuk Superadmin, Admin, Kepala Sekolah, dan Guru BK (termasuk multi-role dewan guru)
+    const { allRoles } = await getUserFullRoles(session.user.id);
+    const canViewConfidential = allRoles.some((r) =>
+      ["SUPERADMIN", "ADMIN", "KEPALA_SEKOLAH", "GURU_BK"].includes(r)
+    );
 
     const sessions = await getCounselingSessions({
       search,
