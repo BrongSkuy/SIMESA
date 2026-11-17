@@ -189,6 +189,81 @@ export const warningLetters = sqliteTable("warning_letters", {
   index("warning_letters_tingkat_idx").on(table.tingkatSp),
 ]);
 
+// --- Sesi Bimbingan Konseling (BK) Siswa ---
+export const counselingSessions = sqliteTable("counseling_sessions", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  counselorId: text("counselor_id").notNull(), // User ID atau nama Guru BK
+  tanggal: text("tanggal").notNull(), // YYYY-MM-DD
+  waktuMulai: text("waktu_mulai").notNull(), // HH:MM
+  waktuSelesai: text("waktu_selesai").notNull(), // HH:MM
+  kategori: text("kategori", {
+    enum: ["Akademik dan Belajar", "Pribadi dan Sosial", "Karir dan Masa Depan", "Kedisiplinan dan Sikap"],
+  }).notNull(),
+  jenisLayanan: text("jenis_layanan", {
+    enum: ["Konseling Perorangan", "Konseling Kelompok", "Mediasi Antar Teman", "Konsultasi Temu Orang Tua"],
+  }).notNull(),
+  tingkatKerahasiaan: text("tingkat_kerahasiaan", {
+    enum: ["Umum", "Rahasia"],
+  }).notNull().default("Umum"),
+  pokokMasalah: text("pokok_masalah").notNull(),
+  pendekatanKonseling: text("pendekatan_konseling"),
+  hasilKonseling: text("hasil_konseling"),
+  tindakLanjut: text("tindak_lanjut"),
+  statusKasus: text("status_kasus", {
+    enum: ["Dalam Pemantauan", "Selesai", "Rujukan Kasus"],
+  }).notNull().default("Dalam Pemantauan"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+}, (table) => [
+  index("counseling_sessions_student_idx").on(table.studentId),
+  index("counseling_sessions_counselor_idx").on(table.counselorId),
+  index("counseling_sessions_tanggal_idx").on(table.tanggal),
+  index("counseling_sessions_status_idx").on(table.statusKasus),
+  index("counseling_sessions_kategori_idx").on(table.kategori),
+]);
+
+// --- Log Pemantauan Perkembangan Siswa ---
+export const studentMonitoringLogs = sqliteTable("student_monitoring_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  recordedBy: text("recorded_by").notNull(), // User ID atau nama Guru BK atau Wali Kelas
+  tanggal: text("tanggal").notNull(), // YYYY-MM-DD
+  aspekPengamatan: text("aspek_pengamatan", {
+    enum: ["Kedisiplinan dan Sikap", "Motivasi Belajar", "Interaksi Sosial", "Keluarga dan Lingkungan"],
+  }).notNull(),
+  catatanPerkembangan: text("catatan_perkembangan").notNull(),
+  rekomendasi: text("rekomendasi"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+}, (table) => [
+  index("monitoring_logs_student_idx").on(table.studentId),
+  index("monitoring_logs_recorder_idx").on(table.recordedBy),
+  index("monitoring_logs_tanggal_idx").on(table.tanggal),
+]);
+
+// --- Surat Dispensasi Izin Meninggalkan Kelas ---
+export const dispensationLetters = sqliteTable("dispensation_letters", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull(),
+  nomorSurat: text("nomor_surat").notNull().unique(), // e.g. "018-DSP-SMK-DIRGANTARA-XI-2026"
+  tanggal: text("tanggal").notNull(), // YYYY-MM-DD
+  jamMulai: text("jam_mulai").notNull(), // e.g. "09:00"
+  jamSelesai: text("jam_selesai").notNull(), // e.g. "10:30" atau "Selesai KBM"
+  keperluan: text("keperluan", {
+    enum: ["Bimbingan Konseling", "Pemeriksaan Kesehatan di UKS", "Tugas Sekolah atau Perlombaan", "Urusan Keluarga Mendesak"],
+  }).notNull(),
+  keterangan: text("keterangan"),
+  diterbitkanOleh: text("diterbitkan_oleh").notNull(), // User ID atau nama Guru BK atau Guru Piket
+  statusDispensasi: text("status_dispensasi", {
+    enum: ["Aktif", "Selesai", "Dibatalkan"],
+  }).notNull().default("Aktif"),
+  createdAt: integer("created_at").$defaultFn(() => Date.now()),
+}, (table) => [
+  index("dispensation_letters_student_idx").on(table.studentId),
+  index("dispensation_letters_nomor_idx").on(table.nomorSurat),
+  index("dispensation_letters_tanggal_idx").on(table.tanggal),
+  index("dispensation_letters_status_idx").on(table.statusDispensasi),
+]);
+
 // ============================================================
 // Type exports
 // ============================================================
@@ -209,3 +284,9 @@ export type StudentViolation = typeof studentViolations.$inferSelect;
 export type NewStudentViolation = typeof studentViolations.$inferInsert;
 export type WarningLetter = typeof warningLetters.$inferSelect;
 export type NewWarningLetter = typeof warningLetters.$inferInsert;
+export type CounselingSession = typeof counselingSessions.$inferSelect;
+export type NewCounselingSession = typeof counselingSessions.$inferInsert;
+export type StudentMonitoringLog = typeof studentMonitoringLogs.$inferSelect;
+export type NewStudentMonitoringLog = typeof studentMonitoringLogs.$inferInsert;
+export type DispensationLetter = typeof dispensationLetters.$inferSelect;
+export type NewDispensationLetter = typeof dispensationLetters.$inferInsert;

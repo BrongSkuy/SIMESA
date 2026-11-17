@@ -762,6 +762,122 @@ async function seed() {
   console.log(`   ✅ Seeded sample disciplinary records & warning letter`);
 
   // ==========================================
+  // 7. Seed Sample Data Konseling BK & Dispensasi (Fitur 12)
+  // ==========================================
+  console.log("🤝 Seeding sample Counseling Sessions, Monitoring Logs, & Dispensations...");
+  if (dimas && andi && rizki) {
+    const endang = "Dra. Endang Lestari, S.Psi.";
+    const budi = "Budi Santoso, S.Pd.";
+
+    // Sesi 1: Dimas (Tindak lanjut SP 1 & rokok)
+    await db.insert(schema.counselingSessions).values({
+      studentId: dimas.id,
+      counselorId: endang,
+      tanggal: "2026-11-13",
+      waktuMulai: "09:00",
+      waktuSelesai: "09:45",
+      kategori: "Kedisiplinan dan Sikap",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Umum",
+      pokokMasalah: "Pembinaan terkait kepemilikan rokok elektrik dan pelanggaran tata tertib sekolah",
+      pendekatanKonseling: "Konseling motivasi diri dan komitmen tertulis perubahan perilaku",
+      hasilKonseling: "Siswa mengakui kesalahan dan berjanji tidak mengulangi serta bersedia didampingi orang tua",
+      tindakLanjut: "Pertemuan bersama orang tua dan evaluasi perilaku sepekan ke depan",
+      statusKasus: "Dalam Pemantauan",
+    }).catch(() => {});
+
+    // Sesi 2: Andi (Konsultasi Karir & Magang Penerbangan)
+    await db.insert(schema.counselingSessions).values({
+      studentId: andi.id,
+      counselorId: endang,
+      tanggal: "2026-11-15",
+      waktuMulai: "10:15",
+      waktuSelesai: "11:00",
+      kategori: "Karir dan Masa Depan",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Umum",
+      pokokMasalah: "Konsultasi pemilihan mitra magang industri pesawat dan persiapan sertifikasi",
+      pendekatanKonseling: "Eksplorasi minat dan pemetaan kompetensi keahlian teknik kedirgantaraan",
+      hasilKonseling: "Siswa memilih fokus pada perawatan instrumen pesawat dan siap menyusun portofolio",
+      tindakLanjut: "Penyerahan berkas portofolio mandiri kepada guru kejuruan",
+      statusKasus: "Selesai",
+    }).catch(() => {});
+
+    // Sesi 3: Rizki (Pribadi & Motivasi Belajar)
+    await db.insert(schema.counselingSessions).values({
+      studentId: rizki.id,
+      counselorId: endang,
+      tanggal: "2026-11-16",
+      waktuMulai: "08:30",
+      waktuSelesai: "09:15",
+      kategori: "Pribadi dan Sosial",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Rahasia",
+      pokokMasalah: "Kesulitan konsentrasi belajar karena masalah pribadi di lingkungan pertemanan",
+      pendekatanKonseling: "Pendekatan konseling berpusat pada pribadi (client-centered)",
+      hasilKonseling: "Siswa merasa lebih tenang dan memahami batasan relasi yang sehat",
+      tindakLanjut: "Sesi konseling lanjutan hari Kamis jam istirahat pertama",
+      statusKasus: "Dalam Pemantauan",
+    }).catch(() => {});
+
+    // Log Pemantauan Siswa
+    await db.insert(schema.studentMonitoringLogs).values([
+      {
+        studentId: dimas.id,
+        recordedBy: budi,
+        tanggal: "2026-11-14",
+        aspekPengamatan: "Kedisiplinan dan Sikap",
+        catatanPerkembangan: "Dimas hadir tepat waktu dan duduk di barisan depan selama pelajaran berlangsung",
+        rekomendasi: "Berikan apresiasi positif atas kedisiplinan yang mulai membaik",
+      },
+      {
+        studentId: andi.id,
+        recordedBy: budi,
+        tanggal: "2026-11-15",
+        aspekPengamatan: "Motivasi Belajar",
+        catatanPerkembangan: "Sangat aktif dalam diskusi kelompok dan antusias mempelajari materi baru",
+        rekomendasi: "Diberi tugas pengayaan materi lanjutan",
+      },
+      {
+        studentId: rizki.id,
+        recordedBy: endang,
+        tanggal: "2026-11-16",
+        aspekPengamatan: "Interaksi Sosial",
+        catatanPerkembangan: "Mulai terbuka berinteraksi dengan teman sekelas dan tidak menyendiri lagi",
+        rekomendasi: "Dorong keterlibatan dalam kegiatan ekstrakurikuler",
+      },
+    ]).catch(() => {});
+
+    // Sample Surat Dispensasi Izin Meninggalkan Kelas
+    await db.insert(schema.dispensationLetters).values([
+      {
+        studentId: dimas.id,
+        nomorSurat: "001-DSP-SMK-DIRGANTARA-XI-2026",
+        tanggal: "2026-11-13",
+        jamMulai: "09:00",
+        jamSelesai: "09:45",
+        keperluan: "Bimbingan Konseling",
+        keterangan: "Mengikuti sesi bimbingan konseling dan pembinaan karakter di Ruang BK",
+        diterbitkanOleh: endang,
+        statusDispensasi: "Selesai",
+      },
+      {
+        studentId: rizki.id,
+        nomorSurat: "002-DSP-SMK-DIRGANTARA-XI-2026",
+        tanggal: "2026-11-17",
+        jamMulai: "08:30",
+        jamSelesai: "10:00",
+        keperluan: "Pemeriksaan Kesehatan di UKS",
+        keterangan: "Mengalami demam saat jam pelajaran berlangsung dan beristirahat di ruang UKS",
+        diterbitkanOleh: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        statusDispensasi: "Aktif",
+      },
+    ]).catch(() => {});
+
+    console.log(`   ✅ Seeded sample counseling sessions, logs, and dispensation letters`);
+  }
+
+  // ==========================================
   // Done
   // ==========================================
   console.log("\n✨ Seeding complete!\n");
