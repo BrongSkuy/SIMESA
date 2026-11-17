@@ -488,7 +488,7 @@ export function ActivityLogView() {
                       {/* Aktor Pengguna */}
                       <TableCell className="py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/50 flex items-center justify-center font-bold text-xs text-blue-700 dark:text-blue-300 shrink-0">
+                          <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/50 group-hover/row:bg-blue-950 group-hover/row:border-blue-700/60 flex items-center justify-center font-bold text-xs text-blue-700 dark:text-blue-300 group-hover/row:text-blue-200 shrink-0 transition-colors">
                             {getInitials(log.userName)}
                           </div>
                           <div className="min-w-0">
