@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ import {
   UserCheck,
   Shield,
   RotateCcw,
+  Calendar,
 } from "lucide-react";
 import {
   CounselingSessionItem,
@@ -261,62 +261,95 @@ export function CounselingManagementView() {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman Utama */}
-      <PageHeader
-        title="Bimbingan Konseling dan Kesiswaan"
-        description="Pencatatan sesi bimbingan siswa, pemantauan karakter kepribadian, dan penerbitan surat dispensasi kelas resmi"
-        icon={HeartHandshake}
-      >
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-          <Button
-            onClick={openNewDispensation}
-            variant="outline"
-            className="gap-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white border-white/20"
-          >
-            <FileText className="w-4 h-4 text-blue-300" />
-            Buat Surat Dispensasi
-          </Button>
-          <Button
-            onClick={openNewCounseling}
-            className="bg-blue-600 hover:bg-blue-700 text-white gap-2 text-xs sm:text-sm shadow-xs font-semibold"
-          >
-            <Plus className="w-4 h-4" />
-            Catat Konseling Baru
-          </Button>
-        </div>
-      </PageHeader>
+      {/* 1. Header Cockpit Banner Menyatu - Persis Beranda Dashboard */}
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Ambient Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
-      {/* 4 StatCard Esensial SIMESA */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Sesi Bulan Ini"
-          value={loading ? "..." : `${summary.totalSesiBulanIni} Sesi`}
-          subtitle="Total bimbingan tercatat bulan ini"
-          icon={HeartHandshake}
-          color="navy"
-        />
-        <StatCard
-          title="Dalam Pantauan"
-          value={loading ? "..." : `${summary.totalDalamPemantauan} Siswa`}
-          subtitle="Kasus yang sedang didampingi"
-          icon={Clock}
-          color="amber"
-        />
-        <StatCard
-          title="Kasus Selesai"
-          value={loading ? "..." : `${summary.totalSelesai} Kasus`}
-          subtitle="Telah tuntas dibina dengan baik"
-          icon={CheckCircle2}
-          color="emerald"
-        />
-        <StatCard
-          title="Dispensasi Hari Ini"
-          value={loading ? "..." : `${summary.totalDispensasiHariIni} Surat`}
-          subtitle="Izin aktif meninggalkan ruang kelas"
-          icon={FileText}
-          color="blue"
-        />
-      </div>
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Header Title, Subtitle & Action Pills */}
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
+                Bimbingan Konseling dan Kesiswaan
+              </h1>
+              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
+                Pencatatan sesi bimbingan siswa, pemantauan karakter kepribadian, dan penerbitan dispensasi kelas
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <div className="inline-flex items-center bg-white/[0.04] border border-white/10 rounded-full px-4 py-1.5 text-xs text-slate-300 shadow-xs backdrop-blur-xs">
+                <Calendar className="w-3.5 h-3.5 text-amber-300 mr-2" />
+                <span>Periode: Semester Genap 2025-2026</span>
+              </div>
+              <button
+                type="button"
+                onClick={openNewDispensation}
+                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5 mr-2 text-blue-300" />
+                Buat Surat Dispensasi
+              </button>
+              <button
+                type="button"
+                onClick={openNewCounseling}
+                className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 mr-2 text-blue-100" />
+                Catat Konseling Baru
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards (Persis Dashboard) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="TOTAL SESI BULAN INI"
+              value={loading ? "..." : summary.totalSesiBulanIni}
+              icon={HeartHandshake}
+              color="blue"
+              footerLeft="Bimbingan Terdaftar"
+              footerRight="Bulan Berjalan"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="DALAM PANTAUAN"
+              value={loading ? "..." : summary.totalDalamPemantauan}
+              icon={Clock}
+              color="amber"
+              footerLeft="Kasus Aktif"
+              footerRight="Perlu Pendampingan"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-emerald-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="KASUS SELESAI"
+              value={loading ? "..." : summary.totalSelesai}
+              icon={CheckCircle2}
+              color="emerald"
+              footerLeft="Telah Tuntas Dibina"
+              footerRight="Perilaku Positif"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="DISPENSASI HARI INI"
+              value={loading ? "..." : summary.totalDispensasiHariIni}
+              icon={FileText}
+              color="blue"
+              footerLeft="Izin Aktif Kelas"
+              footerRight="KBM Berlangsung"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Navigasi Tab Terpadu */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
