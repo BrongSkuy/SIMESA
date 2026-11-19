@@ -355,6 +355,12 @@ export async function POST(request: NextRequest) {
       ? `Memperbarui nilai ${subjectLabel} untuk siswa ${targetStudent.namaLengkap} di kelas ${kelas} (Periode ${safePeriode})`
       : `Memperbarui nilai ${subjectLabel} untuk ${valuesToInsert.length} siswa di kelas ${kelas} (Periode ${safePeriode})`;
 
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Pengguna",
@@ -371,6 +377,7 @@ export async function POST(request: NextRequest) {
         periode,
         jumlahSiswa: valuesToInsert.length,
       },
+      ipAddress,
     });
 
     return NextResponse.json({ success: true, count: valuesToInsert.length });
@@ -484,6 +491,12 @@ export async function DELETE(request: NextRequest) {
     // Catat ke riwayat aktivitas (audit trail)
     const subjectLabel = mapel ? `mata pelajaran ${mapel}` : "komponen kriteria umum";
     const safePeriode = (periode || "").replace(/\//g, "-");
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Pengguna",
@@ -499,6 +512,7 @@ export async function DELETE(request: NextRequest) {
         mapel: mapel || "Umum",
         periode,
       },
+      ipAddress,
     });
 
     return NextResponse.json({ success: true });

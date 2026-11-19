@@ -55,12 +55,21 @@ export const ACTION_LABELS: Record<AuditAction, string> = {
 };
 
 export const ROLE_LABELS: Record<string, string> = {
+  superadmin: "Super Administrator",
+  super_admin: "Super Administrator",
   admin: "Administrator",
+  kepala_sekolah: "Kepala Sekolah",
   guru: "Guru Mapel",
   wali_kelas: "Wali Kelas",
   guru_bk: "Guru BK",
   siswa: "Siswa",
 };
+
+export function formatRoleLabel(role?: string | null): string {
+  if (!role) return "Pengguna";
+  const normalized = role.toLowerCase().trim();
+  return ROLE_LABELS[normalized] || role;
+}
 
 export interface ActivityLogItem {
   id: string;

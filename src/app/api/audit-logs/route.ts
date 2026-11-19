@@ -145,6 +145,31 @@ export async function DELETE(req: NextRequest) {
     }
 
     const deletedCount = await purgeOldAuditLogs(days);
+
+    // Dapatkan alamat IP
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
+    // Catat aksi pembersihan ini sendiri ke audit trail
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Super Administrator",
+      userRole: (session.user as any).role || (session.user as any).appRole || "superadmin",
+      action: "DELETE",
+      module: "SISTEM",
+      targetId: null,
+      targetName: "Catatan Riwayat Usang",
+      description: `Super Administrator membersihkan ${deletedCount} catatan aktivitas usang dengan batas retensi ${days} hari`,
+      details: {
+        rentangHari: days,
+        jumlahDihapus: deletedCount,
+      },
+      ipAddress,
+    });
+
     return NextResponse.json({
       success: true,
       message: `${deletedCount} catatan aktivitas lama berhasil dibersihkan.`,

@@ -5,6 +5,7 @@ import {
   MODULE_LABELS,
   ACTION_LABELS,
   ROLE_LABELS,
+  formatRoleLabel,
   formatAuditTimestamp,
   getInitials,
   getActionBadgeStyle,
@@ -100,6 +101,25 @@ describe("Riwayat Aktivitas & Audit Trail Helpers (Fitur 15)", () => {
         expect(style.border).toBeDefined();
         expect(style.bg.length).toBeGreaterThan(0);
       });
+    });
+  });
+
+  describe("formatRoleLabel", () => {
+    it("memetakan peran huruf kecil dan huruf besar ke label resmi", () => {
+      expect(formatRoleLabel("superadmin")).toBe("Super Administrator");
+      expect(formatRoleLabel("SUPERADMIN")).toBe("Super Administrator");
+      expect(formatRoleLabel("admin")).toBe("Administrator");
+      expect(formatRoleLabel("ADMIN")).toBe("Administrator");
+      expect(formatRoleLabel("kepala_sekolah")).toBe("Kepala Sekolah");
+      expect(formatRoleLabel("KEPALA_SEKOLAH")).toBe("Kepala Sekolah");
+      expect(formatRoleLabel("guru")).toBe("Guru Mapel");
+      expect(formatRoleLabel("siswa")).toBe("Siswa");
+    });
+
+    it("menangani nilai kosong atau null dengan fallback aman", () => {
+      expect(formatRoleLabel(null)).toBe("Pengguna");
+      expect(formatRoleLabel(undefined)).toBe("Pengguna");
+      expect(formatRoleLabel("")).toBe("Pengguna");
     });
   });
 });

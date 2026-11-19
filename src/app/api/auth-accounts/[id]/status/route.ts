@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
 
 // PUT /api/auth-accounts/[id]/status — toggle status
 export async function PUT(
@@ -70,6 +71,30 @@ export async function PUT(
 
       return updated;
     });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    if (result) {
+      const reqHeaders = await headers();
+      const ipAddress =
+        reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        reqHeaders.get("x-real-ip") ||
+        "127.0.0.1";
+
+      await logActivity({
+        userId: session.user.id,
+        userName: session.user.name || "Administrator",
+        userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+        action: "UPDATE",
+        module: "MANAJEMEN_PENGGUNA",
+        targetId: id,
+        targetName: result.name,
+        description: isBanned
+          ? `Menonaktifkan atau menangguhkan akun pengguna ${result.name} (${result.email || result.username})`
+          : `Mengaktifkan kembali akun pengguna ${result.name} (${result.email || result.username})`,
+        details: { id, isBanned },
+        ipAddress,
+      });
+    }
 
     return NextResponse.json(result);
   } catch (error: unknown) {

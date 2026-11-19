@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { activityLogs } from "@/db/schema";
 import { desc, and, or, like, eq, gte, lte, sql } from "drizzle-orm";
+import { getTodayWIB } from "@/lib/utils";
 import {
   AuditAction,
   AuditModule,
@@ -71,8 +72,7 @@ export async function logActivity(params: LogActivityParams): Promise<ActivityLo
  */
 export async function getAuditSummary(): Promise<AuditSummaryStats> {
   try {
-    const now = new Date();
-    const todayPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const todayPrefix = getTodayWIB();
 
     const [stats] = await db
       .select({
@@ -148,7 +148,25 @@ export async function getActivityLogs(filters: AuditFilterParams = {}): Promise<
     }
 
     if (filters.userRole && filters.userRole !== "all") {
-      conditions.push(eq(activityLogs.userRole, filters.userRole));
+      const lower = filters.userRole.toLowerCase().trim();
+      const upper = filters.userRole.toUpperCase().trim();
+      if (lower === "superadmin" || lower === "super_admin") {
+        conditions.push(
+          or(
+            eq(activityLogs.userRole, "superadmin"),
+            eq(activityLogs.userRole, "SUPERADMIN"),
+            eq(activityLogs.userRole, "super_admin"),
+            eq(activityLogs.userRole, "SUPER_ADMIN")
+          )
+        );
+      } else {
+        conditions.push(
+          or(
+            eq(activityLogs.userRole, lower),
+            eq(activityLogs.userRole, upper)
+          )
+        );
+      }
     }
 
     if (filters.search && filters.search.trim() !== "") {

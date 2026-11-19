@@ -155,6 +155,12 @@ export async function POST(request: NextRequest) {
       .where(eq(students.id, studentId))
       .limit(1);
 
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Wali Kelas",
@@ -170,6 +176,7 @@ export async function POST(request: NextRequest) {
         ekskulNama,
         ekskulNilai,
       },
+      ipAddress,
     });
 
     return NextResponse.json({

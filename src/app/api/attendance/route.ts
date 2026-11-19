@@ -244,6 +244,12 @@ export async function POST(request: NextRequest) {
     const safePeriode = (periode || "").replace(/\//g, "-");
     const subjectLabel = mapel && mapel !== "Umum" ? `mata pelajaran ${mapel}` : "presensi harian";
 
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Pengguna",
@@ -261,6 +267,7 @@ export async function POST(request: NextRequest) {
         periode,
         jumlahSiswa: body.records.length,
       },
+      ipAddress,
     });
 
     return NextResponse.json({

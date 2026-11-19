@@ -64,6 +64,7 @@ import {
   MODULE_LABELS,
   ACTION_LABELS,
   ROLE_LABELS,
+  formatRoleLabel,
   formatAuditTimestamp,
   getInitials,
   getActionBadgeStyle,
@@ -103,6 +104,7 @@ export function ActivityLogView() {
   const [purgeStep, setPurgeStep] = useState<1 | 2>(1);
   const [purgeDays, setPurgeDays] = useState("180");
   const [isPurging, setIsPurging] = useState(false);
+  const [isExportingCSV, setIsExportingCSV] = useState(false);
   const [isDownloadingExcel, setIsDownloadingExcel] = useState(false);
   const [hasDownloadedExcel, setHasDownloadedExcel] = useState(false);
   const [confirmWithoutDownload, setConfirmWithoutDownload] = useState(false);
@@ -131,7 +133,7 @@ export function ActivityLogView() {
         "No": idx + 1,
         "Waktu Pencatatan": formatAuditTimestamp(item.createdAt),
         "Nama Aktor": item.userName,
-        "Peran Pengguna": ROLE_LABELS[item.userRole] || item.userRole,
+        "Peran Pengguna": formatRoleLabel(item.userRole),
         "Modul Sistem": MODULE_LABELS[item.module] || item.module,
         "Jenis Aksi": ACTION_LABELS[item.action] || item.action,
         "Target Objek": item.targetName || "-",
@@ -260,46 +262,70 @@ export function ActivityLogView() {
     setSelectedRole("all");
   };
 
-  // Export logs to CSV
-  const handleExportCSV = () => {
-    if (logs.length === 0) return;
+  // Export logs to CSV (mengunduh seluruh catatan yang sesuai filter)
+  const handleExportCSV = async () => {
+    setIsExportingCSV(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      if (selectedModule !== "all") params.set("module", selectedModule);
+      if (selectedAction !== "all") params.set("action", selectedAction);
+      if (selectedRole !== "all") params.set("userRole", selectedRole);
+      params.set("limit", "50000");
 
-    const headers = [
-      "Waktu Pencatatan",
-      "Nama Aktor",
-      "Peran Pengguna",
-      "Modul Sistem",
-      "Jenis Aksi",
-      "Target Objek",
-      "Uraian Kegiatan",
-      "Alamat IP",
-    ];
+      const res = await fetch(`/api/audit-logs?${params.toString()}`);
+      if (!res.ok) throw new Error("Gagal mengambil data ekspor");
+      const json = await res.json();
+      const exportData: ActivityLogItem[] = json.logs || [];
 
-    const rows = logs.map((log) => [
-      `"${formatAuditTimestamp(log.createdAt)}"`,
-      `"${log.userName.replace(/"/g, '""')}"`,
-      `"${(ROLE_LABELS[log.userRole] || log.userRole).replace(/"/g, '""')}"`,
-      `"${(MODULE_LABELS[log.module] || log.module).replace(/"/g, '""')}"`,
-      `"${(ACTION_LABELS[log.action] || log.action).replace(/"/g, '""')}"`,
-      `"${(log.targetName || "-").replace(/"/g, '""')}"`,
-      `"${(log.description || "").replace(/"/g, '""')}"`,
-      `"${log.ipAddress || "127.0.0.1"}"`,
-    ]);
+      if (exportData.length === 0) {
+        toast.info("Tidak ada data riwayat aktivitas untuk diekspor");
+        return;
+      }
 
-    const csvContent =
-      "data:text/csv;charset=utf-8,\uFEFF" +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+      const headers = [
+        "Waktu Pencatatan",
+        "Nama Aktor",
+        "Peran Pengguna",
+        "Modul Sistem",
+        "Jenis Aksi",
+        "Target Objek",
+        "Uraian Kegiatan",
+        "Alamat IP",
+      ];
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `Riwayat_Aktivitas_SIMESA_${new Date().toISOString().split("T")[0]}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const rows = exportData.map((log) => [
+        `"${formatAuditTimestamp(log.createdAt)}"`,
+        `"${log.userName.replace(/"/g, '""')}"`,
+        `"${formatRoleLabel(log.userRole).replace(/"/g, '""')}"`,
+        `"${(MODULE_LABELS[log.module] || log.module).replace(/"/g, '""')}"`,
+        `"${(ACTION_LABELS[log.action] || log.action).replace(/"/g, '""')}"`,
+        `"${(log.targetName || "-").replace(/"/g, '""')}"`,
+        `"${(log.description || "").replace(/"/g, '""')}"`,
+        `"${log.ipAddress || "127.0.0.1"}"`,
+      ]);
+
+      const csvContent =
+        "data:text/csv;charset=utf-8,\uFEFF" +
+        [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute(
+        "download",
+        `Riwayat_Aktivitas_SIMESA_${new Date().toISOString().split("T")[0]}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`${exportData.length} catatan riwayat berhasil diekspor ke CSV`);
+    } catch (err) {
+      console.error("Gagal mengekspor CSV:", err);
+      toast.error("Gagal mengekspor berkas CSV");
+    } finally {
+      setIsExportingCSV(false);
+    }
   };
 
   return (
@@ -324,11 +350,12 @@ export function ActivityLogView() {
             <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
               <button
                 type="button"
+                disabled={isExportingCSV}
                 onClick={handleExportCSV}
-                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 mr-2 text-emerald-300" />
-                Ekspor Laporan CSV
+                {isExportingCSV ? "Mengekspor CSV..." : "Ekspor Laporan CSV"}
               </button>
 
               <button
@@ -468,7 +495,9 @@ export function ActivityLogView() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Peran</SelectItem>
+                <SelectItem value="superadmin">Super Administrator</SelectItem>
                 <SelectItem value="admin">Administrator</SelectItem>
+                <SelectItem value="kepala_sekolah">Kepala Sekolah</SelectItem>
                 <SelectItem value="guru">Guru Mapel</SelectItem>
                 <SelectItem value="wali_kelas">Wali Kelas</SelectItem>
                 <SelectItem value="guru_bk">Guru BK</SelectItem>
@@ -588,7 +617,7 @@ export function ActivityLogView() {
                               {log.userName}
                             </div>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400 group-hover/row:text-slate-300">
-                              {ROLE_LABELS[log.userRole] || log.userRole}
+                              {formatRoleLabel(log.userRole)}
                             </div>
                           </div>
                         </div>
@@ -717,7 +746,7 @@ export function ActivityLogView() {
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-medium">Aktor Pelaksana</span>
                   <p className="font-semibold text-slate-800 dark:text-slate-200">
-                    {selectedLog.userName} ({ROLE_LABELS[selectedLog.userRole] || selectedLog.userRole})
+                    {selectedLog.userName} ({formatRoleLabel(selectedLog.userRole)})
                   </p>
                 </div>
 

@@ -86,6 +86,12 @@ export async function PUT(
     }
 
     // Catat ke riwayat aktivitas (audit trail)
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Administrator",
@@ -96,6 +102,7 @@ export async function PUT(
       targetName: updated.namaLengkap,
       description: `Memperbarui profil data siswa ${updated.namaLengkap} di kelas ${updated.kelas}`,
       details: updatePayload,
+      ipAddress,
     });
 
     return NextResponse.json(updated);
@@ -152,6 +159,12 @@ export async function DELETE(
 
     // Catat ke riwayat aktivitas (audit trail)
     if (result) {
+      const reqHeaders = await headers();
+      const ipAddress =
+        reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        reqHeaders.get("x-real-ip") ||
+        "127.0.0.1";
+
       await logActivity({
         userId: session.user.id,
         userName: session.user.name || "Administrator",
@@ -166,6 +179,7 @@ export async function DELETE(
           namaLengkap: result.namaLengkap,
           kelas: result.kelas,
         },
+        ipAddress,
       });
     }
 
