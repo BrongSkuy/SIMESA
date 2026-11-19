@@ -543,6 +543,341 @@ async function seed() {
   }
 
   // ==========================================
+  // 8. Violation Types & Sample Disciplinary Records
+  // ==========================================
+  console.log("\n⚖️ Seeding Violation Types & Disciplinary Records...");
+  const defaultViolationTypes = [
+    {
+      kode: "TATIB-01",
+      namaPelanggaran: "Keterlambatan Masuk Sekolah (<15 menit)",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Teguran lisan & pembinaan disiplin apel pagi",
+    },
+    {
+      kode: "TATIB-02",
+      namaPelanggaran: "Atribut Seragam Tidak Lengkap (Topi/Dasi/Sepatu)",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Pembinaan kerapian siswa",
+    },
+    {
+      kode: "TATIB-03",
+      namaPelanggaran: "Rambut Tidak Rapi / Melebihi Batas Ketentuan",
+      kategori: "Ringan" as const,
+      poinDefault: 10,
+      deskripsiSanksi: "Peringatan lisan & batas cukur 1x24 jam",
+    },
+    {
+      kode: "TATIB-04",
+      namaPelanggaran: "Makan/Minum Saat KBM Berlangsung Tanpa Izin",
+      kategori: "Ringan" as const,
+      poinDefault: 5,
+      deskripsiSanksi: "Teguran langsung guru mapel",
+    },
+    {
+      kode: "TATIB-05",
+      namaPelanggaran: "Membuang Sampah Sembarangan di Koridor/Kelas",
+      kategori: "Ringan" as const,
+      poinDefault: 10,
+      deskripsiSanksi: "Tugas kebersihan mandiri 30 menit",
+    },
+    {
+      kode: "KBM-01",
+      namaPelanggaran: "Meninggalkan Kelas Tanpa Izin (Bolos Jam Mapel)",
+      kategori: "Sedang" as const,
+      poinDefault: 25,
+      deskripsiSanksi: "Bimbingan Wali Kelas & tugas refleksi disiplin",
+    },
+    {
+      kode: "KBM-02",
+      namaPelanggaran: "Penggunaan Gadget Non-Instruksional Saat KBM",
+      kategori: "Sedang" as const,
+      poinDefault: 20,
+      deskripsiSanksi: "Penyitaan sementara sampai jam kepulangan",
+    },
+    {
+      kode: "TATIB-06",
+      namaPelanggaran: "Tidak Mengikuti Upacara Bendera / Apel Pagi",
+      kategori: "Sedang" as const,
+      poinDefault: 20,
+      deskripsiSanksi: "Pembinaan kedisiplinan terarah",
+    },
+    {
+      kode: "TATIB-07",
+      namaPelanggaran: "Merokok / Membawa Rokok/Vape di Lingkungan Sekolah",
+      kategori: "Sedang" as const,
+      poinDefault: 40,
+      deskripsiSanksi: "Penyitaan barang & pemanggilan orang tua",
+    },
+    {
+      kode: "KDR-01",
+      namaPelanggaran: "Perkelahian Fisik / Pemicu Konflik Antar Siswa",
+      kategori: "Berat" as const,
+      poinDefault: 75,
+      deskripsiSanksi: "Skorsing akademik 3 hari & penerbitan SP resmi",
+    },
+    {
+      kode: "KDR-02",
+      namaPelanggaran: "Membawa Senjata Tajam / Barang Terlarang",
+      kategori: "Berat" as const,
+      poinDefault: 100,
+      deskripsiSanksi: "Konferensi kasus dewan guru & sanksi berat",
+    },
+    {
+      kode: "KDR-03",
+      namaPelanggaran: "Tindakan Asusila / Perundungan (Bullying) Berat",
+      kategori: "Berat" as const,
+      poinDefault: 80,
+      deskripsiSanksi: "Bimbingan mendalam BK & penerbitan SP tingkat lanjut",
+    },
+    {
+      kode: "KDR-04",
+      namaPelanggaran: "Pemalsuan Tanda Tangan Dokumen / Surat Izin",
+      kategori: "Berat" as const,
+      poinDefault: 60,
+      deskripsiSanksi: "Pemanggilan orang tua & penerbitan SP",
+    },
+  ];
+
+  const insertedTypes: Record<string, string> = {};
+  for (const vt of defaultViolationTypes) {
+    try {
+      const [row] = await db
+        .insert(schema.violationTypes)
+        .values({
+          ...vt,
+          isActive: true,
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (row) {
+        insertedTypes[vt.kode] = row.id;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Tarik ulang ID jika sudah ada sebelumnya
+  const allVTypes = await db.select().from(schema.violationTypes);
+  for (const t of allVTypes) {
+    insertedTypes[t.kode] = t.id;
+  }
+  console.log(`   ✅ Seeded ${allVTypes.length} master violation types`);
+
+  // Buat sample catatan pelanggaran untuk demonstrasi
+  const allStuds = await db.select().from(schema.students);
+  const andi = allStuds.find((s) => s.nis === "2024001");
+  const rizki = allStuds.find((s) => s.nis === "2024003");
+  const dimas = allStuds.find((s) => s.nis === "2024011");
+
+  if (andi && insertedTypes["TATIB-01"]) {
+    await db.insert(schema.studentViolations).values({
+      studentId: andi.id,
+      violationTypeId: insertedTypes["TATIB-01"],
+      reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+      tanggal: "2026-11-10",
+      poin: 5,
+      lokasi: "Gerbang Utama",
+      keterangan: "Terlambat 8 menit karena kendala transportasi",
+      status: "Selesai Dibina",
+      tindakLanjut: "Diberi teguran lisan dan doa apel mandiri",
+    }).catch(() => {});
+  }
+
+  if (rizki && insertedTypes["TATIB-02"] && insertedTypes["KBM-01"]) {
+    await db.insert(schema.studentViolations).values([
+      {
+        studentId: rizki.id,
+        violationTypeId: insertedTypes["TATIB-02"],
+        reportedBy: "Budi Santoso, S.Pd.",
+        tanggal: "2026-11-08",
+        poin: 5,
+        lokasi: "Ruang Kelas X-A",
+        keterangan: "Tidak memakai sabuk logo resmi sekolah",
+        status: "Tercatat",
+      },
+      {
+        studentId: rizki.id,
+        violationTypeId: insertedTypes["KBM-01"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-12",
+        poin: 25,
+        lokasi: "Kantin Belakang",
+        keterangan: "Meninggalkan jam pelajaran Matematika tanpa izin",
+        status: "Diproses BK",
+        tindakLanjut: "Dipanggil konseling BK sesi pembinaan lisan",
+      },
+    ]).catch(() => {});
+  }
+
+  if (dimas && insertedTypes["TATIB-07"] && insertedTypes["KBM-02"] && insertedTypes["TATIB-01"]) {
+    await db.insert(schema.studentViolations).values([
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["TATIB-01"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-04",
+        poin: 5,
+        lokasi: "Gerbang Depan",
+        keterangan: "Terlambat hadir apel pagi",
+        status: "Selesai Dibina",
+      },
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["KBM-02"],
+        reportedBy: "Siti Rahayu, M.Pd.",
+        tanggal: "2026-11-07",
+        poin: 20,
+        lokasi: "Lab Komputer",
+        keterangan: "Bermain game online saat praktikum berlangsung",
+        status: "Tercatat",
+      },
+      {
+        studentId: dimas.id,
+        violationTypeId: insertedTypes["TATIB-07"],
+        reportedBy: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        tanggal: "2026-11-11",
+        poin: 40,
+        lokasi: "Toilet Gedung B",
+        keterangan: "Ditemukan membawa rokok elektrik di area sekolah",
+        status: "Diproses BK",
+        tindakLanjut: "Rekomendasi penerbitan Surat Peringatan I",
+      },
+    ]).catch(() => {});
+
+    // Sample warning letter SP 1 untuk Dimas (total poin: 65)
+    await db.insert(schema.warningLetters).values({
+      studentId: dimas.id,
+      nomorSurat: "001/SP-I/SMK-DIRGANTARA/XI/2026",
+      tingkatSp: 1,
+      totalPoinSaatSp: 65,
+      tanggalTerbit: "2026-11-12",
+      diterbitkanOleh: "Dra. Endang Lestari, S.Psi. (Guru BK)",
+      statusPanggilan: "Menunggu Panggilan",
+      catatanMediasi: "Jadwal pemanggilan orang tua direncanakan hari Senin, 17 November 2026 pukul 09.00 WIB",
+    }).catch(() => {});
+  }
+  console.log(`   ✅ Seeded sample disciplinary records & warning letter`);
+
+  // ==========================================
+  // 7. Seed Sample Data Konseling BK & Dispensasi (Fitur 12)
+  // ==========================================
+  console.log("🤝 Seeding sample Counseling Sessions, Monitoring Logs, & Dispensations...");
+  if (dimas && andi && rizki) {
+    const endang = "Dra. Endang Lestari, S.Psi.";
+    const budi = "Budi Santoso, S.Pd.";
+
+    // Sesi 1: Dimas (Tindak lanjut SP 1 & rokok)
+    await db.insert(schema.counselingSessions).values({
+      studentId: dimas.id,
+      counselorId: endang,
+      tanggal: "2026-11-13",
+      waktuMulai: "09:00",
+      waktuSelesai: "09:45",
+      kategori: "Kedisiplinan dan Sikap",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Umum",
+      pokokMasalah: "Pembinaan terkait kepemilikan rokok elektrik dan pelanggaran tata tertib sekolah",
+      pendekatanKonseling: "Konseling motivasi diri dan komitmen tertulis perubahan perilaku",
+      hasilKonseling: "Siswa mengakui kesalahan dan berjanji tidak mengulangi serta bersedia didampingi orang tua",
+      tindakLanjut: "Pertemuan bersama orang tua dan evaluasi perilaku sepekan ke depan",
+      statusKasus: "Dalam Pemantauan",
+    }).catch(() => {});
+
+    // Sesi 2: Andi (Konsultasi Karir & Magang Penerbangan)
+    await db.insert(schema.counselingSessions).values({
+      studentId: andi.id,
+      counselorId: endang,
+      tanggal: "2026-11-15",
+      waktuMulai: "10:15",
+      waktuSelesai: "11:00",
+      kategori: "Karir dan Masa Depan",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Umum",
+      pokokMasalah: "Konsultasi pemilihan mitra magang industri pesawat dan persiapan sertifikasi",
+      pendekatanKonseling: "Eksplorasi minat dan pemetaan kompetensi keahlian teknik kedirgantaraan",
+      hasilKonseling: "Siswa memilih fokus pada perawatan instrumen pesawat dan siap menyusun portofolio",
+      tindakLanjut: "Penyerahan berkas portofolio mandiri kepada guru kejuruan",
+      statusKasus: "Selesai",
+    }).catch(() => {});
+
+    // Sesi 3: Rizki (Pribadi & Motivasi Belajar)
+    await db.insert(schema.counselingSessions).values({
+      studentId: rizki.id,
+      counselorId: endang,
+      tanggal: "2026-11-16",
+      waktuMulai: "08:30",
+      waktuSelesai: "09:15",
+      kategori: "Pribadi dan Sosial",
+      jenisLayanan: "Konseling Perorangan",
+      tingkatKerahasiaan: "Rahasia",
+      pokokMasalah: "Kesulitan konsentrasi belajar karena masalah pribadi di lingkungan pertemanan",
+      pendekatanKonseling: "Pendekatan konseling berpusat pada pribadi (client-centered)",
+      hasilKonseling: "Siswa merasa lebih tenang dan memahami batasan relasi yang sehat",
+      tindakLanjut: "Sesi konseling lanjutan hari Kamis jam istirahat pertama",
+      statusKasus: "Dalam Pemantauan",
+    }).catch(() => {});
+
+    // Log Pemantauan Siswa
+    await db.insert(schema.studentMonitoringLogs).values([
+      {
+        studentId: dimas.id,
+        recordedBy: budi,
+        tanggal: "2026-11-14",
+        aspekPengamatan: "Kedisiplinan dan Sikap",
+        catatanPerkembangan: "Dimas hadir tepat waktu dan duduk di barisan depan selama pelajaran berlangsung",
+        rekomendasi: "Berikan apresiasi positif atas kedisiplinan yang mulai membaik",
+      },
+      {
+        studentId: andi.id,
+        recordedBy: budi,
+        tanggal: "2026-11-15",
+        aspekPengamatan: "Motivasi Belajar",
+        catatanPerkembangan: "Sangat aktif dalam diskusi kelompok dan antusias mempelajari materi baru",
+        rekomendasi: "Diberi tugas pengayaan materi lanjutan",
+      },
+      {
+        studentId: rizki.id,
+        recordedBy: endang,
+        tanggal: "2026-11-16",
+        aspekPengamatan: "Interaksi Sosial",
+        catatanPerkembangan: "Mulai terbuka berinteraksi dengan teman sekelas dan tidak menyendiri lagi",
+        rekomendasi: "Dorong keterlibatan dalam kegiatan ekstrakurikuler",
+      },
+    ]).catch(() => {});
+
+    // Sample Surat Dispensasi Izin Meninggalkan Kelas
+    await db.insert(schema.dispensationLetters).values([
+      {
+        studentId: dimas.id,
+        nomorSurat: "001-DSP-SMK-DIRGANTARA-XI-2026",
+        tanggal: "2026-11-13",
+        jamMulai: "09:00",
+        jamSelesai: "09:45",
+        keperluan: "Bimbingan Konseling",
+        keterangan: "Mengikuti sesi bimbingan konseling dan pembinaan karakter di Ruang BK",
+        diterbitkanOleh: endang,
+        statusDispensasi: "Selesai",
+      },
+      {
+        studentId: rizki.id,
+        nomorSurat: "002-DSP-SMK-DIRGANTARA-XI-2026",
+        tanggal: "2026-11-17",
+        jamMulai: "08:30",
+        jamSelesai: "10:00",
+        keperluan: "Pemeriksaan Kesehatan di UKS",
+        keterangan: "Mengalami demam saat jam pelajaran berlangsung dan beristirahat di ruang UKS",
+        diterbitkanOleh: "Ahmad Fauzi, S.Pd. (Guru Piket)",
+        statusDispensasi: "Aktif",
+      },
+    ]).catch(() => {});
+
+    console.log(`   ✅ Seeded sample counseling sessions, logs, and dispensation letters`);
+  }
+
+  // ==========================================
   // Done
   // ==========================================
   console.log("\n✨ Seeding complete!\n");

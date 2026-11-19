@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { DEFAULT_PERIODE, getTodayWIB } from "@/lib/utils";
 import { getPortalForRole } from "@/lib/rbac";
 import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
+import { logActivity } from "@/lib/audit-server";
 
 const VALID_STATUSES = new Set(["Hadir", "Izin", "Sakit", "Alfa"]);
 
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
 
     const studentIds = body.records.map((r) => r.studentId);
     const targetStudents = await db
-      .select({ id: students.id, kelas: students.kelas })
+      .select({ id: students.id, kelas: students.kelas, namaLengkap: students.namaLengkap })
       .from(students)
       .where(and(inArray(students.id, studentIds), eq(students.status, "aktif")))
       .all();
@@ -233,6 +234,40 @@ export async function POST(request: NextRequest) {
       if (valuesToInsert.length > 0) {
         await tx.insert(attendance).values(valuesToInsert);
       }
+    });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const isSingle = body.records.length === 1;
+    const studentMap = new Map(targetStudents.map((s) => [s.id, s]));
+    const targetStudent = isSingle ? studentMap.get(body.records[0].studentId) : null;
+    const targetName = targetStudent ? targetStudent.namaLengkap : (uniqueClasses.length === 1 ? `Kelas ${uniqueClasses[0]}` : "Presensi Siswa");
+    const safePeriode = (periode || "").replace(/\//g, "-");
+    const subjectLabel = mapel && mapel !== "Umum" ? `mata pelajaran ${mapel}` : "presensi harian";
+
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Pengguna",
+      userRole: (session.user as any).role || (session.user as any).appRole || "guru",
+      action: "UPDATE",
+      module: "PRESENSI",
+      targetId: targetStudent ? targetStudent.id : null,
+      targetName,
+      description: targetStudent
+        ? `Mencatat ${subjectLabel} (${body.records[0].status}) untuk siswa ${targetStudent.namaLengkap} pada tanggal ${body.tanggal}`
+        : `Mencatat ${subjectLabel} untuk ${body.records.length} siswa pada tanggal ${body.tanggal} (Periode ${safePeriode})`,
+      details: {
+        tanggal: body.tanggal,
+        mapel,
+        periode,
+        jumlahSiswa: body.records.length,
+      },
+      ipAddress,
     });
 
     return NextResponse.json({

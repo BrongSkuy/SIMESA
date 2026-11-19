@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
 
 function validateTahunAjaranFormat(tahunAjaran: string): string | null {
   const match = /^(\d{4})\/(\d{4})$/.exec(tahunAjaran.trim());
@@ -181,6 +182,31 @@ export async function PUT(request: NextRequest) {
       .set(updatePayload)
       .where(eq(academicYears.id, id))
       .returning();
+
+    // Catat ke riwayat aktivitas (audit trail)
+    if (updated) {
+      const reqHeaders = await headers();
+      const ipAddress =
+        reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        reqHeaders.get("x-real-ip") ||
+        "127.0.0.1";
+
+      const safePeriode = `${updated.tahunAjaran} Semester ${updated.semester}`.replace(/\//g, "-");
+      await logActivity({
+        userId: session.user.id,
+        userName: session.user.name || "Administrator",
+        userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+        action: "UPDATE",
+        module: "SISTEM",
+        targetId: updated.id,
+        targetName: `Tahun Ajaran ${safePeriode}`,
+        description: isActive
+          ? `Mengaktifkan tahun ajaran resmi ${safePeriode} untuk seluruh sistem SIMESA`
+          : `Memperbarui konfigurasi tahun ajaran ${safePeriode}`,
+        details: updatePayload,
+        ipAddress,
+      });
+    }
 
     return NextResponse.json(updated);
   } catch (error: unknown) {

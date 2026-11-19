@@ -15,13 +15,23 @@ import {
   Save,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
+
+function getInitials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() || "S"
+  );
+}
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -95,7 +105,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
     catatanWaliKelas: "",
     ekskulNama: "Pramuka Dirgantara",
     ekskulNilai: "Sangat Baik",
-    ekskulKeterangan: "Aktif mengikuti latihan rutin dan kegiatan kedisiplinan taruna.",
+    ekskulKeterangan: "Aktif mengikuti latihan rutin dan kegiatan kedisiplinan siswa.",
     statusRapor: "Draf" as "Draf" | "Disahkan" | "Diterbitkan",
   });
   const [savingNote, setSavingNote] = useState(false);
@@ -223,7 +233,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
       } else {
         setNoteForm({
           catatanWaliKelas:
-            "Pertahankan kedisiplinan dan semangat belajar taruna/taruni. Terus tingkatkan prestasi akademik dan keterampilan kejuruan.",
+            "Pertahankan kedisiplinan dan semangat belajar siswa atau siswi. Terus tingkatkan prestasi akademik dan keterampilan kejuruan.",
           ekskulNama: "Pramuka Dirgantara",
           ekskulNilai: "Sangat Baik",
           ekskulKeterangan: "Aktif mengikuti kegiatan pembinaan kedisiplinan.",
@@ -334,135 +344,158 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
 
   return (
     <div className="space-y-6">
-      {/* 1. SEAMLESS HERO PAGE HEADER (Flush with topbar, matches Rekap Kelas) */}
-      <PageHeader
-        title="Manajemen E-Rapor Internal"
-        badge={badgeText}
-        description="Rekapitulasi capaian nilai akhir bagi rata, catatan wali kelas, dan pencetakan dokumen hasil belajar siswa"
-        icon={FileSpreadsheet}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleOpenKkmModal}
-          className="gap-1.5 text-xs"
-        >
-          <Settings className="h-3.5 w-3.5 text-slate-400" /> Target KKM Mapel
-        </Button>
+      {/* 1. Header Cockpit Banner Menyatu - Persis Beranda Dashboard & Konseling BK */}
+      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        {/* Ambient Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            if (filteredStudents.length > 0) {
-              handlePreviewReport(filteredStudents[0].studentId);
-            } else {
-              toast.info("Pilih siswa terlebih dahulu");
-            }
-          }}
-          disabled={loadingPrint || !summaryData || filteredStudents.length === 0}
-          className="gap-1.5 text-xs"
-        >
-          {loadingPrint ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
-          ) : (
-            <Printer className="h-3.5 w-3.5 text-slate-400" />
-          )}
-          Pratinjau Contoh Rapor
-        </Button>
-      </PageHeader>
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Header Title, Subtitle & Action Pills */}
+          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
+                Laporan Hasil Belajar Siswa (E-Rapor)
+              </h1>
+              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
+                Rekapitulasi capaian nilai akhir bagi rata murni, catatan wali kelas, dan pencetakan dokumen rapor resmi
+              </p>
+            </div>
 
-      {/* 2. CLASS TABS & HOMEROOM INFO (Consistent pill tabs) */}
-      {kelasList.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
-            <Users className="h-5 w-5" />
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={handleOpenKkmModal}
+                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+              >
+                <Settings className="w-3.5 h-3.5 mr-2 text-blue-300" />
+                Target KKM Mapel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (filteredStudents.length > 0) {
+                    handlePreviewReport(filteredStudents[0].studentId);
+                  } else {
+                    toast.info("Pilih siswa terlebih dahulu");
+                  }
+                }}
+                disabled={loadingPrint || !summaryData || filteredStudents.length === 0}
+                className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all cursor-pointer disabled:opacity-50"
+              >
+                {loadingPrint ? (
+                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin text-blue-100" />
+                ) : (
+                  <Printer className="w-3.5 h-3.5 mr-2 text-blue-100" />
+                )}
+                Pratinjau Contoh Rapor
+              </button>
+            </div>
           </div>
-          <p className="text-xs font-semibold text-slate-700">
-            Belum Ada Data Kelas Terdaftar
-          </p>
+
+          {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards (Persis Dashboard & Konseling) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="TOTAL SISWA"
+              value={stats.total}
+              icon={Users}
+              color="blue"
+              footerLeft="Siswa atau Siswi Aktif"
+              footerRight="Kelas Terpilih"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-emerald-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="TUNTAS KKM"
+              value={stats.tuntas}
+              icon={CheckCircle2}
+              color="emerald"
+              footerLeft="Semua Mapel ≥ KKM"
+              footerRight="KKM Tercapai"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="PERLU PERBAIKAN"
+              value={stats.remidi}
+              icon={AlertCircle}
+              color="amber"
+              footerLeft="Nilai di Bawah Target"
+              footerRight="Perlu Remidi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              title="RAPOR DISAHKAN"
+              value={`${stats.disahkan} dari ${stats.total}`}
+              icon={GraduationCap}
+              color="blue"
+              footerLeft={`${stats.adaCatatan} Siswa Ber-catatan`}
+              footerRight="Status Terverifikasi"
+            />
+          </div>
         </div>
-      ) : (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <Tabs
-            value={selectedKelas}
-            onValueChange={(val) => {
-              if (val) setSelectedKelas(val);
-            }}
-          >
-            <TabsList className="flex flex-wrap h-auto">
+      </section>
+
+      {/* 2. Container Konten Utama */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Class Selection & Homeroom Info */}
+        {kelasList.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-10 text-center space-y-2">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400">
+              <Users className="h-5 w-5" />
+            </div>
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Belum Ada Data Kelas Terdaftar
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 shrink-0">
+                Pilih Kelas:
+              </span>
               {kelasList.map((c) => (
-                <TabsTrigger
+                <button
                   key={c.id}
-                  value={c.namaKelas}
-                  className="cursor-pointer"
+                  type="button"
+                  onClick={() => setSelectedKelas(c.namaKelas)}
+                  className={`px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer ${
+                    selectedKelas === c.namaKelas
+                      ? "bg-[#1F4E78] text-white shadow-xs"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
                 >
                   Kelas {c.namaKelas}
-                </TabsTrigger>
+                </button>
               ))}
-            </TabsList>
-          </Tabs>
-
-          {summaryData && (
-            <div className="flex items-center gap-2 text-xs bg-white border border-slate-200/80 rounded-xl px-4 py-2 shadow-xs">
-              <span className="text-slate-500 font-medium">Wali Kelas:</span>
-              <span className="font-semibold text-slate-900">
-                {summaryData.waliKelas}
-              </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500">Periode:</span>
-              <span className="font-semibold text-blue-700">
-                {summaryData.periode.replace("-", " ")}
-              </span>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* 3. KPI STAT CARDS (Standard SIMESA StatCard row) */}
-      <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-4 bg-white overflow-hidden shadow-xs">
-        <StatCard
-          title="Total Siswa"
-          value={stats.total}
-          icon={Users}
-          color="blue"
-          footerLeft="Taruna/taruni aktif"
-          footerRight="Kelas Terpilih"
-        />
-        <StatCard
-          title="Tuntas KKM"
-          value={stats.tuntas}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft="Semua mapel ≥ 75"
-          footerRight="KKM Tercapai"
-        />
-        <StatCard
-          title="Perlu Perbaikan"
-          value={stats.remidi}
-          icon={AlertCircle}
-          color="amber"
-          footerLeft="Ada nilai di bawah 75"
-          footerRight="Perlu Remidi"
-        />
-        <StatCard
-          title="Rapor Disahkan"
-          value={`${stats.disahkan} / ${stats.total}`}
-          icon={GraduationCap}
-          color="navy"
-          footerLeft={`${stats.adaCatatan} siswa ber-catatan`}
-          footerRight="Status Final"
-        />
-      </div>
+            {summaryData && (
+              <div className="flex items-center gap-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 shadow-xs shrink-0">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Wali Kelas:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {summaryData.waliKelas}
+                </span>
+                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Periode:</span>
+                <span className="font-semibold text-blue-700 dark:text-blue-400">
+                  {summaryData.periode.replace("-", " ")}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* 4. DETAIL MATRIKS RAPOR SISWA TABLE (Standard SIMESA styling) */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+      {/* 3. DETAIL MATRIKS RAPOR SISWA TABLE (Standard SIMESA styling) */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <CardTitle className="text-base font-semibold text-slate-900 tracking-tight">
+            <CardTitle className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
               Rekapitulasi Rapor Siswa Kelas {selectedKelas}
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 mt-0.5">
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Nilai akhir dihitung otomatis dengan metode bagi rata murni seluruh komponen
             </CardDescription>
           </div>
@@ -474,7 +507,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                 placeholder="Cari nama atau NIS..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-xs"
+                className="pl-8 h-8 text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
               />
             </div>
 
@@ -499,13 +532,13 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
 
         {loadingSummary ? (
           <div className="py-16 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+            <Loader2 className="w-6 h-6 animate-spin text-blue-900" />
             <p className="text-xs text-slate-500">Memuat data nilai dan catatan kelas...</p>
           </div>
         ) : filteredStudents.length === 0 ? (
           <div className="py-16 text-center text-slate-400">
             <FileSpreadsheet className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            <p className="text-sm font-semibold text-slate-700">Tidak ada data siswa</p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tidak ada data siswa</p>
             <p className="text-xs text-slate-500 mt-1">
               Pilih kelas lain atau sesuaikan kata kunci pencarian.
             </p>
@@ -514,30 +547,30 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6 text-center w-12 whitespace-nowrap">
+                <TableRow className="bg-slate-50/75 dark:bg-slate-800/50">
+                  <TableHead className="pl-6 text-center w-12 whitespace-nowrap text-xs">
                     No
                   </TableHead>
-                  <TableHead className="whitespace-nowrap w-28">NIS</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[200px]">
+                  <TableHead className="whitespace-nowrap w-28 text-xs">NIS</TableHead>
+                  <TableHead className="whitespace-nowrap min-w-[220px] text-xs">
                     Nama Siswa
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap w-28">
+                  <TableHead className="text-center whitespace-nowrap w-28 text-xs">
                     Rata-rata
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap w-32">
+                  <TableHead className="text-center whitespace-nowrap w-32 text-xs">
                     Mapel Terisi
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap w-32">
+                  <TableHead className="text-center whitespace-nowrap w-32 text-xs">
                     Status Nilai
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap w-32">
+                  <TableHead className="text-center whitespace-nowrap w-32 text-xs">
                     Catatan Wali
                   </TableHead>
-                  <TableHead className="text-center whitespace-nowrap w-28">
+                  <TableHead className="text-center whitespace-nowrap w-28 text-xs">
                     Status Rapor
                   </TableHead>
-                  <TableHead className="text-right pr-6 whitespace-nowrap w-36">
+                  <TableHead className="text-right pr-6 whitespace-nowrap w-36 text-xs">
                     Aksi
                   </TableHead>
                 </TableRow>
@@ -546,20 +579,27 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                 {filteredStudents.map((s, idx) => (
                   <TableRow
                     key={`${s.studentId}-${idx}`}
-                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
                   >
                     <TableCell className="pl-6 text-center font-mono text-xs text-slate-500 group-hover/row:text-slate-400 whitespace-nowrap">
                       {idx + 1}
                     </TableCell>
-                    <TableCell className="font-mono text-xs font-semibold text-slate-700 group-hover/row:text-slate-300 tabular-nums whitespace-nowrap">
+                    <TableCell className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 tabular-nums whitespace-nowrap">
                       {s.nis}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
-                      <div className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
-                        {s.namaLengkap}
-                      </div>
-                      <div className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                        {s.jenisKelamin === "L" ? "Taruna" : "Taruni"} • H:{s.presensi.hadir} S:{s.presensi.sakit} I:{s.presensi.izin} A:{s.presensi.alfa}
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                          {getInitials(s.namaLengkap || "")}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                            {s.namaLengkap}
+                          </span>
+                          <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                            {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} • Hadir: {s.presensi.hadir} • Sakit: {s.presensi.sakit} • Izin: {s.presensi.izin} • Alfa: {s.presensi.alfa}
+                          </span>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-center font-mono font-bold text-sm tabular-nums whitespace-nowrap">
@@ -567,12 +607,12 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                         <span
                           className={
                             s.rataRata >= 90
-                              ? "text-emerald-600 group-hover/row:text-emerald-400"
+                              ? "text-emerald-600 group-hover/row:text-emerald-300"
                               : s.rataRata >= 80
-                              ? "text-blue-600 group-hover/row:text-blue-400"
+                              ? "text-blue-600 group-hover/row:text-blue-300"
                               : s.rataRata >= 75
-                              ? "text-amber-600 group-hover/row:text-amber-400"
-                              : "text-rose-600 group-hover/row:text-rose-400"
+                              ? "text-amber-600 group-hover/row:text-amber-300"
+                              : "text-rose-600 group-hover/row:text-rose-300"
                           }
                         >
                           {s.rataRata.toFixed(2)}
@@ -581,8 +621,8 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                         <span className="text-slate-400">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-xs font-medium text-slate-700 group-hover/row:text-slate-300 whitespace-nowrap tabular-nums">
-                      {s.jumlahMapelTerisi} / {s.totalMapel} Mapel
+                    <TableCell className="text-center font-mono text-xs font-medium text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 whitespace-nowrap tabular-nums">
+                      {s.jumlahMapelTerisi} dari {s.totalMapel} Mapel
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <span
@@ -599,11 +639,11 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {s.hasCatatan ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-emerald-600 group-hover/row:text-emerald-400 font-semibold">
+                        <span className="inline-flex items-center gap-1 text-xs text-emerald-600 group-hover/row:text-emerald-300 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Terisi
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400 group-hover/row:text-slate-500 italic">
+                        <span className="text-xs text-slate-400 group-hover/row:text-slate-400 italic">
                           Belum Diisi
                         </span>
                       )}
@@ -625,10 +665,10 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                           variant="ghost"
                           size="xs"
                           onClick={() => handleOpenNoteModal(s)}
-                          className="h-7 px-2 text-xs gap-1 group-hover/row:text-slate-200 group-hover/row:hover:bg-slate-800"
-                          title="Input Catatan Wali Kelas & Ekskul"
+                          className="h-7 px-2 text-xs gap-1 group-hover/row:text-blue-300 group-hover/row:hover:bg-blue-900/50"
+                          title="Input Catatan Wali Kelas dan Ekstrakurikuler"
                         >
-                          <Edit3 className="w-3.5 h-3.5 text-blue-500 group-hover/row:text-blue-400" />
+                          <Edit3 className="w-3.5 h-3.5 text-blue-500 group-hover/row:text-blue-300" />
                           Catatan
                         </Button>
                         <Button
@@ -636,10 +676,10 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                           size="xs"
                           onClick={() => handlePreviewReport(s.studentId)}
                           disabled={loadingPrint}
-                          className="h-7 px-2 text-xs gap-1 group-hover/row:bg-slate-800 group-hover/row:border-slate-700 group-hover/row:text-white"
-                          title="Pratinjau & Cetak Rapor"
+                          className="h-7 px-2 text-xs gap-1 group-hover/row:bg-blue-900/40 group-hover/row:border-blue-500/40 group-hover/row:text-white"
+                          title="Pratinjau dan Cetak Rapor"
                         >
-                          <Printer className="w-3.5 h-3.5 text-slate-500 group-hover/row:text-slate-400" />
+                          <Printer className="w-3.5 h-3.5 text-slate-500 group-hover/row:text-slate-300" />
                           Rapor
                         </Button>
                       </div>
@@ -651,12 +691,13 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
           </div>
         )}
       </div>
+    </div>
 
-      {/* MODAL INPUT CATATAN WALI KELAS & EKSKUL */}
+      {/* MODAL INPUT CATATAN WALI KELAS DAN EKSKUL */}
       <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Catatan Wali Kelas & Ekstrakurikuler</DialogTitle>
+            <DialogTitle>Catatan Wali Kelas dan Ekstrakurikuler</DialogTitle>
             <DialogDescription>
               {selectedStudentForNote
                 ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) — Kelas ${selectedKelas}`
@@ -667,12 +708,12 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
           <div className="space-y-4 py-2 text-xs">
             <div>
               <Label className="text-xs font-semibold mb-1 block">
-                Catatan Perkembangan Karakter & Kedisiplinan:
+                Catatan Perkembangan Karakter dan Kedisiplinan:
               </Label>
               <textarea
                 rows={3}
                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="Tuliskan catatan motivasi, kedisiplinan, dan perkembangan sikap taruna/taruni..."
+                placeholder="Tuliskan catatan motivasi, kedisiplinan, dan perkembangan sikap siswa atau siswi..."
                 value={noteForm.catatanWaliKelas}
                 onChange={(e) =>
                   setNoteForm({ ...noteForm, catatanWaliKelas: e.target.value })
@@ -797,7 +838,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
             {/* Form Input KKM */}
             <div className="bg-muted/40 p-3 rounded-lg border space-y-3">
               <h4 className="font-semibold text-foreground text-xs">
-                Perbarui / Tambah Target KKM Mapel:
+                Perbarui atau Tambah Target KKM Mapel:
               </h4>
               <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">

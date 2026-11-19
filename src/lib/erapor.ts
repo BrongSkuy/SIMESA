@@ -438,7 +438,7 @@ export async function getStudentReportCard(
   const noteRow = reportNotesRows[0];
   const catatanWaliKelas =
     noteRow?.catatanWaliKelas?.trim() ||
-    "Pertahankan kedisiplinan, motivasi belajar, dan sikap kepemimpinan yang baik sebagai taruna/taruni SMK Penerbangan Dirgantara.";
+    "Pertahankan kedisiplinan, motivasi belajar, dan sikap kepemimpinan yang baik sebagai siswa atau siswi SMK Penerbangan Dirgantara.";
   const ekskulNama = noteRow?.ekskulNama?.trim() || "Pramuka Dirgantara";
   const ekskulNilai = noteRow?.ekskulNilai?.trim() || "Sangat Baik";
   const ekskulKeterangan =

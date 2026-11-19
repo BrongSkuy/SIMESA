@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { account } from "@/db/auth-schema";
+import { user, account } from "@/db/auth-schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { hashPassword } from "better-auth/crypto";
 import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
 
 // PUT /api/auth-accounts/[id]/reset — reset password directly using Better Auth's scrypt hashPassword
 export async function PUT(
@@ -46,6 +47,31 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const [targetUser] = await db
+      .select({ name: user.name, email: user.email })
+      .from(user)
+      .where(eq(user.id, id));
+
+    const reqHeaders = await headers();
+    const ipAddress =
+      reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      reqHeaders.get("x-real-ip") ||
+      "127.0.0.1";
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Administrator",
+      userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+      action: "UPDATE",
+      module: "MANAJEMEN_PENGGUNA",
+      targetId: id,
+      targetName: targetUser?.name || "Pengguna",
+      description: `Mengatur ulang kata sandi akun pengguna ${targetUser?.name || "Pengguna"}`,
+      details: { id },
+      ipAddress,
+    });
 
     return NextResponse.json({
       success: true,

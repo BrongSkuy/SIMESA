@@ -151,6 +151,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "record:attendance_guru",
     "record:attendance_siswa",
     "manage:academic_grades",
+    "manage:counseling_bk",
+    "manage:violation_points",
     "manage:library",
     "manage:sarpras",
   ],
