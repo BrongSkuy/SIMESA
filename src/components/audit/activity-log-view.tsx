@@ -302,31 +302,6 @@ export function ActivityLogView() {
     document.body.removeChild(link);
   };
 
-  // Render formatted JSON details
-  const renderFormattedDetails = (detailsString?: string | null) => {
-    if (!detailsString) {
-      return (
-        <span className="text-slate-400 dark:text-slate-500 italic text-xs">
-          Tidak ada data payload tersimpan
-        </span>
-      );
-    }
-    try {
-      const parsed = JSON.parse(detailsString);
-      return (
-        <pre className="bg-slate-900 text-emerald-400 p-3.5 rounded-xl text-xs font-mono overflow-x-auto max-h-60 border border-slate-800 leading-relaxed">
-          {JSON.stringify(parsed, null, 2)}
-        </pre>
-      );
-    } catch {
-      return (
-        <pre className="bg-slate-900 text-slate-200 p-3.5 rounded-xl text-xs font-mono overflow-x-auto max-h-60 border border-slate-800 leading-relaxed">
-          {detailsString}
-        </pre>
-      );
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* 1. Header Cockpit Banner Menyatu - Persis Beranda & Konseling BK */}
@@ -782,18 +757,9 @@ export function ActivityLogView() {
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Uraian Lengkap Kegiatan
                 </label>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
                   {selectedLog.description}
                 </div>
-              </div>
-
-              {/* Payload Data Snapshot */}
-              <div className="space-y-1.5 pt-1">
-                <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                  <span>Snapshot Metadata Data</span>
-                  <span className="text-[10px] text-slate-400 font-normal">JSON Format</span>
-                </label>
-                {renderFormattedDetails(selectedLog.details)}
               </div>
             </div>
           )}
