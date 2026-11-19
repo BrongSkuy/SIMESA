@@ -799,17 +799,12 @@ export function ActivityLogView() {
               </DialogHeader>
 
               <div className="space-y-4 py-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-                  <div className="space-y-1 text-xs leading-relaxed">
-                    <p className="font-semibold">Pemberitahuan Sebelum Menghapus Data</p>
-                    <p>
-                      Sebelum melanjutkan ke tahap pembersihan data log, Anda sangat disarankan untuk mengunduh seluruh catatan riwayat ke dalam berkas format <strong>Microsoft Excel (.xlsx)</strong> terlebih dahulu.
-                    </p>
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
-                      Catatan yang telah dihapus tidak dapat dipulihkan kembali ke dalam sistem. Berkas cadangan Excel ini berfungsi sebagai arsip resmi sekolah.
-                    </p>
-                  </div>
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-center gap-2.5 text-amber-800 dark:text-amber-300">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <p className="text-xs leading-relaxed">
+                    <span className="font-semibold">Pemberitahuan: </span>
+                    Unduh cadangan berkas <strong>Excel (.xlsx)</strong> sebagai arsip resmi sebelum menghapus riwayat aktivitas secara permanen.
+                  </p>
                 </div>
 
                 {/* Kartu Tombol Unduh Excel */}
