@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
 
 // PUT /api/students/[id] — update student
 export async function PUT(
@@ -84,6 +85,19 @@ export async function PUT(
       }
     }
 
+    // Catat ke riwayat aktivitas (audit trail)
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Administrator",
+      userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+      action: "UPDATE",
+      module: "MANAJEMEN_PENGGUNA",
+      targetId: updated.id,
+      targetName: updated.namaLengkap,
+      description: `Memperbarui profil data siswa ${updated.namaLengkap} di kelas ${updated.kelas}`,
+      details: updatePayload,
+    });
+
     return NextResponse.json(updated);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Gagal mengupdate data siswa";
@@ -135,6 +149,25 @@ export async function DELETE(
 
       return deleted;
     });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    if (result) {
+      await logActivity({
+        userId: session.user.id,
+        userName: session.user.name || "Administrator",
+        userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+        action: "DELETE",
+        module: "MANAJEMEN_PENGGUNA",
+        targetId: id,
+        targetName: result.namaLengkap,
+        description: `Menghapus data profil siswa ${result.namaLengkap} (NIS: ${result.nis}) dari sistem`,
+        details: {
+          nis: result.nis,
+          namaLengkap: result.namaLengkap,
+          kelas: result.kelas,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, deleted: result });
   } catch (error: unknown) {

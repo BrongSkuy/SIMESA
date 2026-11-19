@@ -13,6 +13,7 @@ import { headers } from "next/headers";
 import { DEFAULT_PERIODE } from "@/lib/utils";
 import { verifyTeacherSubjectAccess } from "@/lib/teacher-auth";
 import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
 
 // GET /api/spk/scores?kelas=..&criteriaId=..&mapel=..
 export async function GET(request: NextRequest) {
@@ -208,11 +209,12 @@ export async function POST(request: NextRequest) {
 
     // Validate submitted studentIds belong to active students in `kelas`
     const siswaKelas = await db
-      .select({ id: students.id })
+      .select({ id: students.id, namaLengkap: students.namaLengkap, nis: students.nis })
       .from(students)
       .where(and(eq(students.kelas, kelas), eq(students.status, "aktif")))
       .all();
     const validClassStudentIds = new Set(siswaKelas.map((s) => s.id));
+    const studentMap = new Map(siswaKelas.map((s) => [s.id, s]));
 
     for (const rec of body.records) {
       if (!rec.studentId || !validClassStudentIds.has(rec.studentId)) {
@@ -341,6 +343,36 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Catat ke riwayat aktivitas (audit trail)
+    const isSingle = body.records.length === 1;
+    const targetStudent = isSingle ? studentMap.get(body.records[0].studentId) : null;
+    const targetName = targetStudent ? targetStudent.namaLengkap : `Kelas ${kelas}`;
+    const targetId = targetStudent ? targetStudent.id : null;
+    const subjectLabel = mapel && mapel !== "Umum" ? `mata pelajaran ${mapel}` : "komponen kriteria umum";
+    const safePeriode = (periode || "").replace(/\//g, "-");
+
+    const description = targetStudent
+      ? `Memperbarui nilai ${subjectLabel} untuk siswa ${targetStudent.namaLengkap} di kelas ${kelas} (Periode ${safePeriode})`
+      : `Memperbarui nilai ${subjectLabel} untuk ${valuesToInsert.length} siswa di kelas ${kelas} (Periode ${safePeriode})`;
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Pengguna",
+      userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+      action: "UPDATE",
+      module: "AKADEMIK_NILAI",
+      targetId,
+      targetName,
+      description,
+      details: {
+        kelas,
+        mapel: mapel || "Umum",
+        criteriaId,
+        periode,
+        jumlahSiswa: valuesToInsert.length,
+      },
+    });
+
     return NextResponse.json({ success: true, count: valuesToInsert.length });
   } catch (error: unknown) {
     console.error(error);
@@ -447,6 +479,26 @@ export async function DELETE(request: NextRequest) {
         eq(spkGradingCategories.periode, periode)
       );
       await tx.delete(spkGradingCategories).where(catCond);
+    });
+
+    // Catat ke riwayat aktivitas (audit trail)
+    const subjectLabel = mapel ? `mata pelajaran ${mapel}` : "komponen kriteria umum";
+    const safePeriode = (periode || "").replace(/\//g, "-");
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Pengguna",
+      userRole: (session.user as any).role || (session.user as any).appRole || "admin",
+      action: "DELETE",
+      module: "AKADEMIK_NILAI",
+      targetId: null,
+      targetName: `Kelas ${kelas}`,
+      description: `Mereset data nilai ${subjectLabel} untuk seluruh siswa di kelas ${kelas} (Periode ${safePeriode})`,
+      details: {
+        kelas,
+        criteriaId,
+        mapel: mapel || "Umum",
+        periode,
+      },
     });
 
     return NextResponse.json({ success: true });
