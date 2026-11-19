@@ -134,7 +134,7 @@ export async function getActivityLogs(filters: AuditFilterParams = {}): Promise<
 }> {
   try {
     const page = Math.max(1, Number(filters.page) || 1);
-    const limit = Math.max(1, Math.min(100, Number(filters.limit) || 15));
+    const limit = Math.max(1, Math.min(50000, Number(filters.limit) || 15));
     const offset = (page - 1) * limit;
 
     const conditions = [];

@@ -46,7 +46,14 @@ import {
   Info,
   Trash2,
   AlertTriangle,
+  Download,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  ShieldAlert,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -93,8 +100,73 @@ export function ActivityLogView() {
   const rawRole = (((session?.user as any)?.appRole || "") as string).toUpperCase();
   const isSuperadmin = rawRole === "SUPERADMIN";
   const [purgeModalOpen, setPurgeModalOpen] = useState(false);
+  const [purgeStep, setPurgeStep] = useState<1 | 2>(1);
   const [purgeDays, setPurgeDays] = useState("180");
   const [isPurging, setIsPurging] = useState(false);
+  const [isDownloadingExcel, setIsDownloadingExcel] = useState(false);
+  const [hasDownloadedExcel, setHasDownloadedExcel] = useState(false);
+  const [confirmWithoutDownload, setConfirmWithoutDownload] = useState(false);
+
+  const openPurgeModal = () => {
+    setPurgeStep(1);
+    setHasDownloadedExcel(false);
+    setConfirmWithoutDownload(false);
+    setPurgeModalOpen(true);
+  };
+
+  const handleDownloadExcel = async () => {
+    setIsDownloadingExcel(true);
+    try {
+      const res = await fetch("/api/audit-logs?limit=50000");
+      if (!res.ok) throw new Error("Gagal mengambil data riwayat aktivitas");
+      const json = await res.json();
+      const data: ActivityLogItem[] = json.logs || [];
+
+      if (data.length === 0) {
+        toast.info("Belum ada data riwayat aktivitas untuk diunduh");
+        return;
+      }
+
+      const excelRows = data.map((item, idx) => ({
+        "No": idx + 1,
+        "Waktu Pencatatan": formatAuditTimestamp(item.createdAt),
+        "Nama Aktor": item.userName,
+        "Peran Pengguna": ROLE_LABELS[item.userRole] || item.userRole,
+        "Modul Sistem": MODULE_LABELS[item.module] || item.module,
+        "Jenis Aksi": ACTION_LABELS[item.action] || item.action,
+        "Target Objek": item.targetName || "-",
+        "Uraian Kegiatan": item.description,
+        "Alamat IP": item.ipAddress || "127.0.0.1",
+        "Snapshot Metadata": item.details || "-",
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excelRows);
+      ws["!cols"] = [
+        { wch: 6 },
+        { wch: 28 },
+        { wch: 26 },
+        { wch: 18 },
+        { wch: 24 },
+        { wch: 20 },
+        { wch: 25 },
+        { wch: 55 },
+        { wch: 16 },
+        { wch: 40 },
+      ];
+      XLSX.utils.book_append_sheet(wb, ws, "Riwayat Aktivitas");
+      const dateStr = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(wb, `Cadangan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`);
+
+      setHasDownloadedExcel(true);
+      toast.success("Berkas cadangan Excel (.xlsx) berhasil diunduh");
+    } catch (err) {
+      console.error("Gagal mengunduh Excel:", err);
+      toast.error("Gagal mengunduh berkas cadangan Excel");
+    } finally {
+      setIsDownloadingExcel(false);
+    }
+  };
 
   const handlePurgeLogs = async () => {
     setIsPurging(true);
@@ -299,7 +371,7 @@ export function ActivityLogView() {
               {isSuperadmin && (
                 <button
                   type="button"
-                  onClick={() => setPurgeModalOpen(true)}
+                  onClick={openPurgeModal}
                   className="inline-flex items-center bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 border border-rose-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-rose-200 shadow-xs transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-300" />
@@ -740,70 +812,199 @@ export function ActivityLogView() {
         </DialogContent>
       </Dialog>
 
-      {/* 5. Modal Pembersihan Log Usang (Khusus Superadmin) */}
+      {/* 5. Modal Pembersihan Log Usang & Pengingat Unduh Cadangan Excel */}
       <Dialog open={purgeModalOpen} onOpenChange={setPurgeModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-          <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-rose-600 dark:text-rose-400">
-              <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-              Pembersihan Catatan Aktivitas Usang
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-lg rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+          {purgeStep === 1 ? (
+            /* ======================================================== */
+            /* LANGKAH 1: Pengingat Wajib Unduh Cadangan Excel          */
+            /* ======================================================== */
+            <>
+              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    Langkah 1 dari 2: Cadangan Data
+                  </span>
+                </div>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 pt-1">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  Pengingat Cadangan: Unduh Berkas Excel Riwayat
+                </DialogTitle>
+              </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
-            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-              <div className="space-y-1 text-xs leading-relaxed">
-                <p className="font-semibold">Peringatan Penting</p>
-                <p>
-                  Catatan aktivitas yang lebih lama dari rentang waktu yang dipilih akan dihapus secara permanen dari basis data guna menjaga performa dan kapasitas penyimpanan sistem tetap optimal.
-                </p>
-                <p className="text-[11px] text-amber-700 dark:text-amber-400">
-                  Pastikan Anda telah mengunduh berkas <strong>Ekspor Laporan CSV</strong> sebelum melakukan tindakan ini.
-                </p>
+              <div className="space-y-4 py-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p className="font-semibold">Pemberitahuan Sebelum Menghapus Data</p>
+                    <p>
+                      Sebelum melanjutkan ke tahap pembersihan data log, Anda sangat disarankan untuk mengunduh seluruh catatan riwayat ke dalam berkas format <strong>Microsoft Excel (.xlsx)</strong> terlebih dahulu.
+                    </p>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                      Catatan yang telah dihapus tidak dapat dipulihkan kembali ke dalam sistem. Berkas cadangan Excel ini berfungsi sebagai arsip resmi sekolah.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Kartu Tombol Unduh Excel */}
+                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
+                      <FileSpreadsheet className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 dark:text-slate-100 text-xs">
+                        Cadangan Riwayat Aktivitas (.xlsx)
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {hasDownloadedExcel ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Berkas cadangan telah berhasil diunduh
+                          </span>
+                        ) : (
+                          "Format standar tabel Microsoft Excel lengkap"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isDownloadingExcel}
+                    onClick={handleDownloadExcel}
+                    className={cn(
+                      "rounded-xl text-xs font-semibold px-4 cursor-pointer shrink-0 transition-all",
+                      hasDownloadedExcel
+                        ? "bg-slate-700 hover:bg-slate-800 text-white"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                    )}
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1.5" />
+                    {isDownloadingExcel
+                      ? "Menyiapkan Berkas..."
+                      : hasDownloadedExcel
+                      ? "Unduh Ulang Excel"
+                      : "Unduh Cadangan Excel"}
+                  </Button>
+                </div>
+
+                {!hasDownloadedExcel && (
+                  <label className="flex items-start gap-2 pt-1 text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={confirmWithoutDownload}
+                      onChange={(e) => setConfirmWithoutDownload(e.target.checked)}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>
+                      Saya memahami risikonya dan ingin melanjutkan ke tahap pembersihan data tanpa mengunduh berkas cadangan Excel saat ini.
+                    </span>
+                  </label>
+                )}
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Pilih Batas Waktu Retensi Data
-              </label>
-              <Select value={purgeDays} onValueChange={(val) => setPurgeDays(val || "180")}>
-                <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
-                  <SelectValue placeholder="Pilih batas waktu" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">Lebih dari 30 Hari (1 Bulan)</SelectItem>
-                  <SelectItem value="90">Lebih dari 90 Hari (3 Bulan)</SelectItem>
-                  <SelectItem value="180">Lebih dari 180 Hari (6 Bulan - Disarankan)</SelectItem>
-                  <SelectItem value="365">Lebih dari 365 Hari (1 Tahun)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPurgeModalOpen(false)}
+                  className="rounded-xl text-xs"
+                >
+                  Batal
+                </Button>
 
-          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPurging}
-              onClick={() => setPurgeModalOpen(false)}
-              className="rounded-xl text-xs"
-            >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              disabled={isPurging}
-              onClick={handlePurgeLogs}
-              className="rounded-xl text-xs bg-rose-600 hover:bg-rose-700 text-white"
-            >
-              {isPurging ? "Membersihkan..." : "Hapus Log Usang Sekarang"}
-            </Button>
-          </DialogFooter>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={!hasDownloadedExcel && !confirmWithoutDownload}
+                  onClick={() => setPurgeStep(2)}
+                  className="rounded-xl text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer"
+                >
+                  Lanjutkan ke Pembersihan
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            /* ======================================================== */
+            /* LANGKAH 2: Konfirmasi Penghapusan Log                    */
+            /* ======================================================== */
+            <>
+              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                    Langkah 2 dari 2: Eksekusi Pembersihan
+                  </span>
+                </div>
+                <DialogTitle className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-1">
+                  <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                  Konfirmasi Pembersihan Catatan Aktivitas
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 py-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-rose-800 dark:text-rose-300">
+                  <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p className="font-semibold">Tindakan Permanen</p>
+                    <p>
+                      Seluruh catatan aktivitas yang lebih lama dari rentang waktu yang Anda tentukan di bawah ini akan dihapus secara permanen dari basis data SIMESA.
+                    </p>
+                    {hasDownloadedExcel && (
+                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                        ✓ Berkas cadangan Excel telah tersimpan di perangkat Anda.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Pilih Batas Waktu Retensi Data
+                  </label>
+                  <Select value={purgeDays} onValueChange={(val) => setPurgeDays(val || "180")}>
+                    <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+                      <SelectValue placeholder="Pilih batas waktu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">Lebih dari 30 Hari (1 Bulan)</SelectItem>
+                      <SelectItem value="90">Lebih dari 90 Hari (3 Bulan)</SelectItem>
+                      <SelectItem value="180">Lebih dari 180 Hari (6 Bulan - Disarankan)</SelectItem>
+                      <SelectItem value="365">Lebih dari 365 Hari (1 Tahun)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isPurging}
+                  onClick={() => setPurgeStep(1)}
+                  className="rounded-xl text-xs cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+                  Kembali
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={isPurging}
+                  onClick={handlePurgeLogs}
+                  className="rounded-xl text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold cursor-pointer"
+                >
+                  {isPurging ? "Membersihkan Data..." : "Hapus Log Usang Sekarang"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
