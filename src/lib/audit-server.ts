@@ -35,6 +35,11 @@ export async function logActivity(params: LogActivityParams): Promise<ActivityLo
         typeof params.details === "string"
           ? params.details
           : JSON.stringify(params.details);
+
+      // Celah Bloat Defense: Batasi panjang payload metadata maksimal 5.000 karakter
+      if (detailsString.length > 5000) {
+        detailsString = detailsString.substring(0, 5000) + "... (terpotong demi efisiensi)";
+      }
     }
 
     const newLog = {
@@ -61,35 +66,28 @@ export async function logActivity(params: LogActivityParams): Promise<ActivityLo
 
 /**
  * Mengambil ringkasan statistik aktivitas untuk Cockpit Banner.
+ * Menggunakan agregasi SQL langsung (COUNT / SUM CASE) agar sangat cepat dan hemat RAM
+ * meskipun tabel menampung puluhan ribu hingga ratusan ribu baris data.
  */
 export async function getAuditSummary(): Promise<AuditSummaryStats> {
   try {
-    const allLogs = await db.select().from(activityLogs);
-
     const now = new Date();
     const todayPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-    const totalHariIni = allLogs.filter((log) =>
-      log.createdAt.startsWith(todayPrefix)
-    ).length;
-
-    const akademikNilaiCount = allLogs.filter(
-      (log) => log.module === "AKADEMIK_NILAI" || log.module === "E_RAPOR"
-    ).length;
-
-    const kesiswaanDisiplinCount = allLogs.filter(
-      (log) => log.module === "BUKU_POIN" || log.module === "KONSELING_BK"
-    ).length;
-
-    const keamananAkunCount = allLogs.filter(
-      (log) => log.module === "AUTENTIKASI" || log.module === "MANAJEMEN_PENGGUNA"
-    ).length;
+    const [stats] = await db
+      .select({
+        totalHariIni: sql<number>`COALESCE(SUM(CASE WHEN ${activityLogs.createdAt} >= ${todayPrefix} THEN 1 ELSE 0 END), 0)`,
+        akademikNilaiCount: sql<number>`COALESCE(SUM(CASE WHEN ${activityLogs.module} IN ('AKADEMIK_NILAI', 'E_RAPOR') THEN 1 ELSE 0 END), 0)`,
+        kesiswaanDisiplinCount: sql<number>`COALESCE(SUM(CASE WHEN ${activityLogs.module} IN ('BUKU_POIN', 'KONSELING_BK') THEN 1 ELSE 0 END), 0)`,
+        keamananAkunCount: sql<number>`COALESCE(SUM(CASE WHEN ${activityLogs.module} IN ('AUTENTIKASI', 'MANAJEMEN_PENGGUNA') THEN 1 ELSE 0 END), 0)`,
+      })
+      .from(activityLogs);
 
     return {
-      totalHariIni,
-      akademikNilaiCount,
-      kesiswaanDisiplinCount,
-      keamananAkunCount,
+      totalHariIni: Number(stats?.totalHariIni || 0),
+      akademikNilaiCount: Number(stats?.akademikNilaiCount || 0),
+      kesiswaanDisiplinCount: Number(stats?.kesiswaanDisiplinCount || 0),
+      keamananAkunCount: Number(stats?.keamananAkunCount || 0),
     };
   } catch (error) {
     console.error("[AuditLog Error] Gagal mengambil ringkasan statistik:", error);
@@ -99,6 +97,28 @@ export async function getAuditSummary(): Promise<AuditSummaryStats> {
       kesiswaanDisiplinCount: 0,
       keamananAkunCount: 0,
     };
+  }
+}
+
+/**
+ * Membersihkan log aktivitas yang lebih lama dari jumlah hari tertentu (Retensi Data).
+ * Menjamin kapasitas basis data tetap lega dan tidak over-bloat seiring berjalannya semester/tahun.
+ */
+export async function purgeOldAuditLogs(olderThanDays: number): Promise<number> {
+  try {
+    const cutoffDate = new Date(
+      Date.now() - olderThanDays * 24 * 60 * 60 * 1000
+    ).toISOString();
+
+    const result = await db
+      .delete(activityLogs)
+      .where(lte(activityLogs.createdAt, cutoffDate))
+      .returning({ id: activityLogs.id });
+
+    return result.length;
+  } catch (error) {
+    console.error("[AuditLog Error] Gagal menghapus log lama:", error);
+    return 0;
   }
 }
 

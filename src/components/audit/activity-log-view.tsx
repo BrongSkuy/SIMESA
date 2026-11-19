@@ -44,7 +44,11 @@ import {
   Layers,
   Sparkles,
   Info,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 import {
   ActivityLogItem,
   AuditSummaryStats,
@@ -83,6 +87,36 @@ export function ActivityLogView() {
 
   // Detail Modal State
   const [selectedLog, setSelectedLog] = useState<ActivityLogItem | null>(null);
+
+  // Superadmin Purge / Retensi Data State
+  const { data: session } = authClient.useSession();
+  const rawRole = (((session?.user as any)?.appRole || "") as string).toUpperCase();
+  const isSuperadmin = rawRole === "SUPERADMIN";
+  const [purgeModalOpen, setPurgeModalOpen] = useState(false);
+  const [purgeDays, setPurgeDays] = useState("180");
+  const [isPurging, setIsPurging] = useState(false);
+
+  const handlePurgeLogs = async () => {
+    setIsPurging(true);
+    try {
+      const res = await fetch(`/api/audit-logs?days=${purgeDays}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Log aktivitas lama berhasil dibersihkan");
+        setPurgeModalOpen(false);
+        fetchSummary();
+        fetchLogs(1);
+      } else {
+        toast.error(data.error || "Gagal membersihkan log lama");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan saat membersihkan log lama");
+    } finally {
+      setIsPurging(false);
+    }
+  };
 
   // Fetch summary
   const fetchSummary = useCallback(async () => {
@@ -261,6 +295,17 @@ export function ActivityLogView() {
                 <RotateCcw className="w-3.5 h-3.5 mr-2 text-blue-100" />
                 Segarkan Data
               </button>
+
+              {isSuperadmin && (
+                <button
+                  type="button"
+                  onClick={() => setPurgeModalOpen(true)}
+                  className="inline-flex items-center bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 border border-rose-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-rose-200 shadow-xs transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-300" />
+                  Pembersihan Log Usang
+                </button>
+              )}
             </div>
           </div>
 
@@ -690,6 +735,73 @@ export function ActivityLogView() {
               className="rounded-xl text-xs"
             >
               Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 5. Modal Pembersihan Log Usang (Khusus Superadmin) */}
+      <Dialog open={purgeModalOpen} onOpenChange={setPurgeModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+          <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-rose-600 dark:text-rose-400">
+              <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              Pembersihan Catatan Aktivitas Usang
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+              <div className="space-y-1 text-xs leading-relaxed">
+                <p className="font-semibold">Peringatan Penting</p>
+                <p>
+                  Catatan aktivitas yang lebih lama dari rentang waktu yang dipilih akan dihapus secara permanen dari basis data guna menjaga performa dan kapasitas penyimpanan sistem tetap optimal.
+                </p>
+                <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                  Pastikan Anda telah mengunduh berkas <strong>Ekspor Laporan CSV</strong> sebelum melakukan tindakan ini.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Pilih Batas Waktu Retensi Data
+              </label>
+              <Select value={purgeDays} onValueChange={(val) => setPurgeDays(val || "180")}>
+                <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+                  <SelectValue placeholder="Pilih batas waktu" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">Lebih dari 30 Hari (1 Bulan)</SelectItem>
+                  <SelectItem value="90">Lebih dari 90 Hari (3 Bulan)</SelectItem>
+                  <SelectItem value="180">Lebih dari 180 Hari (6 Bulan - Disarankan)</SelectItem>
+                  <SelectItem value="365">Lebih dari 365 Hari (1 Tahun)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPurging}
+              onClick={() => setPurgeModalOpen(false)}
+              className="rounded-xl text-xs"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={isPurging}
+              onClick={handlePurgeLogs}
+              className="rounded-xl text-xs bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              {isPurging ? "Membersihkan..." : "Hapus Log Usang Sekarang"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getUserFullRoles } from "@/lib/rbac-server";
-import { getActivityLogs, logActivity } from "@/lib/audit-server";
+import { getActivityLogs, logActivity, purgeOldAuditLogs } from "@/lib/audit-server";
+import { AUDIT_ACTIONS, AUDIT_MODULES } from "@/lib/audit";
 
 // GET /api/audit-logs — Mengambil daftar log aktivitas dengan filter dan paginasi
 // Hak akses terbatas khusus untuk: SUPERADMIN, ADMIN, dan KEPALA_SEKOLAH
@@ -77,6 +78,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!AUDIT_ACTIONS.includes(action) || !AUDIT_MODULES.includes(module)) {
+      return NextResponse.json(
+        { error: "Nilai action atau module tidak valid" },
+        { status: 400 }
+      );
+    }
+
     // Mendapatkan alamat IP dari headers
     const reqHeaders = await headers();
     const ipAddress =
@@ -103,6 +111,49 @@ export async function POST(req: NextRequest) {
     console.error("Error in POST /api/audit-logs:", error);
     return NextResponse.json(
       { error: "Gagal mencatat log aktivitas" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/audit-logs?days=180 — Pembersihan (retensi) log aktivitas lama khusus SUPERADMIN
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { allRoles } = await getUserFullRoles(session.user.id);
+    if (!allRoles.includes("SUPERADMIN")) {
+      return NextResponse.json(
+        {
+          error:
+            "Akses ditolak. Hanya Superadmin yang berwenang membersihkan log aktivitas lama.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const days = parseInt(searchParams.get("days") || "180", 10);
+    if (isNaN(days) || days < 30) {
+      return NextResponse.json(
+        { error: "Minimal usia log yang dapat dibersihkan adalah 30 hari" },
+        { status: 400 }
+      );
+    }
+
+    const deletedCount = await purgeOldAuditLogs(days);
+    return NextResponse.json({
+      success: true,
+      message: `${deletedCount} catatan aktivitas lama berhasil dibersihkan.`,
+      deletedCount,
+    });
+  } catch (error) {
+    console.error("Error in DELETE /api/audit-logs:", error);
+    return NextResponse.json(
+      { error: "Gagal membersihkan log aktivitas lama" },
       { status: 500 }
     );
   }
