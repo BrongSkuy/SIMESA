@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   GURU_DROPDOWN_GROUPS,
   GURU_NAV_ITEMS,
-  ADMIN_DROPDOWN_GROUPS,
+  SISWA_NAV_ITEMS,
 } from "../../components/layout/topbar";
 
 describe("Validasi Menu Navigasi Guru & Bebas Simbol Slash (Fitur Layout)", () => {
@@ -78,5 +78,14 @@ describe("Validasi Menu Navigasi Guru & Bebas Simbol Slash (Fitur Layout)", () =
     expect(checkCanViewConfidential(["ADMIN"])).toBe(true);
     expect(checkCanViewConfidential(["SUPERADMIN"])).toBe(true);
     expect(checkCanViewConfidential(["KEPALA_SEKOLAH"])).toBe(true);
+  });
+
+  it("menggabungkan akses E-Rapor siswa ke dalam Nilai Saya (tanpa menu E-Rapor terpisah di Topbar siswa)", () => {
+    const siswaHrefs = SISWA_NAV_ITEMS.map((item) => item.href);
+    expect(siswaHrefs).toContain("/siswa/nilai");
+    expect(siswaHrefs).not.toContain("/siswa/erapor");
+    SISWA_NAV_ITEMS.forEach((item) => {
+      expect(item.label).not.toContain("/");
+    });
   });
 });

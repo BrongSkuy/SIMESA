@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Filter,
   ArrowUpDown,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { StatCard } from "@/components/shared/stat-card";
@@ -123,16 +124,19 @@ export function EraporManagementView({
   const [bulkSortBy, setBulkSortBy] = useState<string>("nama_asc");
   const [loadingBulkPrint, setLoadingBulkPrint] = useState(false);
 
+  // Modal Terbitkan Rapor Kelas State
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [publishingClass, setPublishingClass] = useState(false);
+
   // Modal Catatan Wali Kelas State
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [selectedStudentForNote, setSelectedStudentForNote] =
     useState<ClassReportSummaryItem | null>(null);
   const [noteForm, setNoteForm] = useState({
     catatanWaliKelas: "",
-    ekskulNama: "Pramuka Dirgantara",
-    ekskulNilai: "Sangat Baik",
-    ekskulKeterangan:
-      "Aktif mengikuti latihan rutin dan kegiatan kedisiplinan siswa.",
+    ekskulNama: "",
+    ekskulNilai: "",
+    ekskulKeterangan: "",
     statusRapor: "Draf" as "Draf" | "Disahkan" | "Diterbitkan",
   });
   const [savingNote, setSavingNote] = useState(false);
@@ -277,9 +281,43 @@ export function EraporManagementView({
     const disahkan = list.filter(
       (s) => s.statusRapor === "Disahkan" || s.statusRapor === "Diterbitkan"
     ).length;
+    const diterbitkan = list.filter(
+      (s) => s.statusRapor === "Diterbitkan"
+    ).length;
+    const siapTerbit = list.filter((s) => s.jumlahMapelTerisi > 0).length;
     const adaCatatan = list.filter((s) => s.hasCatatan).length;
-    return { total, tuntas, remidi, disahkan, adaCatatan };
+    return { total, tuntas, remidi, disahkan, diterbitkan, siapTerbit, adaCatatan };
   }, [summaryData]);
+
+  // Handler Terbitkan / Tarik Status Rapor Satu Kelas
+  const handlePublishClass = async (targetStatus: "Diterbitkan" | "Draf") => {
+    if (!selectedKelas) return;
+    setPublishingClass(true);
+    try {
+      const res = await fetch("/api/erapor/publish-class", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kelas: selectedKelas,
+          targetStatus,
+          periode: summaryData?.periode,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Gagal memperbarui status rapor kelas");
+      }
+      toast.success(json.message);
+      setPublishModalOpen(false);
+      loadClassSummary(selectedKelas);
+    } catch (err: unknown) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal memperbarui status kelas"
+      );
+    } finally {
+      setPublishingClass(false);
+    }
+  };
 
   // Handler Pratinjau / Cetak Rapor Satu Siswa
   const handlePreviewReport = async (studentId: string) => {
@@ -373,31 +411,29 @@ export function EraporManagementView({
   // Handler Buka Form Catatan Wali Kelas
   const handleOpenNoteModal = async (student: ClassReportSummaryItem) => {
     setSelectedStudentForNote(student);
+    setNoteForm({
+      catatanWaliKelas: "",
+      ekskulNama: "",
+      ekskulNilai: "",
+      ekskulKeterangan: "",
+      statusRapor: student.statusRapor || "Draf",
+    });
     try {
-      const res = await fetch(
-        `/api/erapor/notes?studentId=${student.studentId}`
-      );
+      const params = new URLSearchParams({ studentId: student.studentId });
+      if (summaryData?.periode) params.set("periode", summaryData.periode);
+      const res = await fetch(`/api/erapor/notes?${params.toString()}`);
       const json = await res.json();
       if (json.data) {
         setNoteForm({
           catatanWaliKelas: json.data.catatanWaliKelas || "",
-          ekskulNama: json.data.ekskulNama || "Pramuka Dirgantara",
-          ekskulNilai: json.data.ekskulNilai || "Sangat Baik",
+          ekskulNama: json.data.ekskulNama || "",
+          ekskulNilai: json.data.ekskulNilai || "",
           ekskulKeterangan: json.data.ekskulKeterangan || "",
-          statusRapor: json.data.statusRapor || "Draf",
-        });
-      } else {
-        setNoteForm({
-          catatanWaliKelas:
-            "Pertahankan kedisiplinan dan semangat belajar siswa atau siswi. Terus tingkatkan prestasi akademik dan keterampilan kejuruan.",
-          ekskulNama: "Pramuka Dirgantara",
-          ekskulNilai: "Sangat Baik",
-          ekskulKeterangan: "Aktif mengikuti kegiatan pembinaan kedisiplinan.",
-          statusRapor: student.statusRapor || "Draf",
+          statusRapor: json.data.statusRapor || student.statusRapor || "Draf",
         });
       }
     } catch {
-      // Default
+      toast.error("Gagal memuat catatan siswa");
     }
     setNoteModalOpen(true);
   };
@@ -498,6 +534,16 @@ export function EraporManagementView({
               >
                 <Printer className="w-3.5 h-3.5 mr-2 text-blue-100" />
                 Cetak Semua
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPublishModalOpen(true)}
+                disabled={!selectedKelas || loadingSummary || stats.total === 0}
+                className="inline-flex items-center bg-emerald-600/90 hover:bg-emerald-500 active:bg-emerald-700 border border-emerald-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Send className="w-3.5 h-3.5 mr-2 text-emerald-100" />
+                Terbitkan Rapor
               </button>
             </div>
           </div>
@@ -1209,6 +1255,90 @@ export function EraporManagementView({
         </DialogContent>
       </Dialog>
 
+      {/* MODAL TERBITKAN RAPOR KELAS */}
+      <Dialog open={publishModalOpen} onOpenChange={setPublishModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Send className="w-4 h-4 text-emerald-600" />
+              Penerbitan Rapor Kelas {selectedKelas}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Rapor berstatus Diterbitkan akan langsung dapat dibuka dan dicetak
+              oleh siswa.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-3 gap-2 py-2 text-center">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+              <p className="text-[11px] text-slate-500">Total Siswa</p>
+              <p className="text-base font-bold font-mono text-slate-900">
+                {stats.total}
+              </p>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5">
+              <p className="text-[11px] text-emerald-700">Siap Terbit</p>
+              <p className="text-base font-bold font-mono text-emerald-700">
+                {stats.siapTerbit}
+              </p>
+            </div>
+            <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-2.5">
+              <p className="text-[11px] text-blue-700">Sudah Terbit</p>
+              <p className="text-base font-bold font-mono text-blue-700">
+                {stats.diterbitkan}
+              </p>
+            </div>
+          </div>
+
+          {stats.total - stats.siapTerbit > 0 && (
+            <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              {stats.total - stats.siapTerbit} siswa belum memiliki nilai mapel
+              dan akan dilewati otomatis.
+            </p>
+          )}
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-2">
+            <div>
+              {stats.diterbitkan > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePublishClass("Draf")}
+                  disabled={publishingClass}
+                  className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                >
+                  Tarik ke Draf
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPublishModalOpen(false)}
+                disabled={publishingClass}
+              >
+                Batal
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handlePublishClass("Diterbitkan")}
+                disabled={publishingClass || stats.siapTerbit === 0}
+                className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {publishingClass ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+                Terbitkan Sekarang
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* MODAL INPUT CATATAN WALI KELAS DAN EKSKUL */}
       <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
         <DialogContent className="max-w-lg">
@@ -1257,9 +1387,12 @@ export function EraporManagementView({
                   Predikat Nilai Ekskul:
                 </Label>
                 <Select
-                  value={noteForm.ekskulNilai}
+                  value={noteForm.ekskulNilai || "none"}
                   onValueChange={(val) => {
-                    if (val) setNoteForm({ ...noteForm, ekskulNilai: val });
+                    setNoteForm({
+                      ...noteForm,
+                      ekskulNilai: !val || val === "none" ? "" : val,
+                    });
                   }}
                 >
                   <SelectTrigger className="text-xs">
@@ -1268,11 +1401,12 @@ export function EraporManagementView({
                         if (val === "Sangat Baik") return "Sangat Baik (A)";
                         if (val === "Baik") return "Baik (B)";
                         if (val === "Cukup") return "Cukup (C)";
-                        return "Pilih Nilai";
+                        return "Belum diisi";
                       }}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Belum diisi</SelectItem>
                     <SelectItem value="Sangat Baik">
                       Sangat Baik (A)
                     </SelectItem>

@@ -348,8 +348,8 @@ export function buildReportCardPageHtml(data: StudentReportCardData): string {
       </div>
 
       <div class="section-title">D. Catatan Perkembangan Karakter dan Kedisiplinan Wali Kelas</div>
-      <div class="catatan-box">
-        "${escapeHtml(data.catatanWaliKelas || "Tetap pertahankan kedisiplinan dan semangat belajar.")}"
+      <div class="catatan-box" style="${data.catatanWaliKelas?.trim() ? "" : "font-style: normal; color: #777;"}">
+        ${data.catatanWaliKelas?.trim() ? `"${escapeHtml(data.catatanWaliKelas.trim())}"` : "-"}
       </div>
 
       <div class="ttd-section">
@@ -675,12 +675,14 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               <tbody>
                 <tr>
                   <td className="border border-zinc-400 px-2 py-2 text-center">1</td>
-                  <td className="border border-zinc-400 px-3 py-2 font-medium">{data.ekskul.nama}</td>
+                  <td className="border border-zinc-400 px-3 py-2 font-medium">
+                    {data.ekskul?.nama?.trim() || "-"}
+                  </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-semibold text-emerald-800">
-                    {data.ekskul.nilai}
+                    {data.ekskul?.nilai?.trim() || "-"}
                   </td>
                   <td className="border border-zinc-400 px-3 py-2 text-[11px] text-zinc-600">
-                    {data.ekskul.keterangan}
+                    {data.ekskul?.keterangan?.trim() || "-"}
                   </td>
                 </tr>
               </tbody>
@@ -728,8 +730,16 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
           <h3 className="text-xs font-bold uppercase text-zinc-900 tracking-wider mb-2">
             D. Catatan Perkembangan Karakter & Kedisiplinan Wali Kelas
           </h3>
-          <div className="border border-zinc-400 p-3 rounded text-xs bg-zinc-50 print:bg-transparent leading-relaxed italic text-zinc-800 min-h-[60px]">
-            &quot;{data.catatanWaliKelas}&quot;
+          <div className="border border-zinc-400 p-3 rounded text-xs bg-zinc-50 print:bg-transparent leading-relaxed min-h-[60px]">
+            {data.catatanWaliKelas?.trim() ? (
+              <span className="italic text-zinc-800">
+                &quot;{data.catatanWaliKelas.trim()}&quot;
+              </span>
+            ) : (
+              <span className="text-zinc-400">
+                Belum ada catatan wali kelas.
+              </span>
+            )}
           </div>
         </div>
 

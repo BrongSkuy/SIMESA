@@ -193,3 +193,49 @@ export function deduplicateSubjectsForKkm(
 
   return result.sort((a, b) => a.namaMapel.localeCompare(b.namaMapel));
 }
+
+export type EraporStatus = "Draf" | "Disahkan" | "Diterbitkan";
+
+/**
+ * Siswa hanya diizinkan melihat pratinjau penuh dan mencetak E-Rapor
+ * apabila status rapor telah resmi "Diterbitkan".
+ */
+export function canStudentPrintErapor(
+  statusRapor: string | null | undefined
+): boolean {
+  return statusRapor === "Diterbitkan";
+}
+
+export function getStudentEraporGateInfo(
+  statusRapor: string | null | undefined
+): {
+  canPrint: boolean;
+  status: EraporStatus;
+  badgeLabel: string;
+  message: string;
+} {
+  if (statusRapor === "Diterbitkan") {
+    return {
+      canPrint: true,
+      status: "Diterbitkan",
+      badgeLabel: "Diterbitkan",
+      message: "E-Rapor resmi telah diterbitkan dan siap dicetak.",
+    };
+  }
+
+  if (statusRapor === "Disahkan") {
+    return {
+      canPrint: false,
+      status: "Disahkan",
+      badgeLabel: "Disahkan",
+      message: "Rapor telah disahkan wali kelas dan menunggu penerbitan resmi.",
+    };
+  }
+
+  return {
+    canPrint: false,
+    status: "Draf",
+    badgeLabel: "Belum Terbit",
+    message: "Nilai sedang dalam proses penilaian dan pengesahan wali kelas.",
+  };
+}

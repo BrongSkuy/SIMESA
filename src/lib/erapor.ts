@@ -38,6 +38,7 @@ export interface StudentReportCardData {
   };
   periode: string;
   periodeDisplay: string;
+  defaultKkm: number;
   waliKelas: {
     nama: string;
     nip: string;
@@ -446,16 +447,12 @@ export async function getStudentReportCard(
   const persentaseKehadiran =
     totalAbsen > 0 ? Number(((hadir / totalAbsen) * 100).toFixed(1)) : 100;
 
-  // Catatan Wali Kelas & Ekskul
+  // Catatan Wali Kelas & Ekskul (jangan isi teks palsu bila memang belum diinput)
   const noteRow = reportNotesRows[0];
-  const catatanWaliKelas =
-    noteRow?.catatanWaliKelas?.trim() ||
-    "Pertahankan kedisiplinan, motivasi belajar, dan sikap kepemimpinan yang baik sebagai siswa atau siswi SMK Penerbangan Dirgantara.";
-  const ekskulNama = noteRow?.ekskulNama?.trim() || "Pramuka Dirgantara";
-  const ekskulNilai = noteRow?.ekskulNilai?.trim() || "Sangat Baik";
-  const ekskulKeterangan =
-    noteRow?.ekskulKeterangan?.trim() ||
-    "Aktif mengikuti latihan rutin, upacara, dan kegiatan keorganisasian sekolah.";
+  const catatanWaliKelas = noteRow?.catatanWaliKelas?.trim() || "";
+  const ekskulNama = noteRow?.ekskulNama?.trim() || "";
+  const ekskulNilai = noteRow?.ekskulNilai?.trim() || "";
+  const ekskulKeterangan = noteRow?.ekskulKeterangan?.trim() || "";
   const statusRapor = (noteRow?.statusRapor as "Draf" | "Disahkan" | "Diterbitkan") || "Draf";
   const updatedAt = noteRow?.updatedAt || new Date().toISOString();
 
@@ -470,6 +467,7 @@ export async function getStudentReportCard(
     },
     periode: activePeriode,
     periodeDisplay,
+    defaultKkm,
     waliKelas: {
       nama: waliKelasNama,
       nip: waliKelasNip,
@@ -1054,6 +1052,7 @@ export async function getBulkStudentReportCards(params: {
       },
       periode: activePeriode,
       periodeDisplay,
+      defaultKkm,
       waliKelas: { nama: waliKelasNama, nip: waliKelasNip },
       kepalaSekolah: { nama: kepalaSekolahNama, nip: kepalaSekolahNip },
       sekolah: {
@@ -1081,15 +1080,11 @@ export async function getBulkStudentReportCards(params: {
         persentase: persentaseKehadiran,
       },
       ekskul: {
-        nama: noteRow?.ekskulNama?.trim() || "Pramuka Dirgantara",
-        nilai: noteRow?.ekskulNilai?.trim() || "Sangat Baik",
-        keterangan:
-          noteRow?.ekskulKeterangan?.trim() ||
-          "Aktif mengikuti latihan rutin, upacara, dan kegiatan keorganisasian sekolah.",
+        nama: noteRow?.ekskulNama?.trim() || "",
+        nilai: noteRow?.ekskulNilai?.trim() || "",
+        keterangan: noteRow?.ekskulKeterangan?.trim() || "",
       },
-      catatanWaliKelas:
-        noteRow?.catatanWaliKelas?.trim() ||
-        "Pertahankan kedisiplinan, motivasi belajar, dan sikap kepemimpinan yang baik sebagai siswa atau siswi SMK Penerbangan Dirgantara.",
+      catatanWaliKelas: noteRow?.catatanWaliKelas?.trim() || "",
       statusRapor:
         (noteRow?.statusRapor as "Draf" | "Disahkan" | "Diterbitkan") || "Draf",
       updatedAt: noteRow?.updatedAt || new Date().toISOString(),

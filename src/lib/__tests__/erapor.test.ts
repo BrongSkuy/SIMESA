@@ -6,6 +6,8 @@ import {
   getKkmAverageColorInfo,
   deduplicateSubjectsForKkm,
   DEFAULT_KKM_KEY,
+  canStudentPrintErapor,
+  getStudentEraporGateInfo,
 } from "../erapor-utils";
 
 describe("E-Rapor Akademik & Penilaian Bagi Rata Unit Tests", () => {
@@ -195,5 +197,19 @@ describe("E-Rapor & KKM Utility Helpers (Input Leading Zero, 3-Color Zone, Dedup
     expect(mtk?.guruList).toEqual(["Budi", "Siti"]);
     expect(mtk?.kelasList).toEqual(["X RPL 1", "X RPL 2", "XI RPL 1"]);
     expect(mtk?.capaianKompetensi).toBe("Menguasai aljabar");
+  });
+
+  it("canStudentPrintErapor & getStudentEraporGateInfo only allow printing when Diterbitkan", () => {
+    expect(canStudentPrintErapor("Draf")).toBe(false);
+    expect(canStudentPrintErapor("Disahkan")).toBe(false);
+    expect(canStudentPrintErapor(null)).toBe(false);
+    expect(canStudentPrintErapor("Diterbitkan")).toBe(true);
+
+    expect(getStudentEraporGateInfo("Draf").canPrint).toBe(false);
+    expect(getStudentEraporGateInfo("Draf").badgeLabel).toBe("Belum Terbit");
+    expect(getStudentEraporGateInfo("Disahkan").canPrint).toBe(false);
+    expect(getStudentEraporGateInfo("Disahkan").badgeLabel).toBe("Disahkan");
+    expect(getStudentEraporGateInfo("Diterbitkan").canPrint).toBe(true);
+    expect(getStudentEraporGateInfo("Diterbitkan").badgeLabel).toBe("Diterbitkan");
   });
 });

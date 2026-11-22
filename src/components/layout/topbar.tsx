@@ -266,7 +266,6 @@ export const SISWA_NAV_ITEMS = [
   { label: "Beranda", href: "/siswa", icon: LayoutDashboard },
   { label: "Riwayat Absensi", href: "/siswa/absensi", icon: CalendarCheck },
   { label: "Nilai Saya", href: "/siswa/nilai", icon: ScrollText },
-  { label: "E-Rapor", href: "/siswa/erapor", icon: BookMarked },
   { label: "Buku Poin", href: "/siswa/pelanggaran", icon: ShieldAlert },
   { label: "Konseling BK", href: "/siswa/konseling", icon: HeartHandshake },
   { label: "Leaderboard", href: "/siswa/leaderboard", icon: Trophy },
