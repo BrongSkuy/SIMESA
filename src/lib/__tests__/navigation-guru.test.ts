@@ -30,6 +30,7 @@ describe("Validasi Menu Navigasi Guru & Bebas Simbol Slash (Fitur Layout)", () =
 
     const hrefs = akademikGroup!.items.map((i) => i.href);
     expect(hrefs).toContain("/guru/absensi");
+    expect(hrefs).toContain("/guru/mapel");
     expect(hrefs).toContain("/guru/nilai");
     expect(hrefs).toContain("/guru/erapor");
     expect(hrefs).toContain("/guru/rekap");
