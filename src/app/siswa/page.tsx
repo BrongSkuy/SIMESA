@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { HeaderBackdrop } from "@/components/shared/header-backdrop";
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -154,6 +155,7 @@ export default function SiswaDashboard() {
     <div className="space-y-6">
       {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
       <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        <HeaderBackdrop />
         {/* Subtle Ambient Radial Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
@@ -361,7 +363,7 @@ export default function SiswaDashboard() {
                   Top 5 Kelas {profile.kelas}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Peringkat skor SPK resmi di kelas Anda
+                  Peringkat siswa berprestasi di kelas Anda
                 </p>
               </div>
               <Link

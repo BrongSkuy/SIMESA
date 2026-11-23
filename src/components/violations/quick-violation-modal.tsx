@@ -154,7 +154,7 @@ export function QuickViolationModal({
               onValueChange={(val) => setSelectedStudentId(val || "")}
             >
               <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                <SelectValue placeholder="-- Pilih Siswa --" />
+                <SelectValue placeholder="Pilih siswa..." />
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {studentsList.map((s) => (
@@ -176,7 +176,7 @@ export function QuickViolationModal({
               onValueChange={(val) => handleTypeChange(val || "")}
             >
               <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                <SelectValue placeholder="-- Pilih Aturan Pelanggaran --" />
+                <SelectValue placeholder="Pilih aturan pelanggaran..." />
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {typesList.map((t) => (

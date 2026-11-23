@@ -347,7 +347,7 @@ export default function ManajemenDataPage() {
                         Periode Aktif Saat Ini
                       </p>
                       <h3 className="text-base font-bold tracking-tight text-slate-900 mt-0.5">
-                        Tahun Ajaran {activePeriod.tahunAjaran} — Semester{" "}
+                        Tahun Ajaran {activePeriod.tahunAjaran}, Semester{" "}
                         {activePeriod.semester}
                       </h3>
                     </div>
@@ -511,12 +511,12 @@ export default function ManajemenDataPage() {
             </div>
             <div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 mb-4">
-                <ul className="text-xs text-slate-600 space-y-1.5">
-                  <li>• Master Siswa, Guru, Kelas & Mata Pelajaran</li>
-                  <li>• Riwayat Lengkap Presensi & Absensi</li>
-                  <li>• Rincian Nilai, Kategori & Bobot Kriteria SPK</li>
-                  <li>• Relasi Pengajaran & Daftar Periode Akademik</li>
-                  <li>• Peringkat Leaderboard SPK SAW (Umum & Kelas)</li>
+                <ul className="list-disc pl-4 text-xs text-slate-600 space-y-1.5">
+                  <li>Master Siswa, Guru, Kelas, dan Mata Pelajaran</li>
+                  <li>Riwayat Lengkap Presensi dan Absensi</li>
+                  <li>Rincian Nilai, Kategori, dan Bobot Kriteria SPK</li>
+                  <li>Relasi Pengajaran dan Daftar Periode Akademik</li>
+                  <li>Peringkat Leaderboard SPK SAW (Umum dan Kelas)</li>
                 </ul>
               </div>
               <Button
@@ -540,7 +540,7 @@ export default function ManajemenDataPage() {
             <div className="pb-3 border-b border-rose-200">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-rose-900">
                 <ShieldAlert className="h-4 w-4 text-rose-600" />
-                Zona Bahaya — Reset Operasional
+                Zona Bahaya: Reset Operasional
               </CardTitle>
               <CardDescription className="text-xs text-rose-700/80 mt-0.5">
                 Bersihkan seluruh data transaksi operasional dengan tetap

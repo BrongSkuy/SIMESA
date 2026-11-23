@@ -123,9 +123,9 @@ export function LeaderboardPagination({
 
 export default function LeaderboardCard({
   title = "Tabel Peringkat Siswa Berprestasi",
-  subtitle = "Kalkulasi normalisasi matriks multi-kriteria real-time metode SAW",
+  subtitle = "Rekapitulasi peringkat siswa berprestasi semester aktif",
   period = "Aktif",
-  badgeMethod = "Metode SAW Multi-Kriteria",
+  badgeMethod = "Penilaian Terpadu",
   activeTab = "umum",
   onTabChange,
   classes = [],

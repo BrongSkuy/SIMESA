@@ -4,9 +4,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title:
-    "SIMESA — Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi | SMK Penerbangan Dirgantara",
+    "SIMESA - Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi | SMK Penerbangan Dirgantara",
   description:
-    "SIMESA (Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi) — Portal Akademik, Presensi, dan Evaluasi Prestasi SMK Penerbangan Dirgantara",
+    "SIMESA (Sistem Informasi Manajemen Elektronik Sekolah dan Administrasi) - Portal Akademik, Presensi, dan Evaluasi Prestasi SMK Penerbangan Dirgantara",
   icons: {
     icon: [
       { url: "/logo.png?v=3", type: "image/png" },

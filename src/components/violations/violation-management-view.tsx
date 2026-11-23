@@ -1015,7 +1015,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
               <span>Riwayat Buku Poin: {selectedStudentForHistory?.namaLengkap}</span>
             </DialogTitle>
             <p className="text-xs text-slate-500">
-              NIS: {selectedStudentForHistory?.nis} • Kelas: {selectedStudentForHistory?.kelas} • Total:{" "}
+              NIS: {selectedStudentForHistory?.nis} | Kelas: {selectedStudentForHistory?.kelas} | Total:{" "}
               <strong className="text-red-600">{selectedStudentForHistory?.totalPoints} Poin</strong>
             </p>
           </DialogHeader>
@@ -1045,7 +1045,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                       </div>
                       {v.keterangan && <p className="text-slate-600 dark:text-slate-400 italic mb-1">&ldquo;{v.keterangan}&rdquo;</p>}
                       <p className="text-[11px] text-slate-400">
-                        Lokasi: {v.lokasi || "-"} • Pencatat: {v.reportedBy}
+                        Lokasi: {v.lokasi || "-"} | Pencatat: {v.reportedBy}
                       </p>
                     </div>
                     <span className="font-bold text-red-600 text-sm shrink-0">+{v.poin}</span>
@@ -1053,11 +1053,6 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 ))
             )}
           </div>
-          <DialogFooter>
-            <Button size="sm" variant="outline" onClick={() => setHistoryModalOpen(false)}>
-              Tutup
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -1154,7 +1149,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
               <span>Terbitkan Surat Peringatan (SP)</span>
             </DialogTitle>
             <p className="text-xs text-slate-500">
-              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) • Akumulasi:{" "}
+              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) | Akumulasi:{" "}
               <strong className="text-red-600">{targetStudentForSp?.totalPoints} Poin</strong>
             </p>
           </DialogHeader>

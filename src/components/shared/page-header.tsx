@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HeaderBackdrop } from "@/components/shared/header-backdrop";
 
 interface PageHeaderProps {
   title: string;
@@ -25,6 +26,8 @@ export function PageHeader({
         className
       )}
     >
+      {/* Foto Latar Gedung Sekolah Fade (Gaya Halaman Login) */}
+      <HeaderBackdrop />
       {/* Subtle Cockpit Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 

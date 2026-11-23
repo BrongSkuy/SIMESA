@@ -6,7 +6,46 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
-const Select = SelectPrimitive.Root
+function collectSelectItems(
+  children: React.ReactNode,
+  map: Record<string, React.ReactNode>
+) {
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) return;
+    const props = child.props as {
+      value?: unknown;
+      children?: React.ReactNode;
+    };
+    if (
+      child.type === SelectItem &&
+      props.value !== undefined &&
+      props.value !== null
+    ) {
+      map[String(props.value)] = props.children;
+    } else if (props.children) {
+      collectSelectItems(props.children, map);
+    }
+  });
+}
+
+function Select<Value, Multiple extends boolean | undefined = false>({
+  items,
+  children,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  const derivedItems = React.useMemo(() => {
+    if (items !== undefined) return items;
+    const map: Record<string, React.ReactNode> = {};
+    collectSelectItems(children, map);
+    return Object.keys(map).length > 0 ? map : undefined;
+  }, [items, children]);
+
+  return (
+    <SelectPrimitive.Root items={derivedItems} {...props}>
+      {children}
+    </SelectPrimitive.Root>
+  );
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -22,7 +61,7 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
-      className={cn("flex flex-1 text-left", className)}
+      className={cn("flex-1 min-w-0 truncate text-left", className)}
       {...props}
     />
   )

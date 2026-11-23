@@ -19,7 +19,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -514,7 +513,7 @@ export function CounselingManagementView() {
                                 {item.studentName}
                               </span>
                               <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                                NIS: {item.studentNis} • Kelas {item.studentKelas}
+                                NIS: {item.studentNis} | Kelas {item.studentKelas}
                               </span>
                             </div>
                           </div>
@@ -675,7 +674,7 @@ export function CounselingManagementView() {
                               {log.studentName}
                             </span>
                             <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                              NIS: {log.studentNis} • Kelas {log.studentKelas}
+                              NIS: {log.studentNis} | Kelas {log.studentKelas}
                             </span>
                           </div>
                         </div>
@@ -686,10 +685,10 @@ export function CounselingManagementView() {
                       <TableCell className="text-xs align-top font-semibold text-blue-900 dark:text-blue-300 group-hover/row:text-blue-300 transition-colors">
                         {log.aspekPengamatan}
                       </TableCell>
-                      <TableCell className="text-xs align-top max-w-sm text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 transition-colors">
+                      <TableCell className="text-xs align-top max-w-sm whitespace-normal break-words leading-relaxed text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 transition-colors">
                         {log.catatanPerkembangan}
                       </TableCell>
-                      <TableCell className="text-xs align-top text-slate-500 group-hover/row:text-slate-400 italic transition-colors">
+                      <TableCell className="text-xs align-top max-w-xs whitespace-normal break-words leading-relaxed text-slate-500 group-hover/row:text-slate-400 italic transition-colors">
                         {log.rekomendasi || "-"}
                       </TableCell>
                     </TableRow>
@@ -782,7 +781,7 @@ export function CounselingManagementView() {
                                 {disp.studentName}
                               </span>
                               <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                                NIS: {disp.studentNis} • Kelas {disp.studentKelas}
+                                NIS: {disp.studentNis} | Kelas {disp.studentKelas}
                               </span>
                             </div>
                           </div>
@@ -894,7 +893,7 @@ export function CounselingManagementView() {
                   </Badge>
                 </div>
                 <p className="text-muted-foreground">
-                  Nomor Induk Siswa: {selectedSessionDetail.studentNis} • Kelas: {selectedSessionDetail.studentKelas}
+                  Nomor Induk Siswa: {selectedSessionDetail.studentNis} | Kelas: {selectedSessionDetail.studentKelas}
                 </p>
                 <p className="text-muted-foreground">
                   Waktu Pelaksanaan: {formatTanggalIndonesia(selectedSessionDetail.tanggal)} ({selectedSessionDetail.waktuMulai} - {selectedSessionDetail.waktuSelesai})
@@ -982,12 +981,6 @@ export function CounselingManagementView() {
               </div>
             </div>
           )}
-
-          <DialogFooter className="border-t pt-3">
-            <Button variant="outline" onClick={() => setDetailModalOpen(false)}>
-              Tutup
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

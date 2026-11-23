@@ -369,7 +369,7 @@ export default function GuruRekapPage() {
       <PageHeader
         title="Rekapitulasi Kelas Diampu"
         badge="Portal Guru"
-        description="Ringkasan akumulasi presensi dan nilai kriteria SPK siswa pada kelas penugasan Anda"
+        description="Ringkasan kehadiran dan capaian nilai siswa pada kelas binaan Anda"
         icon={BarChart3}
       >
         <Button
@@ -437,7 +437,7 @@ export default function GuruRekapPage() {
                     icon={BarChart3}
                     color="amber"
                     footerLeft="Gabungan Izin, Sakit & Alfa"
-                    footerRight="Log Sesi"
+                    footerRight="Total Pertemuan"
                   />
                 </div>
 
@@ -579,7 +579,7 @@ export default function GuruRekapPage() {
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-3">
                   <div className="pb-3 border-b border-slate-100">
                     <CardTitle className="text-base font-semibold text-slate-900 tracking-tight">
-                      Matriks Detail Per Siswa
+                      Rincian Rekap Per Siswa
                     </CardTitle>
                   </div>
                   <div className="overflow-x-auto">

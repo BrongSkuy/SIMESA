@@ -206,8 +206,8 @@ export function DispensationPrintModal({
             <div class="kop-text">
               <h3>Yayasan Pendidikan Kedirgantaraan Nusantara</h3>
               <h2>SMK Penerbangan Dirgantara</h2>
-              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara • Telp. (021) 876-5432</p>
-              <p>Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A</p>
+              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara | Telp. (021) 876-5432</p>
+              <p>Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A</p>
             </div>
           </div>
 
@@ -318,15 +318,18 @@ export function DispensationPrintModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-4xl gap-0 p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+      >
         {/* Header Modal - Hidden Saat Cetak Standar */}
-        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between gap-3 space-y-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
               <FileText className="w-5 h-5" />
             </div>
-            <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white truncate">
                 Pratinjau Surat Dispensasi Izin Meninggalkan Kelas
               </DialogTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -334,22 +337,24 @@ export function DispensationPrintModal({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={handlePrint}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-sm font-semibold"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak Dokumen Resmi</span>
+              <span>Cetak Dokumen (A4)</span>
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onOpenChange(false)}
+              aria-label="Tutup pratinjau"
+              title="Tutup"
+              className="rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-4 h-4" />
-              <span>Tutup</span>
             </Button>
           </div>
         </DialogHeader>
@@ -380,10 +385,10 @@ export function DispensationPrintModal({
                     SMK Penerbangan Dirgantara
                   </h1>
                   <p className="text-[11px] text-slate-600 font-sans mt-0.5">
-                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara • Telp. (021) 876-5432
+                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara | Telp. (021) 876-5432
                   </p>
                   <p className="text-[10px] text-slate-500 font-sans">
-                    Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A
+                    Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A
                   </p>
                 </div>
               </div>

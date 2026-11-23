@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { StatCard } from "@/components/shared/stat-card";
+import { HeaderBackdrop } from "@/components/shared/header-backdrop";
 import { Button } from "@/components/ui/button";
 
 function getInitials(name: string): string {
@@ -328,24 +329,13 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
     }
   };
 
-  // Jika sedang membuka pratinjau cetak rapor seorang siswa:
-  if (activeReportData) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4">
-        <ReportCardPrintView
-          data={activeReportData}
-          onBack={() => setActiveReportData(null)}
-        />
-      </div>
-    );
-  }
-
   const badgeText = portal === "admin" ? "Portal Admin" : "Portal Guru";
 
   return (
     <div className="space-y-6">
       {/* 1. Header Cockpit Banner Menyatu - Persis Beranda Dashboard & Konseling BK */}
       <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        <HeaderBackdrop />
         {/* Ambient Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
@@ -478,7 +468,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                 <span className="font-semibold text-slate-900 dark:text-white">
                   {summaryData.waliKelas}
                 </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
                 <span className="text-slate-500 dark:text-slate-400 font-medium">Periode:</span>
                 <span className="font-semibold text-blue-700 dark:text-blue-400">
                   {summaryData.periode.replace("-", " ")}
@@ -597,7 +587,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
                             {s.namaLengkap}
                           </span>
                           <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                            {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} • Hadir: {s.presensi.hadir} • Sakit: {s.presensi.sakit} • Izin: {s.presensi.izin} • Alfa: {s.presensi.alfa}
+                            {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} | Hadir: {s.presensi.hadir}, Sakit: {s.presensi.sakit}, Izin: {s.presensi.izin}, Alfa: {s.presensi.alfa}
                           </span>
                         </div>
                       </div>
@@ -700,7 +690,7 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
             <DialogTitle>Catatan Wali Kelas dan Ekstrakurikuler</DialogTitle>
             <DialogDescription>
               {selectedStudentForNote
-                ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) — Kelas ${selectedKelas}`
+                ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) - Kelas ${selectedKelas}`
                 : "Pengisian catatan evaluasi siswa"}
             </DialogDescription>
           </DialogHeader>
@@ -943,16 +933,30 @@ export function EraporManagementView({ portal = "guru" }: EraporManagementViewPr
               )}
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setKkmModalOpen(false)}
-            >
-              Tutup
-            </Button>
-          </DialogFooter>
+      {/* MODAL PRATINJAU CETAK E-RAPOR INTERNAL (SERAGAM DENGAN SP & DISPENSASI) */}
+      <Dialog
+        open={Boolean(activeReportData)}
+        onOpenChange={(open) => {
+          if (!open) setActiveReportData(null);
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="sm:max-w-5xl gap-0 p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        >
+          <DialogTitle className="sr-only">
+            Pratinjau E-Rapor Internal
+          </DialogTitle>
+          {activeReportData && (
+            <ReportCardPrintView
+              data={activeReportData}
+              onBack={() => setActiveReportData(null)}
+              inModal
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

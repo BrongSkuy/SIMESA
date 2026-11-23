@@ -166,7 +166,7 @@ export default function GuruLeaderboardPage() {
       } catch (err: unknown) {
         if (!cancelled) {
           toast.error(
-            err instanceof Error ? err.message : "Gagal memuat SPK"
+            err instanceof Error ? err.message : "Gagal memuat data peringkat"
           );
           setData([]);
         }
@@ -195,14 +195,14 @@ export default function GuruLeaderboardPage() {
       NIS: d.nis,
       NamaSiswa: d.namaLengkap,
       Kelas: d.kelas,
-      SkorSPK_Persen: d.persentase,
+      SkorPrestasi_Persen: d.persentase,
       RawScore: d.rawScore,
     }));
     const ws = XLSX.utils.json_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Leaderboard " + activeTab);
-    XLSX.writeFile(wb, `Leaderboard_${activeTab}_SPK.xlsx`);
-    toast.success("Leaderboard SPK berhasil diekspor!");
+    XLSX.utils.book_append_sheet(wb, ws, "Peringkat " + activeTab);
+    XLSX.writeFile(wb, `Peringkat_Siswa_${activeTab}.xlsx`);
+    toast.success("Data peringkat siswa berhasil diekspor");
   };
 
   const handleExportPDF = () => {
@@ -222,9 +222,9 @@ export default function GuruLeaderboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Peringkat Siswa Berprestasi (SPK SAW)"
+        title="Peringkat Siswa Berprestasi"
         badge="Portal Guru"
-        description="Daftar pemeringkatan resmi siswa terbaik berdasarkan kalkulasi Simple Additive Weighting"
+        description="Daftar peringkat resmi siswa berprestasi berdasarkan rekap penilaian semester aktif"
         icon={Trophy}
       >
         <Button
@@ -243,7 +243,7 @@ export default function GuruLeaderboardPage() {
           onClick={handleExportPDF}
           disabled={data.length === 0 || isPublished !== true}
         >
-          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak / PDF
+          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak PDF
         </Button>
       </PageHeader>
 
@@ -286,10 +286,9 @@ export default function GuruLeaderboardPage() {
 
             <div className="p-6 space-y-5">
               <p className="text-xs text-slate-600 group-hover:text-slate-300 leading-relaxed transition-colors">
-                Hasil kalkulasi Sistem Pendukung Keputusan (SPK) SAW saat ini
-                masih dalam tahap verifikasi kelengkapan nilai oleh
-                Administrator. Peringkat resmi akan terbuka otomatis segera
-                setelah dipublikasikan.
+                Hasil pemeringkatan siswa berprestasi saat ini masih dalam tahap
+                verifikasi kelengkapan nilai oleh Administrator. Peringkat resmi
+                akan terbuka otomatis segera setelah dipublikasikan.
               </p>
 
               <div className="rounded-xl border border-slate-200 group-hover:border-slate-800 bg-slate-50 group-hover:bg-white/[0.03] p-4 space-y-3 transition-colors">
@@ -377,7 +376,7 @@ export default function GuruLeaderboardPage() {
                   </div>
                   <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 flex items-center justify-between text-xs transition-colors">
                     <span className="text-slate-500 group-hover:text-slate-400 transition-colors">
-                      Nilai Akhir SAW
+                      Skor Prestasi
                     </span>
                     <span className="font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
                       {student.rawScore.toFixed(4)} ({student.persentase}%)
@@ -400,7 +399,7 @@ export default function GuruLeaderboardPage() {
                     ? "Tabel Peringkat Siswa Berprestasi"
                     : `Peringkat Siswa Kelas ${activeTab}`
                 }
-                subtitle="Hasil resmi pemeringkatan multi-kriteria periode aktif metode SAW"
+                subtitle="Hasil resmi pemeringkatan siswa berprestasi semester aktif"
                 period={activePeriodeName}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
@@ -425,7 +424,7 @@ export default function GuruLeaderboardPage() {
                           Kelas
                         </TableHead>
                         <TableHead className="font-semibold text-slate-600">
-                          Indeks SAW
+                          Skor Akhir
                         </TableHead>
                         <TableHead className="text-center font-semibold text-slate-600">
                           Skor (%)

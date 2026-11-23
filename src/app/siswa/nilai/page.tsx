@@ -317,32 +317,32 @@ export default function SiswaNilaiPage() {
         "Transkrip Per Mapel"
       );
 
-      // Sheet 2: Perhitungan SPK SAW
+      // Sheet 2: Rincian Skor Prestasi
       const sawRows = data.criteria.map((c, idx) => ({
         No: idx + 1,
-        "Kriteria Evaluasi": c.namaKriteria,
+        "Aspek Penilaian": c.namaKriteria,
         "Tipe Input": c.tipe,
         "Bobot (%)": c.bobot,
         "Nilai Rata-Rata": c.nilaiRataRata,
-        "Normalisasi SAW (R_ij)": Number(
+        "Indeks Capaian": Number(
           (c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)
         ),
-        "Skor Terbobot SAW": c.nilaiTerbobot,
+        "Kontribusi Nilai": c.nilaiTerbobot,
       }));
       sawRows.push({
         No: sawRows.length + 1,
-        "Kriteria Evaluasi": "TOTAL AKUMULASI SKOR SPK SAW",
+        "Aspek Penilaian": "TOTAL SKOR PRESTASI",
         "Tipe Input": "-",
         "Bobot (%)": 100,
         "Nilai Rata-Rata": 0,
-        "Normalisasi SAW (R_ij)": 1,
-        "Skor Terbobot SAW": data.totalSkorSPK,
+        "Indeks Capaian": 1,
+        "Kontribusi Nilai": data.totalSkorSPK,
       });
 
       XLSX.utils.book_append_sheet(
         wb,
         XLSX.utils.json_to_sheet(sawRows),
-        "Perhitungan SPK SAW"
+        "Rincian Skor Prestasi"
       );
 
       XLSX.writeFile(
@@ -358,13 +358,13 @@ export default function SiswaNilaiPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Transkrip Nilai & Skor SPK Saya"
+        title="Transkrip Nilai Saya"
         badge="Portal Siswa"
-        description="Rincian nilai per mata pelajaran, komponen Tugas/UTS/UAS, dan akumulasi skor evaluasi SPK SAW"
+        description="Rincian nilai mata pelajaran, komponen Tugas, UTS, UAS, dan skor prestasi semester"
         icon={ClipboardList}
       />
 
-      {/* Score Summary Banner - Fokus pada Skor SPK & Progres Kelengkapan Mapel */}
+      {/* Score Summary Banner - Fokus pada Skor Prestasi & Progres Kelengkapan Mapel */}
       <div className="rounded-2xl bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] p-5 sm:p-6 border border-slate-800 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
@@ -383,20 +383,20 @@ export default function SiswaNilaiPage() {
                 }`}
               >
                 <CheckCircle2 className="h-3 w-3" />
-                {completenessStats.lengkap}/{completenessStats.total} Mapel
+                {completenessStats.lengkap} dari {completenessStats.total} Mapel
                 Lengkap
               </span>
             )}
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
-              {data.criteria.length} Kriteria SPK
+              {data.criteria.length} Aspek Penilaian
             </span>
           </div>
           <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
-            Akumulasi Evaluasi Multi-Kriteria (SAW)
+            Ringkasan Skor Prestasi
           </h2>
           <p className="text-xs text-slate-400">
-            Nilai akhir diperoleh dari penjumlahan skor terbobot seluruh
-            kriteria akademik & kehadiran
+            Skor prestasi diperoleh dari gabungan seluruh aspek penilaian
+            akademik dan kehadiran
           </p>
         </div>
 
@@ -418,7 +418,7 @@ export default function SiswaNilaiPage() {
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Total Skor SPK SAW
+                Total Skor Prestasi
               </p>
               <div className="flex items-baseline gap-1.5">
                 <p className="text-2xl font-bold tabular-nums text-white">
@@ -488,8 +488,8 @@ export default function SiswaNilaiPage() {
             Mode Tampilan Transkrip Evaluasi
           </h3>
           <p className="text-xs text-slate-500">
-            Pilih tampilan berdasarkan rincian per mata pelajaran atau per
-            kriteria SPK SAW
+            Pilih tampilan berdasarkan rincian per mata pelajaran atau per aspek
+            penilaian
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
@@ -502,7 +502,7 @@ export default function SiswaNilaiPage() {
                 <GraduationCap className="h-3.5 w-3.5" /> Rincian Per Mapel ({subjectsList.length})
               </TabsTrigger>
               <TabsTrigger value="kriteria" className="gap-1.5 cursor-pointer">
-                <Layers className="h-3.5 w-3.5" /> Evaluasi SPK SAW ({data.criteria.length})
+                <Layers className="h-3.5 w-3.5" /> Aspek Penilaian ({data.criteria.length})
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -836,9 +836,9 @@ export default function SiswaNilaiPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="6">6 Mapel / Hal</SelectItem>
-                      <SelectItem value="10">10 Mapel / Hal</SelectItem>
-                      <SelectItem value="15">15 Mapel / Hal</SelectItem>
+                      <SelectItem value="6">6 Mapel per Hal</SelectItem>
+                      <SelectItem value="10">10 Mapel per Hal</SelectItem>
+                      <SelectItem value="15">15 Mapel per Hal</SelectItem>
                       <SelectItem value="50">Semua Mapel</SelectItem>
                     </SelectContent>
                   </Select>
@@ -1188,12 +1188,12 @@ export default function SiswaNilaiPage() {
                 ) : (
                   <div className="flex items-center gap-2 text-xs">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-slate-600 shadow-2xs">
-                      <span>Skor Evaluasi SPK:</span>
+                      <span>Skor Prestasi:</span>
                       <strong className="font-mono text-slate-900">
                         {data.totalSkorSPK}
                       </strong>
                       <span className="text-slate-400 font-mono text-[11px]">
-                        / 100
+                        dari 100
                       </span>
                     </span>
                   </div>
@@ -1255,17 +1255,13 @@ export default function SiswaNilaiPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
-                          Skor Terbobot SAW
+                          Kontribusi Nilai
                         </p>
                         <p className="text-base font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
                           {c.nilaiTerbobot}
                         </p>
                         <p className="text-xs tabular-nums text-slate-400 group-hover:text-slate-500 transition-colors">
-                          (R:{" "}
-                          {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(
-                            4
-                          )}{" "}
-                          × {c.bobot}%)
+                          Bobot {c.bobot}%
                         </p>
                       </div>
                     </div>
@@ -1341,28 +1337,25 @@ export default function SiswaNilaiPage() {
             <div className="pb-3 border-b border-slate-100">
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-blue-600" />
-                Ringkasan Perhitungan Skor SPK SAW
+                Rincian Skor Prestasi Semester
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Rumus SAW: Skor Akhir = Σ (Normalisasi R_ij × Bobot%), di mana
-                R_ij = Nilai Rata-Rata / Nilai Maksimum Global
+                Skor prestasi dihitung otomatis dari gabungan seluruh aspek
+                penilaian sesuai bobot yang ditetapkan sekolah.
               </p>
             </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-6">Kriteria Evaluasi</TableHead>
+                    <TableHead className="pl-6">Aspek Penilaian</TableHead>
                     <TableHead className="text-center">Tipe Input</TableHead>
                     <TableHead className="text-center">Bobot</TableHead>
                     <TableHead className="text-center">
                       Nilai Rata-Rata
                     </TableHead>
-                    <TableHead className="text-center">
-                      Normalisasi (R)
-                    </TableHead>
                     <TableHead className="text-right pr-6">
-                      Skor Terbobot
+                      Kontribusi Nilai
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1396,11 +1389,6 @@ export default function SiswaNilaiPage() {
                       >
                         {c.nilaiRataRata}
                       </TableCell>
-                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
-                        {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(
-                          4
-                        )}
-                      </TableCell>
                       <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
                         {c.nilaiTerbobot}
                       </TableCell>
@@ -1408,10 +1396,10 @@ export default function SiswaNilaiPage() {
                   ))}
                   <TableRow className="group/row bg-slate-50/90 hover:bg-[#091524] border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
                     <TableCell
-                      colSpan={5}
+                      colSpan={4}
                       className="pl-6 font-bold text-slate-900 group-hover/row:text-white transition-colors"
                     >
-                      Total Akumulasi Skor SPK SAW
+                      Total Skor Prestasi
                     </TableCell>
                     <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 group-hover/row:text-amber-300 transition-colors">
                       {data.totalSkorSPK}

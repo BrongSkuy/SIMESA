@@ -208,7 +208,7 @@ export function StudentCounselingView() {
                       </div>
                       <p className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">{disp.keperluan}</p>
                       <p className="text-slate-500 group-hover/row:text-slate-400 transition-colors">
-                        {formatTanggalIndonesia(disp.tanggal)} • {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
+                        {formatTanggalIndonesia(disp.tanggal)}, {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                       </p>
                       {disp.keterangan && (
                         <p className="text-slate-500 group-hover/row:text-slate-400 italic text-[11px] transition-colors">{disp.keterangan}</p>
@@ -365,7 +365,7 @@ export function StudentCounselingView() {
                         </Badge>
                       </div>
                       <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] transition-colors">
-                        {formatTanggalIndonesia(item.tanggal)} • Pukul {item.waktuMulai} - {item.waktuSelesai}
+                        {formatTanggalIndonesia(item.tanggal)}, Pukul {item.waktuMulai} - {item.waktuSelesai}
                       </p>
                       <p className="text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 line-clamp-2 transition-colors">{item.pokokMasalah}</p>
                       {item.tindakLanjut && (

@@ -260,7 +260,7 @@ export function QuickCounselingModal({
               <SelectContent className="max-h-56">
                 {studentsList.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.namaLengkap} • NIS {s.nis} • Kelas {s.kelas}
+                    {s.namaLengkap} (NIS {s.nis}, Kelas {s.kelas})
                   </SelectItem>
                 ))}
               </SelectContent>

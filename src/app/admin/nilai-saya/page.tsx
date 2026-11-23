@@ -939,9 +939,9 @@ export default function AdminNilaiSayaPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="6">6 Mapel / Hal</SelectItem>
-                          <SelectItem value="10">10 Mapel / Hal</SelectItem>
-                          <SelectItem value="15">15 Mapel / Hal</SelectItem>
+                          <SelectItem value="6">6 Mapel per Hal</SelectItem>
+                          <SelectItem value="10">10 Mapel per Hal</SelectItem>
+                          <SelectItem value="15">15 Mapel per Hal</SelectItem>
                           <SelectItem value="50">Semua Mapel</SelectItem>
                         </SelectContent>
                       </Select>

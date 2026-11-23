@@ -2,16 +2,21 @@
 
 import React from "react";
 import Image from "next/image";
-import { Printer, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Printer, FileSpreadsheet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StudentReportCardData } from "@/lib/erapor";
 
 interface ReportCardPrintViewProps {
   data: StudentReportCardData;
   onBack?: () => void;
+  inModal?: boolean;
 }
 
-export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) {
+export function ReportCardPrintView({
+  data,
+  onBack,
+  inModal = false,
+}: ReportCardPrintViewProps) {
   const handlePrint = () => {
     // Siapkan dokumen HTML mandiri dalam iframe terisolasi agar presisi A4 tanpa header dan footer browser
     const printFrame = document.createElement("iframe");
@@ -208,8 +213,8 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
             <div class="kop-text">
               <h4>Yayasan Kemajuan Dirgantara</h4>
               <h1>${data.sekolah.nama}</h1>
-              <p>Akreditasi "A" (Unggul) • NPSN: ${data.sekolah.npsn}</p>
-              <p>Jl. Marsekal Suryadarma No. 12, Kompleks Bandara, Tangerang • Telp: (021) 5567-8901 • Email: info@smkpenerbangan.sch.id</p>
+              <p>Akreditasi "A" (Unggul) | NPSN: ${data.sekolah.npsn}</p>
+              <p>Jl. Marsekal Suryadarma No. 12, Kompleks Bandara, Tangerang | Telp: (021) 5567-8901 | Email: info@smkpenerbangan.sch.id</p>
             </div>
           </div>
 
@@ -401,7 +406,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
           </div>
 
           <div class="footer-internal">
-            <span>SIMESA — Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
+            <span>SIMESA - Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
             <span>Status Rapor: <strong>${data.statusRapor}</strong></span>
             <span>Dicetak otomatis pada: ${new Date().toLocaleDateString("id-ID")}</span>
           </div>
@@ -426,36 +431,68 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-6">
-      {/* Tombol Aksi di Luar Print Area */}
-      <div className="print:hidden flex items-center justify-between gap-4 p-4 mb-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <Button variant="outline" size="sm" onClick={onBack} className="gap-1.5 text-xs">
-              <ArrowLeft className="w-4 h-4" />
-              Kembali
-            </Button>
-          )}
-          <div>
-            <h3 className="font-semibold text-slate-900 text-sm">
-              Pratinjau E-Rapor Internal
+    <div className={inModal ? "w-full" : "w-full max-w-4xl mx-auto my-6"}>
+      {/* Toolbar Pratinjau Cetak Seragam */}
+      <div
+        className={
+          inModal
+            ? "print:hidden p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3"
+            : "print:hidden flex items-center justify-between gap-4 p-4 mb-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs"
+        }
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+            <FileSpreadsheet className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base truncate">
+              Pratinjau E-Rapor Internal ({data.student.namaLengkap})
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Dokumen hasil belajar siswa siap cetak format A4 standar resmi sekolah
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button onClick={handlePrint} size="sm" className="gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white">
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            onClick={handlePrint}
+            size="sm"
+            className="gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
+          >
             <Printer className="w-4 h-4" />
-            Cetak Dokumen (A4)
+            <span>Cetak Dokumen (A4)</span>
           </Button>
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onBack}
+              aria-label="Tutup pratinjau"
+              title="Tutup"
+              className="rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Lembar Dokumen Rapor (A4 Print-Ready) */}
-      <div className="bg-white text-zinc-900 border border-zinc-200 shadow-lg print:shadow-none print:border-none p-8 md:p-12 rounded-lg font-sans text-sm leading-normal">
+      <div
+        className={
+          inModal
+            ? "p-4 sm:p-6 max-h-[82vh] overflow-y-auto flex justify-center bg-slate-200/70 dark:bg-slate-950"
+            : ""
+        }
+      >
+      <div
+        className={
+          inModal
+            ? "w-full max-w-[210mm] bg-white text-zinc-900 border border-slate-300 shadow-xl print:shadow-none print:border-none p-8 md:p-12 rounded-sm font-sans text-sm leading-normal"
+            : "bg-white text-zinc-900 border border-zinc-200 shadow-lg print:shadow-none print:border-none p-8 md:p-12 rounded-lg font-sans text-sm leading-normal"
+        }
+      >
         {/* KOP SURAT RESMI */}
         <div className="border-b-4 border-double border-zinc-900 pb-4 mb-6">
           <div className="flex items-center justify-between gap-4">
@@ -476,10 +513,10 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                 {data.sekolah.nama}
               </h1>
               <p className="text-xs font-medium text-zinc-600 mt-0.5">
-                Akreditasi &quot;A&quot; (Unggul) • NPSN: {data.sekolah.npsn}
+                Akreditasi &quot;A&quot; (Unggul) | NPSN: {data.sekolah.npsn}
               </p>
               <p className="text-[11px] text-zinc-500 mt-1">
-                {data.sekolah.alamat} • Telp: {data.sekolah.telepon} • Email: {data.sekolah.email}
+                {data.sekolah.alamat} | Telp: {data.sekolah.telepon} | Email: {data.sekolah.email}
               </p>
             </div>
             <div className="w-20 h-20 flex-shrink-0 opacity-0 print:hidden" />
@@ -597,7 +634,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               <tfoot>
                 <tr className="bg-zinc-50 font-semibold text-zinc-900">
                   <td colSpan={3} className="border border-zinc-400 px-3 py-2 text-right">
-                    Total Nilai / Rata-rata Rapor:
+                    Total Nilai dan Rata-rata Rapor:
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-bold text-zinc-950">
                     {data.rekapNilai.rataRata > 0 ? data.rekapNilai.rataRata.toFixed(2) : "-"}
@@ -679,7 +716,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-zinc-400 px-3 py-1.5">Tanpa Keterangan / Alfa (A)</td>
+                  <td className="border border-zinc-400 px-3 py-1.5">Tanpa Keterangan atau Alfa (A)</td>
                   <td className="border border-zinc-400 px-3 py-1.5 text-center font-medium">
                     {data.presensi.alfa} hari
                   </td>
@@ -706,11 +743,11 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center text-xs">
-            {/* Orang Tua / Wali */}
+            {/* Orang Tua atau Wali */}
             <div className="flex flex-col justify-between h-28">
               <div>
                 <p className="font-medium text-zinc-700">Mengetahui,</p>
-                <p className="font-semibold text-zinc-900">Orang Tua / Wali Murid</p>
+                <p className="font-semibold text-zinc-900">Orang Tua atau Wali Murid</p>
               </div>
               <div className="border-b border-zinc-900 w-36 mx-auto" />
             </div>
@@ -747,10 +784,11 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
 
         {/* FOOTER RESMI DOKUMEN INTERNAL */}
         <div className="mt-8 pt-3 border-t border-zinc-300 flex items-center justify-between text-[10px] text-zinc-400">
-          <span>SIMESA — Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
+          <span>SIMESA - Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
           <span>Status Rapor: <strong className="text-zinc-600">{data.statusRapor}</strong></span>
           <span>Dicetak otomatis pada: {new Date().toLocaleDateString("id-ID")}</span>
         </div>
+      </div>
       </div>
     </div>
   );

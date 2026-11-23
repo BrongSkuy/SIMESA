@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { StatCard } from "@/components/shared/stat-card";
+import { HeaderBackdrop } from "@/components/shared/header-backdrop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -332,6 +333,7 @@ export function ActivityLogView() {
     <div className="space-y-6">
       {/* 1. Header Cockpit Banner Menyatu - Persis Beranda & Konseling BK */}
       <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
+        <HeaderBackdrop />
         {/* Ambient Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
 
@@ -792,18 +794,6 @@ export function ActivityLogView() {
               </div>
             </div>
           )}
-
-          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedLog(null)}
-              className="rounded-xl text-xs"
-            >
-              Tutup
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 

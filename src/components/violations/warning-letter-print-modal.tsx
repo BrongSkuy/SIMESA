@@ -216,8 +216,8 @@ export function WarningLetterPrintModal({
             <div class="kop-text">
               <h3>Yayasan Pendidikan Kedirgantaraan Nusantara</h3>
               <h2>SMK Penerbangan Dirgantara</h2>
-              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara, Tangerang • Telp. (021) 876-5432</p>
-              <p>Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A</p>
+              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara, Tangerang | Telp. (021) 876-5432</p>
+              <p>Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A</p>
             </div>
           </div>
 
@@ -355,25 +355,28 @@ export function WarningLetterPrintModal({
   const getSanksiText = (level: number) => {
     switch (level) {
       case 1:
-        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua / Wali Siswa ke sekolah untuk pembinaan terpadu.";
+        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua atau Wali Siswa ke sekolah untuk pembinaan terpadu.";
       case 2:
-        return "Peringatan tertulis kedua (SP II), skorsing akademik selama 3 (tiga) hari kerja, serta penandatanganan pakta integritas kedisiplinan bermaterai bersama Orang Tua / Wali.";
+        return "Peringatan tertulis kedua (SP II), skorsing akademik selama 3 (tiga) hari kerja, serta penandatanganan pakta integritas kedisiplinan bermaterai bersama Orang Tua atau Wali.";
       case 3:
       default:
-        return "Peringatan tertulis ketiga (SP III / Terakhir), pelaksanaan Konferensi Kasus Dewan Guru, serta evaluasi pengembalian siswa kepada Orang Tua / Wali.";
+        return "Peringatan tertulis ketiga (SP III atau Terakhir), pelaksanaan Konferensi Kasus Dewan Guru, serta evaluasi pengembalian siswa kepada Orang Tua atau Wali.";
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 print:hidden">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400">
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-4xl gap-0 p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+      >
+        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between gap-3 space-y-0 print:hidden">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 shrink-0">
               <ShieldAlert className="w-5 h-5" />
             </div>
-            <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white truncate">
                 Pratinjau Surat Peringatan {letterData.tingkatSp} (SP {tingkatRomawi})
               </DialogTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -381,22 +384,24 @@ export function WarningLetterPrintModal({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-sm font-semibold"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak Dokumen Resmi</span>
+              <span>Cetak Dokumen (A4)</span>
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onOpenChange(false)}
+              aria-label="Tutup pratinjau"
+              title="Tutup"
+              className="rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-4 h-4" />
-              <span>Tutup</span>
             </Button>
           </div>
         </DialogHeader>
@@ -427,10 +432,10 @@ export function WarningLetterPrintModal({
                     SMK Penerbangan Dirgantara
                   </h1>
                   <p className="text-[11px] text-slate-600 font-sans mt-0.5">
-                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara • Telp. (021) 876-5432
+                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara | Telp. (021) 876-5432
                   </p>
                   <p className="text-[10px] text-slate-500 font-sans">
-                    Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A
+                    Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A
                   </p>
                 </div>
               </div>
@@ -516,7 +521,7 @@ export function WarningLetterPrintModal({
 
             <p className="mb-6 text-justify">
               Demikian Surat Peringatan ini dibuat agar menjadi perhatian sungguh-sungguh bagi siswa
-              yang bersangkutan serta pihak Orang Tua / Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
+              yang bersangkutan serta pihak Orang Tua atau Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
             </p>
 
             {/* TANDA TANGAN */}

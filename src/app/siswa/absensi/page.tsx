@@ -223,7 +223,7 @@ export default function SiswaAbsensiPage() {
         dayRecords.length > 0
           ? dayRecords
               .map((r) => `${r.mapel || "Umum"}: ${r.status || "-"}`)
-              .join(" • ")
+              .join(", ")
           : undefined;
 
       days.push({
@@ -511,7 +511,7 @@ export default function SiswaAbsensiPage() {
               <div>
                 <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <List className="h-4 w-4 text-blue-600" />
-                  Log Presensi Terkini
+                  Riwayat Kehadiran Terkini
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-500">
                   {selectedDate

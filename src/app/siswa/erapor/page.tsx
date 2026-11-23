@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FileSpreadsheet,
-  Printer,
   FileText,
   Loader2,
   CheckCircle2,
@@ -118,15 +117,6 @@ export default function SiswaEraporPage() {
               <FileText className="h-3.5 w-3.5 text-slate-400" /> Transkrip Nilai
             </Button>
           </Link>
-
-          <Button
-            onClick={() => window.print()}
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs"
-          >
-            <Printer className="h-3.5 w-3.5 text-slate-400" /> Cetak Rapor (A4)
-          </Button>
         </PageHeader>
       </div>
 

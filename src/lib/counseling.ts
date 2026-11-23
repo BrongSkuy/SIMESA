@@ -3,7 +3,7 @@
  *
  * PENTING: Sesuai standar UI/UX SIMESA, seluruh teks tampilan, label,
  * dan konstanta di modul ini TIDAK MENGGUNAKAN SIMBOL GARIS MIRING ('/').
- * Sebagai gantinya, digunakan kata hubung alami seperti 'dan', 'atau', '-', atau '•'.
+ * Sebagai gantinya, digunakan kata hubung alami seperti 'dan', 'atau', '-', atau '|'.
  */
 
 export const COUNSELING_CATEGORIES = [
