@@ -42,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { UserRole } from "@/lib/mock-data";
-import { authClient } from "@/lib/auth-client";
+import { authClient, setSigningOut } from "@/lib/auth-client";
 import { ROLE_CONFIGS, type AppRole, getPortalForRole } from "@/lib/rbac";
 
 export interface TopbarUser {
@@ -255,6 +255,53 @@ export const GURU_NAV_ITEMS = [
   { label: "Leaderboard", href: "/guru/leaderboard", icon: Trophy },
 ];
 
+export const SISWA_DROPDOWN_GROUPS: NavDropdownGroup[] = [
+  {
+    label: "Akademik",
+    sectionTitle: "Pembelajaran dan Nilai",
+    icon: GraduationCap,
+    items: [
+      {
+        label: "Riwayat Absensi",
+        description: "Rekap kehadiran dan status presensi harian",
+        href: "/siswa/absensi",
+        icon: CalendarCheck,
+      },
+      {
+        label: "Nilai Saya",
+        description: "Daftar nilai tugas, UTS, dan UAS tiap mata pelajaran",
+        href: "/siswa/nilai",
+        icon: FileText,
+      },
+      {
+        label: "E-Rapor",
+        description: "Ringkasan capaian rapor dan cetak hasil belajar",
+        href: "/siswa/erapor",
+        icon: FileSpreadsheet,
+      },
+    ],
+  },
+  {
+    label: "Kesiswaan",
+    sectionTitle: "Kedisiplinan dan Pendampingan",
+    icon: HeartHandshake,
+    items: [
+      {
+        label: "Buku Poin",
+        description: "Akumulasi poin tata tertib dan riwayat pembinaan",
+        href: "/siswa/pelanggaran",
+        icon: ShieldAlert,
+      },
+      {
+        label: "Konseling BK",
+        description: "Jadwal bimbingan konseling dan izin dispensasi",
+        href: "/siswa/konseling",
+        icon: HeartHandshake,
+      },
+    ],
+  },
+];
+
 export const SISWA_NAV_ITEMS = [
   { label: "Beranda", href: "/siswa", icon: LayoutDashboard },
   { label: "Riwayat Absensi", href: "/siswa/absensi", icon: CalendarCheck },
@@ -356,15 +403,17 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
+    setSigningOut(true);
     toast.loading("Mengakhiri sesi...", { id: "logout-toast" });
     try {
       await authClient.signOut();
       toast.success("Berhasil keluar dari sistem", { id: "logout-toast" });
-      router.push("/login");
+      // Gunakan navigasi penuh agar seluruh cache sesi dan RSC stream dibersihkan tuntas
+      window.location.replace("/login");
     } catch {
-      toast.error("Gagal keluar", { id: "logout-toast" });
-    } finally {
+      setSigningOut(false);
       setIsLoggingOut(false);
+      toast.error("Gagal keluar", { id: "logout-toast" });
     }
   };
 
@@ -529,25 +578,35 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 </Link>
               </>
             ) : (
-              SISWA_NAV_ITEMS.map((item) => {
-                const ItemIcon = item.icon;
-                const active = isRouteActive(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
-                      active
-                        ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                        : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
-                    )}
-                  >
-                    <ItemIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", active ? "text-amber-300" : "text-blue-200")} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })
+              <>
+                <Link
+                  href="/siswa"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    pathname === "/siswa"
+                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                  )}
+                >
+                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa" ? "text-amber-300" : "text-blue-200")} />
+                  Beranda
+                </Link>
+
+                {SISWA_DROPDOWN_GROUPS.map(renderDropdownGroup)}
+
+                <Link
+                  href="/siswa/leaderboard"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    pathname === "/siswa/leaderboard"
+                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
+                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                  )}
+                >
+                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  Leaderboard
+                </Link>
+              </>
             )}
           </nav>
 

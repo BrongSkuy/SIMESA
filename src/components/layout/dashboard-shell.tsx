@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar, type TopbarUser } from "@/components/layout/topbar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { authClient, isSigningOut } from "@/lib/auth-client";
 import type { UserRole } from "@/lib/mock-data";
 import { getPortalForRole } from "@/lib/rbac";
 
@@ -19,21 +19,24 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
+  const redirectingRef = useRef(false);
 
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (!isPending) {
-      if (!session) {
-        router.push("/login");
-      } else {
-        const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-        if (userRole) {
-          const userPortal = getPortalForRole(userRole);
-          const expectedPortal = getPortalForRole(role);
-          if (userPortal !== expectedPortal) {
-            router.push(userPortal);
-          }
+    if (isPending || isSigningOut() || redirectingRef.current) return;
+
+    if (!session) {
+      redirectingRef.current = true;
+      router.replace("/login");
+    } else {
+      const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+      if (userRole) {
+        const userPortal = getPortalForRole(userRole);
+        const expectedPortal = getPortalForRole(role);
+        if (userPortal !== expectedPortal) {
+          redirectingRef.current = true;
+          router.replace(userPortal);
         }
       }
     }
@@ -50,7 +53,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     image: session?.user?.image || null,
   };
 
-  if (isPending) {
+  if (isPending || isSigningOut()) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">
@@ -66,7 +69,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           </div>
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a8a]" />
           <p className="text-xs font-medium text-slate-500">
-            Memuat ruang kerja SIMESA...
+            {isSigningOut() ? "Mengakhiri sesi SIMESA..." : "Memuat ruang kerja SIMESA..."}
           </p>
         </div>
       </div>

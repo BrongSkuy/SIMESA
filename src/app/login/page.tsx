@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -42,12 +42,14 @@ export default function LoginPage() {
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const redirectedRef = useRef(false);
 
   // Redirect automatically if user already has an active session
   useEffect(() => {
-    if (!sessionLoading && session) {
+    if (!sessionLoading && session && !redirectedRef.current) {
+      redirectedRef.current = true;
       const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-      router.push(getPortalForRole(appRole || "SISWA"));
+      router.replace(getPortalForRole(appRole || "SISWA"));
     }
   }, [sessionLoading, session, router]);
 

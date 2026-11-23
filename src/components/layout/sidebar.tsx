@@ -11,8 +11,7 @@ import { getPortalForRole, ROLE_CONFIGS, type AppRole } from "@/lib/rbac";
 import {
   ADMIN_DROPDOWN_GROUPS,
   GURU_DROPDOWN_GROUPS,
-  GURU_NAV_ITEMS,
-  SISWA_NAV_ITEMS,
+  SISWA_DROPDOWN_GROUPS,
 } from "@/components/layout/topbar";
 
 interface SidebarProps {
@@ -182,31 +181,70 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
               </div>
             </>
           ) : (
-            <div className="space-y-1">
-              {SISWA_NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const active = isRouteActive(item.href);
+            <>
+              <div>
+                <Link
+                  href="/siswa"
+                  onClick={onToggle}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
+                    pathname === "/siswa"
+                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                  )}
+                >
+                  <LayoutDashboard className={cn("w-4 h-4", pathname === "/siswa" ? "text-amber-300" : "text-blue-200")} />
+                  Beranda
+                </Link>
+              </div>
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onToggle}
-                    className={cn(
-                      "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
-                      active
-                        ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                        : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
-                      <span>{item.label}</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+              {SISWA_DROPDOWN_GROUPS.map((group) => (
+                <div key={group.label} className="space-y-1">
+                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-blue-200/70">
+                    {group.label}
+                  </div>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isRouteActive(item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={onToggle}
+                        className={cn(
+                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
+                          active
+                            ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                            : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
+                          <span>{item.label}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
+
+              <div>
+                <Link
+                  href="/siswa/leaderboard"
+                  onClick={onToggle}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
+                    pathname === "/siswa/leaderboard"
+                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                  )}
+                >
+                  <Trophy className={cn("w-4 h-4", pathname === "/siswa/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  Leaderboard
+                </Link>
+              </div>
+            </>
           )}
         </nav>
       </ScrollArea>

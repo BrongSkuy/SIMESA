@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { eq, desc, and, like, or } from "drizzle-orm";
 import { getClassDisciplineSummary } from "@/lib/violations-server";
 import { logActivity } from "@/lib/audit-server";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/violations — List violations with filters or class summary
 export async function GET(req: NextRequest) {
@@ -114,6 +115,11 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await req.json();
     const { studentId, violationTypeId, tanggal, poin, lokasi, keterangan, reportedByCustom } = body;
@@ -132,7 +138,7 @@ export async function POST(req: NextRequest) {
       .where(eq(violationTypes.id, violationTypeId))
       .limit(1);
 
-    if (!vType) {
+    if (!vType || !vType.isActive) {
       return NextResponse.json(
         { error: "Jenis pelanggaran tidak valid" },
         { status: 404 }

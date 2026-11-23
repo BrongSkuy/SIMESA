@@ -20,6 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AlertCircle, Plus, Loader2 } from "lucide-react";
+import { sanitizePoinInput } from "@/lib/violations";
+
+function getLocalIsoDate(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 interface StudentOption {
   id: string;
@@ -39,7 +48,7 @@ interface ViolationTypeOption {
 interface QuickViolationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (recordedStudentId?: string) => void;
   studentsList: StudentOption[];
   typesList: ViolationTypeOption[];
   defaultStudentId?: string;
@@ -55,25 +64,27 @@ export function QuickViolationModal({
 }: QuickViolationModalProps) {
   const [selectedStudentId, setSelectedStudentId] = useState(defaultStudentId || "");
   const [selectedTypeId, setSelectedTypeId] = useState("");
-  const [poin, setPoin] = useState<number>(10);
-  const [tanggal, setTanggal] = useState(new Date().toISOString().split("T")[0]);
+  const [poinInput, setPoinInput] = useState<string>("10");
+  const [tanggal, setTanggal] = useState(getLocalIsoDate);
   const [lokasi, setLokasi] = useState("Area Sekolah");
   const [keterangan, setKeterangan] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (defaultStudentId) {
-      setSelectedStudentId(defaultStudentId);
+    if (open) {
+      setSelectedStudentId(defaultStudentId || "");
+      setTanggal(getLocalIsoDate());
+      setError(null);
     }
-  }, [defaultStudentId]);
+  }, [open, defaultStudentId]);
 
   // Saat jenis pelanggaran dipilih, otomatis isi poin default
   const handleTypeChange = (typeId: string) => {
     setSelectedTypeId(typeId);
     const found = typesList.find((t) => t.id === typeId);
     if (found) {
-      setPoin(found.poinDefault);
+      setPoinInput(String(found.poinDefault));
     }
   };
 
@@ -81,6 +92,12 @@ export function QuickViolationModal({
     e.preventDefault();
     if (!selectedStudentId || !selectedTypeId) {
       setError("Pilih siswa dan jenis pelanggaran");
+      return;
+    }
+
+    const parsedPoin = Number(poinInput);
+    if (!poinInput.trim() || !Number.isInteger(parsedPoin) || parsedPoin < 1 || parsedPoin > 100) {
+      setError("Bobot poin harus berupa bilangan bulat antara 1 sampai 100");
       return;
     }
 
@@ -95,7 +112,7 @@ export function QuickViolationModal({
           studentId: selectedStudentId,
           violationTypeId: selectedTypeId,
           tanggal,
-          poin: Number(poin),
+          poin: parsedPoin,
           lokasi,
           keterangan,
         }),
@@ -107,10 +124,11 @@ export function QuickViolationModal({
       }
 
       // Reset form
+      const recordedId = selectedStudentId;
       setKeterangan("");
       setSelectedTypeId("");
       onOpenChange(false);
-      onSuccess();
+      onSuccess(recordedId);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan");
     } finally {
@@ -154,7 +172,15 @@ export function QuickViolationModal({
               onValueChange={(val) => setSelectedStudentId(val || "")}
             >
               <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                <SelectValue placeholder="-- Pilih Siswa --" />
+                <SelectValue placeholder="Pilih siswa...">
+                  {(val) => {
+                    if (!val) return "Pilih siswa...";
+                    const student = studentsList.find((s) => s.id === val);
+                    return student
+                      ? `[${student.kelas}] ${student.namaLengkap} (${student.nis})`
+                      : "Pilih siswa...";
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {studentsList.map((s) => (
@@ -176,7 +202,15 @@ export function QuickViolationModal({
               onValueChange={(val) => handleTypeChange(val || "")}
             >
               <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                <SelectValue placeholder="-- Pilih Aturan Pelanggaran --" />
+                <SelectValue placeholder="Pilih aturan pelanggaran...">
+                  {(val) => {
+                    if (!val) return "Pilih aturan pelanggaran...";
+                    const item = typesList.find((t) => t.id === val);
+                    return item
+                      ? `[${item.kategori}] ${item.kode} - ${item.namaPelanggaran} (+${item.poinDefault} Poin)`
+                      : "Pilih aturan pelanggaran...";
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {typesList.map((t) => (
@@ -195,12 +229,12 @@ export function QuickViolationModal({
                 Bobot Poin
               </Label>
               <Input
-                type="number"
-                min="1"
-                max="100"
-                value={poin}
-                onChange={(e) => setPoin(Number(e.target.value))}
-                className="text-xs font-bold text-red-600 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                type="text"
+                inputMode="numeric"
+                placeholder="1 sampai 100"
+                value={poinInput}
+                onChange={(e) => setPoinInput(sanitizePoinInput(e.target.value))}
+                className="text-xs font-mono font-bold text-red-600 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               />
             </div>
 
@@ -234,7 +268,7 @@ export function QuickViolationModal({
           {/* Kronologi Singkat */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Keterangan / Kronologi Singkat
+              Keterangan dan Kronologi Singkat
             </Label>
             <Textarea
               rows={2}
@@ -252,6 +286,7 @@ export function QuickViolationModal({
               size="sm"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="cursor-pointer"
             >
               Batal
             </Button>
@@ -259,7 +294,7 @@ export function QuickViolationModal({
               type="submit"
               size="sm"
               disabled={loading}
-              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5"
+              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 cursor-pointer"
             >
               {loading ? (
                 <>
