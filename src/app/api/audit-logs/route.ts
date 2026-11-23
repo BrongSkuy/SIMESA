@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || undefined;
-    const module = searchParams.get("module") || undefined;
+    const moduleFilter = searchParams.get("module") || undefined;
     const action = searchParams.get("action") || undefined;
     const userRole = searchParams.get("userRole") || undefined;
     const startDate = searchParams.get("startDate") || undefined;
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
     const result = await getActivityLogs({
       search,
-      module,
+      module: moduleFilter,
       action,
       userRole,
       startDate,
@@ -69,16 +69,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { action, module, targetId, targetName, description, details } = body;
+    const { action, module: auditModule, targetId, targetName, description, details } = body;
 
-    if (!action || !module || !description) {
+    if (!action || !auditModule || !description) {
       return NextResponse.json(
         { error: "Parameter action, module, dan description wajib diisi" },
         { status: 400 }
       );
     }
 
-    if (!AUDIT_ACTIONS.includes(action) || !AUDIT_MODULES.includes(module)) {
+    if (!AUDIT_ACTIONS.includes(action) || !AUDIT_MODULES.includes(auditModule)) {
       return NextResponse.json(
         { error: "Nilai action atau module tidak valid" },
         { status: 400 }
@@ -92,13 +92,13 @@ export async function POST(req: NextRequest) {
       reqHeaders.get("x-real-ip") ||
       "127.0.0.1";
 
-    const user = session.user as any;
+    const user = session.user as { id: string; name?: string | null; role?: string | null; appRole?: string | null };
     const logged = await logActivity({
       userId: user.id,
       userName: user.name || "Pengguna",
-      userRole: user.role || "guru",
+      userRole: user.appRole || user.role || "guru",
       action,
-      module,
+      module: auditModule,
       targetId,
       targetName,
       description,
@@ -110,13 +110,13 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error in POST /api/audit-logs:", error);
     return NextResponse.json(
-      { error: "Gagal mencatat log aktivitas" },
+      { error: "Gagal mencatat riwayat aktivitas" },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/audit-logs?days=180 — Pembersihan (retensi) log aktivitas lama khusus SUPERADMIN
+// DELETE /api/audit-logs?days=180 - Pembersihan riwayat aktivitas lama khusus SUPERADMIN
 export async function DELETE(req: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -129,7 +129,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Akses ditolak. Hanya Superadmin yang berwenang membersihkan log aktivitas lama.",
+            "Akses ditolak. Hanya Superadmin yang berwenang membersihkan riwayat aktivitas lama.",
         },
         { status: 403 }
       );
@@ -139,7 +139,7 @@ export async function DELETE(req: NextRequest) {
     const days = parseInt(searchParams.get("days") || "180", 10);
     if (isNaN(days) || days < 30) {
       return NextResponse.json(
-        { error: "Minimal usia log yang dapat dibersihkan adalah 30 hari" },
+        { error: "Minimal usia riwayat yang dapat dibersihkan adalah 30 hari" },
         { status: 400 }
       );
     }
@@ -153,16 +153,18 @@ export async function DELETE(req: NextRequest) {
       reqHeaders.get("x-real-ip") ||
       "127.0.0.1";
 
-    // Catat aksi pembersihan ini sendiri ke audit trail
+    const sessionUser = session.user as { id: string; name?: string | null; role?: string | null; appRole?: string | null };
+
+    // Catat aksi pembersihan ini sendiri ke riwayat aktivitas
     await logActivity({
-      userId: session.user.id,
-      userName: session.user.name || "Super Administrator",
-      userRole: (session.user as any).role || (session.user as any).appRole || "superadmin",
+      userId: sessionUser.id,
+      userName: sessionUser.name || "Super Administrator",
+      userRole: sessionUser.appRole || sessionUser.role || "superadmin",
       action: "DELETE",
       module: "SISTEM",
       targetId: null,
-      targetName: "Catatan Riwayat Usang",
-      description: `Super Administrator membersihkan ${deletedCount} catatan aktivitas usang dengan batas retensi ${days} hari`,
+      targetName: "Catatan Riwayat Lama",
+      description: `Super Administrator membersihkan ${deletedCount} catatan riwayat aktivitas lama (lebih dari ${days} hari)`,
       details: {
         rentangHari: days,
         jumlahDihapus: deletedCount,
@@ -172,13 +174,13 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${deletedCount} catatan aktivitas lama berhasil dibersihkan.`,
+      message: `${deletedCount} catatan riwayat aktivitas lama berhasil dibersihkan.`,
       deletedCount,
     });
   } catch (error) {
     console.error("Error in DELETE /api/audit-logs:", error);
     return NextResponse.json(
-      { error: "Gagal membersihkan log aktivitas lama" },
+      { error: "Gagal membersihkan riwayat aktivitas lama" },
       { status: 500 }
     );
   }

@@ -183,7 +183,7 @@ export const ADMIN_DROPDOWN_GROUPS: NavDropdownGroup[] = [
       },
       {
         label: "Riwayat Aktivitas",
-        description: "Audit trail dan rekam jejak sistem",
+        description: "Catatan aktivitas pengguna dan sistem",
         href: "/admin/riwayat-aktivitas",
         icon: Activity,
       },

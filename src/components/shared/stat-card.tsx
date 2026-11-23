@@ -11,6 +11,7 @@ interface StatCardProps {
     isPositive: boolean;
   };
   badge?: React.ReactNode;
+  headerAction?: React.ReactNode;
   footerLeft?: React.ReactNode;
   footerRight?: React.ReactNode;
   color?: "navy" | "slate" | "amber" | "emerald" | "rose" | "blue";
@@ -43,6 +44,7 @@ export function StatCard({
   icon: Icon,
   trend,
   badge,
+  headerAction,
   footerLeft,
   footerRight,
   color = "slate",
@@ -66,17 +68,20 @@ export function StatCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p
-            className={cn(
-              "text-xs font-semibold uppercase tracking-wider truncate transition-colors",
-              isDark
-                ? "text-slate-400"
-                : "text-slate-500 group-hover:text-slate-400"
-            )}
-          >
-            {title}
-          </p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <p
+              className={cn(
+                "text-xs font-semibold uppercase tracking-wider truncate transition-colors",
+                isDark
+                  ? "text-slate-400"
+                  : "text-slate-500 group-hover:text-slate-400"
+              )}
+            >
+              {title}
+            </p>
+            {headerAction && <div className="shrink-0">{headerAction}</div>}
+          </div>
           <div className="flex flex-wrap items-baseline gap-2 mt-2">
             <h3
               className={cn(

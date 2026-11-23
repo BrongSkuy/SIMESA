@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -33,17 +32,17 @@ import {
   ShieldCheck,
   KeyRound,
   Search,
-  Filter,
   RotateCcw,
   Eye,
+  EyeOff,
+  Copy,
   FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  User,
-  Layers,
-  Sparkles,
   Info,
+  CircleAlert,
+  FileText,
+  Lock,
   Trash2,
   AlertTriangle,
   Download,
@@ -61,16 +60,16 @@ import {
   AuditSummaryStats,
   AUDIT_ACTIONS,
   AUDIT_MODULES,
+  AUDIT_KPI_CARD_INFO,
+  AuditKpiKey,
   MODULE_LABELS,
   ACTION_LABELS,
-  ROLE_LABELS,
   formatRoleLabel,
   formatAuditTimestamp,
   getInitials,
   getActionBadgeStyle,
   getModuleBadgeStyle,
-  AuditAction,
-  AuditModule,
+  buildActivityLogExportData,
 } from "@/lib/audit";
 
 export function ActivityLogView() {
@@ -93,27 +92,97 @@ export function ActivityLogView() {
   const [selectedAction, setSelectedAction] = useState<string>("all");
   const [selectedRole, setSelectedRole] = useState<string>("all");
 
-  // Detail Modal State
+  // Detail Modal State & Privasi IP
   const [selectedLog, setSelectedLog] = useState<ActivityLogItem | null>(null);
+  const [isIpRevealed, setIsIpRevealed] = useState(false);
 
-  // Superadmin Purge / Retensi Data State
+  // Popup Informasi Cakupan Kartu KPI
+  const [activeKpiInfoKey, setActiveKpiInfoKey] = useState<AuditKpiKey | null>(
+    null
+  );
+
+  // Superadmin Pembersihan Riwayat Lama State
   const { data: session } = authClient.useSession();
-  const rawRole = (((session?.user as any)?.appRole || "") as string).toUpperCase();
+  const rawRole = (
+    (session?.user as { appRole?: string } | undefined)?.appRole || ""
+  ).toUpperCase();
   const isSuperadmin = rawRole === "SUPERADMIN";
   const [purgeModalOpen, setPurgeModalOpen] = useState(false);
   const [purgeStep, setPurgeStep] = useState<1 | 2>(1);
   const [purgeDays, setPurgeDays] = useState("180");
   const [isPurging, setIsPurging] = useState(false);
-  const [isExportingCSV, setIsExportingCSV] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [isDownloadingExcel, setIsDownloadingExcel] = useState(false);
   const [hasDownloadedExcel, setHasDownloadedExcel] = useState(false);
   const [confirmWithoutDownload, setConfirmWithoutDownload] = useState(false);
+
+  const handleOpenLogDetail = (log: ActivityLogItem) => {
+    setIsIpRevealed(false);
+    setSelectedLog(log);
+  };
+
+  const handleCloseLogDetail = () => {
+    setIsIpRevealed(false);
+    setSelectedLog(null);
+  };
+
+  const handleCopyIp = async (ip: string) => {
+    try {
+      await navigator.clipboard.writeText(ip);
+      toast.success("Alamat IP berhasil disalin");
+    } catch {
+      toast.error("Gagal menyalin alamat IP");
+    }
+  };
 
   const openPurgeModal = () => {
     setPurgeStep(1);
     setHasDownloadedExcel(false);
     setConfirmWithoutDownload(false);
     setPurgeModalOpen(true);
+  };
+
+  const createAndDownloadExcel = (
+    data: ActivityLogItem[],
+    options: {
+      fileName: string;
+      filterSummary: string;
+      includeIpAddress: boolean;
+    }
+  ) => {
+    const dataset = buildActivityLogExportData(data, {
+      filterSummary: options.filterSummary,
+      includeIpAddress: options.includeIpAddress,
+      summary,
+    });
+
+    const wb = XLSX.utils.book_new();
+
+    const wsMain = XLSX.utils.aoa_to_sheet(dataset.mainSheetRows);
+    wsMain["!cols"] = dataset.mainColWidths;
+    wsMain["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: dataset.mainLastColIndex } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: dataset.mainLastColIndex } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: dataset.mainLastColIndex } },
+    ];
+    const lastColLetter = XLSX.utils.encode_col(dataset.mainLastColIndex);
+    const headerRowNum = dataset.mainHeaderRowIndex + 1;
+    const lastRowNum = dataset.mainSheetRows.length;
+    wsMain["!autofilter"] = {
+      ref: `A${headerRowNum}:${lastColLetter}${lastRowNum}`,
+    };
+    XLSX.utils.book_append_sheet(wb, wsMain, "Riwayat Aktivitas");
+
+    const wsSummary = XLSX.utils.aoa_to_sheet(dataset.summarySheetRows);
+    wsSummary["!cols"] = dataset.summaryColWidths;
+    wsSummary["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } },
+    ];
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan Statistik");
+
+    XLSX.writeFile(wb, options.fileName);
   };
 
   const handleDownloadExcel = async () => {
@@ -129,36 +198,12 @@ export function ActivityLogView() {
         return;
       }
 
-      const excelRows = data.map((item, idx) => ({
-        "No": idx + 1,
-        "Waktu Pencatatan": formatAuditTimestamp(item.createdAt),
-        "Nama Aktor": item.userName,
-        "Peran Pengguna": formatRoleLabel(item.userRole),
-        "Modul Sistem": MODULE_LABELS[item.module] || item.module,
-        "Jenis Aksi": ACTION_LABELS[item.action] || item.action,
-        "Target Objek": item.targetName || "-",
-        "Uraian Kegiatan": item.description,
-        "Alamat IP": item.ipAddress || "127.0.0.1",
-        "Snapshot Metadata": item.details || "-",
-      }));
-
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelRows);
-      ws["!cols"] = [
-        { wch: 6 },
-        { wch: 28 },
-        { wch: 26 },
-        { wch: 18 },
-        { wch: 24 },
-        { wch: 20 },
-        { wch: 25 },
-        { wch: 55 },
-        { wch: 16 },
-        { wch: 40 },
-      ];
-      XLSX.utils.book_append_sheet(wb, ws, "Riwayat Aktivitas");
       const dateStr = new Date().toISOString().split("T")[0];
-      XLSX.writeFile(wb, `Cadangan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`);
+      createAndDownloadExcel(data, {
+        fileName: `Cadangan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`,
+        filterSummary: "Seluruh Riwayat Sistem (Cadangan Penuh)",
+        includeIpAddress: true,
+      });
 
       setHasDownloadedExcel(true);
       toast.success("Berkas cadangan Excel (.xlsx) berhasil diunduh");
@@ -178,15 +223,17 @@ export function ActivityLogView() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || "Log aktivitas lama berhasil dibersihkan");
+        toast.success(
+          data.message || "Riwayat aktivitas lama berhasil dibersihkan"
+        );
         setPurgeModalOpen(false);
         fetchSummary();
         fetchLogs(1);
       } else {
-        toast.error(data.error || "Gagal membersihkan log lama");
+        toast.error(data.error || "Gagal membersihkan riwayat aktivitas lama");
       }
     } catch {
-      toast.error("Terjadi kesalahan saat membersihkan log lama");
+      toast.error("Terjadi kesalahan saat membersihkan riwayat aktivitas lama");
     } finally {
       setIsPurging(false);
     }
@@ -262,9 +309,9 @@ export function ActivityLogView() {
     setSelectedRole("all");
   };
 
-  // Export logs to CSV (mengunduh seluruh catatan yang sesuai filter)
-  const handleExportCSV = async () => {
-    setIsExportingCSV(true);
+  // Ekspor riwayat aktivitas sesuai filter aktif ke Microsoft Excel (.xlsx)
+  const handleExportExcel = async () => {
+    setIsExportingExcel(true);
     try {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
@@ -283,50 +330,74 @@ export function ActivityLogView() {
         return;
       }
 
-      const headers = [
-        "Waktu Pencatatan",
-        "Nama Aktor",
-        "Peran Pengguna",
-        "Modul Sistem",
-        "Jenis Aksi",
-        "Target Objek",
-        "Uraian Kegiatan",
-        "Alamat IP",
-      ];
+      const activeFilterParts: string[] = [];
+      if (selectedModule !== "all") {
+        activeFilterParts.push(
+          `Modul ${MODULE_LABELS[selectedModule as keyof typeof MODULE_LABELS] || selectedModule}`
+        );
+      }
+      if (selectedAction !== "all") {
+        activeFilterParts.push(
+          `Aksi ${ACTION_LABELS[selectedAction as keyof typeof ACTION_LABELS] || selectedAction}`
+        );
+      }
+      if (selectedRole !== "all") {
+        activeFilterParts.push(`Peran ${formatRoleLabel(selectedRole)}`);
+      }
+      if (searchQuery.trim()) {
+        activeFilterParts.push(`Kata kunci "${searchQuery.trim()}"`);
+      }
 
-      const rows = exportData.map((log) => [
-        `"${formatAuditTimestamp(log.createdAt)}"`,
-        `"${log.userName.replace(/"/g, '""')}"`,
-        `"${formatRoleLabel(log.userRole).replace(/"/g, '""')}"`,
-        `"${(MODULE_LABELS[log.module] || log.module).replace(/"/g, '""')}"`,
-        `"${(ACTION_LABELS[log.action] || log.action).replace(/"/g, '""')}"`,
-        `"${(log.targetName || "-").replace(/"/g, '""')}"`,
-        `"${(log.description || "").replace(/"/g, '""')}"`,
-        `"${log.ipAddress || "127.0.0.1"}"`,
-      ]);
+      const dateStr = new Date().toISOString().split("T")[0];
+      createAndDownloadExcel(exportData, {
+        fileName: `Laporan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`,
+        filterSummary:
+          activeFilterParts.length > 0
+            ? activeFilterParts.join(", ")
+            : "Semua Modul dan Peran",
+        includeIpAddress: false,
+      });
 
-      const csvContent =
-        "data:text/csv;charset=utf-8,\uFEFF" +
-        [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute(
-        "download",
-        `Riwayat_Aktivitas_SIMESA_${new Date().toISOString().split("T")[0]}.csv`
+      toast.success(
+        `${exportData.length} catatan riwayat berhasil diekspor ke Excel (.xlsx)`
       );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success(`${exportData.length} catatan riwayat berhasil diekspor ke CSV`);
     } catch (err) {
-      console.error("Gagal mengekspor CSV:", err);
-      toast.error("Gagal mengekspor berkas CSV");
+      console.error("Gagal mengekspor Excel:", err);
+      toast.error("Gagal mengekspor berkas Excel");
     } finally {
-      setIsExportingCSV(false);
+      setIsExportingExcel(false);
     }
   };
+
+  const renderKpiInfoButton = (key: AuditKpiKey, label: string) => (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        setActiveKpiInfoKey(key);
+      }}
+      aria-label={`Lihat rincian halaman pada kartu ${label}`}
+      title="Lihat daftar halaman yang dihitung"
+      className="inline-flex items-center justify-center w-5 h-5 rounded-full text-blue-200/70 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+    >
+      <CircleAlert className="w-3.5 h-3.5" />
+    </button>
+  );
+
+  const activeKpiInfo = activeKpiInfoKey
+    ? AUDIT_KPI_CARD_INFO[activeKpiInfoKey]
+    : null;
+
+  const activeKpiCount =
+    activeKpiInfoKey === "hari_ini"
+      ? summary.totalHariIni
+      : activeKpiInfoKey === "akademik_nilai"
+      ? summary.akademikNilaiCount
+      : activeKpiInfoKey === "kesiswaan_disiplin"
+      ? summary.kesiswaanDisiplinCount
+      : activeKpiInfoKey === "keamanan_akses"
+      ? summary.keamananAkunCount
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -340,22 +411,22 @@ export function ActivityLogView() {
           <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
             <div className="space-y-1.5">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
-                Riwayat Aktivitas dan Audit Trail
+                Riwayat Aktivitas Sistem
               </h1>
               <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
-                Pemantauan jejak digital operasional sekolah, integritas data akademik siswa, dan kepatuhan sistem keamanan
+                Pemantauan catatan aktivitas operasional sekolah, perubahan data akademik siswa, dan keamanan akun pengguna
               </p>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
               <button
                 type="button"
-                disabled={isExportingCSV}
-                onClick={handleExportCSV}
+                disabled={isExportingExcel}
+                onClick={handleExportExcel}
                 className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 mr-2 text-emerald-300" />
-                {isExportingCSV ? "Mengekspor CSV..." : "Ekspor Laporan CSV"}
+                {isExportingExcel ? "Menyiapkan Excel..." : "Ekspor Laporan Excel"}
               </button>
 
               <button
@@ -377,7 +448,7 @@ export function ActivityLogView() {
                   className="inline-flex items-center bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 border border-rose-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-rose-200 shadow-xs transition-all cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-300" />
-                  Pembersihan Log Usang
+                  Bersihkan Riwayat Lama
                 </button>
               )}
             </div>
@@ -387,8 +458,9 @@ export function ActivityLogView() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 shadow-xs"
               title="AKTIVITAS HARI INI"
+              headerAction={renderKpiInfoButton("hari_ini", "Aktivitas Hari Ini")}
               value={loading ? "..." : summary.totalHariIni}
               icon={Activity}
               color="blue"
@@ -398,8 +470,12 @@ export function ActivityLogView() {
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 shadow-xs"
               title="AKADEMIK DAN NILAI"
+              headerAction={renderKpiInfoButton(
+                "akademik_nilai",
+                "Akademik dan Nilai"
+              )}
               value={loading ? "..." : summary.akademikNilaiCount}
               icon={GraduationCap}
               color="blue"
@@ -409,8 +485,12 @@ export function ActivityLogView() {
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 shadow-xs"
               title="KESISWAAN DAN DISIPLIN"
+              headerAction={renderKpiInfoButton(
+                "kesiswaan_disiplin",
+                "Kesiswaan dan Disiplin"
+              )}
               value={loading ? "..." : summary.kesiswaanDisiplinCount}
               icon={ShieldCheck}
               color="amber"
@@ -420,8 +500,12 @@ export function ActivityLogView() {
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-slate-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(148,163,184,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-slate-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(148,163,184,0.15)] transition-all duration-200 shadow-xs"
               title="KEAMANAN DAN AKSES"
+              headerAction={renderKpiInfoButton(
+                "keamanan_akses",
+                "Keamanan dan Akses"
+              )}
               value={loading ? "..." : summary.keamananAkunCount}
               icon={KeyRound}
               color="slate"
@@ -440,7 +524,7 @@ export function ActivityLogView() {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <Input
               type="text"
-              placeholder="Cari nama aktor, target objek, atau uraian kegiatan..."
+              placeholder="Cari nama pengguna, data terkait, atau uraian aktivitas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20"
@@ -547,19 +631,19 @@ export function ActivityLogView() {
                   WAKTU PENCATATAN
                 </TableHead>
                 <TableHead className="w-[200px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
-                  AKTOR PENGGUNA
+                  PENGGUNA
                 </TableHead>
                 <TableHead className="w-[160px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
-                  MODUL SISTEM
+                  MODUL
                 </TableHead>
                 <TableHead className="w-[140px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
                   JENIS AKSI
                 </TableHead>
                 <TableHead className="w-[160px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
-                  TARGET OBJEK
+                  DATA TERKAIT
                 </TableHead>
                 <TableHead className="text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
-                  URAIAN KEGIATAN
+                  URAIAN AKTIVITAS
                 </TableHead>
                 <TableHead className="w-[80px] text-right text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5 pr-5">
                   AKSI
@@ -598,7 +682,7 @@ export function ActivityLogView() {
                   return (
                     <TableRow
                       key={log.id}
-                      onClick={() => setSelectedLog(log)}
+                      onClick={() => handleOpenLogDetail(log)}
                       className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
                     >
                       {/* Waktu */}
@@ -606,7 +690,7 @@ export function ActivityLogView() {
                         {formatAuditTimestamp(log.createdAt)}
                       </TableCell>
 
-                      {/* Aktor Pengguna */}
+                      {/* Pengguna */}
                       <TableCell className="py-3.5">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/50 group-hover/row:bg-blue-950 group-hover/row:border-blue-700/60 flex items-center justify-center font-bold text-xs text-blue-700 dark:text-blue-300 group-hover/row:text-blue-200 shrink-0 transition-colors">
@@ -623,7 +707,7 @@ export function ActivityLogView() {
                         </div>
                       </TableCell>
 
-                      {/* Modul Sistem */}
+                      {/* Modul */}
                       <TableCell className="py-3.5">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${moduleStyle.bg} ${moduleStyle.text} ${moduleStyle.border}`}
@@ -641,13 +725,13 @@ export function ActivityLogView() {
                         </span>
                       </TableCell>
 
-                      {/* Target Objek */}
+                      {/* Data Terkait */}
                       <TableCell className="py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 truncate max-w-[160px]">
                         {log.targetName || "-"}
                       </TableCell>
 
-                      {/* Uraian Kegiatan */}
-                      <TableCell className="py-3.5 text-xs text-slate-600 dark:text-slate-300 group-hover/row:text-slate-100 leading-relaxed">
+                      {/* Uraian Aktivitas */}
+                      <TableCell className="py-3.5 text-xs text-slate-600 dark:text-slate-300 group-hover/row:text-slate-100 leading-relaxed whitespace-normal break-words">
                         {log.description}
                       </TableCell>
 
@@ -657,10 +741,10 @@ export function ActivityLogView() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedLog(log);
+                            handleOpenLogDetail(log);
                           }}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/50 group-hover/row:text-blue-400 transition-colors"
-                          title="Lihat Detail Log"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/50 group-hover/row:text-blue-400 transition-colors cursor-pointer"
+                          title="Lihat Detail Aktivitas"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -710,48 +794,92 @@ export function ActivityLogView() {
         )}
       </div>
 
-      {/* 4. Modal Detail Aktivitas & Payload Snapshot */}
+      {/* 4. Modal Detail Aktivitas (dengan Reveal Alamat IP) */}
       <Dialog
         open={Boolean(selectedLog)}
         onOpenChange={(open) => {
-          if (!open) setSelectedLog(null);
+          if (!open) handleCloseLogDetail();
         }}
       >
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
           <DialogHeader className="space-y-1.5 pb-4 border-b border-slate-100 dark:border-slate-800">
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-600" />
-              Detail Riwayat Aktivitas Sistem
+              Detail Riwayat Aktivitas
             </DialogTitle>
           </DialogHeader>
 
           {selectedLog && (
             <div className="space-y-4 py-2 text-xs">
               {/* Ringkasan Metadata Grid */}
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
                 <div className="space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium">Waktu Presisi</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Waktu Pencatatan</span>
                   <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
                     {formatAuditTimestamp(selectedLog.createdAt)}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium">Alamat IP Klien</span>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
-                    {selectedLog.ipAddress || "127.0.0.1"}
-                  </p>
+                  <span className="text-[11px] text-slate-400 font-medium">Alamat IP Perangkat</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {isIpRevealed ? (
+                      <>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                          {selectedLog.ipAddress || "127.0.0.1"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleCopyIp(selectedLog.ipAddress || "127.0.0.1")
+                          }
+                          title="Salin Alamat IP"
+                          aria-label="Salin Alamat IP"
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsIpRevealed(false)}
+                          title="Sembunyikan Alamat IP"
+                          aria-label="Sembunyikan Alamat IP"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          <EyeOff className="w-3.5 h-3.5" />
+                          <span>Sembunyikan</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium text-[11px]">
+                          <Lock className="w-3 h-3 text-slate-500" />
+                          Disembunyikan
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsIpRevealed(true)}
+                          title="Tampilkan Alamat IP"
+                          aria-label="Tampilkan Alamat IP"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800/60 bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/70 text-[11px] font-semibold transition-colors cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Lihat</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium">Aktor Pelaksana</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Pelaksana</span>
                   <p className="font-semibold text-slate-800 dark:text-slate-200">
                     {selectedLog.userName} ({formatRoleLabel(selectedLog.userRole)})
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium">Target Objek</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Data Terkait</span>
                   <p className="font-semibold text-slate-800 dark:text-slate-200">
                     {selectedLog.targetName || "-"}
                   </p>
@@ -759,7 +887,7 @@ export function ActivityLogView() {
               </div>
 
               {/* Modul & Aksi Badges */}
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
                 <span className="text-slate-500 font-medium">Klasifikasi:</span>
                 <span
                   className={`px-2 py-0.5 rounded-md font-semibold border ${
@@ -784,7 +912,7 @@ export function ActivityLogView() {
               {/* Uraian Lengkap */}
               <div className="space-y-1.5 pt-1">
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  Uraian Lengkap Kegiatan
+                  Uraian Lengkap Aktivitas
                 </label>
                 <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
                   {selectedLog.description}
@@ -792,22 +920,76 @@ export function ActivityLogView() {
               </div>
             </div>
           )}
-
-          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedLog(null)}
-              className="rounded-xl text-xs"
-            >
-              Tutup
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* 5. Modal Pembersihan Log Usang & Pengingat Unduh Cadangan Excel */}
+      {/* 4B. Popup Informasi Cakupan Halaman pada Kartu KPI */}
+      <Dialog
+        open={Boolean(activeKpiInfo)}
+        onOpenChange={(open) => {
+          if (!open) setActiveKpiInfoKey(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+          {activeKpiInfo && (
+            <>
+              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    Total Tercatat: {activeKpiCount}
+                  </span>
+                </div>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 pt-1">
+                  <CircleAlert className="w-5 h-5 text-blue-600 shrink-0" />
+                  Cakupan Kartu: {activeKpiInfo.judul}
+                </DialogTitle>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {activeKpiInfo.ringkasan}
+                </p>
+              </DialogHeader>
+
+              <div className="space-y-3 py-2 text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Halaman dan Fitur yang Termasuk
+                </p>
+
+                <div className="space-y-2.5">
+                  {activeKpiInfo.halamanTercakup.map((item) => (
+                    <div
+                      key={item.halaman}
+                      className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 space-y-1"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                          <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <span>{item.halaman}</span>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
+                          {item.lokasiMenu}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed pl-5">
+                        {item.aktivitas}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {activeKpiInfo.catatan && (
+                  <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2 text-amber-800 dark:text-amber-300">
+                    <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                    <p className="text-[11px] leading-relaxed">
+                      {activeKpiInfo.catatan}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* 5. Modal Pembersihan Riwayat Lama & Pengingat Unduh Cadangan Excel */}
       <Dialog open={purgeModalOpen} onOpenChange={setPurgeModalOpen}>
         <DialogContent className="sm:max-w-lg rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
           {purgeStep === 1 ? (
@@ -931,7 +1113,7 @@ export function ActivityLogView() {
                 </div>
                 <DialogTitle className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-1">
                   <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-                  Konfirmasi Pembersihan Catatan Aktivitas
+                  Konfirmasi Pembersihan Riwayat Lama
                 </DialogTitle>
               </DialogHeader>
 
@@ -941,7 +1123,7 @@ export function ActivityLogView() {
                   <div className="space-y-1 text-xs leading-relaxed">
                     <p className="font-semibold">Tindakan Permanen</p>
                     <p>
-                      Seluruh catatan aktivitas yang lebih lama dari rentang waktu yang Anda tentukan di bawah ini akan dihapus secara permanen dari basis data SIMESA.
+                      Seluruh catatan riwayat aktivitas yang lebih lama dari rentang waktu yang Anda pilih di bawah ini akan dihapus secara permanen dari sistem SIMESA.
                     </p>
                     {hasDownloadedExcel && (
                       <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
@@ -953,7 +1135,7 @@ export function ActivityLogView() {
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Pilih Batas Waktu Retensi Data
+                    Pilih Usia Riwayat yang Dihapus
                   </label>
                   <Select value={purgeDays} onValueChange={(val) => setPurgeDays(val || "180")}>
                     <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
@@ -990,7 +1172,7 @@ export function ActivityLogView() {
                   onClick={handlePurgeLogs}
                   className="rounded-xl text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold cursor-pointer"
                 >
-                  {isPurging ? "Membersihkan Data..." : "Hapus Log Usang Sekarang"}
+                  {isPurging ? "Membersihkan Data..." : "Hapus Riwayat Lama"}
                 </Button>
               </DialogFooter>
             </>
