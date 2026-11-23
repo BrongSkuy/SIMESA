@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { hashPassword } from "better-auth/crypto";
-import { getPortalForRole } from "@/lib/rbac";
+import { getUserFullRoles } from "@/lib/rbac-server";
 import { logActivity } from "@/lib/audit-server";
 
 // PUT /api/auth-accounts/[id]/reset — reset password directly using Better Auth's scrypt hashPassword
@@ -14,8 +14,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-  if (!session || getPortalForRole(appRole || "") !== "/admin") {
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { allRoles } = await getUserFullRoles(session.user.id);
+  if (!allRoles.some((r) => r === "SUPERADMIN" || r === "ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
