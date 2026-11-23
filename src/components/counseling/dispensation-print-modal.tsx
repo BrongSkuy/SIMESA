@@ -338,7 +338,7 @@ export function DispensationPrintModal({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-sm font-semibold"
+              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-semibold cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak Dokumen Resmi</span>
@@ -347,6 +347,7 @@ export function DispensationPrintModal({
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
+              className="cursor-pointer"
             >
               <X className="w-4 h-4" />
               <span>Tutup</span>

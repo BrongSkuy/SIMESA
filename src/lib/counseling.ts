@@ -131,6 +131,16 @@ export interface CounselingOverviewSummary {
 }
 
 /**
+ * Mengembalikan tanggal lokal saat ini dalam format YYYY-MM-DD (menghindari pergeseran UTC 00:00-06:59 WIB).
+ */
+export function getLocalIsoDate(dateObj: Date = new Date()): string {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
  * Format tanggal Indonesia yang ramah pengguna dan bebas garis miring.
  * Contoh: 17 November 2026
  */
@@ -271,4 +281,27 @@ export function getDispensasiStatusBadge(status: DispensationStatus) {
         badgeClass: "bg-muted text-muted-foreground border-border",
       };
   }
+}
+
+/**
+ * Resolusi label dropdown filter Base UI agar tidak menampilkan kode mentah "all".
+ */
+export function resolveFilterSelectLabel(
+  value: string | null | undefined,
+  allLabel: string
+): string {
+  if (!value || value === "all") return allLabel;
+  return value;
+}
+
+/**
+ * Label lengkap sifat kerahasiaan catatan untuk SelectValue Base UI.
+ */
+export function getKerahasiaanOptionLabel(
+  value: string | null | undefined
+): string {
+  if (value === "Rahasia") {
+    return "Rahasia (Khusus Guru BK dan Kepala Sekolah)";
+  }
+  return "Umum (Wali kelas dapat ikut membaca catatan)";
 }

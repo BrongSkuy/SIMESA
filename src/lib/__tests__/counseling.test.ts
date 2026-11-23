@@ -13,6 +13,9 @@ import {
   getStatusKasusBadge,
   getKerahasiaanBadge,
   getDispensasiStatusBadge,
+  resolveFilterSelectLabel,
+  getKerahasiaanOptionLabel,
+  getLocalIsoDate,
 } from "../counseling";
 
 describe("Counseling BK & Kesiswaan Helpers (Fitur 12)", () => {
@@ -136,6 +139,29 @@ describe("Counseling BK & Kesiswaan Helpers (Fitur 12)", () => {
 
       const dibatalkan = getDispensasiStatusBadge("Dibatalkan");
       expect(dibatalkan.label).toBe("Dibatalkan");
+    });
+  });
+
+  describe("Dropdown SelectValue Label Helpers (Base UI)", () => {
+    it("mengonversi nilai filter 'all' atau kosong menjadi label ramah pengguna", () => {
+      expect(resolveFilterSelectLabel("all", "Semua Kategori")).toBe("Semua Kategori");
+      expect(resolveFilterSelectLabel("", "Semua Kelas")).toBe("Semua Kelas");
+      expect(resolveFilterSelectLabel(undefined, "Semua Status")).toBe("Semua Status");
+      expect(resolveFilterSelectLabel("XI-A", "Semua Kelas")).toBe("XI-A");
+    });
+
+    it("mengembalikan label kerahasiaan lengkap bebas karakter slash", () => {
+      const umum = getKerahasiaanOptionLabel("Umum");
+      const rahasia = getKerahasiaanOptionLabel("Rahasia");
+      expect(umum).toContain("Umum");
+      expect(rahasia).toContain("Rahasia");
+      expect(umum).not.toContain("/");
+      expect(rahasia).not.toContain("/");
+    });
+
+    it("memformat tanggal lokal YYYY-MM-DD tanpa pergeseran UTC", () => {
+      const fixed = new Date(2026, 10, 5, 1, 30, 0); // 5 Nov 2026 01:30 lokal
+      expect(getLocalIsoDate(fixed)).toBe("2026-11-05");
     });
   });
 });
