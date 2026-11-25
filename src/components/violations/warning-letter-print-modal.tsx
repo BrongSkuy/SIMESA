@@ -199,7 +199,7 @@ export function WarningLetterPrintModal({
             }
             .ttd-box {
               display: flex;
-              flex-col: column;
+              flex-direction: column;
               justify-content: space-between;
               min-height: 95px;
             }
@@ -292,6 +292,11 @@ export function WarningLetterPrintModal({
           <div class="sanksi-box">
             <strong>Ketentuan dan Tindak Lanjut Sanksi:</strong><br />
             ${getSanksiText(letterData.tingkatSp)}
+            ${
+              letterData.catatanMediasi
+                ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #d1d5db; font-style: italic; color: #374151;">Catatan Tambahan: ${letterData.catatanMediasi}</div>`
+                : ""
+            }
           </div>
 
           <p class="paragraf">
@@ -355,28 +360,28 @@ export function WarningLetterPrintModal({
   const getSanksiText = (level: number) => {
     switch (level) {
       case 1:
-        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua / Wali Siswa ke sekolah untuk pembinaan terpadu.";
+        return "Peringatan tertulis pertama (SP I) serta pemanggilan Orang Tua atau Wali Siswa ke sekolah untuk pembinaan terpadu.";
       case 2:
-        return "Peringatan tertulis kedua (SP II), skorsing akademik selama 3 (tiga) hari kerja, serta penandatanganan pakta integritas kedisiplinan bermaterai bersama Orang Tua / Wali.";
+        return "Peringatan tertulis kedua (SP II), skorsing akademik selama 3 (tiga) hari kerja, serta penandatanganan pakta integritas kedisiplinan bermaterai bersama Orang Tua atau Wali.";
       case 3:
       default:
-        return "Peringatan tertulis ketiga (SP III / Terakhir), pelaksanaan Konferensi Kasus Dewan Guru, serta evaluasi pengembalian siswa kepada Orang Tua / Wali.";
+        return "Peringatan tertulis ketiga (SP III atau Terakhir), pelaksanaan Konferensi Kasus Dewan Guru, serta evaluasi pengembalian siswa kepada Orang Tua atau Wali.";
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between space-y-0 print:hidden">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 border border-slate-200">
+        <DialogHeader className="p-4 bg-white border-b border-slate-200 flex flex-row items-center justify-between space-y-0 print:hidden">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400">
+            <div className="p-2 rounded-lg bg-red-500/10 text-red-600 ">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+              <DialogTitle className="text-base font-bold text-slate-900 ">
                 Pratinjau Surat Peringatan {letterData.tingkatSp} (SP {tingkatRomawi})
               </DialogTitle>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 ">
                 Dokumen kedinasan resmi siap cetak format A4 SMK Penerbangan Dirgantara
               </p>
             </div>
@@ -385,7 +390,7 @@ export function WarningLetterPrintModal({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm font-semibold"
+              className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm font-semibold cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak Dokumen Resmi</span>
@@ -394,6 +399,7 @@ export function WarningLetterPrintModal({
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
+              className="cursor-pointer"
             >
               <X className="w-4 h-4" />
               <span>Tutup</span>
@@ -402,7 +408,7 @@ export function WarningLetterPrintModal({
         </DialogHeader>
 
         {/* Scrollable Container with Sheet Paper */}
-        <div className="p-4 sm:p-6 max-h-[80vh] overflow-y-auto flex justify-center bg-slate-200/60 dark:bg-slate-950">
+        <div className="p-4 sm:p-6 max-h-[80vh] overflow-y-auto flex justify-center bg-slate-200/60 ">
           <div
             ref={printRef}
             className="w-full max-w-[210mm] min-h-[297mm] p-8 sm:p-12 bg-white text-slate-900 shadow-xl rounded-sm print:p-0 print:m-0 print:w-full print:shadow-none print:border-none font-serif text-[13px] leading-relaxed"
@@ -461,7 +467,7 @@ export function WarningLetterPrintModal({
                 <span className="font-semibold text-slate-600">Nomor Induk Siswa (NIS)</span>
                 <span className="col-span-2 text-slate-900">: {letterData.student.nis}</span>
 
-                <span className="font-semibold text-slate-600">Kelas / Tingkat</span>
+                <span className="font-semibold text-slate-600">Kelas dan Tingkat</span>
                 <span className="col-span-2 text-slate-900">: {letterData.student.kelas}</span>
 
                 <span className="font-semibold text-slate-600">Total Akumulasi Poin</span>
@@ -516,7 +522,7 @@ export function WarningLetterPrintModal({
 
             <p className="mb-6 text-justify">
               Demikian Surat Peringatan ini dibuat agar menjadi perhatian sungguh-sungguh bagi siswa
-              yang bersangkutan serta pihak Orang Tua / Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
+              yang bersangkutan serta pihak Orang Tua atau Wali untuk bersama-sama melakukan pembinaan kedisiplinan.
             </p>
 
             {/* TANDA TANGAN */}

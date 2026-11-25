@@ -21,9 +21,11 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  FileSpreadsheet,
+  BookMarked,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getStudentEraporGateInfo, type EraporStatus } from "@/lib/erapor-utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +112,11 @@ interface ScoreData {
   kehadiran: KehadiranData | null;
   totalSkorSPK: number;
   rankUmum?: number | null;
+  erapor?: {
+    statusRapor: EraporStatus;
+    canPrint: boolean;
+    updatedAt: string | null;
+  };
 }
 
 const CARDS_PER_PAGE = 6;
@@ -233,32 +240,32 @@ export default function SiswaNilaiPage() {
   const getScoreTone = (score: number | null | undefined) => {
     if (score === null || score === undefined) {
       return {
-        text: "text-slate-400 group-hover:text-slate-500 group-hover/row:text-slate-500",
-        pill: "bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-400 group-hover:border-slate-700 group-hover/row:bg-slate-800 group-hover/row:text-slate-400 group-hover/row:border-slate-700",
+        text: "text-slate-400",
+        pill: "bg-slate-100 text-slate-500 border-slate-200",
         label: "Belum Dinilai",
       };
     }
     if (score >= 85)
       return {
-        text: "text-emerald-700 group-hover:text-emerald-400 group-hover/row:text-emerald-400",
-        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30",
+        text: "text-emerald-700",
+        pill: "bg-emerald-50 text-emerald-700 border-emerald-200",
         label: "Sangat Baik",
       };
     if (score >= 70)
       return {
-        text: "text-blue-700 group-hover:text-blue-400 group-hover/row:text-blue-400",
-        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30",
+        text: "text-blue-700",
+        pill: "bg-blue-50 text-blue-700 border-blue-200",
         label: "Baik",
       };
     if (score >= 50)
       return {
-        text: "text-amber-700 group-hover:text-amber-400 group-hover/row:text-amber-400",
-        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30",
+        text: "text-amber-700",
+        pill: "bg-amber-50 text-amber-700 border-amber-200",
         label: "Cukup",
       };
     return {
-      text: "text-rose-700 group-hover:text-rose-400 group-hover/row:text-rose-400",
-      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30 group-hover/row:bg-rose-500/15 group-hover/row:text-rose-300 group-hover/row:border-rose-500/30",
+      text: "text-rose-700",
+      pill: "bg-rose-50 text-rose-700 border-rose-200",
       label: "Perlu Perbaikan",
     };
   };
@@ -267,12 +274,12 @@ export default function SiswaNilaiPage() {
     status: "Lengkap" | "Sebagian" | "Belum Dinilai"
   ) => {
     if (status === "Lengkap") {
-      return "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30";
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
     }
     if (status === "Sebagian") {
-      return "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30";
+      return "bg-amber-50 text-amber-700 border-amber-200";
     }
-    return "bg-slate-100 text-slate-600 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-300 group-hover:border-slate-700 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700";
+    return "bg-slate-100 text-slate-600 border-slate-200 ";
   };
 
   const handleExportTranscript = () => {
@@ -360,118 +367,135 @@ export default function SiswaNilaiPage() {
       <PageHeader
         title="Transkrip Nilai & Skor SPK Saya"
         badge="Portal Siswa"
-        description="Rincian nilai per mata pelajaran, komponen Tugas/UTS/UAS, dan akumulasi skor evaluasi SPK SAW"
+        description="Rincian nilai per mata pelajaran, komponen Tugas, UTS, UAS, dan skor evaluasi SPK SAW"
         icon={ClipboardList}
       />
 
-      {/* Score Summary Banner - Fokus pada Skor SPK & Progres Kelengkapan Mapel */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] p-5 sm:p-6 border border-slate-800 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+      {/* Score Summary Card */}
+      <div className="rounded-xl bg-white p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
               Periode: {data.periode || "Aktif"}
             </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200">
               Kelas {data.student.kelas}
             </span>
             {completenessStats.total > 0 && (
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${
                   completenessStats.lengkap === completenessStats.total
-                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                    : "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "bg-amber-50 text-amber-800 border-amber-200"
                 }`}
               >
                 <CheckCircle2 className="h-3 w-3" />
-                {completenessStats.lengkap}/{completenessStats.total} Mapel
+                {completenessStats.lengkap} dari {completenessStats.total} Mapel
                 Lengkap
               </span>
             )}
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono bg-white/5 text-slate-300 border border-white/10">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200">
               {data.criteria.length} Kriteria SPK
             </span>
           </div>
-          <h2 className="text-base sm:text-lg font-bold tracking-tight text-white">
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900">
             Akumulasi Evaluasi Multi-Kriteria (SAW)
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Nilai akhir diperoleh dari penjumlahan skor terbobot seluruh
             kriteria akademik & kehadiran
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-          <Link href="/siswa/erapor" className="self-center sm:self-auto">
+          {data.erapor?.canPrint ? (
+            <Link href="/siswa/erapor" className="self-center sm:self-auto">
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold gap-2 text-xs shadow-2xs w-full sm:w-auto cursor-pointer"
+              >
+                <BookMarked className="w-4 h-4" />
+                Buka E-Rapor
+              </Button>
+            </Link>
+          ) : (
             <Button
-              variant="default"
+              type="button"
+              variant="outline"
               size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-2 text-xs shadow-md w-full sm:w-auto"
+              onClick={() => {
+                const gate = getStudentEraporGateInfo(data.erapor?.statusRapor);
+                toast.info(gate.message);
+              }}
+              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 font-medium gap-2 text-xs w-full sm:w-auto cursor-pointer"
+              title={getStudentEraporGateInfo(data.erapor?.statusRapor).message}
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Lihat E-Rapor Internal
+              <Lock className="w-3.5 h-3.5 text-amber-600" />
+              E-Rapor ({getStudentEraporGateInfo(data.erapor?.statusRapor).badgeLabel})
             </Button>
-          </Link>
+          )}
 
-          <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
-            <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">
-              <Award className="h-6 w-6" />
+          <div className="flex items-center gap-3.5 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200/90 w-full sm:w-auto justify-between sm:justify-start shrink-0">
+            <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-200/80">
+              <Award className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-medium text-slate-500">
                 Total Skor SPK SAW
               </p>
               <div className="flex items-baseline gap-1.5">
-                <p className="text-2xl font-bold tabular-nums text-white">
+                <p className="text-2xl font-bold tabular-nums text-[#1e3a8a]">
                   {data.totalSkorSPK}
                 </p>
-                <span className="text-xs text-blue-300 font-semibold">/ 100</span>
+                <span className="text-xs text-slate-500 font-semibold">/ 100</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Attendance Summary - 5 Interactive Dark Hover Cards */}
+      {/* Attendance Summary */}
       {data.kehadiran && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+            <p className="text-xs font-medium text-slate-500">
               Hadir
             </p>
-            <p className="text-2xl font-bold tabular-nums text-emerald-600 group-hover:text-emerald-400 mt-1 transition-colors">
+            <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1">
               {data.kehadiran.hadir}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+            <p className="text-xs font-medium text-slate-500">
               Izin
             </p>
-            <p className="text-2xl font-bold tabular-nums text-amber-600 group-hover:text-amber-400 mt-1 transition-colors">
+            <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1">
               {data.kehadiran.izin}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+            <p className="text-xs font-medium text-slate-500">
               Sakit
             </p>
-            <p className="text-2xl font-bold tabular-nums text-blue-600 group-hover:text-blue-400 mt-1 transition-colors">
+            <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1">
               {data.kehadiran.sakit}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
+            <p className="text-xs font-medium text-slate-500">
               Alfa
             </p>
-            <p className="text-2xl font-bold tabular-nums text-rose-600 group-hover:text-rose-400 mt-1 transition-colors">
+            <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1">
               {data.kehadiran.alfa}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer col-span-2 sm:col-span-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs col-span-2 sm:col-span-1">
+            <p className="text-xs font-medium text-slate-500">
               % Kehadiran
             </p>
             <p
-              className={`text-2xl font-bold tabular-nums mt-1 transition-colors ${
+              className={`text-2xl font-bold tabular-nums mt-1 ${
                 getScoreTone(data.kehadiran.persentase).text
               }`}
             >
@@ -603,23 +627,23 @@ export default function SiswaNilaiPage() {
                 return (
                   <div
                     key={`${subj.namaMapel}-${idx}`}
-                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
                   >
                     <div>
                       {/* Header Mapel & Guru */}
-                      <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800 transition-colors flex items-start justify-between gap-2.5">
+                      <div className="pb-3.5 border-b border-slate-100 transition-colors flex items-start justify-between gap-2.5">
                         <div className="min-w-0 flex-1">
-                          <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                          <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2 transition-colors">
                             {subj.isHomeroom ? (
-                              <UserCheck className="h-4 w-4 text-amber-500 group-hover:text-amber-400 shrink-0" />
+                              <UserCheck className="h-4 w-4 text-amber-500 shrink-0" />
                             ) : (
-                              <BookOpen className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
+                              <BookOpen className="h-4 w-4 text-blue-600 shrink-0" />
                             )}
                             <span className="truncate">{subj.labelMapel}</span>
                           </CardTitle>
-                          <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 truncate transition-colors">
+                          <CardDescription className="mt-1 text-xs text-slate-500 truncate transition-colors">
                             {subj.isHomeroom ? "Wali Kelas" : "Guru Mapel"}:{" "}
-                            <span className="font-medium text-slate-700 group-hover:text-slate-300 transition-colors">
+                            <span className="font-medium text-slate-700 transition-colors">
                               {subj.guruPengampu}
                             </span>
                           </CardDescription>
@@ -635,9 +659,9 @@ export default function SiswaNilaiPage() {
 
                       {/* Komponen Nilai Akademik (Tugas, UTS, UAS, dll.) */}
                       {!subj.isHomeroom && subj.akademik && (
-                        <div className="pt-3.5 pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors space-y-2.5">
+                        <div className="pt-3.5 pb-3 border-b border-slate-100 transition-colors space-y-2.5">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                               {subj.akademik.namaKriteria}
                             </span>
                             <div className="flex items-center gap-1.5">
@@ -667,16 +691,16 @@ export default function SiswaNilaiPage() {
                               return (
                                 <div
                                   key={cat}
-                                  className="rounded-xl border border-slate-200/80 bg-slate-50/80 group-hover:bg-slate-800/70 group-hover:border-slate-700/80 px-2.5 py-2 text-center transition-colors"
+                                  className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 text-center transition-colors"
                                 >
-                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 truncate">
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                                     {cat}
                                   </p>
                                   <p
                                     className={`text-sm font-bold font-mono tabular-nums mt-0.5 transition-colors ${
                                       hasVal
                                         ? getScoreTone(val).text
-                                        : "text-slate-400 group-hover:text-slate-500"
+                                        : "text-slate-400 "
                                     }`}
                                   >
                                     {hasVal ? val : "-"}
@@ -690,7 +714,7 @@ export default function SiswaNilaiPage() {
 
                       {/* Kriteria Non-Akademik & Kehadiran di Mapel Ini */}
                       <div className="pt-3 space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 transition-colors">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 transition-colors">
                           Evaluasi Karakter & Presensi Mapel
                         </p>
                         <div className="space-y-1.5">
@@ -699,7 +723,7 @@ export default function SiswaNilaiPage() {
                               key={kl.criteriaId}
                               className="flex items-center justify-between text-xs"
                             >
-                              <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                              <span className="text-slate-600 transition-colors">
                                 {kl.namaKriteria}
                               </span>
                               <span
@@ -711,8 +735,8 @@ export default function SiswaNilaiPage() {
                               </span>
                             </div>
                           ))}
-                          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 group-hover:border-slate-800/60 transition-colors">
-                            <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 transition-colors">
+                            <span className="text-slate-600 transition-colors">
                               Kehadiran Mapel
                             </span>
                             <span
@@ -730,9 +754,9 @@ export default function SiswaNilaiPage() {
                     </div>
 
                     {/* Footer Rata-rata Mapel */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
+                    <div className="mt-4 pt-3 border-t border-slate-100 transition-colors">
                       <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-slate-500 group-hover:text-slate-400 font-medium transition-colors">
+                        <span className="text-slate-500 font-medium transition-colors">
                           Rata-Rata Evaluasi Mapel
                         </span>
                         <span
@@ -741,9 +765,9 @@ export default function SiswaNilaiPage() {
                           {subj.rataRataMapel !== null ? subj.rataRataMapel : "-"}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
+                      <div className="w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden transition-colors">
                         <div
-                          className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                          className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -874,17 +898,17 @@ export default function SiswaNilaiPage() {
                     return (
                       <TableRow
                         key={`${subj.namaMapel}-${idx}`}
-                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                        className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                       >
-                        <TableCell className="pl-5 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                        <TableCell className="pl-5 font-semibold text-slate-800 transition-colors">
                           {subj.labelMapel}
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                        <TableCell className="text-xs text-slate-600 transition-colors">
                           {subj.guruPengampu}
                         </TableCell>
                         <TableCell>
                           {subj.isHomeroom ? (
-                            <span className="text-xs text-slate-400 group-hover/row:text-slate-500 italic">
+                            <span className="text-xs text-slate-400 italic">
                               Non-Akademik (Wali Kelas)
                             </span>
                           ) : kompItems.length > 0 ? (
@@ -892,16 +916,16 @@ export default function SiswaNilaiPage() {
                               {kompItems.map(({ cat, val }) => (
                                 <span
                                   key={cat}
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 border border-slate-200 transition-colors"
                                 >
-                                  <span className="text-slate-500 group-hover/row:text-slate-400 font-sans">
+                                  <span className="text-slate-500 font-sans">
                                     {cat}:
                                   </span>
                                   <span
                                     className={`font-bold ${
                                       val !== undefined && val !== null
                                         ? getScoreTone(val).text
-                                        : "text-slate-400 group-hover/row:text-slate-500"
+                                        : "text-slate-400 "
                                     }`}
                                   >
                                     {val !== undefined && val !== null
@@ -912,7 +936,7 @@ export default function SiswaNilaiPage() {
                               ))}
                             </div>
                           ) : (
-                            <span className="text-xs text-slate-400 group-hover/row:text-slate-500">
+                            <span className="text-xs text-slate-400 ">
                               -
                             </span>
                           )}
@@ -1212,24 +1236,24 @@ export default function SiswaNilaiPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                  className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
                 >
-                  <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800 transition-colors">
+                  <div className="pb-3 border-b border-slate-100 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                        <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2 transition-colors">
                           {c.tipe === "Otomatis" ? (
-                            <CheckCircle2 className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
+                            <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
                           ) : (
-                            <BookOpen className="h-4 w-4 text-indigo-600 group-hover:text-indigo-400 shrink-0" />
+                            <BookOpen className="h-4 w-4 text-indigo-600 shrink-0" />
                           )}
                           <span className="truncate">{c.namaKriteria}</span>
                         </CardTitle>
-                        <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                        <CardDescription className="mt-1 text-xs text-slate-500 transition-colors">
                           {c.deskripsi || `Bobot evaluasi ${c.bobot}%`}
                         </CardDescription>
                       </div>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold bg-slate-100 group-hover:bg-slate-800 text-slate-700 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 shrink-0 transition-colors">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors">
                         {c.bobot}%
                       </span>
                     </div>
@@ -1237,7 +1261,7 @@ export default function SiswaNilaiPage() {
                   <div className="pt-4">
                     <div className="flex items-end justify-between">
                       <div>
-                        <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
+                        <p className="text-xs text-slate-500 mb-0.5 transition-colors">
                           Nilai Rata-Rata
                         </p>
                         <div className="flex items-center gap-2">
@@ -1254,13 +1278,13 @@ export default function SiswaNilaiPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
+                        <p className="text-xs text-slate-500 mb-0.5 transition-colors">
                           Skor Terbobot SAW
                         </p>
-                        <p className="text-base font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
+                        <p className="text-base font-bold tabular-nums text-slate-900 transition-colors">
                           {c.nilaiTerbobot}
                         </p>
-                        <p className="text-xs tabular-nums text-slate-400 group-hover:text-slate-500 transition-colors">
+                        <p className="text-xs tabular-nums text-slate-400 transition-colors">
                           (R:{" "}
                           {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(
                             4
@@ -1271,21 +1295,21 @@ export default function SiswaNilaiPage() {
                     </div>
 
                     {/* Progress bar */}
-                    <div className="mt-3 w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
+                    <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden transition-colors">
                       <div
-                        className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                        className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
 
                     {/* Per-Mapel detail if any (with bounded max-height scroll for 20+ mapels) */}
                     {Object.keys(c.detailMapel).length > 0 && (
-                        <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
+                        <div className="mt-4 pt-3 border-t border-slate-100 transition-colors">
                           <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                               Rincian Per Mata Pelajaran
                             </p>
-                            <span className="text-[10px] font-mono text-slate-400 group-hover:text-slate-500">
+                            <span className="text-[10px] font-mono text-slate-400 ">
                               {Object.keys(c.detailMapel).length} Mapel
                             </span>
                           </div>
@@ -1305,7 +1329,7 @@ export default function SiswaNilaiPage() {
                                 return (
                                   <div key={mapel} className="space-y-0.5">
                                     <div className="flex items-center justify-between text-xs">
-                                      <span className="text-slate-700 font-medium group-hover:text-slate-200 truncate mr-2 transition-colors">
+                                      <span className="text-slate-700 font-medium truncate mr-2 transition-colors">
                                         {mapel}
                                       </span>
                                       <span
@@ -1317,7 +1341,7 @@ export default function SiswaNilaiPage() {
                                       </span>
                                     </div>
                                     {katEntries.length > 0 && (
-                                      <p className="text-[11px] text-slate-400 group-hover:text-slate-400 font-mono truncate transition-colors">
+                                      <p className="text-[11px] text-slate-400 font-mono truncate transition-colors">
                                         {katEntries
                                           .map(([k, v]) => `${k}: ${v}`)
                                           .join(" · ")}
@@ -1370,23 +1394,23 @@ export default function SiswaNilaiPage() {
                   {data.criteria.map((c) => (
                     <TableRow
                       key={c.id}
-                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                     >
-                      <TableCell className="pl-6 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                      <TableCell className="pl-6 font-semibold text-slate-800 transition-colors">
                         {c.namaKriteria}
                       </TableCell>
                       <TableCell className="text-center">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                             c.tipe === "Otomatis"
-                              ? "border-blue-200 text-[#1e3a8a] bg-blue-50 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30"
-                              : "border-indigo-200 text-indigo-700 bg-indigo-50 group-hover/row:bg-indigo-500/15 group-hover/row:text-indigo-300 group-hover/row:border-indigo-500/30"
+                              ? "border-blue-200 text-[#1e3a8a] bg-blue-50"
+                              : "border-indigo-200 text-indigo-700 bg-indigo-50"
                           }`}
                         >
                           {c.tipe}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-400 transition-colors">
+                      <TableCell className="text-center font-mono text-slate-600 transition-colors">
                         {c.bobot}%
                       </TableCell>
                       <TableCell
@@ -1396,24 +1420,24 @@ export default function SiswaNilaiPage() {
                       >
                         {c.nilaiRataRata}
                       </TableCell>
-                      <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                      <TableCell className="text-center font-mono text-slate-600 transition-colors">
                         {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(
                           4
                         )}
                       </TableCell>
-                      <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
+                      <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 transition-colors">
                         {c.nilaiTerbobot}
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableRow className="group/row bg-slate-50/90 hover:bg-[#091524] border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
+                  <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
                     <TableCell
                       colSpan={5}
-                      className="pl-6 font-bold text-slate-900 group-hover/row:text-white transition-colors"
+                      className="pl-6 font-bold text-slate-900 transition-colors"
                     >
                       Total Akumulasi Skor SPK SAW
                     </TableCell>
-                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 group-hover/row:text-amber-300 transition-colors">
+                    <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 transition-colors">
                       {data.totalSkorSPK}
                     </TableCell>
                   </TableRow>

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getPortalForRole } from "@/lib/rbac";
 import { getStudentReportCard } from "@/lib/erapor";
+import { canStudentPrintErapor } from "@/lib/erapor-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,29 @@ export async function GET(
         { status: 404 }
       );
     }
-    return NextResponse.json(reportCard);
+
+    // Untuk portal siswa: kunci lembar rapor sebelum berstatus "Diterbitkan"
+    if (portal === "/siswa" && !canStudentPrintErapor(reportCard.statusRapor)) {
+      const jumlahMapelTerisi = reportCard.subjects.filter(
+        (s) => s.nilaiAkhir !== null
+      ).length;
+      return NextResponse.json({
+        locked: true,
+        statusRapor: reportCard.statusRapor,
+        periode: reportCard.periode,
+        periodeDisplay: reportCard.periodeDisplay,
+        defaultKkm: reportCard.defaultKkm,
+        waliKelas: reportCard.waliKelas,
+        student: reportCard.student,
+        totalMapel: reportCard.subjects.length,
+        jumlahMapelTerisi,
+      });
+    }
+
+    return NextResponse.json({
+      locked: false,
+      ...reportCard,
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Gagal memuat data rapor siswa";
     return NextResponse.json({ error: msg }, { status: 500 });

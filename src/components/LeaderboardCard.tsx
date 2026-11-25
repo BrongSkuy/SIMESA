@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Trophy, PartyPopper, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trophy, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
@@ -69,7 +69,7 @@ export function LeaderboardPagination({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 disabled:opacity-40"
+          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 disabled:opacity-40 cursor-pointer"
           onClick={() => onPageChange(safePage - 1)}
           disabled={safePage <= 1}
         >
@@ -91,10 +91,10 @@ export function LeaderboardPagination({
                 key={p}
                 type="button"
                 onClick={() => onPageChange(p)}
-                className={`h-8 min-w-8 px-2 rounded-md text-xs font-semibold tabular-nums border transition-all ${
+                className={`h-8 min-w-8 px-2 rounded-md text-xs font-semibold tabular-nums border transition-colors cursor-pointer ${
                   p === safePage
-                    ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200"
+                    ? "bg-[#1e3a8a] text-white border-[#1e3a8a] shadow-2xs"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
                 }`}
                 aria-label={`Halaman ${p}`}
                 aria-current={p === safePage ? "page" : undefined}
@@ -109,7 +109,7 @@ export function LeaderboardPagination({
           type="button"
           variant="outline"
           size="sm"
-          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 disabled:opacity-40"
+          className="h-8 px-2.5 text-xs gap-1 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 disabled:opacity-40 cursor-pointer"
           onClick={() => onPageChange(safePage + 1)}
           disabled={safePage >= totalPages}
         >
@@ -123,7 +123,7 @@ export function LeaderboardPagination({
 
 export default function LeaderboardCard({
   title = "Tabel Peringkat Siswa Berprestasi",
-  subtitle = "Kalkulasi normalisasi matriks multi-kriteria real-time metode SAW",
+  subtitle = "Pemeringkatan siswa berdasarkan evaluasi multi-kriteria metode SAW",
   period = "Aktif",
   badgeMethod = "Metode SAW Multi-Kriteria",
   activeTab = "umum",
@@ -135,92 +135,69 @@ export default function LeaderboardCard({
   children,
 }: LeaderboardCardProps) {
   return (
-    <div className="relative rounded-2xl bg-gradient-to-b from-amber-50/70 via-amber-50/25 to-slate-50/20 border border-amber-200/70 p-5 sm:p-6 pb-6 text-center space-y-4 overflow-hidden select-none">
-      {/* Central Trophy Medallion Flanked by Party Poppers (PURE GOLDEN TROPHY - NO AI SYMBOL) */}
-      <div className="relative flex items-center justify-center gap-3 sm:gap-6 pt-1">
-        {/* Left Party Popper Horn */}
-        <div
-          className="p-2 sm:p-2.5 rounded-full bg-amber-100/90 border border-amber-300/80 text-amber-700 shadow-xs -rotate-12 hover:-rotate-45 transition-transform"
-          title="Perayaan Prestasi!"
-          aria-label="Perayaan Prestasi"
-        >
-          <PartyPopper className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
-        </div>
-
-        {/* Pure Golden Trophy Medallion */}
-        <div className="relative inline-flex items-center justify-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 p-0.5 shadow-[0_0_24px_rgba(245,158,11,0.4)] ring-4 ring-amber-100/90">
-            <div className="w-full h-full rounded-[14px] bg-gradient-to-b from-amber-50 via-white to-amber-100 flex items-center justify-center">
-              <Trophy
-                className="w-7 h-7 text-amber-600 drop-shadow-xs"
-                aria-label="Trofi Peringkat Emas"
-              />
+    <div className="rounded-xl bg-white border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-5">
+      {/* Header Row: Left-aligned institutional masthead */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div className="flex items-start gap-3.5 min-w-0">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-amber-50 border border-amber-200/80 text-amber-600 mt-0.5">
+            <Trophy
+              className="w-5 h-5"
+              aria-label="Trofi Peringkat Siswa"
+            />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                {title}
+              </h3>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-2xl">
+              {subtitle}
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded-md border border-slate-200">
+                {badgeMethod}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium bg-amber-50 text-amber-800 rounded-md border border-amber-200/90">
+                Periode: {period}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right Party Popper Horn (Flipped) */}
-        <div
-          className="p-2 sm:p-2.5 rounded-full bg-amber-100/90 border border-amber-300/80 text-amber-700 shadow-xs rotate-12 scale-x-[-1] hover:rotate-45 transition-transform"
-          title="Perayaan Prestasi!"
-          aria-label="Perayaan Prestasi"
-        >
-          <PartyPopper className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
-        </div>
+        {/* Optional Interactive Actions */}
+        {(onDetailClick || onDownloadClick) && (
+          <div className="flex items-center gap-2 shrink-0 hide-on-print">
+            {onDetailClick && (
+              <button
+                type="button"
+                onClick={onDetailClick}
+                className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+              >
+                Lihat Detail
+              </button>
+            )}
+            {onDownloadClick && (
+              <button
+                type="button"
+                onClick={onDownloadClick}
+                className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-2xs transition-colors cursor-pointer"
+              >
+                Unduh PDF
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Title & Subtitle */}
-      <div className="relative space-y-1 max-w-xl mx-auto px-2">
-        <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-          {title}
-        </h3>
-        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-          {subtitle}
-        </p>
-      </div>
-
-      {/* Centered Dual Badges */}
-      <div className="relative flex flex-wrap items-center justify-center gap-2 pt-0.5">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200 shadow-2xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-          {badgeMethod}
-        </span>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 rounded-full border border-amber-300/90 shadow-2xs">
-          <Trophy className="w-3 h-3 text-amber-600 shrink-0" />
-          Periode: {period}
-        </span>
-      </div>
-
-      {/* Optional Interactive Actions */}
-      {(onDetailClick || onDownloadClick) && (
-        <div className="relative flex items-center justify-center gap-3 pt-2 hide-on-print">
-          {onDetailClick && (
-            <button
-              onClick={onDetailClick}
-              className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-xs focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors"
-            >
-              Lihat Detail
-            </button>
-          )}
-          {onDownloadClick && (
-            <button
-              onClick={onDownloadClick}
-              className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-xs focus-visible:ring-2 focus-visible:ring-amber-400 transition-colors"
-            >
-              Unduh PDF
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Centered Class Tabs (When provided) */}
+      {/* Segmented Class Filter Tabs */}
       {showTabs && onTabChange && (
-        <div className="relative w-full pt-2 flex justify-center hide-on-print">
-          <Tabs value={activeTab} onValueChange={onTabChange} className="w-auto">
-            <TabsList className="flex flex-wrap items-center justify-center h-auto p-1 bg-white/90 backdrop-blur-xs rounded-full border border-amber-200/80 shadow-2xs gap-1">
+        <div className="w-full pt-1 border-t border-slate-100 hide-on-print">
+          <Tabs value={activeTab} onValueChange={onTabChange} className="w-full pt-3">
+            <TabsList className="inline-flex flex-wrap items-center justify-start h-auto p-1 bg-slate-100/90 rounded-lg border border-slate-200/80 gap-1">
               <TabsTrigger
                 value="umum"
-                className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all"
+                className="rounded-md text-xs font-medium px-3 py-1.5 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:font-semibold data-[state=active]:shadow-2xs transition-colors cursor-pointer"
               >
                 Umum (Semua)
               </TabsTrigger>
@@ -228,7 +205,7 @@ export default function LeaderboardCard({
                 <TabsTrigger
                   key={c.id}
                   value={c.namaKelas}
-                  className="rounded-full text-xs font-medium px-3.5 py-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all"
+                  className="rounded-md text-xs font-medium px-3 py-1.5 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:font-semibold data-[state=active]:shadow-2xs transition-colors cursor-pointer"
                 >
                   {c.namaKelas}
                 </TabsTrigger>

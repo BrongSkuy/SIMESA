@@ -785,15 +785,15 @@ export default function AdminNilaiPage() {
                         return (
                           <tr
                             key={siswa.studentId}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer"
+                            className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer"
                           >
-                            <td className="px-4 py-2.5 text-slate-500 group-hover/row:text-slate-400 font-mono sticky left-0 bg-white group-hover/row:bg-[#091524] transition-colors">
+                            <td className="px-4 py-2.5 text-slate-500 font-mono sticky left-0 bg-white transition-colors">
                               {i + 1}
                             </td>
-                            <td className="px-4 py-2.5 font-mono text-slate-600 group-hover/row:text-slate-400 sticky left-12 bg-white group-hover/row:bg-[#091524] transition-colors">
+                            <td className="px-4 py-2.5 font-mono text-slate-600 sticky left-12 bg-white transition-colors">
                               {siswa.nis}
                             </td>
-                            <td className="px-4 py-2.5 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                            <td className="px-4 py-2.5 font-semibold text-slate-800 transition-colors">
                               {siswa.namaLengkap}
                             </td>
 
@@ -830,13 +830,13 @@ export default function AdminNilaiPage() {
                                         };
                                       });
                                     }}
-                                    className="w-20 h-8 text-center font-mono text-xs font-semibold group-hover/row:bg-slate-900/90 group-hover/row:border-slate-700 group-hover/row:text-white group-hover/row:[color-scheme:dark] transition-colors"
+                                    className="w-20 h-8 text-center font-mono text-xs font-semibold transition-colors"
                                   />
                                 </div>
                               </td>
                             ))}
                             {isAkademik && (
-                              <td className="px-4 py-2.5 text-center font-mono font-bold bg-blue-50/40 group-hover/row:bg-blue-950/30 text-blue-700 group-hover/row:text-blue-300 transition-colors">
+                              <td className="px-4 py-2.5 text-center font-mono font-bold bg-blue-50/40 text-blue-700 transition-colors">
                                 {rerata > 0 ? rerata : "-"}
                               </td>
                             )}

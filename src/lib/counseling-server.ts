@@ -22,6 +22,7 @@ import {
   ConfidentialityLevel,
   CounselingService,
 } from "./counseling";
+import { calculateActiveViolationPoints } from "./violations";
 
 /**
  * Mengambil ringkasan statistik layanan konseling (menghormati asas kerahasiaan peran pengguna)
@@ -459,11 +460,7 @@ export async function getStudentCounselingProfile(studentId: string, canViewConf
     .where(eq(studentViolations.studentId, studentId))
     .orderBy(desc(studentViolations.tanggal));
 
-  // Hanya poin pelanggaran aktif (status !== "Selesai Dibina") yang dihitung
-  const totalPoinPelanggaran = rawViolations.reduce(
-    (sum, v) => (v.status === "Selesai Dibina" ? sum : sum + (v.poin || 0)),
-    0
-  );
+  const totalPoinPelanggaran = calculateActiveViolationPoints(rawViolations);
 
   const letters = await db
     .select()

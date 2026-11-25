@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Printer, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StudentReportCardData } from "@/lib/erapor";
 
@@ -11,418 +11,458 @@ interface ReportCardPrintViewProps {
   onBack?: () => void;
 }
 
-export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) {
-  const handlePrint = () => {
-    // Siapkan dokumen HTML mandiri dalam iframe terisolasi agar presisi A4 tanpa header dan footer browser
-    const printFrame = document.createElement("iframe");
-    printFrame.style.position = "fixed";
-    printFrame.style.right = "0";
-    printFrame.style.bottom = "0";
-    printFrame.style.width = "0";
-    printFrame.style.height = "0";
-    printFrame.style.border = "none";
-    document.body.appendChild(printFrame);
+const REPORT_CARD_PRINT_STYLES = `
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    margin: 0;
+    padding: 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    background: #fff;
+  }
+  .rapor-page {
+    padding: 10mm 14mm 10mm 14mm;
+    page-break-after: always;
+    break-after: page;
+  }
+  .rapor-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .kop-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    border-bottom: 3px double #000;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .kop-logo {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+  }
+  .kop-text h4 {
+    font-size: 8pt;
+    font-weight: 600;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #444;
+  }
+  .kop-text h1 {
+    font-size: 13pt;
+    font-weight: 900;
+    margin: 1px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kop-text p {
+    font-size: 7.5pt;
+    margin: 1px 0;
+    color: #444;
+  }
+  .judul-rapor {
+    text-align: center;
+    margin: 6px 0 8px 0;
+  }
+  .judul-rapor h2 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: underline;
+    margin: 0;
+  }
+  .judul-rapor p {
+    font-size: 8pt;
+    color: #444;
+    margin: 2px 0 0 0;
+  }
+  .identitas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 16px;
+    font-size: 8.5pt;
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+  .identitas-row {
+    display: flex;
+    margin-bottom: 1px;
+  }
+  .identitas-label {
+    width: 140px;
+    color: #555;
+    font-weight: 500;
+  }
+  .identitas-val {
+    flex: 1;
+    font-weight: 600;
+  }
+  .section-title {
+    font-size: 8.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 7px 0 3px 0;
+    color: #000;
+  }
+  table.rapor-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 7px;
+    font-size: 8pt;
+  }
+  table.rapor-table th, table.rapor-table td {
+    border: 1px solid #444;
+    padding: 3px 5px;
+  }
+  table.rapor-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-align: center;
+  }
+  table.rapor-table tr {
+    page-break-inside: avoid;
+  }
+  .two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 7px;
+    page-break-inside: avoid;
+  }
+  .catatan-box {
+    border: 1px solid #444;
+    padding: 5px 8px;
+    font-size: 8pt;
+    min-height: 35px;
+    font-style: italic;
+    background-color: #fcfcfc;
+    margin-bottom: 7px;
+    page-break-inside: avoid;
+  }
+  .ttd-section {
+    page-break-inside: avoid;
+    margin-top: 8px;
+  }
+  .ttd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    text-align: center;
+    gap: 12px;
+    font-size: 8pt;
+    margin-top: 4px;
+  }
+  .ttd-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 75px;
+  }
+  .ttd-nama {
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 0;
+  }
+  .footer-internal {
+    margin-top: 6px;
+    padding-top: 3px;
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #666;
+  }
+`;
 
-    const frameDoc = printFrame.contentWindow?.document;
-    if (!frameDoc) return;
+function escapeHtml(val: unknown): string {
+  return String(val ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="id">
-        <head>
-          <meta charset="utf-8" />
-          <title>E-Rapor - ${data.student.namaLengkap} (${data.student.nis})</title>
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 0;
-            }
-            * {
-              box-sizing: border-box;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            body {
-              font-family: Arial, Helvetica, sans-serif;
-              color: #111;
-              margin: 0;
-              padding: 10mm 14mm 10mm 14mm;
-              font-size: 8.5pt;
-              line-height: 1.35;
-              background: #fff;
-            }
-            .kop-container {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 14px;
-              border-bottom: 3px double #000;
-              padding-bottom: 6px;
-              margin-bottom: 8px;
-              text-align: center;
-            }
-            .kop-logo {
-              width: 58px;
-              height: 58px;
-              object-fit: contain;
-            }
-            .kop-text h4 {
-              font-size: 8pt;
-              font-weight: 600;
-              margin: 0;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              color: #444;
-            }
-            .kop-text h1 {
-              font-size: 13pt;
-              font-weight: 900;
-              margin: 1px 0;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-            .kop-text p {
-              font-size: 7.5pt;
-              margin: 1px 0;
-              color: #444;
-            }
-            .judul-rapor {
-              text-align: center;
-              margin: 6px 0 8px 0;
-            }
-            .judul-rapor h2 {
-              font-size: 10.5pt;
-              font-weight: bold;
-              text-transform: uppercase;
-              text-decoration: underline;
-              margin: 0;
-            }
-            .judul-rapor p {
-              font-size: 8pt;
-              color: #444;
-              margin: 2px 0 0 0;
-            }
-            .identitas-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 3px 16px;
-              font-size: 8.5pt;
-              margin-bottom: 8px;
-              padding: 5px 8px;
-              background-color: #fafafa;
-              border: 1px solid #ddd;
-              border-radius: 3px;
-            }
-            .identitas-row {
-              display: flex;
-              margin-bottom: 1px;
-            }
-            .identitas-label {
-              width: 140px;
-              color: #555;
-              font-weight: 500;
-            }
-            .identitas-val {
-              flex: 1;
-              font-weight: 600;
-            }
-            .section-title {
-              font-size: 8.5pt;
-              font-weight: bold;
-              text-transform: uppercase;
-              margin: 7px 0 3px 0;
-              color: #000;
-            }
-            table.rapor-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 7px;
-              font-size: 8pt;
-            }
-            table.rapor-table th, table.rapor-table td {
-              border: 1px solid #444;
-              padding: 3px 5px;
-            }
-            table.rapor-table th {
-              background-color: #f2f2f2;
-              font-weight: bold;
-              text-align: center;
-            }
-            table.rapor-table tr {
-              page-break-inside: avoid;
-            }
-            .two-cols {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 10px;
-              margin-bottom: 7px;
-              page-break-inside: avoid;
-            }
-            .catatan-box {
-              border: 1px solid #444;
-              padding: 5px 8px;
-              font-size: 8pt;
-              min-height: 35px;
-              font-style: italic;
-              background-color: #fcfcfc;
-              margin-bottom: 7px;
-              page-break-inside: avoid;
-            }
-            .ttd-section {
-              page-break-inside: avoid;
-              margin-top: 8px;
-            }
-            .ttd-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr 1fr;
-              text-align: center;
-              gap: 12px;
-              font-size: 8pt;
-              margin-top: 4px;
-            }
-            .ttd-box {
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              min-height: 75px;
-            }
-            .ttd-nama {
-              font-weight: bold;
-              text-decoration: underline;
-              margin: 0;
-            }
-            .footer-internal {
-              margin-top: 6px;
-              padding-top: 3px;
-              border-top: 1px solid #ccc;
-              display: flex;
-              justify-content: space-between;
-              font-size: 7pt;
-              color: #666;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="kop-container">
-            <img src="/logo.png" alt="Logo Sekolah" class="kop-logo" />
-            <div class="kop-text">
-              <h4>Yayasan Kemajuan Dirgantara</h4>
-              <h1>${data.sekolah.nama}</h1>
-              <p>Akreditasi "A" (Unggul) • NPSN: ${data.sekolah.npsn}</p>
-              <p>Jl. Marsekal Suryadarma No. 12, Kompleks Bandara, Tangerang • Telp: (021) 5567-8901 • Email: info@smkpenerbangan.sch.id</p>
-            </div>
+export function buildReportCardPageHtml(data: StudentReportCardData): string {
+  return `
+    <div class="rapor-page">
+      <div class="kop-container">
+        <img src="/logo.png" alt="Logo Sekolah" class="kop-logo" />
+        <div class="kop-text">
+          <h4>Yayasan Kemajuan Dirgantara</h4>
+          <h1>${escapeHtml(data.sekolah.nama)}</h1>
+          <p>Akreditasi "A" (Unggul) • NPSN: ${escapeHtml(data.sekolah.npsn)}</p>
+          <p>${escapeHtml(data.sekolah.alamat)} • Telp: ${escapeHtml(data.sekolah.telepon)} • Email: ${escapeHtml(data.sekolah.email)}</p>
+        </div>
+      </div>
+
+      <div class="judul-rapor">
+        <h2>Laporan Hasil Belajar Siswa (E-Rapor Internal)</h2>
+        <p>Tahun Pelajaran: ${escapeHtml(data.periodeDisplay)}</p>
+      </div>
+
+      <div class="identitas-grid">
+        <div>
+          <div class="identitas-row">
+            <span class="identitas-label">Nama Siswa</span>
+            <span class="identitas-val">: ${escapeHtml(data.student.namaLengkap)}</span>
           </div>
-
-          <div class="judul-rapor">
-            <h2>Laporan Hasil Belajar Siswa (E-Rapor Internal)</h2>
-            <p>Tahun Pelajaran: ${data.periodeDisplay}</p>
+          <div class="identitas-row">
+            <span class="identitas-label">Nomor Induk Siswa (NIS)</span>
+            <span class="identitas-val">: ${escapeHtml(data.student.nis)}</span>
           </div>
-
-          <div class="identitas-grid">
-            <div>
-              <div class="identitas-row">
-                <span class="identitas-label">Nama Siswa</span>
-                <span class="identitas-val">: ${data.student.namaLengkap}</span>
-              </div>
-              <div class="identitas-row">
-                <span class="identitas-label">Nomor Induk Siswa (NIS)</span>
-                <span class="identitas-val">: ${data.student.nis}</span>
-              </div>
-              <div class="identitas-row">
-                <span class="identitas-label">Angkatan</span>
-                <span class="identitas-val">: ${data.student.angkatan}</span>
-              </div>
-            </div>
-            <div>
-              <div class="identitas-row">
-                <span class="identitas-label">Kelas</span>
-                <span class="identitas-val">: ${data.student.kelas}</span>
-              </div>
-              <div class="identitas-row">
-                <span class="identitas-label">Jenis Kelamin</span>
-                <span class="identitas-val">: ${data.student.jenisKelamin === "L" ? "Laki-laki (Siswa)" : "Perempuan (Siswi)"}</span>
-              </div>
-              <div class="identitas-row">
-                <span class="identitas-label">Program Keahlian</span>
-                <span class="identitas-val">: Teknologi Penerbangan</span>
-              </div>
-            </div>
+          <div class="identitas-row">
+            <span class="identitas-label">Angkatan</span>
+            <span class="identitas-val">: ${escapeHtml(data.student.angkatan)}</span>
           </div>
+        </div>
+        <div>
+          <div class="identitas-row">
+            <span class="identitas-label">Kelas</span>
+            <span class="identitas-val">: ${escapeHtml(data.student.kelas)}</span>
+          </div>
+          <div class="identitas-row">
+            <span class="identitas-label">Jenis Kelamin</span>
+            <span class="identitas-val">: ${data.student.jenisKelamin === "L" ? "Laki-laki (Siswa)" : "Perempuan (Siswi)"}</span>
+          </div>
+          <div class="identitas-row">
+            <span class="identitas-label">Program Keahlian</span>
+            <span class="identitas-val">: Teknologi Penerbangan</span>
+          </div>
+        </div>
+      </div>
 
-          <div class="section-title">A. Capaian Kompetensi Akademik (Nilai Rata-rata Murni)</div>
+      <div class="section-title">A. Capaian Kompetensi Akademik (Nilai Rata-rata Murni)</div>
+      <table class="rapor-table">
+        <thead>
+          <tr>
+            <th style="width: 25px;">No</th>
+            <th style="text-align: left; width: 140px;">Mata Pelajaran</th>
+            <th style="width: 40px;">KKM</th>
+            <th style="width: 60px;">Nilai Akhir</th>
+            <th style="width: 55px;">Predikat</th>
+            <th style="text-align: left;">Deskripsi Capaian Pembelajaran</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(data.subjects || [])
+            .map(
+              (sub, idx) => `
+            <tr>
+              <td style="text-align: center;">${idx + 1}</td>
+              <td>
+                <strong>${escapeHtml(sub.mapel)}</strong><br />
+                <span style="font-size: 7pt; color: #555;">${escapeHtml(sub.guruPengampu || "-")}</span>
+              </td>
+              <td style="text-align: center;">${sub.kkm}</td>
+              <td style="text-align: center; font-weight: bold;">${sub.nilaiAkhir !== null && sub.nilaiAkhir !== undefined ? sub.nilaiAkhir.toFixed(2) : "-"}</td>
+              <td style="text-align: center; font-weight: bold;">${escapeHtml(sub.predikat || "-")}</td>
+              <td style="font-size: 7.5pt; color: #333;">${escapeHtml(sub.deskripsi || "-")}</td>
+            </tr>
+          `
+            )
+            .join("")}
+        </tbody>
+        <tfoot>
+          <tr style="background-color: #fafafa; font-weight: bold;">
+            <td colspan="3" style="text-align: right;">Total Nilai dan Rata-rata Rapor:</td>
+            <td style="text-align: center;">${data.rekapNilai?.rataRata ? data.rekapNilai.rataRata.toFixed(2) : "-"}</td>
+            <td style="text-align: center;">
+              ${escapeHtml(
+                data.rekapNilai?.predikatUmum
+                  ? data.rekapNilai.predikatUmum.split(" ")[0]
+                  : "-"
+              )}
+            </td>
+            <td style="font-size: 7.5pt; font-weight: normal; color: #555;">
+              Total ${data.rekapNilai?.jumlahTuntas || 0} mapel tuntas KKM dari ${data.rekapNilai?.jumlahMapel || 0} mata pelajaran.
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="two-cols">
+        <div>
+          <div class="section-title">B. Kegiatan Ekstrakurikuler</div>
           <table class="rapor-table">
             <thead>
               <tr>
                 <th style="width: 25px;">No</th>
-                <th style="text-align: left; width: 140px;">Mata Pelajaran</th>
-                <th style="width: 40px;">KKM</th>
-                <th style="width: 60px;">Nilai Akhir</th>
-                <th style="width: 55px;">Predikat</th>
-                <th style="text-align: left;">Deskripsi Capaian Pembelajaran</th>
+                <th style="text-align: left;">Kegiatan</th>
+                <th style="width: 65px;">Nilai</th>
+                <th style="text-align: left;">Keterangan</th>
               </tr>
             </thead>
             <tbody>
-              ${(data.subjects || [])
-                .map(
-                  (sub, idx) => `
-                <tr>
-                  <td style="text-align: center;">${idx + 1}</td>
-                  <td>
-                    <strong>${sub.mapel}</strong><br />
-                    <span style="font-size: 7pt; color: #555;">${sub.guruPengampu || "-"}</span>
-                  </td>
-                  <td style="text-align: center;">${sub.kkm}</td>
-                  <td style="text-align: center; font-weight: bold;">${sub.nilaiAkhir !== null && sub.nilaiAkhir !== undefined ? sub.nilaiAkhir.toFixed(2) : "-"}</td>
-                  <td style="text-align: center; font-weight: bold;">${sub.predikat || "-"}</td>
-                  <td style="font-size: 7.5pt; color: #333;">${sub.deskripsi || "-"}</td>
-                </tr>
-              `
-                )
-                .join("")}
-            </tbody>
-            <tfoot>
-              <tr style="background-color: #fafafa; font-weight: bold;">
-                <td colspan="3" style="text-align: right;">Total Nilai dan Rata-rata Rapor:</td>
-                <td style="text-align: center;">${data.rekapNilai?.rataRata ? data.rekapNilai.rataRata.toFixed(2) : "-"}</td>
-                <td style="text-align: center;">
-                  ${
-                    (data.rekapNilai?.rataRata || 0) >= 90
-                      ? "A"
-                      : (data.rekapNilai?.rataRata || 0) >= 80
-                      ? "B"
-                      : (data.rekapNilai?.rataRata || 0) >= 75
-                      ? "C"
-                      : (data.rekapNilai?.rataRata || 0) > 0
-                      ? "D"
-                      : "-"
-                  }
-                </td>
-                <td style="font-size: 7.5pt; font-weight: normal; color: #555;">
-                  Total ${data.rekapNilai?.jumlahTuntas || 0} mapel tuntas KKM dari ${data.rekapNilai?.jumlahMapel || 0} mata pelajaran.
-                </td>
+              <tr>
+                <td style="text-align: center;">1</td>
+                <td><strong>${escapeHtml(data.ekskul?.nama || "-")}</strong></td>
+                <td style="text-align: center; font-weight: bold; color: #047857;">${escapeHtml(data.ekskul?.nilai || "-")}</td>
+                <td style="font-size: 7.5pt;">${escapeHtml(data.ekskul?.keterangan || "-")}</td>
               </tr>
-            </tfoot>
+            </tbody>
           </table>
+        </div>
 
-          <div class="two-cols">
+        <div>
+          <div class="section-title">C. Ketidakhadiran (Semester)</div>
+          <table class="rapor-table">
+            <thead>
+              <tr>
+                <th style="text-align: left;">Keterangan</th>
+                <th style="width: 80px;">Jumlah Hari</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sakit (S)</td>
+                <td style="text-align: center; font-weight: 500;">${data.presensi?.sakit ?? 0} hari</td>
+              </tr>
+              <tr>
+                <td>Izin (I)</td>
+                <td style="text-align: center; font-weight: 500;">${data.presensi?.izin ?? 0} hari</td>
+              </tr>
+              <tr>
+                <td>Tanpa Keterangan atau Alfa (A)</td>
+                <td style="text-align: center; font-weight: 500;">${data.presensi?.alfa ?? 0} hari</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-title">D. Catatan Perkembangan Karakter dan Kedisiplinan Wali Kelas</div>
+      <div class="catatan-box" style="${data.catatanWaliKelas?.trim() ? "" : "font-style: normal; color: #777;"}">
+        ${data.catatanWaliKelas?.trim() ? `"${escapeHtml(data.catatanWaliKelas.trim())}"` : "-"}
+      </div>
+
+      <div class="ttd-section">
+        <div style="text-align: right; font-size: 8pt; margin-bottom: 2px;">
+          Diberikan di: Tangerang, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+        </div>
+
+        <div class="ttd-grid">
+          <div class="ttd-box">
             <div>
-              <div class="section-title">B. Kegiatan Ekstrakurikuler</div>
-              <table class="rapor-table">
-                <thead>
-                  <tr>
-                    <th style="width: 25px;">No</th>
-                    <th style="text-align: left;">Kegiatan</th>
-                    <th style="width: 65px;">Nilai</th>
-                    <th style="text-align: left;">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="text-align: center;">1</td>
-                    <td><strong>${data.ekskul?.nama || "-"}</strong></td>
-                    <td style="text-align: center; font-weight: bold; color: #047857;">${data.ekskul?.nilai || "-"}</td>
-                    <td style="font-size: 7.5pt;">${data.ekskul?.keterangan || "-"}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <p style="margin: 0; color: #555;">Mengetahui,</p>
+              <p style="margin: 1px 0 0 0; font-weight: 600;">Orang Tua atau Wali Murid</p>
             </div>
+            <div style="height: 45px;"></div>
+            <div style="border-bottom: 1px solid #222; width: 130px; margin: 0 auto;"></div>
+          </div>
 
+          <div class="ttd-box">
             <div>
-              <div class="section-title">C. Ketidakhadiran (Semester)</div>
-              <table class="rapor-table">
-                <thead>
-                  <tr>
-                    <th style="text-align: left;">Keterangan</th>
-                    <th style="width: 80px;">Jumlah Hari</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Sakit (S)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi?.sakit ?? 0} hari</td>
-                  </tr>
-                  <tr>
-                    <td>Izin (I)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi?.izin ?? 0} hari</td>
-                  </tr>
-                  <tr>
-                    <td>Tanpa Keterangan atau Alfa (A)</td>
-                    <td style="text-align: center; font-weight: 500;">${data.presensi?.alfa ?? 0} hari</td>
-                  </tr>
-                </tbody>
-              </table>
+              <p style="margin: 0; color: #555;">Wali Kelas,</p>
+              <p style="margin: 1px 0 0 0; font-weight: 600;">${escapeHtml(data.student.kelas)}</p>
+            </div>
+            <div style="height: 45px;"></div>
+            <div>
+              <p class="ttd-nama">${escapeHtml(data.waliKelas.nama)}</p>
+              <p style="margin: 1px 0 0 0; font-size: 7pt; color: #666;">NIP. ${escapeHtml(data.waliKelas.nip)}</p>
             </div>
           </div>
 
-          <div class="section-title">D. Catatan Perkembangan Karakter dan Kedisiplinan Wali Kelas</div>
-          <div class="catatan-box">
-            "${data.catatanWaliKelas || "Tetap pertahankan kedisiplinan dan semangat belajar."}"
-          </div>
-
-          <div class="ttd-section">
-            <div style="text-align: right; font-size: 8pt; margin-bottom: 2px;">
-              Diberikan di: Tangerang, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          <div class="ttd-box">
+            <div>
+              <p style="margin: 0; color: #555;">Mengetahui,</p>
+              <p style="margin: 1px 0 0 0; font-weight: 600;">Kepala Sekolah</p>
             </div>
-
-            <div class="ttd-grid">
-              <div class="ttd-box">
-                <div>
-                  <p style="margin: 0; color: #555;">Mengetahui,</p>
-                  <p style="margin: 1px 0 0 0; font-weight: 600;">Orang Tua atau Wali Murid</p>
-                </div>
-                <div style="height: 45px;"></div>
-                <div style="border-bottom: 1px solid #222; width: 130px; margin: 0 auto;"></div>
-              </div>
-
-              <div class="ttd-box">
-                <div>
-                  <p style="margin: 0; color: #555;">Wali Kelas,</p>
-                  <p style="margin: 1px 0 0 0; font-weight: 600;">${data.student.kelas}</p>
-                </div>
-                <div style="height: 45px;"></div>
-                <div>
-                  <p class="ttd-nama">${data.waliKelas.nama}</p>
-                  <p style="margin: 1px 0 0 0; font-size: 7pt; color: #666;">NIP. ${data.waliKelas.nip}</p>
-                </div>
-              </div>
-
-              <div class="ttd-box">
-                <div>
-                  <p style="margin: 0; color: #555;">Mengetahui,</p>
-                  <p style="margin: 1px 0 0 0; font-weight: 600;">Kepala Sekolah</p>
-                </div>
-                <div style="height: 45px;"></div>
-                <div>
-                  <p class="ttd-nama">${data.kepalaSekolah.nama}</p>
-                  <p style="margin: 1px 0 0 0; font-size: 7pt; color: #666;">NIP. ${data.kepalaSekolah.nip}</p>
-                </div>
-              </div>
+            <div style="height: 45px;"></div>
+            <div>
+              <p class="ttd-nama">${escapeHtml(data.kepalaSekolah.nama)}</p>
+              <p style="margin: 1px 0 0 0; font-size: 7pt; color: #666;">NIP. ${escapeHtml(data.kepalaSekolah.nip)}</p>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="footer-internal">
-            <span>SIMESA — Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
-            <span>Status Rapor: <strong>${data.statusRapor}</strong></span>
-            <span>Dicetak otomatis pada: ${new Date().toLocaleDateString("id-ID")}</span>
-          </div>
-        </body>
-      </html>
-    `;
+      <div class="footer-internal">
+        <span>SIMESA — Laporan Evaluasi Hasil Belajar Internal Sekolah</span>
+        <span>Status Rapor: <strong>${escapeHtml(data.statusRapor)}</strong></span>
+        <span>Dicetak otomatis pada: ${new Date().toLocaleDateString("id-ID")}</span>
+      </div>
+    </div>
+  `;
+}
 
-    frameDoc.open();
-    frameDoc.write(htmlContent);
-    frameDoc.close();
+/**
+ * Mencetak satu atau banyak lembar E-Rapor A4 secara berurutan dalam iframe terisolasi.
+ */
+export function printReportCards(
+  reports: StudentReportCardData[],
+  docTitle = "Cetak Massal E-Rapor SIMESA"
+) {
+  if (!reports || reports.length === 0) return;
+
+  const printFrame = document.createElement("iframe");
+  printFrame.style.position = "fixed";
+  printFrame.style.right = "0";
+  printFrame.style.bottom = "0";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "none";
+  document.body.appendChild(printFrame);
+
+  const frameDoc = printFrame.contentWindow?.document;
+  if (!frameDoc) {
+    if (document.body.contains(printFrame)) {
+      document.body.removeChild(printFrame);
+    }
+    return;
+  }
+
+  const pagesHtml = reports.map((r) => buildReportCardPageHtml(r)).join("");
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="id">
+      <head>
+        <meta charset="utf-8" />
+        <title>${escapeHtml(docTitle)}</title>
+        <style>${REPORT_CARD_PRINT_STYLES}</style>
+      </head>
+      <body>${pagesHtml}</body>
+    </html>
+  `;
+
+  frameDoc.open();
+  frameDoc.write(htmlContent);
+  frameDoc.close();
+
+  setTimeout(() => {
+    printFrame.contentWindow?.focus();
+    printFrame.contentWindow?.print();
 
     setTimeout(() => {
-      printFrame.contentWindow?.focus();
-      printFrame.contentWindow?.print();
+      if (document.body.contains(printFrame)) {
+        document.body.removeChild(printFrame);
+      }
+    }, 1500);
+  }, 350);
+}
 
-      setTimeout(() => {
-        if (document.body.contains(printFrame)) {
-          document.body.removeChild(printFrame);
-        }
-      }, 1000);
-    }, 300);
+export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) {
+  const handlePrint = () => {
+    printReportCards(
+      [data],
+      `E-Rapor - ${data.student.namaLengkap} (${data.student.nis})`
+    );
   };
 
   return (
@@ -597,20 +637,14 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               <tfoot>
                 <tr className="bg-zinc-50 font-semibold text-zinc-900">
                   <td colSpan={3} className="border border-zinc-400 px-3 py-2 text-right">
-                    Total Nilai / Rata-rata Rapor:
+                    Total Nilai dan Rata-rata Rapor:
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-mono tabular-nums font-bold text-zinc-950">
                     {data.rekapNilai.rataRata > 0 ? data.rekapNilai.rataRata.toFixed(2) : "-"}
                   </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-bold">
-                    {data.rekapNilai.rataRata >= 90
-                      ? "A"
-                      : data.rekapNilai.rataRata >= 80
-                      ? "B"
-                      : data.rekapNilai.rataRata >= 75
-                      ? "C"
-                      : data.rekapNilai.rataRata > 0
-                      ? "D"
+                    {data.rekapNilai.predikatUmum
+                      ? data.rekapNilai.predikatUmum.split(" ")[0]
                       : "-"}
                   </td>
                   <td className="border border-zinc-400 px-3 py-2 text-[11px] text-zinc-600">
@@ -641,12 +675,14 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
               <tbody>
                 <tr>
                   <td className="border border-zinc-400 px-2 py-2 text-center">1</td>
-                  <td className="border border-zinc-400 px-3 py-2 font-medium">{data.ekskul.nama}</td>
+                  <td className="border border-zinc-400 px-3 py-2 font-medium">
+                    {data.ekskul?.nama?.trim() || "-"}
+                  </td>
                   <td className="border border-zinc-400 px-2 py-2 text-center font-semibold text-emerald-800">
-                    {data.ekskul.nilai}
+                    {data.ekskul?.nilai?.trim() || "-"}
                   </td>
                   <td className="border border-zinc-400 px-3 py-2 text-[11px] text-zinc-600">
-                    {data.ekskul.keterangan}
+                    {data.ekskul?.keterangan?.trim() || "-"}
                   </td>
                 </tr>
               </tbody>
@@ -679,7 +715,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-zinc-400 px-3 py-1.5">Tanpa Keterangan / Alfa (A)</td>
+                  <td className="border border-zinc-400 px-3 py-1.5">Tanpa Keterangan atau Alfa (A)</td>
                   <td className="border border-zinc-400 px-3 py-1.5 text-center font-medium">
                     {data.presensi.alfa} hari
                   </td>
@@ -694,8 +730,16 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
           <h3 className="text-xs font-bold uppercase text-zinc-900 tracking-wider mb-2">
             D. Catatan Perkembangan Karakter & Kedisiplinan Wali Kelas
           </h3>
-          <div className="border border-zinc-400 p-3 rounded text-xs bg-zinc-50 print:bg-transparent leading-relaxed italic text-zinc-800 min-h-[60px]">
-            &quot;{data.catatanWaliKelas}&quot;
+          <div className="border border-zinc-400 p-3 rounded text-xs bg-zinc-50 print:bg-transparent leading-relaxed min-h-[60px]">
+            {data.catatanWaliKelas?.trim() ? (
+              <span className="italic text-zinc-800">
+                &quot;{data.catatanWaliKelas.trim()}&quot;
+              </span>
+            ) : (
+              <span className="text-zinc-400">
+                Belum ada catatan wali kelas.
+              </span>
+            )}
           </div>
         </div>
 
@@ -710,7 +754,7 @@ export function ReportCardPrintView({ data, onBack }: ReportCardPrintViewProps) 
             <div className="flex flex-col justify-between h-28">
               <div>
                 <p className="font-medium text-zinc-700">Mengetahui,</p>
-                <p className="font-semibold text-zinc-900">Orang Tua / Wali Murid</p>
+                <p className="font-semibold text-zinc-900">Orang Tua atau Wali Murid</p>
               </div>
               <div className="border-b border-zinc-900 w-36 mx-auto" />
             </div>

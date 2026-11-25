@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -152,53 +153,16 @@ export default function SiswaDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Unified Aero Masthead: Menyatu mulus secara visual dengan Topbar */}
-      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-10 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
-
-        <div className="relative z-10">
-          {/* Header Info Row - Centered Executive Layout */}
-          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2.5 drop-shadow-xs">
-                  <LayoutDashboard className="w-6 h-6 text-blue-400 shrink-0" />
-                  <span>Ringkasan Akademik Siswa</span>
-                </h1>
-                <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-blue-300 border border-white/10 shadow-xs">
-                  Kelas {profile.kelas}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
-                Selamat datang, <strong className="text-white">{profile.namaLengkap}</strong>{" "}
-                <span className="text-blue-300/80">(NIS {profile.nis})</span> · Pantau presensi dan capaian evaluasi semester Anda
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-              <Link href="/siswa/absensi">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 bg-white/5 border-white/10 text-slate-200 hover:bg-white/10 hover:border-amber-400/40 hover:text-white transition-all cursor-pointer"
-                >
-                  <CalendarCheck className="h-3.5 w-3.5 text-amber-300" /> Riwayat Absensi
-                </Button>
-              </Link>
-              <Link href="/siswa/nilai">
-                <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/30 shadow-xs hover:shadow-md transition-all cursor-pointer">
-                  <ClipboardList className="h-3.5 w-3.5 text-blue-100" /> Transkrip Nilai
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* 3 KPI Cards - Sleek Glassmorphism Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+      <PageHeader
+        title="Ringkasan Akademik Siswa"
+        badge={`Kelas ${profile.kelas}`}
+        description={`Selamat datang, ${profile.namaLengkap} (NIS ${profile.nis}) · Pantau presensi dan capaian evaluasi semester Anda`}
+        icon={LayoutDashboard}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl border border-white/10"
               title="Persentase Kehadiran"
               value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
               icon={CalendarCheck}
@@ -208,7 +172,7 @@ export default function SiswaDashboard() {
             />
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl border border-white/10"
               title="Total Pertemuan Hadir"
               value={stats?.totalHadir ?? 0}
               icon={Trophy}
@@ -218,7 +182,7 @@ export default function SiswaDashboard() {
             />
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.06)] transition-all duration-200 cursor-pointer shadow-xs"
+              className="rounded-xl border border-white/10"
               title="Ketidakhadiran"
               value={
                 stats
@@ -231,19 +195,39 @@ export default function SiswaDashboard() {
               footerRight="Rincian"
             />
           </div>
-        </div>
-      </section>
+        }
+      >
+        <Link href="/siswa/absensi">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 cursor-pointer"
+          >
+            <CalendarCheck className="h-3.5 w-3.5" />
+            Riwayat Absensi
+          </Button>
+        </Link>
+        <Link href="/siswa/nilai">
+          <Button
+            size="sm"
+            className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/25 cursor-pointer"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            Transkrip Nilai
+          </Button>
+        </Link>
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         {/* Attendance Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group flex flex-col justify-between">
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group flex flex-col justify-between">
           <div>
-            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+            <div className="pb-3.5 border-b border-slate-100 transition-colors">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 tracking-tight transition-colors">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
                 Tren Riwayat Kehadiran Harian
               </h3>
-              <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+              <p className="text-xs text-slate-500 mt-0.5 transition-colors">
                 {chartData.length > 0
                   ? `Visualisasi frekuensi hadir dari ${chartData.length} tanggal pencatatan`
                   : "Belum ada rekaman kehadiran semester ini"}
@@ -281,7 +265,7 @@ export default function SiswaDashboard() {
                       />
                       <XAxis
                         dataKey="tanggal"
-                        tick={{ fontSize: 11, fill: "#94A3B8" }}
+                        tick={{ fontSize: 11, fill: "#64748B" }}
                         axisLine={false}
                         tickLine={false}
                         interval={
@@ -294,7 +278,7 @@ export default function SiswaDashboard() {
                         height={chartData.length > 5 ? 60 : 30}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: "#94A3B8" }}
+                        tick={{ fontSize: 11, fill: "#64748B" }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
@@ -342,7 +326,7 @@ export default function SiswaDashboard() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400 group-hover:text-slate-500 transition-colors">
+                  <div className="flex h-full items-center justify-center text-slate-400 transition-colors">
                     <p className="text-xs">Belum ada data untuk ditampilkan</p>
                   </div>
                 )}
@@ -390,53 +374,53 @@ export default function SiswaDashboard() {
                           <TableRow
                             key={entry.studentId}
                             className={cn(
-                              "group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0",
-                              isMe && "bg-blue-50/50 hover:bg-[#091524]"
+                              "transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0",
+                              isMe && "bg-blue-50/50 hover:bg-blue-50/90"
                             )}
                           >
                             <TableCell className="pl-2">
                               <span
                                 className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold transition-colors ${
                                   entry.rank === 1
-                                    ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:ring-amber-500/40"
+                                    ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
                                     : entry.rank === 2
-                                      ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:ring-slate-700"
+                                      ? "bg-slate-200 text-slate-700 ring-1 ring-slate-300"
                                       : entry.rank === 3
-                                        ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300 group-hover/row:bg-orange-500/20 group-hover/row:text-orange-300 group-hover/row:ring-orange-500/40"
-                                        : "bg-slate-50 text-slate-600 border border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700"
+                                        ? "bg-orange-100 text-orange-800 ring-1 ring-orange-300"
+                                        : "bg-slate-50 text-slate-600 border border-slate-200"
                                 }`}
                               >
                                 #{entry.rank}
                               </span>
                             </TableCell>
-                            <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                            <TableCell className="font-semibold text-slate-800 transition-colors">
                               <span>{entry.namaLengkap}</span>
                               {isMe && (
-                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] group-hover/row:bg-blue-600 text-white transition-colors">
+                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white transition-colors">
                                   Kamu
                                 </span>
                               )}
                             </TableCell>
-                            <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
+                            <TableCell className="text-right font-mono font-bold text-blue-600 pr-2 transition-colors">
                               {entry.skorSPK}%
                             </TableCell>
                           </TableRow>
                         );
                       })}
                       {myLeaderboardEntry && myLeaderboardEntry.rank > 5 && (
-                        <TableRow className="group/row transition-all duration-200 bg-blue-50/60 hover:bg-[#091524] hover:shadow-md cursor-pointer border-t-2 border-blue-200/80">
+                        <TableRow className="transition-colors bg-blue-50/60 hover:bg-blue-50/90 border-t-2 border-blue-200/80">
                           <TableCell className="pl-2">
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/40 transition-colors">
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 transition-colors">
                               #{myLeaderboardEntry.rank}
                             </span>
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                          <TableCell className="font-semibold text-slate-900 transition-colors">
                             <span>{myLeaderboardEntry.namaLengkap}</span>
-                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] group-hover/row:bg-blue-600 text-white transition-colors">
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-[#1e3a8a] text-white transition-colors">
                               Kamu
                             </span>
                           </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-blue-600 group-hover/row:text-blue-300 pr-2 transition-colors">
+                          <TableCell className="text-right font-mono font-bold text-blue-600 pr-2 transition-colors">
                             {myLeaderboardEntry.skorSPK}%
                           </TableCell>
                         </TableRow>

@@ -207,32 +207,32 @@ export default function AdminNilaiSayaPage() {
   const getScoreTone = (score: number | null | undefined) => {
     if (score === null || score === undefined) {
       return {
-        text: "text-slate-400 group-hover:text-slate-500 group-hover/row:text-slate-500",
-        pill: "bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-400 group-hover:border-slate-700",
+        text: "text-slate-400",
+        pill: "bg-slate-100 text-slate-500 border-slate-200",
         label: "Belum Dinilai",
       };
     }
     if (score >= 85)
       return {
-        text: "text-emerald-700 group-hover:text-emerald-400 group-hover/row:text-emerald-400",
-        pill: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30",
+        text: "text-emerald-700",
+        pill: "bg-emerald-50 text-emerald-700 border-emerald-200",
         label: "Sangat Baik",
       };
     if (score >= 70)
       return {
-        text: "text-blue-700 group-hover:text-blue-400 group-hover/row:text-blue-400",
-        pill: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-300 group-hover:border-blue-500/30",
+        text: "text-blue-700",
+        pill: "bg-blue-50 text-blue-700 border-blue-200",
         label: "Baik",
       };
     if (score >= 50)
       return {
-        text: "text-amber-700 group-hover:text-amber-400 group-hover/row:text-amber-400",
-        pill: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30",
+        text: "text-amber-700",
+        pill: "bg-amber-50 text-amber-700 border-amber-200",
         label: "Cukup",
       };
     return {
-      text: "text-rose-700 group-hover:text-rose-400 group-hover/row:text-rose-400",
-      pill: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-300 group-hover:border-rose-500/30",
+      text: "text-rose-700",
+      pill: "bg-rose-50 text-rose-700 border-rose-200",
       label: "Perlu Perbaikan",
     };
   };
@@ -241,12 +241,12 @@ export default function AdminNilaiSayaPage() {
     status: "Lengkap" | "Sebagian" | "Belum Dinilai"
   ) => {
     if (status === "Lengkap") {
-      return "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-300 group-hover:border-emerald-500/30 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30";
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
     }
     if (status === "Sebagian") {
-      return "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-300 group-hover:border-amber-500/30 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30";
+      return "bg-amber-50 text-amber-700 border-amber-200";
     }
-    return "bg-slate-100 text-slate-600 border-slate-200 group-hover:bg-slate-800 group-hover:text-slate-300 group-hover:border-slate-700 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700";
+    return "bg-slate-100 text-slate-600 border-slate-200 ";
   };
 
   const subjectsList = useMemo(
@@ -500,49 +500,49 @@ export default function AdminNilaiSayaPage() {
 
       {!loading && !error && data && (
         <div className="space-y-6">
-          {/* Score Summary Banner - Executive Dark Hero */}
-          <div className="rounded-xl bg-[#091524] border border-slate-800/80 p-5 sm:p-6 overflow-hidden shadow-sm text-white bg-gradient-to-r from-[#091524] via-[#0E1E34] to-[#091524] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+          {/* Score Summary Card */}
+          <div className="rounded-xl bg-white border border-slate-200/90 p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-extrabold text-lg flex items-center justify-center shrink-0 shadow-inner border border-blue-400/30">
+              <div className="h-12 w-12 rounded-xl bg-[#1e3a8a] text-white font-bold text-base flex items-center justify-center shrink-0">
                 {getInitials(data.student.namaLengkap)}
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/60">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
                     Periode: {data.periode || "Aktif"}
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs tabular-nums bg-slate-800/80 text-slate-300 border border-slate-700/60">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono tabular-nums bg-slate-100 text-slate-700 border border-slate-200">
                     NIS {data.student.nis}
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200">
                     Kelas {data.student.kelas}
                   </span>
                   {completenessStats.total > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       {completenessStats.lengkap}/{completenessStats.total} Mapel Lengkap
                     </span>
                   )}
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1.5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1.5">
                   {data.student.namaLengkap}
                 </h2>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 bg-slate-900/90 backdrop-blur-xs px-4 py-3 rounded-lg border border-slate-700/80 w-full sm:w-auto justify-between sm:justify-start shadow-inner">
-              <div className="p-2.5 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                <Award className="h-6 w-6" />
+            <div className="flex items-center gap-3.5 bg-slate-50 px-4 py-3 rounded-xl border border-slate-200/90 w-full sm:w-auto justify-between sm:justify-start">
+              <div className="p-2 rounded-lg bg-blue-50 text-[#1e3a8a] border border-blue-200/80">
+                <Award className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <p className="text-xs font-medium text-slate-500">
                   Total Skor SPK
                 </p>
                 <div className="flex items-baseline gap-1.5">
-                  <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-white">
+                  <p className="text-2xl sm:text-3xl font-bold tabular-nums text-[#1e3a8a]">
                     {data.totalSkorSPK}
                   </p>
-                  <span className="text-xs text-blue-400 font-semibold">/ 100</span>
+                  <span className="text-xs text-slate-500 font-semibold">/ 100</span>
                 </div>
               </div>
             </div>
@@ -550,41 +550,41 @@ export default function AdminNilaiSayaPage() {
 
           {/* Attendance Summary */}
           {data.kehadiran && (
-            <div className="rounded-2xl border border-slate-200/80 bg-white grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 sm:divide-slate-200/80 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group transition-all duration-300 overflow-hidden">
-              <div className="p-4 group-hover:border-slate-800/80 transition-colors">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+            <div className="rounded-2xl border border-slate-200/80 bg-white grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 sm:divide-slate-200/80 shadow-xs hover:border-slate-300/90 hover:shadow-sm group transition-all duration-300 overflow-hidden">
+              <div className="p-4 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                   Hadir
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-emerald-600 group-hover:text-emerald-400 mt-1 transition-colors">
+                <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1 transition-colors">
                   {data.kehadiran.hadir}
                 </p>
               </div>
-              <div className="p-4 group-hover:border-slate-800/80 transition-colors">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+              <div className="p-4 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                   Izin
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-amber-600 group-hover:text-amber-400 mt-1 transition-colors">
+                <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1 transition-colors">
                   {data.kehadiran.izin}
                 </p>
               </div>
-              <div className="p-4 group-hover:border-slate-800/80 transition-colors">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+              <div className="p-4 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                   Sakit
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-blue-600 group-hover:text-blue-400 mt-1 transition-colors">
+                <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1 transition-colors">
                   {data.kehadiran.sakit}
                 </p>
               </div>
-              <div className="p-4 group-hover:border-slate-800/80 transition-colors">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+              <div className="p-4 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                   Alfa
                 </p>
-                <p className="text-2xl font-bold tabular-nums text-rose-600 group-hover:text-rose-400 mt-1 transition-colors">
+                <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1 transition-colors">
                   {data.kehadiran.alfa}
                 </p>
               </div>
-              <div className="p-4 col-span-2 sm:col-span-1 group-hover:border-slate-800/80 transition-colors">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+              <div className="p-4 col-span-2 sm:col-span-1 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                   % Kehadiran
                 </p>
                 <p
@@ -710,23 +710,23 @@ export default function AdminNilaiSayaPage() {
                     return (
                       <div
                         key={`${subj.namaMapel}-${idx}`}
-                        className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                        className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
                       >
                         <div>
                           {/* Header Mapel & Guru */}
-                          <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800 transition-colors flex items-start justify-between gap-2.5">
+                          <div className="pb-3.5 border-b border-slate-100 transition-colors flex items-start justify-between gap-2.5">
                             <div className="min-w-0 flex-1">
-                              <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2 transition-colors">
                                 {subj.isHomeroom ? (
-                                  <UserCheck className="h-4 w-4 text-amber-500 group-hover:text-amber-400 shrink-0" />
+                                  <UserCheck className="h-4 w-4 text-amber-500 shrink-0" />
                                 ) : (
-                                  <BookOpen className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0" />
+                                  <BookOpen className="h-4 w-4 text-blue-600 shrink-0" />
                                 )}
                                 <span className="truncate">{subj.labelMapel}</span>
                               </CardTitle>
-                              <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 truncate transition-colors">
+                              <CardDescription className="mt-1 text-xs text-slate-500 truncate transition-colors">
                                 {subj.isHomeroom ? "Wali Kelas" : "Guru Mapel"}:{" "}
-                                <span className="font-medium text-slate-700 group-hover:text-slate-300 transition-colors">
+                                <span className="font-medium text-slate-700 transition-colors">
                                   {subj.guruPengampu}
                                 </span>
                               </CardDescription>
@@ -742,9 +742,9 @@ export default function AdminNilaiSayaPage() {
 
                           {/* Komponen Nilai Akademik (Tugas, UTS, UAS, dll.) */}
                           {!subj.isHomeroom && subj.akademik && (
-                            <div className="pt-3.5 pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors space-y-2.5">
+                            <div className="pt-3.5 pb-3 border-b border-slate-100 transition-colors space-y-2.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                                   {subj.akademik.namaKriteria}
                                 </span>
                                 <div className="flex items-center gap-1.5">
@@ -774,15 +774,15 @@ export default function AdminNilaiSayaPage() {
                                   return (
                                     <div
                                       key={cat}
-                                      className="rounded-xl border border-slate-200/80 bg-slate-50/80 group-hover:bg-slate-800/70 group-hover:border-slate-700/80 px-2.5 py-2 text-center transition-colors"
+                                      className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-2.5 py-2 text-center transition-colors"
                                     >
-                                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 truncate">
+                                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                                         {cat}
                                       </p>
                                       <p
                                         className={`text-sm font-bold font-mono tabular-nums mt-0.5 transition-colors ${hasVal
                                             ? getScoreTone(val).text
-                                            : "text-slate-400 group-hover:text-slate-500"
+                                            : "text-slate-400 "
                                           }`}
                                       >
                                         {hasVal ? val : "-"}
@@ -796,7 +796,7 @@ export default function AdminNilaiSayaPage() {
 
                           {/* Kriteria Non-Akademik & Kehadiran di Mapel Ini */}
                           <div className="pt-3 space-y-2">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-slate-400 transition-colors">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 transition-colors">
                               Evaluasi Karakter & Presensi Mapel
                             </p>
                             <div className="space-y-1.5">
@@ -805,7 +805,7 @@ export default function AdminNilaiSayaPage() {
                                   key={kl.criteriaId}
                                   className="flex items-center justify-between text-xs"
                                 >
-                                  <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                                  <span className="text-slate-600 transition-colors">
                                     {kl.namaKriteria}
                                   </span>
                                   <span
@@ -816,8 +816,8 @@ export default function AdminNilaiSayaPage() {
                                   </span>
                                 </div>
                               ))}
-                              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 group-hover:border-slate-800/60 transition-colors">
-                                <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100/80 transition-colors">
+                                <span className="text-slate-600 transition-colors">
                                   Kehadiran Mapel
                                 </span>
                                 <span
@@ -834,9 +834,9 @@ export default function AdminNilaiSayaPage() {
                         </div>
 
                         {/* Footer Rata-rata Mapel */}
-                        <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800 transition-colors">
+                        <div className="mt-4 pt-3 border-t border-slate-100 transition-colors">
                           <div className="flex items-center justify-between text-xs mb-1.5">
-                            <span className="text-slate-500 group-hover:text-slate-400 font-medium transition-colors">
+                            <span className="text-slate-500 font-medium transition-colors">
                               Rata-Rata Evaluasi Mapel
                             </span>
                             <span
@@ -845,9 +845,9 @@ export default function AdminNilaiSayaPage() {
                               {subj.rataRataMapel !== null ? subj.rataRataMapel : "-"}
                             </span>
                           </div>
-                          <div className="w-full bg-slate-100 group-hover:bg-slate-800 h-1.5 rounded-xs overflow-hidden transition-colors">
+                          <div className="w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden transition-colors">
                             <div
-                              className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                              className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -976,17 +976,17 @@ export default function AdminNilaiSayaPage() {
                         return (
                           <TableRow
                             key={`${subj.namaMapel}-${idx}`}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                            className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                           >
-                            <TableCell className="pl-5 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                            <TableCell className="pl-5 font-semibold text-slate-800 transition-colors">
                               {subj.labelMapel}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                            <TableCell className="text-xs text-slate-600 transition-colors">
                               {subj.guruPengampu}
                             </TableCell>
                             <TableCell>
                               {subj.isHomeroom ? (
-                                <span className="text-xs text-slate-400 group-hover/row:text-slate-500 italic">
+                                <span className="text-xs text-slate-400 italic">
                                   Evaluasi Umum Wali Kelas
                                 </span>
                               ) : kompItems.length > 0 ? (
@@ -994,9 +994,9 @@ export default function AdminNilaiSayaPage() {
                                   {kompItems.map(({ cat, val }) => (
                                     <span
                                       key={cat}
-                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 group-hover/row:bg-slate-800 group-hover/row:text-slate-200 border border-slate-200 group-hover/row:border-slate-700 transition-colors"
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 border border-slate-200 transition-colors"
                                     >
-                                      <span className="text-slate-500 group-hover/row:text-slate-400 font-sans">
+                                      <span className="text-slate-500 font-sans">
                                         {cat}:
                                       </span>
                                       <span
@@ -1171,24 +1171,24 @@ export default function AdminNilaiSayaPage() {
                   return (
                     <div
                       key={c.id}
-                      className="rounded-2xl border border-slate-200/90 bg-white p-5 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+                      className="rounded-2xl border border-slate-200/90 bg-white p-5 hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between"
                     >
-                      <div className="pb-3 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                      <div className="pb-3 border-b border-slate-100 transition-colors">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
+                            <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2 transition-colors">
                               {c.tipe === "Otomatis" ? (
-                                <CheckCircle2 className="h-4 w-4 text-blue-600 group-hover:text-blue-400 shrink-0 transition-colors" />
+                                <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 transition-colors" />
                               ) : (
-                                <BookOpen className="h-4 w-4 text-indigo-600 group-hover:text-indigo-400 shrink-0 transition-colors" />
+                                <BookOpen className="h-4 w-4 text-indigo-600 shrink-0 transition-colors" />
                               )}
                               <span className="truncate">{c.namaKriteria}</span>
                             </CardTitle>
-                            <CardDescription className="mt-1 text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                            <CardDescription className="mt-1 text-xs text-slate-500 transition-colors">
                               {c.deskripsi || `Bobot evaluasi ${c.bobot}%`}
                             </CardDescription>
                           </div>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs tabular-nums font-semibold bg-slate-100 group-hover:bg-slate-800 group-hover:text-slate-200 border border-slate-200 group-hover:border-slate-700 shrink-0 transition-colors">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs tabular-nums font-semibold bg-slate-100 border border-slate-200 shrink-0 transition-colors">
                             {c.bobot}%
                           </span>
                         </div>
@@ -1196,7 +1196,7 @@ export default function AdminNilaiSayaPage() {
                       <div className="pt-4">
                         <div className="flex items-end justify-between">
                           <div>
-                            <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
+                            <p className="text-xs text-slate-500 mb-0.5 transition-colors">
                               Nilai Rata-Rata
                             </p>
                             <div className="flex items-center gap-2">
@@ -1213,34 +1213,34 @@ export default function AdminNilaiSayaPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-xs text-slate-500 group-hover:text-slate-400 mb-0.5 transition-colors">
+                            <p className="text-xs text-slate-500 mb-0.5 transition-colors">
                               Skor Terbobot SAW
                             </p>
-                            <p className="text-base font-bold tabular-nums text-slate-900 group-hover:text-white transition-colors">
+                            <p className="text-base font-bold tabular-nums text-slate-900 transition-colors">
                               {c.nilaiTerbobot}
                             </p>
-                            <p className="text-xs text-slate-400 group-hover:text-slate-500 tabular-nums transition-colors">
+                            <p className="text-xs text-slate-400 tabular-nums transition-colors">
                               (R: {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)} × {c.bobot}%)
                             </p>
                           </div>
                         </div>
 
                         {/* Progress bar */}
-                        <div className="mt-3 w-full bg-slate-100 group-hover:bg-slate-800/80 h-1.5 rounded-xs overflow-hidden transition-colors">
+                        <div className="mt-3 w-full bg-slate-100 h-1.5 rounded-xs overflow-hidden transition-colors">
                           <div
-                            className="bg-[#1e3a8a] group-hover:bg-blue-500 h-full rounded-xs transition-all"
+                            className="bg-[#1e3a8a] h-full rounded-xs transition-all"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
 
                         {/* Per-Mapel detail if any (with bounded max-height scroll for 20+ mapels) */}
                         {Object.keys(c.detailMapel).length > 0 && (
-                          <div className="mt-4 pt-3 border-t border-slate-100 group-hover:border-slate-800/80 transition-colors">
+                          <div className="mt-4 pt-3 border-t border-slate-100 transition-colors">
                             <div className="flex items-center justify-between mb-2">
-                              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
                                 Rincian Per Mata Pelajaran
                               </p>
-                              <span className="text-[10px] font-mono text-slate-400 group-hover:text-slate-500">
+                              <span className="text-[10px] font-mono text-slate-400 ">
                                 {Object.keys(c.detailMapel).length} Mapel
                               </span>
                             </div>
@@ -1260,7 +1260,7 @@ export default function AdminNilaiSayaPage() {
                                   return (
                                     <div key={mapel} className="space-y-0.5">
                                       <div className="flex items-center justify-between text-xs">
-                                        <span className="text-slate-700 font-medium group-hover:text-slate-200 truncate mr-2 transition-colors">
+                                        <span className="text-slate-700 font-medium truncate mr-2 transition-colors">
                                           {mapel}
                                         </span>
                                         <span
@@ -1271,7 +1271,7 @@ export default function AdminNilaiSayaPage() {
                                         </span>
                                       </div>
                                       {katEntries.length > 0 && (
-                                        <p className="text-[11px] text-slate-400 group-hover:text-slate-400 font-mono truncate transition-colors">
+                                        <p className="text-[11px] text-slate-400 font-mono truncate transition-colors">
                                           {katEntries
                                             .map(([k, v]) => `${k}: ${v}`)
                                             .join(" · ")}
@@ -1319,22 +1319,22 @@ export default function AdminNilaiSayaPage() {
                       {data.criteria.map((c) => (
                         <TableRow
                           key={c.id}
-                          className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                          className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                         >
-                          <TableCell className="pl-6 font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                          <TableCell className="pl-6 font-semibold text-slate-800 transition-colors">
                             {c.namaKriteria}
                           </TableCell>
                           <TableCell className="text-center">
                             <span
                               className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${c.tipe === "Otomatis"
-                                  ? "border-blue-200 text-[#1e3a8a] bg-blue-50 group-hover/row:bg-blue-500/15 group-hover/row:border-blue-500/30 group-hover/row:text-blue-300"
-                                  : "border-indigo-200 text-indigo-700 bg-indigo-50 group-hover/row:bg-indigo-500/15 group-hover/row:border-indigo-500/30 group-hover/row:text-indigo-300"
+                                  ? "border-blue-200 text-[#1e3a8a] bg-blue-50"
+                                  : "border-indigo-200 text-indigo-700 bg-indigo-50"
                                 }`}
                             >
                               {c.tipe}
                             </span>
                           </TableCell>
-                          <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                          <TableCell className="text-center font-mono text-slate-600 transition-colors">
                             {c.bobot}%
                           </TableCell>
                           <TableCell
@@ -1343,23 +1343,23 @@ export default function AdminNilaiSayaPage() {
                           >
                             {c.nilaiRataRata}
                           </TableCell>
-                          <TableCell className="text-center font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                          <TableCell className="text-center font-mono text-slate-600 transition-colors">
                             {(c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)}
                           </TableCell>
-                          <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 group-hover/row:text-white transition-colors">
+                          <TableCell className="text-right pr-6 font-mono font-bold text-slate-900 transition-colors">
                             {c.nilaiTerbobot}
                           </TableCell>
                         </TableRow>
                       ))}
                       {/* Total Row */}
-                      <TableRow className="group/row bg-slate-50/90 hover:bg-[#091524] border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
+                      <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
                         <TableCell
                           colSpan={5}
-                          className="pl-6 font-bold text-slate-900 group-hover/row:text-white transition-colors"
+                          className="pl-6 font-bold text-slate-900 transition-colors"
                         >
                           Total Akumulasi Skor SPK SAW
                         </TableCell>
-                        <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 group-hover/row:text-amber-300 transition-colors">
+                        <TableCell className="text-right pr-6 font-mono font-extrabold text-base text-blue-600 transition-colors">
                           {data.totalSkorSPK}
                         </TableCell>
                       </TableRow>
