@@ -577,12 +577,12 @@ export default function GuruAbsensiPage() {
 
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap Matriks");
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kehadiran");
     XLSX.writeFile(
       wb,
-      `rekap_matriks_${selectedKelas}_${selectedMapel}.xlsx`
+      `rekap_kehadiran_${selectedKelas}_${selectedMapel}.xlsx`
     );
-    toast.success("Rekap matriks absensi berhasil diekspor!");
+    toast.success("Rekap kehadiran berhasil diekspor");
   };
 
   const totalDatesCount = historyData.dates.length;
@@ -1082,7 +1082,7 @@ export default function GuruAbsensiPage() {
                 <div className="pb-3 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                      Matriks Riwayat Kehadiran ({selectedMapel})
+                      Tabel Riwayat Kehadiran ({selectedMapel})
                       {loadingHistory && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
                       )}
@@ -1131,7 +1131,7 @@ export default function GuruAbsensiPage() {
                         className="h-8 gap-1.5 text-xs font-semibold bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-2xs self-start md:self-auto"
                       >
                         <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
-                        Ekspor Rekap Matriks
+                        Ekspor Rekap Kehadiran
                       </Button>
                     )}
                   </div>

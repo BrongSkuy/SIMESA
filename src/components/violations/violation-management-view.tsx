@@ -647,9 +647,9 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
 
   return (
     <div className="space-y-0 pb-10">
-      {/* 1. COMPACT ASYMMETRIC HERO HEADER (Konsep 1 — Deep Navy + Foto Gaya Login + 1 Strip Metrik) */}
+      {/* 1. COMPACT ASYMMETRIC HERO HEADER (Konsep 1 - Deep Navy + Foto Gaya Login + 1 Strip Metrik) */}
       <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-6 pb-16 sm:pb-20 bg-[#091424] border-b border-white/10 text-white">
-        {/* Foto Latar Tunggal Gaya Login — Jelas di sisi kanan, melebur halus ke navy di kiri */}
+        {/* Foto Latar Tunggal Gaya Login - Jelas di sisi kanan, melebur halus ke navy di kiri */}
         {headerBgLoaded && (
           <Image
             src="/bg-buku-poin.jpg"
@@ -670,7 +670,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                Kedisiplinan Siswa • {portal === "admin" ? "Portal Admin" : "Portal Guru"}
+                Kedisiplinan Siswa | {portal === "admin" ? "Portal Admin" : "Portal Guru"}
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 Buku Poin dan Kedisiplinan Siswa
@@ -888,7 +888,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 {s.namaLengkap}
                               </p>
                               <p className="text-[11px] text-slate-500 font-mono truncate">
-                                {s.kelas} • NIS {s.nis}
+                                {s.kelas} | NIS {s.nis}
                               </p>
                             </div>
                           </div>
@@ -929,7 +929,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                           {activeStudent.namaLengkap}
                         </h3>
                         <p className="text-xs font-mono text-slate-600">
-                          NIS {activeStudent.nis} • Kelas {activeStudent.kelas}
+                          NIS {activeStudent.nis} | Kelas {activeStudent.kelas}
                         </p>
                       </div>
 
@@ -1116,7 +1116,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                               <div className="min-w-0 flex-1 space-y-0.5">
                                 <p className="text-xs text-slate-800 leading-snug">
                                   <span className="font-mono font-semibold text-slate-600 mr-1.5">
-                                    {formatShortDateId(v.tanggal)} —
+                                    {formatShortDateId(v.tanggal)} -
                                   </span>
                                   <span className="font-bold text-slate-900">
                                     {v.namaPelanggaran}
@@ -1777,7 +1777,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
               <span>Terbitkan Surat Peringatan (SP)</span>
             </DialogTitle>
             <p className="text-xs text-slate-500">
-              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) • Akumulasi:{" "}
+              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) | Akumulasi:{" "}
               <strong className="text-red-600">{targetStudentForSp?.totalPoints} Poin</strong>
             </p>
           </DialogHeader>

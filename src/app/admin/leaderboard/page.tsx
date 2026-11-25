@@ -47,6 +47,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface SpkResult {
   studentId: string;
@@ -304,19 +313,19 @@ export default function AdminLeaderboardPage() {
     // Susun data tabel dengan kop formal
     const sheetData: (string | number)[][] = [
       ["DAFTAR PENILAIAN BELUM LENGKAP (SPK SAW)"],
-      ["SMK PENERBANGAN DIRGANTARA — SIMESA"],
-      [`Periode / Semester: ${periode}`],
+      ["SMK PENERBANGAN DIRGANTARA - SIMESA"],
+      [`Periode Semester: ${periode}`],
       [`Waktu Ekspor: ${exportTime} WIB`],
       [
-        "Catatan: Mohon Bapak/Ibu Guru pengajar atau Wali Kelas melengkapi item penilaian berikut sebelum perilisan leaderboard resmi.",
+        "Catatan: Mohon Bapak dan Ibu Guru pengajar atau Wali Kelas melengkapi item penilaian berikut sebelum perilisan leaderboard resmi.",
       ],
       [], // Baris kosong pemisah
       [
         "No",
-        "Siswa / Cakupan",
+        "Siswa atau Cakupan",
         "Kelas",
-        "Kriteria / Mata Pelajaran",
-        "Status / Penyebab",
+        "Kriteria atau Mata Pelajaran",
+        "Status dan Penyebab",
       ],
     ];
 
@@ -449,7 +458,7 @@ export default function AdminLeaderboardPage() {
           onClick={handleExportPDF}
           disabled={data.length === 0}
         >
-          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak / PDF
+          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak PDF
         </Button>
       </PageHeader>
 
@@ -457,10 +466,13 @@ export default function AdminLeaderboardPage() {
         dangerouslySetInnerHTML={{
           __html: `
         @media print {
-          body * { visibility: hidden; }
-          .print-area, .print-area * { visibility: visible; }
-          .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-          .hide-on-print { display: none !important; }
+          header, nav, footer, .hide-on-print { display: none !important; }
+          .print-area {
+            position: static !important;
+            width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
         }
       `,
         }}
@@ -594,48 +606,48 @@ export default function AdminLeaderboardPage() {
 
           {/* Validation Notice Panel inside Status card */}
           {hasMissing && !publishStatus.isPublished && (
-            <div className="mt-5 p-4 rounded-lg bg-amber-950/40 border border-amber-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="mt-5 p-4 rounded-xl bg-amber-50 border border-amber-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex gap-3 items-start">
-                <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-amber-200">
+                  <h4 className="text-xs font-bold text-amber-900">
                     Validasi Kriteria Belum Lengkap ({validation?.missing.length}{" "}
                     Item Kosong)
                   </h4>
-                  <p className="text-xs text-amber-300/80 leading-relaxed mt-0.5">
+                  <p className="text-xs text-amber-800/90 leading-relaxed mt-0.5">
                     Beberapa nilai kriteria manual belum diinput oleh guru atau
                     siswa belum tercatat pada presensi periode aktif.
                   </p>
                 </div>
               </div>
 
-              <AlertDialog
+              <Dialog
                 open={showMissingDialog}
                 onOpenChange={setShowMissingDialog}
               >
-                <AlertDialogTrigger
+                <DialogTrigger
                   render={
                     <Button
                       variant="outline"
                       size="sm"
-                      className="bg-amber-950/60 border-amber-700 text-amber-200 hover:bg-amber-900/70 hover:text-white whitespace-nowrap shrink-0"
+                      className="bg-white border-amber-300 text-amber-900 hover:bg-amber-100 hover:border-amber-400 whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       Lihat Rincian Kosong
                     </Button>
                   }
                 />
-                <AlertDialogContent className="max-w-2xl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="flex items-center gap-2 text-slate-900">
+                <DialogContent className="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-slate-900">
                       <AlertTriangle className="h-5 w-5 text-amber-500" />
                       Daftar Penilaian Kosong (SPK SAW)
-                    </AlertDialogTitle>
-                    <AlertDialogDescription className="text-slate-500 text-xs">
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-500 text-xs">
                       Item penilaian berikut belum dilengkapi untuk semester
                       aktif ({publishStatus.periode}). Lengkapi seluruh item
                       sebelum merilis leaderboard resmi.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
+                    </DialogDescription>
+                  </DialogHeader>
 
                   <div className="my-3 border border-slate-200 rounded-lg max-h-[300px] overflow-y-auto bg-white">
                     <Table>
@@ -645,7 +657,7 @@ export default function AdminLeaderboardPage() {
                           <TableHead className="py-2.5">Kelas</TableHead>
                           <TableHead className="py-2.5">Kriteria</TableHead>
                           <TableHead className="py-2.5 pr-4">
-                            Status / Penyebab
+                            Status dan Penyebab
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -672,7 +684,7 @@ export default function AdminLeaderboardPage() {
                     </Table>
                   </div>
 
-                  <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                  <DialogFooter className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
                     <div className="text-xs text-slate-500 text-left">
                       Total:{" "}
                       <span className="font-semibold text-slate-800 font-mono">
@@ -680,39 +692,31 @@ export default function AdminLeaderboardPage() {
                       </span>{" "}
                       item belum lengkap
                     </div>
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="text-xs gap-1.5 border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-medium"
-                        onClick={handleExportMissingExcel}
-                        disabled={!validation?.missing || validation.missing.length === 0}
-                      >
-                        <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                        Unduh Excel (.xlsx)
-                      </Button>
-                      <AlertDialogAction
-                        onClick={() => setShowMissingDialog(false)}
-                        className="text-xs"
-                      >
-                        Tutup Rincian
-                      </AlertDialogAction>
-                    </div>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs gap-1.5 border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-medium"
+                      onClick={handleExportMissingExcel}
+                      disabled={!validation?.missing || validation.missing.length === 0}
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                      Unduh Excel (.xlsx)
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 
           {!hasMissing && !publishStatus.isPublished && (
-            <div className="mt-5 p-4 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center gap-3">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <div className="mt-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200/90 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
               <div>
-                <h4 className="text-xs font-bold text-emerald-200">
+                <h4 className="text-xs font-bold text-emerald-900">
                   Validasi Penilaian Lengkap (100%)
                 </h4>
-                <p className="text-xs text-emerald-300/80 leading-relaxed">
+                <p className="text-xs text-emerald-800/90 leading-relaxed mt-0.5">
                   Seluruh kriteria manual dan otomatis telah terisi untuk setiap
                   siswa. Hasil perhitungan SPK SAW siap dipublikasikan.
                 </p>
@@ -741,6 +745,7 @@ export default function AdminLeaderboardPage() {
                 : "Kalkulasi normalisasi matriks SPK..."
             }
             period={publishStatus?.periode || "Aktif"}
+            badgeMethod="Metode SAW Multi-Kriteria"
             activeTab={activeTab}
             onTabChange={setActiveTab}
             classes={classes}

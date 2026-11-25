@@ -719,7 +719,7 @@ export function CounselingManagementView() {
                         </div>
                       </div>
 
-                      {/* Catatan Konseling Langsung — Tipografi Bersih Tanpa Kotak Bersarang & Tanpa Ikon Dekoratif */}
+                      {/* Catatan Konseling Langsung - Tipografi Bersih Tanpa Kotak Bersarang & Tanpa Ikon Dekoratif */}
                       <div className="divide-y divide-slate-100">
                         <div className="pb-4 space-y-1">
                           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -768,7 +768,7 @@ export function CounselingManagementView() {
                     <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
                         <span>Layanan: {activeSession.jenisLayanan}</span>
-                        <span>•</span>
+                        <span>|</span>
                         <span className="font-mono">NIS {activeSession.studentNis}</span>
                       </div>
 
@@ -909,7 +909,7 @@ export function CounselingManagementView() {
                                 {log.studentName}
                               </span>
                               <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400">
-                                Kelas {log.studentKelas} • Pengamat: {log.recorderName}
+                                Kelas {log.studentKelas} | Pengamat: {log.recorderName}
                               </span>
                             </TableCell>
                             <TableCell className="align-top">
@@ -1021,7 +1021,7 @@ export function CounselingManagementView() {
                                 {disp.studentName}
                               </span>
                               <span className="text-[11px] font-mono text-slate-500 group-hover/row:text-slate-400">
-                                Kelas {disp.studentKelas} • NIS {disp.studentNis}
+                                Kelas {disp.studentKelas} | NIS {disp.studentNis}
                               </span>
                             </TableCell>
                             <TableCell className="text-xs align-top whitespace-nowrap">

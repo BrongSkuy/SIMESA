@@ -434,7 +434,7 @@ export default function SiswaEraporPage() {
           </div>
         </div>
       ) : (
-        <ReportCardPrintView data={data} />
+        <ReportCardPrintView data={data} hideToolbar />
       )}
     </div>
   );

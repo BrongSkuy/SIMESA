@@ -179,7 +179,7 @@ export function StudentViolationView() {
                       {profile.student.namaLengkap}
                     </h2>
                     <p className="text-xs text-slate-300 font-mono">
-                      NIS {profile.student.nis} • Kelas {profile.student.kelas}
+                      NIS {profile.student.nis} | Kelas {profile.student.kelas}
                     </p>
                   </div>
 
@@ -210,7 +210,7 @@ export function StudentViolationView() {
                         {profile.tier.status}
                       </span>
                       <p className="text-[11px] text-slate-300">
-                        {profile.violations.length} catatan •{" "}
+                        {profile.violations.length} catatan |{" "}
                         {profile.breakdown.selesaiDibina} selesai dibina
                       </p>
                     </div>

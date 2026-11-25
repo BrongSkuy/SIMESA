@@ -281,7 +281,7 @@ export function QuickCounselingModal({
                     if (!val) return "Pilih nama siswa atau nomor induk siswa...";
                     const student = studentsList.find((s) => s.id === val);
                     return student
-                      ? `${student.namaLengkap} • NIS ${student.nis} • Kelas ${student.kelas}`
+                      ? `${student.namaLengkap} | NIS ${student.nis} | Kelas ${student.kelas}`
                       : "Pilih nama siswa atau nomor induk siswa...";
                   }}
                 </SelectValue>
@@ -289,7 +289,7 @@ export function QuickCounselingModal({
               <SelectContent className="max-h-56">
                 {studentsList.map((s) => (
                   <SelectItem key={s.id} value={s.id} className="text-xs">
-                    {s.namaLengkap} • NIS {s.nis} • Kelas {s.kelas}
+                    {s.namaLengkap} | NIS {s.nis} | Kelas {s.kelas}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -338,10 +338,10 @@ export default function GuruDashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-slate-800 transition-colors">
-                      Input Nilai Kriteria SPK
+                      Input Nilai Penilaian
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5 transition-colors">
-                      Tugas, UTS, UAS & kriteria
+                      Tugas, UTS, UAS, dan aspek sikap
                     </p>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ export default function GuruDashboard() {
                       Peringkat Siswa
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5 transition-colors">
-                      Hasil pemeringkatan resmi SAW
+                      Hasil pemeringkatan siswa berprestasi
                     </p>
                   </div>
                 </div>

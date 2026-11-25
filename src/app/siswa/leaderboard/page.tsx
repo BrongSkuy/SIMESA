@@ -212,9 +212,9 @@ export default function SiswaLeaderboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Peringkat Siswa Berprestasi (SPK SAW)"
+        title="Peringkat Siswa Berprestasi"
         badge="Portal Siswa"
-        description="Hasil resmi pemeringkatan siswa terbaik berdasarkan kalkulasi Simple Additive Weighting semester aktif"
+        description="Daftar resmi siswa berprestasi berdasarkan rekap penilaian semester aktif"
         icon={Trophy}
       />
 
@@ -241,9 +241,9 @@ export default function SiswaLeaderboardPage() {
 
             <div className="p-6 space-y-5">
               <p className="text-xs text-slate-600 leading-relaxed transition-colors">
-                Hasil Sistem Pendukung Keputusan (SPK) SAW penentuan siswa
-                berprestasi masih dalam tahap rekapitulasi akhir oleh pihak
-                sekolah. Peringkat resmi akan dipublikasikan secara serentak.
+                Hasil pemeringkatan siswa berprestasi masih dalam tahap
+                rekapitulasi akhir oleh pihak sekolah. Peringkat resmi akan
+                dipublikasikan secara serentak.
               </p>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3 transition-colors">
@@ -342,7 +342,7 @@ export default function SiswaLeaderboardPage() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs transition-colors">
                       <span className="text-slate-500 transition-colors">
-                        Nilai Akhir SAW
+                        Skor Prestasi
                       </span>
                       <span className="tabular-nums font-bold text-slate-900 transition-colors">
                         {student.rawScore.toFixed(4)} ({student.persentase}%)
@@ -366,7 +366,7 @@ export default function SiswaLeaderboardPage() {
                     ? "Tabel Peringkat Siswa Berprestasi"
                     : `Peringkat Siswa Kelas ${myData?.kelas || ""}`
                 }
-                subtitle="Hasil resmi pemeringkatan multi-kriteria periode aktif metode SAW"
+                subtitle="Hasil resmi pemeringkatan siswa berprestasi semester aktif"
                 period={activePeriodeName}
                 showTabs={false}
               >
@@ -415,7 +415,7 @@ export default function SiswaLeaderboardPage() {
                           Kelas
                         </TableHead>
                         <TableHead className="font-semibold text-slate-600">
-                          Indeks SAW
+                          Skor Akhir
                         </TableHead>
                         <TableHead className="text-center font-semibold text-slate-600">
                           Skor (%)
@@ -517,7 +517,7 @@ export default function SiswaLeaderboardPage() {
                             colSpan={6}
                             className="text-center py-10 text-xs text-slate-500"
                           >
-                            Belum ada data perhitungan SPK untuk kategori ini.
+                            Belum ada data peringkat untuk kategori ini.
                           </TableCell>
                         </TableRow>
                       )}

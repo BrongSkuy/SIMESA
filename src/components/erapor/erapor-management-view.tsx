@@ -473,18 +473,6 @@ export function EraporManagementView({
     }
   };
 
-  // Jika sedang membuka pratinjau cetak rapor seorang siswa:
-  if (activeReportData) {
-    return (
-      <div className="min-h-screen bg-slate-50 p-4">
-        <ReportCardPrintView
-          data={activeReportData}
-          onBack={() => setActiveReportData(null)}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -622,7 +610,7 @@ export function EraporManagementView({
                 <span className="font-semibold text-slate-900 ">
                   {summaryData.waliKelas}
                 </span>
-                <span className="text-slate-300 ">•</span>
+                <span className="text-slate-300 ">|</span>
                 <span className="text-slate-500 font-medium">
                   Periode:
                 </span>
@@ -644,12 +632,12 @@ export function EraporManagementView({
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-500 mt-0.5">
                   Menampilkan {filteredStudents.length} dari{" "}
-                  {summaryData?.students.length || 0} siswa • Nilai akhir
+                  {summaryData?.students.length || 0} siswa | Nilai akhir
                   dihitung dengan metode bagi rata murni
                 </CardDescription>
               </div>
 
-              {/* Legend Warna Penanda KKM (Opsi A — 3 Warna Dinamis) */}
+              {/* Legend Warna Penanda KKM (Opsi A - 3 Warna Dinamis) */}
               <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1.5">
                 <span className="text-slate-500 font-semibold">
                   Penanda KKM ({activeDefaultKkm}):
@@ -895,10 +883,9 @@ export function EraporManagementView({
                                 {s.namaLengkap}
                               </span>
                               <span className="text-[11px] text-slate-500 transition-colors">
-                                {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} •
-                                Hadir: {s.presensi.hadir} • Sakit:{" "}
-                                {s.presensi.sakit} • Izin: {s.presensi.izin} •
-                                Alfa: {s.presensi.alfa}
+                                {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} | Hadir:{" "}
+                                {s.presensi.hadir}, Sakit: {s.presensi.sakit}, Izin:{" "}
+                                {s.presensi.izin}, Alfa: {s.presensi.alfa}
                               </span>
                             </div>
                           </div>
@@ -1332,7 +1319,7 @@ export function EraporManagementView({
             <DialogTitle>Catatan Wali Kelas dan Ekstrakurikuler</DialogTitle>
             <DialogDescription>
               {selectedStudentForNote
-                ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) — Kelas ${selectedKelas}`
+                ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) - Kelas ${selectedKelas}`
                 : "Pengisian catatan evaluasi siswa"}
             </DialogDescription>
           </DialogHeader>
@@ -1479,6 +1466,30 @@ export function EraporManagementView({
               Simpan Catatan
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL PRATINJAU CETAK E-RAPOR INTERNAL (SERAGAM DENGAN SP DAN DISPENSASI) */}
+      <Dialog
+        open={Boolean(activeReportData)}
+        onOpenChange={(open) => {
+          if (!open) setActiveReportData(null);
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="sm:max-w-5xl gap-0 p-0 overflow-hidden bg-slate-100 border border-slate-200"
+        >
+          <DialogTitle className="sr-only">
+            Pratinjau E-Rapor Internal
+          </DialogTitle>
+          {activeReportData && (
+            <ReportCardPrintView
+              data={activeReportData}
+              onBack={() => setActiveReportData(null)}
+              inModal
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

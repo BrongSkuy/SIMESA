@@ -545,7 +545,7 @@ export default function GuruNilaiPage() {
       <PageHeader
         title="Input Nilai Multi-Kategori"
         badge="Portal Guru"
-        description="Kelola komponen penilaian Tugas, UTS, UAS, Praktek, maupun kriteria non-akademik SPK SAW"
+        description="Kelola penilaian Tugas, UTS, UAS, Praktik, dan aspek penilaian sikap siswa"
         icon={PenLine}
       >
         {showGrid && (
@@ -647,7 +647,7 @@ export default function GuruNilaiPage() {
             icon={PenLine}
             eyebrow="Langkah 1 dari 2"
             title="Mulai Sesi Penilaian Siswa"
-            description="Pilih target kelas penugasan, mata pelajaran, dan kriteria evaluasi SPK SAW untuk membuka lembar pengisian nilai."
+            description="Pilih kelas penugasan, mata pelajaran, dan aspek penilaian untuk membuka lembar pengisian nilai."
             submitLabel="Buka Lembar Penilaian"
             onSubmit={handleLoad}
             loading={loading}
@@ -700,7 +700,7 @@ export default function GuruNilaiPage() {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-slate-700">
-                Kriteria Penilaian SPK
+                Aspek Penilaian
               </Label>
               <Select
                 value={selectedCriteria}

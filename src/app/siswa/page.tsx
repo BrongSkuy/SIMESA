@@ -345,7 +345,7 @@ export default function SiswaDashboard() {
                   Top 5 Kelas {profile.kelas}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Peringkat skor SPK resmi di kelas Anda
+                  Peringkat siswa berprestasi di kelas Anda
                 </p>
               </div>
               <Link

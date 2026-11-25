@@ -222,7 +222,7 @@ export function StudentCounselingView() {
                     {featuredDispensation && featuredDispensation.statusDispensasi === "Aktif" ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-400/20 text-emerald-200 border border-emerald-300/35 whitespace-nowrap">
                         <CheckCircle2 className="w-3 h-3" />
-                        Aktif • Sah
+                        Aktif | Sah
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-teal-100 border border-white/15 whitespace-nowrap">
@@ -240,13 +240,13 @@ export function StudentCounselingView() {
                         <p className="flex items-center gap-2">
                           <User className="w-3.5 h-3.5 text-teal-200 shrink-0" />
                           <span>
-                            {profile.student.namaLengkap} • Kelas {profile.student.kelas}
+                            {profile.student.namaLengkap} | Kelas {profile.student.kelas}
                           </span>
                         </p>
                         <p className="flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-teal-200 shrink-0" />
                           <span>
-                            {formatTanggalIndonesia(featuredDispensation.tanggal)} •{" "}
+                            {formatTanggalIndonesia(featuredDispensation.tanggal)} |{" "}
                             {formatRentangWaktu(
                               featuredDispensation.jamMulai,
                               featuredDispensation.jamSelesai
@@ -296,7 +296,7 @@ export function StudentCounselingView() {
                         Ruang Aman BK
                       </h2>
                       <p className="text-xs text-slate-500">
-                        {profile.student.namaLengkap} • NIS {profile.student.nis}
+                        {profile.student.namaLengkap} | NIS {profile.student.nis}
                       </p>
                     </div>
                   </div>
@@ -500,7 +500,7 @@ export function StudentCounselingView() {
                               </div>
                             </div>
                             <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] font-mono transition-colors">
-                              {formatTanggalIndonesia(item.tanggal)} • Pukul {item.waktuMulai} - {item.waktuSelesai} • {item.counselorName}
+                              {formatTanggalIndonesia(item.tanggal)} | Pukul {item.waktuMulai} - {item.waktuSelesai} | {item.counselorName}
                             </p>
                             <p className="text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 line-clamp-2 transition-colors">
                               {item.pokokMasalah}
@@ -558,7 +558,7 @@ export function StudentCounselingView() {
                               {disp.keperluan}
                             </p>
                             <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] transition-colors">
-                              {formatTanggalIndonesia(disp.tanggal)} •{" "}
+                              {formatTanggalIndonesia(disp.tanggal)} |{" "}
                               {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                             </p>
                           </div>

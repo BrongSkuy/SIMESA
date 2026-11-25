@@ -216,8 +216,8 @@ export function WarningLetterPrintModal({
             <div class="kop-text">
               <h3>Yayasan Pendidikan Kedirgantaraan Nusantara</h3>
               <h2>SMK Penerbangan Dirgantara</h2>
-              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara, Tangerang • Telp. (021) 876-5432</p>
-              <p>Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A</p>
+              <p>Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara, Tangerang | Telp. (021) 876-5432</p>
+              <p>Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A</p>
             </div>
           </div>
 
@@ -371,7 +371,10 @@ export function WarningLetterPrintModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 border border-slate-200">
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-4xl p-0 gap-0 overflow-hidden bg-slate-100 border border-slate-200"
+      >
         <DialogHeader className="p-4 bg-white border-b border-slate-200 flex flex-row items-center justify-between space-y-0 print:hidden">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-red-500/10 text-red-600 ">
@@ -386,23 +389,23 @@ export function WarningLetterPrintModal({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={handlePrint}
               size="sm"
               className="bg-[#1F4E78] hover:bg-[#163a5c] text-white flex items-center gap-1.5 shadow-sm font-semibold cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak Dokumen Resmi</span>
+              <span>Cetak Dokumen (A4)</span>
             </Button>
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onOpenChange(false)}
-              className="cursor-pointer"
+              aria-label="Tutup pratinjau"
+              className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-4 h-4" />
-              <span>Tutup</span>
             </Button>
           </div>
         </DialogHeader>
@@ -433,10 +436,10 @@ export function WarningLetterPrintModal({
                     SMK Penerbangan Dirgantara
                   </h1>
                   <p className="text-[11px] text-slate-600 font-sans mt-0.5">
-                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara • Telp. (021) 876-5432
+                    Jl. Protokol Bandara No. 45, Kompleks Edukasi Dirgantara | Telp. (021) 876-5432
                   </p>
                   <p className="text-[10px] text-slate-500 font-sans">
-                    Email: info@smkpenerbangan.sch.id • NPSN: 20109988 • Terakreditasi A
+                    Email: info@smkpenerbangan.sch.id | NPSN: 20109988 | Terakreditasi A
                   </p>
                 </div>
               </div>

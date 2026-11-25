@@ -177,8 +177,9 @@ export default function AdminSpkPage() {
                   {isValid ? "Valid (100%)" : "Belum Seimbang"}
                 </span>
                 {hasChanges && !saved && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-colors">
-                    • Belum Disimpan
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-colors">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    Belum Disimpan
                   </span>
                 )}
                 {saved && !hasChanges && (

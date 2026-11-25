@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HeaderBackdrop } from "@/components/shared/header-backdrop";
 
 interface PageHeaderProps {
   title: string;
@@ -28,6 +29,7 @@ export function PageHeader({
         className
       )}
     >
+      <HeaderBackdrop />
       <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-3">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center justify-center gap-2.5">

@@ -776,18 +776,6 @@ export function ActivityLogView() {
               </div>
             </div>
           )}
-
-          <DialogFooter className="pt-3 border-t border-slate-100 ">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedLog(null)}
-              className="rounded-xl text-xs"
-            >
-              Tutup
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
