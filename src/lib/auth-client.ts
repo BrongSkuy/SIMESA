@@ -16,3 +16,15 @@ export const {
   useSession,
   getSession,
 } = authClient;
+
+// Koordinasi proses logout lintas komponen agar DashboardShell tidak memicu
+// router.push("/login") ganda yang memutus RSC stream saat signOut sedang berjalan.
+let signingOutFlag = false;
+
+export function setSigningOut(value: boolean) {
+  signingOutFlag = value;
+}
+
+export function isSigningOut(): boolean {
+  return signingOutFlag;
+}

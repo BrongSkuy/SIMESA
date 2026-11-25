@@ -8,8 +8,36 @@ import {
 import { eq, desc } from "drizzle-orm";
 import {
   SANCTION_THRESHOLDS,
+  THRESHOLDS_CONFIG_CODE,
   evaluateSanctionTier,
+  calculateActiveViolationPoints,
+  validateSanctionThresholds,
+  type SanctionThresholds,
 } from "./violations";
+
+/**
+ * Membaca konfigurasi ambang batas meter poin dari database (fallback ke default 30/50/75/100).
+ */
+export async function getSanctionThresholds(): Promise<SanctionThresholds> {
+  try {
+    const [configRow] = await db
+      .select({ deskripsiSanksi: violationTypes.deskripsiSanksi })
+      .from(violationTypes)
+      .where(eq(violationTypes.kode, THRESHOLDS_CONFIG_CODE))
+      .limit(1);
+
+    if (configRow?.deskripsiSanksi) {
+      const parsed = JSON.parse(configRow.deskripsiSanksi);
+      const checked = validateSanctionThresholds(parsed);
+      if (checked.valid) {
+        return checked.data;
+      }
+    }
+  } catch {
+    // fallback ke default jika belum dikonfigurasi
+  }
+  return { ...SANCTION_THRESHOLDS };
+}
 
 /**
  * Mengambil profil kedisiplinan dan riwayat lengkap buku poin siswa (Server Only)
@@ -23,39 +51,40 @@ export async function getStudentDisciplinaryProfile(studentId: string) {
 
   if (!student) return null;
 
-  // Catatan pelanggaran siswa
-  const rawViolations = await db
-    .select({
-      id: studentViolations.id,
-      studentId: studentViolations.studentId,
-      violationTypeId: studentViolations.violationTypeId,
-      reportedBy: studentViolations.reportedBy,
-      tanggal: studentViolations.tanggal,
-      poin: studentViolations.poin,
-      lokasi: studentViolations.lokasi,
-      keterangan: studentViolations.keterangan,
-      status: studentViolations.status,
-      tindakLanjut: studentViolations.tindakLanjut,
-      createdAt: studentViolations.createdAt,
-      namaPelanggaran: violationTypes.namaPelanggaran,
-      kodePelanggaran: violationTypes.kode,
-      kategori: violationTypes.kategori,
-      deskripsiSanksi: violationTypes.deskripsiSanksi,
-    })
-    .from(studentViolations)
-    .leftJoin(violationTypes, eq(studentViolations.violationTypeId, violationTypes.id))
-    .where(eq(studentViolations.studentId, studentId))
-    .orderBy(desc(studentViolations.tanggal), desc(studentViolations.createdAt));
+  const [rawViolations, letters, thresholds] = await Promise.all([
+    db
+      .select({
+        id: studentViolations.id,
+        studentId: studentViolations.studentId,
+        violationTypeId: studentViolations.violationTypeId,
+        reportedBy: studentViolations.reportedBy,
+        tanggal: studentViolations.tanggal,
+        poin: studentViolations.poin,
+        lokasi: studentViolations.lokasi,
+        keterangan: studentViolations.keterangan,
+        status: studentViolations.status,
+        tindakLanjut: studentViolations.tindakLanjut,
+        createdAt: studentViolations.createdAt,
+        namaPelanggaran: violationTypes.namaPelanggaran,
+        kodePelanggaran: violationTypes.kode,
+        kategori: violationTypes.kategori,
+        deskripsiSanksi: violationTypes.deskripsiSanksi,
+      })
+      .from(studentViolations)
+      .leftJoin(violationTypes, eq(studentViolations.violationTypeId, violationTypes.id))
+      .where(eq(studentViolations.studentId, studentId))
+      .orderBy(desc(studentViolations.tanggal), desc(studentViolations.createdAt)),
+    db
+      .select()
+      .from(warningLetters)
+      .where(eq(warningLetters.studentId, studentId))
+      .orderBy(desc(warningLetters.tingkatSp), desc(warningLetters.tanggalTerbit)),
+    getSanctionThresholds(),
+  ]);
 
-  // Surat peringatan siswa
-  const letters = await db
-    .select()
-    .from(warningLetters)
-    .where(eq(warningLetters.studentId, studentId))
-    .orderBy(desc(warningLetters.tingkatSp), desc(warningLetters.tanggalTerbit));
-
-  const totalPoints = rawViolations.reduce((sum, v) => sum + (v.poin || 0), 0);
-  const tier = evaluateSanctionTier(totalPoints);
+  // Hanya pelanggaran aktif (belum Selesai Dibina) yang dihitung ke totalPoints
+  const totalPoints = calculateActiveViolationPoints(rawViolations);
+  const tier = evaluateSanctionTier(totalPoints, thresholds);
 
   const breakdown = {
     ringan: rawViolations.filter((v) => v.kategori === "Ringan").length,
@@ -75,6 +104,7 @@ export async function getStudentDisciplinaryProfile(studentId: string) {
       foto: student.foto,
     },
     totalPoints,
+    thresholds,
     tier,
     breakdown,
     violations: rawViolations,
@@ -91,30 +121,32 @@ export async function getClassDisciplineSummary(kelas?: string) {
     // @ts-expect-error drizzle query builder condition
     query = query.where(eq(students.kelas, kelas));
   }
-  const classStudents = await query;
 
-  // Tarik seluruh pelanggaran aktif
-  const allViolations = await db
-    .select({
-      id: studentViolations.id,
-      studentId: studentViolations.studentId,
-      poin: studentViolations.poin,
-      kategori: violationTypes.kategori,
-      status: studentViolations.status,
-    })
-    .from(studentViolations)
-    .leftJoin(violationTypes, eq(studentViolations.violationTypeId, violationTypes.id));
+  const [classStudents, allViolations, allLetters, thresholds] = await Promise.all([
+    query,
+    db
+      .select({
+        id: studentViolations.id,
+        studentId: studentViolations.studentId,
+        poin: studentViolations.poin,
+        kategori: violationTypes.kategori,
+        status: studentViolations.status,
+      })
+      .from(studentViolations)
+      .leftJoin(violationTypes, eq(studentViolations.violationTypeId, violationTypes.id)),
+    db.select().from(warningLetters),
+    getSanctionThresholds(),
+  ]);
 
-  // Tarik seluruh surat peringatan
-  const allLetters = await db.select().from(warningLetters);
-
-  // Petakan poin dan SP ke tiap siswa
+  // Petakan poin AKTIF (status !== "Selesai Dibina") dan jumlah kasus ke tiap siswa
   const pointsMap = new Map<string, number>();
   const violationsCountMap = new Map<string, number>();
 
   for (const v of allViolations) {
-    pointsMap.set(v.studentId, (pointsMap.get(v.studentId) || 0) + (v.poin || 0));
     violationsCountMap.set(v.studentId, (violationsCountMap.get(v.studentId) || 0) + 1);
+    if (v.status !== "Selesai Dibina") {
+      pointsMap.set(v.studentId, (pointsMap.get(v.studentId) || 0) + (v.poin || 0));
+    }
   }
 
   const latestLetterMap = new Map<string, typeof allLetters[0]>();
@@ -128,7 +160,7 @@ export async function getClassDisciplineSummary(kelas?: string) {
   const studentRows = classStudents.map((s) => {
     const totalPoints = pointsMap.get(s.id) || 0;
     const totalViolations = violationsCountMap.get(s.id) || 0;
-    const tier = evaluateSanctionTier(totalPoints);
+    const tier = evaluateSanctionTier(totalPoints, thresholds);
     const latestLetter = latestLetterMap.get(s.id) || null;
 
     return {
@@ -144,17 +176,22 @@ export async function getClassDisciplineSummary(kelas?: string) {
     };
   });
 
-  // Urutkan siswa dari poin pelanggaran tertinggi ke terendah
+  // Urutkan siswa dari poin pelanggaran aktif tertinggi ke terendah
   studentRows.sort((a, b) => b.totalPoints - a.totalPoints || a.namaLengkap.localeCompare(b.namaLengkap));
 
-  // Statistik kelas
+  // Statistik kelas berdasarkan ambang batas dinamis sekolah
   const totalStudents = studentRows.length;
   const studentsWithPoints = studentRows.filter((s) => s.totalPoints > 0).length;
-  const studentsNeedIntervention = studentRows.filter((s) => s.totalPoints >= SANCTION_THRESHOLDS.PEMBINAAN_LISAN).length;
-  const spRecommendedCount = studentRows.filter((s) => s.totalPoints >= SANCTION_THRESHOLDS.SP_1).length;
+  const studentsNeedIntervention = studentRows.filter(
+    (s) => s.totalPoints >= thresholds.PEMBINAAN_LISAN
+  ).length;
+  const spRecommendedCount = studentRows.filter(
+    (s) => s.totalPoints >= thresholds.SP_1
+  ).length;
 
   return {
     kelas: kelas || "Semua Kelas",
+    thresholds,
     totalStudents,
     studentsWithPoints,
     studentsNeedIntervention,

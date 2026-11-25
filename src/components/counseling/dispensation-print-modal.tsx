@@ -320,19 +320,19 @@ export function DispensationPrintModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-4xl gap-0 p-0 overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        className="sm:max-w-4xl p-0 gap-0 overflow-hidden bg-slate-100 border border-slate-200"
       >
         {/* Header Modal - Hidden Saat Cetak Standar */}
-        <DialogHeader className="p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between gap-3 space-y-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+        <DialogHeader className="p-4 bg-white border-b border-slate-200 flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 ">
               <FileText className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white truncate">
+            <div>
+              <DialogTitle className="text-base font-bold text-slate-900 ">
                 Pratinjau Surat Dispensasi Izin Meninggalkan Kelas
               </DialogTitle>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 ">
                 Dokumen kedinasan resmi siap cetak format A4 SMK Penerbangan Dirgantara
               </p>
             </div>
@@ -341,7 +341,7 @@ export function DispensationPrintModal({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 shadow-sm font-semibold"
+              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-semibold cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Cetak Dokumen (A4)</span>
@@ -351,8 +351,7 @@ export function DispensationPrintModal({
               size="icon-sm"
               onClick={() => onOpenChange(false)}
               aria-label="Tutup pratinjau"
-              title="Tutup"
-              className="rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -360,7 +359,7 @@ export function DispensationPrintModal({
         </DialogHeader>
 
         {/* Area Pratinjau Kertas A4 yang Rapi & Proporsional */}
-        <div className="p-4 sm:p-6 max-h-[82vh] overflow-y-auto flex justify-center bg-slate-200/70 dark:bg-slate-950">
+        <div className="p-4 sm:p-6 max-h-[82vh] overflow-y-auto flex justify-center bg-slate-200/70 ">
           <div
             ref={printRef}
             className="w-full max-w-[210mm] bg-white text-slate-900 p-8 sm:p-12 shadow-xl rounded-sm border border-slate-300 font-serif text-[13px] leading-relaxed"

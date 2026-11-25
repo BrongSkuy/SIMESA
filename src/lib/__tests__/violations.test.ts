@@ -4,6 +4,11 @@ import {
   evaluateSanctionTier,
   generateWarningLetterNumber,
   SANCTION_THRESHOLDS,
+  sanitizePoinInput,
+  sanitizeThresholdInput,
+  validateSanctionThresholds,
+  calculateActiveViolationPoints,
+  getSpTingkatLabel,
 } from "../violations";
 
 describe("violations helper functions", () => {
@@ -92,6 +97,63 @@ describe("violations helper functions", () => {
       const d = new Date(2026, 0, 5); // Month index 0 is January (1)
       const num = generateWarningLetterNumber(3, 9, d);
       expect(num).toBe("009/SP-III/SMK-DIRGANTARA/I/2026");
+    });
+  });
+
+  describe("sanitizePoinInput & getSpTingkatLabel", () => {
+    it("strips leading zeros and non-digits, and caps values at 100", () => {
+      expect(sanitizePoinInput("015")).toBe("15");
+      expect(sanitizePoinInput("00")).toBe("0");
+      expect(sanitizePoinInput("")).toBe("");
+      expect(sanitizePoinInput("2a5")).toBe("25");
+      expect(sanitizePoinInput("150")).toBe("100");
+    });
+
+    it("returns clear Indonesian labels for SP levels", () => {
+      expect(getSpTingkatLabel(1)).toBe("Surat Peringatan I (SP 1)");
+      expect(getSpTingkatLabel("2")).toBe("Surat Peringatan II (SP 2)");
+      expect(getSpTingkatLabel(3)).toBe("Surat Peringatan III (SP 3 atau Terakhir)");
+    });
+  });
+
+  describe("calculateActiveViolationPoints & dynamic sanction thresholds", () => {
+    it("excludes Selesai Dibina violations from active point totals", () => {
+      const list = [
+        { poin: 40, status: "Tercatat" },
+        { poin: 75, status: "Selesai Dibina" },
+        { poin: 15, status: "Diproses BK" },
+      ];
+      expect(calculateActiveViolationPoints(list)).toBe(55);
+    });
+
+    it("evaluates tiers accurately using custom admin thresholds", () => {
+      const custom = { PEMBINAAN_LISAN: 50, SP_1: 100, SP_2: 150, SP_3: 200 };
+      expect(evaluateSanctionTier(40, custom).level).toBe("ringan");
+      expect(evaluateSanctionTier(60, custom).level).toBe("pembinaan");
+      expect(evaluateSanctionTier(120, custom).level).toBe("sp1");
+      expect(evaluateSanctionTier(185, custom).level).toBe("sp2");
+      expect(evaluateSanctionTier(200, custom).level).toBe("sp3");
+    });
+
+    it("validates strictly increasing thresholds and sanitizes leading zeros", () => {
+      expect(sanitizeThresholdInput("050")).toBe("50");
+      expect(sanitizeThresholdInput("1500")).toBe("1000");
+
+      const ok = validateSanctionThresholds({
+        PEMBINAAN_LISAN: 40,
+        SP_1: 80,
+        SP_2: 120,
+        SP_3: 200,
+      });
+      expect(ok.valid).toBe(true);
+
+      const badOrder = validateSanctionThresholds({
+        PEMBINAAN_LISAN: 60,
+        SP_1: 50,
+        SP_2: 75,
+        SP_3: 100,
+      });
+      expect(badOrder.valid).toBe(false);
     });
   });
 });

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar, type TopbarUser } from "@/components/layout/topbar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { authClient, isSigningOut } from "@/lib/auth-client";
 import type { UserRole } from "@/lib/mock-data";
 import { getPortalForRole } from "@/lib/rbac";
 
@@ -19,21 +19,24 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
+  const redirectingRef = useRef(false);
 
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (!isPending) {
-      if (!session) {
-        router.push("/login");
-      } else {
-        const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-        if (userRole) {
-          const userPortal = getPortalForRole(userRole);
-          const expectedPortal = getPortalForRole(role);
-          if (userPortal !== expectedPortal) {
-            router.push(userPortal);
-          }
+    if (isPending || isSigningOut() || redirectingRef.current) return;
+
+    if (!session) {
+      redirectingRef.current = true;
+      router.replace("/login");
+    } else {
+      const userRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
+      if (userRole) {
+        const userPortal = getPortalForRole(userRole);
+        const expectedPortal = getPortalForRole(role);
+        if (userPortal !== expectedPortal) {
+          redirectingRef.current = true;
+          router.replace(userPortal);
         }
       }
     }
@@ -50,11 +53,11 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     image: session?.user?.image || null,
   };
 
-  if (isPending) {
+  if (isPending || isSigningOut()) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="relative h-12 w-12 animate-pulse">
+          <div className="relative h-12 w-12">
             <Image
               src="/logo.png?v=3"
               alt="Logo SMK Penerbangan Dirgantara"
@@ -66,7 +69,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           </div>
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a8a]" />
           <p className="text-xs font-medium text-slate-500">
-            Memuat ruang kerja SIMESA...
+            {isSigningOut() ? "Mengakhiri sesi SIMESA..." : "Memuat SIMESA..."}
           </p>
         </div>
       </div>
@@ -80,7 +83,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen flex flex-col bg-white text-slate-800">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
         {/* Sticky Dark Enterprise Top Navigation Bar */}
         <Topbar user={user} onMenuClick={() => setMobileOpen(true)} />
 
@@ -88,7 +91,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-[280px] p-0 bg-[#091424] border-white/10 text-white"
+            className="w-[280px] p-0 bg-[#0F172A] border-slate-800 text-white"
           >
             <SheetTitle className="sr-only">Menu Navigasi SIMESA SMK Penerbangan Dirgantara</SheetTitle>
             <Sidebar role={user.role} onToggle={() => setMobileOpen(false)} />

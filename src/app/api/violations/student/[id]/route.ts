@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { students } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getStudentDisciplinaryProfile } from "@/lib/violations-server";
+import { getPortalForRole } from "@/lib/rbac";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -19,6 +20,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     const { id } = await params;
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (id !== "me" && portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     let targetStudentId = id;
 
     // Jika parameter id adalah "me", cari studentId berdasarkan userId sesi login

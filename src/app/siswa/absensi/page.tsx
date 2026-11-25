@@ -67,20 +67,20 @@ const months = [
 
 const statusTileMap: Record<string, string> = {
   Hadir:
-    "bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover/cal:bg-emerald-500/20 group-hover/cal:text-emerald-300 group-hover/cal:border-emerald-500/30",
-  Izin: "bg-amber-50 text-amber-700 border border-amber-200 group-hover/cal:bg-amber-500/20 group-hover/cal:text-amber-300 group-hover/cal:border-amber-500/30",
+    "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  Izin: "bg-amber-50 text-amber-700 border border-amber-200",
   Sakit:
-    "bg-blue-50 text-blue-700 border border-blue-200 group-hover/cal:bg-blue-500/20 group-hover/cal:text-blue-300 group-hover/cal:border-blue-500/30",
-  Alfa: "bg-rose-50 text-rose-700 border border-rose-200 group-hover/cal:bg-rose-500/20 group-hover/cal:text-rose-300 group-hover/cal:border-rose-500/30",
+    "bg-blue-50 text-blue-700 border border-blue-200",
+  Alfa: "bg-rose-50 text-rose-700 border border-rose-200",
 };
 
 const statusPillMap: Record<string, string> = {
   Hadir:
-    "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30",
-  Izin: "bg-amber-50 text-amber-700 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30",
+    "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Izin: "bg-amber-50 text-amber-700 border-amber-200",
   Sakit:
-    "bg-blue-50 text-blue-700 border-blue-200 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30",
-  Alfa: "bg-rose-50 text-rose-700 border-rose-200 group-hover/row:bg-rose-500/20 group-hover/row:text-rose-300 group-hover/row:border-rose-500/30",
+    "bg-blue-50 text-blue-700 border-blue-200",
+  Alfa: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 export default function SiswaAbsensiPage() {
@@ -346,49 +346,49 @@ export default function SiswaAbsensiPage() {
 
       {/* Summary Stats - 5 Interactive Dark Hover Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
             Hadir
           </p>
-          <p className="text-2xl font-bold tabular-nums text-emerald-600 group-hover:text-emerald-400 mt-1 transition-colors">
+          <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1 transition-colors">
             {summary.hadir}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
             Izin
           </p>
-          <p className="text-2xl font-bold tabular-nums text-amber-600 group-hover:text-amber-400 mt-1 transition-colors">
+          <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1 transition-colors">
             {summary.izin}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
             Sakit
           </p>
-          <p className="text-2xl font-bold tabular-nums text-blue-600 group-hover:text-blue-400 mt-1 transition-colors">
+          <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1 transition-colors">
             {summary.sakit}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
             Alfa
           </p>
-          <p className="text-2xl font-bold tabular-nums text-rose-600 group-hover:text-rose-400 mt-1 transition-colors">
+          <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1 transition-colors">
             {summary.alfa}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group cursor-pointer col-span-2 sm:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 group-hover:text-slate-400 transition-colors">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer col-span-2 sm:col-span-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
             % Kehadiran
           </p>
           <p
             className={`text-2xl font-bold tabular-nums mt-1 transition-colors ${
               summary.total > 0
                 ? attendancePct >= 75
-                  ? "text-emerald-600 group-hover:text-emerald-400"
-                  : "text-rose-600 group-hover:text-rose-400"
-                : "text-slate-500 group-hover:text-slate-300"
+                  ? "text-emerald-600 "
+                  : "text-rose-600 "
+                : "text-slate-500 "
             }`}
           >
             {attendancePct}%
@@ -423,9 +423,9 @@ export default function SiswaAbsensiPage() {
       {viewMode === "kalender" ? (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Calendar Card with Dark Hover */}
-          <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group/cal space-y-4">
-            <div className="flex flex-row items-center justify-between pb-3.5 border-b border-slate-100 group-hover/cal:border-slate-800/80 transition-colors">
-              <CardTitle className="text-sm font-semibold text-slate-900 group-hover/cal:text-white transition-colors">
+          <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group/cal space-y-4">
+            <div className="flex flex-row items-center justify-between pb-3.5 border-b border-slate-100 transition-colors">
+              <CardTitle className="text-sm font-semibold text-slate-900 transition-colors">
                 {months[currentMonth]} {currentYear}
               </CardTitle>
               <div className="flex items-center gap-1">
@@ -434,7 +434,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handlePrevMonth}
                   aria-label="Bulan sebelumnya"
-                  className="cursor-pointer group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
+                  className="cursor-pointer transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
@@ -443,7 +443,7 @@ export default function SiswaAbsensiPage() {
                   size="icon-xs"
                   onClick={handleNextMonth}
                   aria-label="Bulan selanjutnya"
-                  className="cursor-pointer group-hover/cal:border-slate-700 group-hover/cal:bg-slate-800/80 group-hover/cal:text-slate-200 group-hover/cal:hover:bg-slate-700 transition-colors"
+                  className="cursor-pointer transition-colors"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -454,7 +454,7 @@ export default function SiswaAbsensiPage() {
                 {dayNames.map((d) => (
                   <div
                     key={d}
-                    className="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover/cal:text-slate-400 py-1.5 transition-colors"
+                    className="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 py-1.5 transition-colors"
                   >
                     {d}
                   </div>
@@ -481,20 +481,20 @@ export default function SiswaAbsensiPage() {
                         day.count > 0 ? "cursor-pointer" : "cursor-default"
                       } ${
                         isSelected
-                          ? "ring-2 ring-blue-600 group-hover/cal:ring-amber-400 scale-[1.03]"
+                          ? "ring-2 ring-blue-600 scale-[1.03]"
                           : ""
                       } ${
                         day.status
                           ? statusTileMap[day.status]
                           : day.isWeekend
-                            ? "bg-slate-100/70 text-slate-400 group-hover/cal:bg-slate-800/40 group-hover/cal:text-slate-500"
-                            : "bg-slate-50/70 text-slate-500 border border-slate-100 group-hover/cal:bg-slate-800/70 group-hover/cal:text-slate-300 group-hover/cal:border-slate-700/80"
+                            ? "bg-slate-100/70 text-slate-400"
+                            : "bg-slate-50/70 text-slate-500 border border-slate-100"
                       }`}
                       title={day.tooltip}
                     >
                       {day.date}
                       {day.count > 1 && (
-                        <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] group-hover/cal:bg-blue-500 text-[10px] font-bold text-white shadow-xs transition-colors">
+                        <span className="absolute -top-1 -right-1 flex h-3.5 px-1 items-center justify-center rounded-xs bg-[#1e3a8a] text-[10px] font-bold text-white shadow-xs transition-colors">
                           {day.count}
                         </span>
                       )}
@@ -563,18 +563,18 @@ export default function SiswaAbsensiPage() {
                           return (
                             <TableRow
                               key={`${r.id}-${i}`}
-                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                              className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                             >
                               <TableCell className="pl-5">
-                                <p className="text-xs font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                                <p className="text-xs font-semibold text-slate-800 transition-colors">
                                   {formattedDate}
                                 </p>
-                                <p className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">
+                                <p className="text-xs text-slate-400 transition-colors">
                                   {hariName}
                                 </p>
                               </TableCell>
                               <TableCell>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 transition-colors">
                                   {r.mapel || "Umum"}
                                 </span>
                               </TableCell>
@@ -583,7 +583,7 @@ export default function SiswaAbsensiPage() {
                                   className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
                                     r.status && statusPillMap[r.status]
                                       ? statusPillMap[r.status]
-                                      : "bg-slate-100 text-slate-500 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
+                                      : "bg-slate-100 text-slate-500 border-slate-200"
                                   }`}
                                 >
                                   {r.status || "Belum"}
@@ -614,13 +614,13 @@ export default function SiswaAbsensiPage() {
       ) : (
         /* Grafik Per Mapel View */
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-4 cursor-pointer">
-            <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-              <CardTitle className="text-sm font-semibold text-slate-900 group-hover:text-white flex items-center gap-2 transition-colors">
-                <BarChart3 className="h-4 w-4 text-blue-600 group-hover:text-blue-400 transition-colors" />
+          <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-4">
+            <div className="pb-3.5 border-b border-slate-100 transition-colors">
+              <CardTitle className="text-sm font-semibold text-slate-900 flex items-center gap-2 transition-colors">
+                <BarChart3 className="h-4 w-4 text-blue-600 transition-colors" />
                 Grafik Kehadiran Per Mata Pelajaran
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+              <CardDescription className="text-xs text-slate-500 mt-0.5 transition-colors">
                 Perbandingan frekuensi status kehadiran pada setiap mata
                 pelajaran
               </CardDescription>
@@ -637,12 +637,12 @@ export default function SiswaAbsensiPage() {
                       />
                       <XAxis
                         dataKey="mapel"
-                        tick={{ fontSize: 11, fill: "#94A3B8" }}
+                        tick={{ fontSize: 11, fill: "#64748B" }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: "#94A3B8" }}
+                        tick={{ fontSize: 11, fill: "#64748B" }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
@@ -661,7 +661,7 @@ export default function SiswaAbsensiPage() {
                         iconType="circle"
                         wrapperStyle={{ fontSize: "12px" }}
                         formatter={(value) => (
-                          <span className="text-slate-600 group-hover:text-slate-300 transition-colors">
+                          <span className="text-slate-600 transition-colors">
                             {value}
                           </span>
                         )}
@@ -693,7 +693,7 @@ export default function SiswaAbsensiPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-slate-400 group-hover:text-slate-500 transition-colors">
+                  <div className="flex h-full items-center justify-center text-slate-400 transition-colors">
                     <p className="text-xs">Belum ada data untuk ditampilkan</p>
                   </div>
                 )}
@@ -726,23 +726,23 @@ export default function SiswaAbsensiPage() {
                   {perMapelChartData.map((row) => (
                     <TableRow
                       key={row.mapel}
-                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                     >
                       <TableCell className="pl-5">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-300 border border-slate-200 group-hover/row:border-slate-700 transition-colors">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 transition-colors">
                           {row.mapel}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-emerald-600 group-hover/row:text-emerald-400 transition-colors">
+                      <TableCell className="text-center font-mono font-semibold text-emerald-600 transition-colors">
                         {row.hadir}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-amber-600 group-hover/row:text-amber-400 transition-colors">
+                      <TableCell className="text-center font-mono font-semibold text-amber-600 transition-colors">
                         {row.izin}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-blue-600 group-hover/row:text-blue-400 transition-colors">
+                      <TableCell className="text-center font-mono font-semibold text-blue-600 transition-colors">
                         {row.sakit}
                       </TableCell>
-                      <TableCell className="text-center font-mono font-semibold text-rose-600 group-hover/row:text-rose-400 pr-5 transition-colors">
+                      <TableCell className="text-center font-mono font-semibold text-rose-600 pr-5 transition-colors">
                         {row.alfa}
                       </TableCell>
                     </TableRow>

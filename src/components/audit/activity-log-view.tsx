@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { StatCard } from "@/components/shared/stat-card";
-import { HeaderBackdrop } from "@/components/shared/header-backdrop";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,6 @@ import {
   Clock,
   User,
   Layers,
-  Sparkles,
   Info,
   Trash2,
   AlertTriangle,
@@ -331,111 +330,94 @@ export function ActivityLogView() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Cockpit Banner Menyatu - Persis Beranda & Konseling BK */}
-      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
-        <HeaderBackdrop />
-        {/* Ambient Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
-
-        <div className="relative z-10 max-w-7xl mx-auto">
-          {/* Header Title, Subtitle & Action Pills */}
-          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
-            <div className="space-y-1.5">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
-                Riwayat Aktivitas dan Audit Trail
-              </h1>
-              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
-                Pemantauan jejak digital operasional sekolah, integritas data akademik siswa, dan kepatuhan sistem keamanan
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-              <button
-                type="button"
-                disabled={isExportingCSV}
-                onClick={handleExportCSV}
-                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 mr-2 text-emerald-300" />
-                {isExportingCSV ? "Mengekspor CSV..." : "Ekspor Laporan CSV"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  fetchSummary();
-                  fetchLogs(1);
-                }}
-                className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5 mr-2 text-blue-100" />
-                Segarkan Data
-              </button>
-
-              {isSuperadmin && (
-                <button
-                  type="button"
-                  onClick={openPurgeModal}
-                  className="inline-flex items-center bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/35 border border-rose-400/30 rounded-xl px-4 py-2 text-xs font-semibold text-rose-200 shadow-xs transition-all cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-300" />
-                  Pembersihan Log Usang
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* 4 Kartu Metrik Utama - Sleek Semi-Transparent Glass Cards (Persis Dashboard) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <PageHeader
+        title="Riwayat Aktivitas dan Audit Trail"
+        description="Catatan aktivitas pengguna, perubahan data akademik, dan keamanan akses sistem"
+        icon={Activity}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="AKTIVITAS HARI INI"
+              className="rounded-xl border border-white/10"
+              title="Aktivitas Hari Ini"
               value={loading ? "..." : summary.totalHariIni}
               icon={Activity}
               color="blue"
-              footerLeft="Aktivitas Terkini"
-              footerRight="Tanggal Berjalan"
+              footerLeft="Aktivitas terkini"
+              footerRight="Tanggal berjalan"
             />
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="AKADEMIK DAN NILAI"
+              className="rounded-xl border border-white/10"
+              title="Akademik & Nilai"
               value={loading ? "..." : summary.akademikNilaiCount}
               icon={GraduationCap}
               color="blue"
-              footerLeft="Capaian Belajar"
-              footerRight="Nilai dan Rapor"
+              footerLeft="Capaian belajar"
+              footerRight="Nilai dan rapor"
             />
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="KESISWAAN DAN DISIPLIN"
+              className="rounded-xl border border-white/10"
+              title="Kesiswaan & Disiplin"
               value={loading ? "..." : summary.kesiswaanDisiplinCount}
               icon={ShieldCheck}
               color="amber"
-              footerLeft="Buku Poin Siswa"
+              footerLeft="Buku poin siswa"
               footerRight="Layanan BK"
             />
 
             <StatCard
               variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-slate-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(148,163,184,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="KEAMANAN DAN AKSES"
+              className="rounded-xl border border-white/10"
+              title="Keamanan & Akses"
               value={loading ? "..." : summary.keamananAkunCount}
               icon={KeyRound}
               color="slate"
-              footerLeft="Sesi Pengguna"
-              footerRight="Proteksi Akun"
+              footerLeft="Sesi pengguna"
+              footerRight="Proteksi akun"
             />
           </div>
-        </div>
-      </section>
+        }
+      >
+        <button
+          type="button"
+          disabled={isExportingCSV}
+          onClick={handleExportCSV}
+          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+          {isExportingCSV ? "Mengekspor CSV..." : "Ekspor CSV"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            fetchSummary();
+            fetchLogs(1);
+          }}
+          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          Segarkan Data
+        </button>
+
+        {isSuperadmin && (
+          <button
+            type="button"
+            onClick={openPurgeModal}
+            className="inline-flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 rounded-lg px-3.5 py-2 text-xs font-semibold text-rose-200 transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Bersihkan Log Usang
+          </button>
+        )}
+      </PageHeader>
 
       {/* 2. Filter Bar Interaktif */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row gap-3.5 items-stretch lg:items-center justify-between">
           {/* Kolom Pencarian Cerdas */}
           <div className="relative flex-1">
@@ -445,7 +427,7 @@ export function ActivityLogView() {
               placeholder="Cari nama aktor, target objek, atau uraian kegiatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20"
+              className="pl-10 h-10 rounded-xl bg-slate-50 border-slate-200 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -456,7 +438,7 @@ export function ActivityLogView() {
               value={selectedModule}
               onValueChange={(val) => setSelectedModule(val || "all")}
             >
-              <SelectTrigger className="h-10 text-xs w-[170px] rounded-xl bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="h-10 text-xs w-[170px] rounded-xl bg-slate-50 border-slate-200">
                 <SelectValue placeholder="Semua Modul" />
               </SelectTrigger>
               <SelectContent>
@@ -474,7 +456,7 @@ export function ActivityLogView() {
               value={selectedAction}
               onValueChange={(val) => setSelectedAction(val || "all")}
             >
-              <SelectTrigger className="h-10 text-xs w-[160px] rounded-xl bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="h-10 text-xs w-[160px] rounded-xl bg-slate-50 border-slate-200">
                 <SelectValue placeholder="Semua Jenis Aksi" />
               </SelectTrigger>
               <SelectContent>
@@ -492,7 +474,7 @@ export function ActivityLogView() {
               value={selectedRole}
               onValueChange={(val) => setSelectedRole(val || "all")}
             >
-              <SelectTrigger className="h-10 text-xs w-[150px] rounded-xl bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
+              <SelectTrigger className="h-10 text-xs w-[150px] rounded-xl bg-slate-50 border-slate-200">
                 <SelectValue placeholder="Semua Peran" />
               </SelectTrigger>
               <SelectContent>
@@ -517,7 +499,7 @@ export function ActivityLogView() {
                 variant="ghost"
                 size="sm"
                 onClick={handleResetFilters}
-                className="h-10 px-3 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl"
+                className="h-10 px-3 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl"
               >
                 <RotateCcw className="w-3.5 h-3.5 mr-1" />
                 Reset
@@ -527,43 +509,43 @@ export function ActivityLogView() {
         </div>
 
         {/* Informasi Status Filter */}
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+        <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
           <div>
-            Menampilkan <span className="font-semibold text-slate-800 dark:text-slate-200">{logs.length}</span> dari{" "}
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{totalRecords}</span> catatan aktivitas
+            Menampilkan <span className="font-semibold text-slate-800 ">{logs.length}</span> dari{" "}
+            <span className="font-semibold text-slate-800 ">{totalRecords}</span> catatan aktivitas
           </div>
           <div>
-            Halaman <span className="font-semibold text-slate-800 dark:text-slate-200">{currentPage}</span> dari{" "}
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{totalPages}</span>
+            Halaman <span className="font-semibold text-slate-800 ">{currentPage}</span> dari{" "}
+            <span className="font-semibold text-slate-800 ">{totalPages}</span>
           </div>
         </div>
       </div>
 
       {/* 3. Tabel Interaktif SIMESA */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/80 dark:bg-slate-950/50 border-b border-slate-200/80 dark:border-slate-800">
+            <TableHeader className="bg-slate-50/80 border-b border-slate-200/80">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[180px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5 pl-5">
+                <TableHead className="w-[180px] text-xs font-bold text-slate-700 py-3.5 pl-5">
                   WAKTU PENCATATAN
                 </TableHead>
-                <TableHead className="w-[200px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
+                <TableHead className="w-[200px] text-xs font-bold text-slate-700 py-3.5">
                   AKTOR PENGGUNA
                 </TableHead>
-                <TableHead className="w-[160px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
+                <TableHead className="w-[160px] text-xs font-bold text-slate-700 py-3.5">
                   MODUL SISTEM
                 </TableHead>
-                <TableHead className="w-[140px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
+                <TableHead className="w-[140px] text-xs font-bold text-slate-700 py-3.5">
                   JENIS AKSI
                 </TableHead>
-                <TableHead className="w-[160px] text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
+                <TableHead className="w-[160px] text-xs font-bold text-slate-700 py-3.5">
                   TARGET OBJEK
                 </TableHead>
-                <TableHead className="text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5">
+                <TableHead className="text-xs font-bold text-slate-700 py-3.5">
                   URAIAN KEGIATAN
                 </TableHead>
-                <TableHead className="w-[80px] text-right text-xs font-bold text-slate-700 dark:text-slate-300 py-3.5 pr-5">
+                <TableHead className="w-[80px] text-right text-xs font-bold text-slate-700 py-3.5 pr-5">
                   AKSI
                 </TableHead>
               </TableRow>
@@ -582,8 +564,8 @@ export function ActivityLogView() {
                 <TableRow>
                   <TableCell colSpan={7} className="h-44 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2 text-slate-400">
-                      <Info className="w-8 h-8 stroke-1 text-slate-300 dark:text-slate-600" />
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <Info className="w-8 h-8 stroke-1 text-slate-300 " />
+                      <span className="text-sm font-medium text-slate-600 ">
                         Belum ada catatan aktivitas yang sesuai
                       </span>
                       <span className="text-xs text-slate-400">
@@ -601,24 +583,24 @@ export function ActivityLogView() {
                     <TableRow
                       key={log.id}
                       onClick={() => setSelectedLog(log)}
-                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                     >
                       {/* Waktu */}
-                      <TableCell className="py-3.5 pl-5 text-xs font-mono text-slate-500 dark:text-slate-400 group-hover/row:text-slate-300 whitespace-nowrap">
+                      <TableCell className="py-3.5 pl-5 text-xs font-mono text-slate-500 whitespace-nowrap">
                         {formatAuditTimestamp(log.createdAt)}
                       </TableCell>
 
                       {/* Aktor Pengguna */}
                       <TableCell className="py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/50 group-hover/row:bg-blue-950 group-hover/row:border-blue-700/60 flex items-center justify-center font-bold text-xs text-blue-700 dark:text-blue-300 group-hover/row:text-blue-200 shrink-0 transition-colors">
+                          <div className="w-8 h-8 rounded-md bg-blue-100 border border-blue-200 flex items-center justify-center font-bold text-xs text-blue-700 shrink-0 transition-colors">
                             {getInitials(log.userName)}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate group-hover/row:text-white transition-colors">
+                            <div className="font-semibold text-xs text-slate-900 truncate transition-colors">
                               {log.userName}
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 group-hover/row:text-slate-300">
+                            <div className="text-[11px] text-slate-500">
                               {formatRoleLabel(log.userRole)}
                             </div>
                           </div>
@@ -644,12 +626,12 @@ export function ActivityLogView() {
                       </TableCell>
 
                       {/* Target Objek */}
-                      <TableCell className="py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 truncate max-w-[160px]">
+                      <TableCell className="py-3.5 text-xs font-medium text-slate-700 truncate max-w-[160px]">
                         {log.targetName || "-"}
                       </TableCell>
 
                       {/* Uraian Kegiatan */}
-                      <TableCell className="py-3.5 text-xs text-slate-600 dark:text-slate-300 group-hover/row:text-slate-100 leading-relaxed">
+                      <TableCell className="py-3.5 text-xs text-slate-600 leading-relaxed">
                         {log.description}
                       </TableCell>
 
@@ -661,7 +643,7 @@ export function ActivityLogView() {
                             e.stopPropagation();
                             setSelectedLog(log);
                           }}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/50 group-hover/row:text-blue-400 transition-colors"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
                           title="Lihat Detail Log"
                         >
                           <Eye className="w-4 h-4" />
@@ -677,8 +659,8 @@ export function ActivityLogView() {
 
         {/* Paginasi Modern */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/50 border-t border-slate-100">
+            <div className="text-xs text-slate-500 ">
               Menampilkan halaman {currentPage} dari {totalPages}
             </div>
             <div className="flex items-center gap-1.5">
@@ -693,7 +675,7 @@ export function ActivityLogView() {
                 <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                 Sebelumnya
               </Button>
-              <div className="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900">
+              <div className="px-3 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-600 border border-blue-200">
                 {currentPage}
               </div>
               <Button
@@ -719,9 +701,9 @@ export function ActivityLogView() {
           if (!open) setSelectedLog(null);
         }}
       >
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-          <DialogHeader className="space-y-1.5 pb-4 border-b border-slate-100 dark:border-slate-800">
-            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border-slate-200 bg-white p-6">
+          <DialogHeader className="space-y-1.5 pb-4 border-b border-slate-100 ">
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-600" />
               Detail Riwayat Aktivitas Sistem
             </DialogTitle>
@@ -730,31 +712,31 @@ export function ActivityLogView() {
           {selectedLog && (
             <div className="space-y-4 py-2 text-xs">
               {/* Ringkasan Metadata Grid */}
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-medium">Waktu Presisi</span>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                  <p className="font-semibold text-slate-800 font-mono">
                     {formatAuditTimestamp(selectedLog.createdAt)}
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-medium">Alamat IP Klien</span>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                  <p className="font-semibold text-slate-800 font-mono">
                     {selectedLog.ipAddress || "127.0.0.1"}
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-medium">Aktor Pelaksana</span>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="font-semibold text-slate-800 ">
                     {selectedLog.userName} ({formatRoleLabel(selectedLog.userRole)})
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-medium">Target Objek</span>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="font-semibold text-slate-800 ">
                     {selectedLog.targetName || "-"}
                   </p>
                 </div>
@@ -788,7 +770,7 @@ export function ActivityLogView() {
                 <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Uraian Lengkap Kegiatan
                 </label>
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-800 leading-relaxed font-medium">
                   {selectedLog.description}
                 </div>
               </div>
@@ -799,27 +781,27 @@ export function ActivityLogView() {
 
       {/* 5. Modal Pembersihan Log Usang & Pengingat Unduh Cadangan Excel */}
       <Dialog open={purgeModalOpen} onOpenChange={setPurgeModalOpen}>
-        <DialogContent className="sm:max-w-lg rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+        <DialogContent className="sm:max-w-lg rounded-2xl border-slate-200 bg-white p-6">
           {purgeStep === 1 ? (
             /* ======================================================== */
             /* LANGKAH 1: Pengingat Wajib Unduh Cadangan Excel          */
             /* ======================================================== */
             <>
-              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 ">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
                     Langkah 1 dari 2: Cadangan Data
                   </span>
                 </div>
-                <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 pt-1">
-                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2 pt-1">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 " />
                   Pengingat Cadangan: Unduh Berkas Excel Riwayat
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4 py-3 text-xs">
-                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-center gap-2.5 text-amber-800 dark:text-amber-300">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2.5 text-amber-800">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 " />
                   <p className="text-xs leading-relaxed">
                     <span className="font-semibold">Pemberitahuan: </span>
                     Unduh cadangan berkas <strong>Excel (.xlsx)</strong> sebagai arsip resmi sebelum menghapus riwayat aktivitas secara permanen.
@@ -827,18 +809,18 @@ export function ActivityLogView() {
                 </div>
 
                 {/* Kartu Tombol Unduh Excel */}
-                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
                       <FileSpreadsheet className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-slate-100 text-xs">
+                      <div className="font-bold text-slate-900 text-xs">
                         Cadangan Riwayat Aktivitas (.xlsx)
                       </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      <div className="text-[11px] text-slate-500 mt-0.5">
                         {hasDownloadedExcel ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             Berkas cadangan telah berhasil diunduh
                           </span>
@@ -871,7 +853,7 @@ export function ActivityLogView() {
                 </div>
 
                 {!hasDownloadedExcel && (
-                  <label className="flex items-start gap-2 pt-1 text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer">
+                  <label className="flex items-start gap-2 pt-1 text-[11px] text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={confirmWithoutDownload}
@@ -885,7 +867,7 @@ export function ActivityLogView() {
                 )}
               </div>
 
-              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <DialogFooter className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -913,28 +895,28 @@ export function ActivityLogView() {
             /* LANGKAH 2: Konfirmasi Penghapusan Log                    */
             /* ======================================================== */
             <>
-              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <DialogHeader className="space-y-1.5 pb-3 border-b border-slate-100 ">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-200">
                     Langkah 2 dari 2: Eksekusi Pembersihan
                   </span>
                 </div>
-                <DialogTitle className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 pt-1">
-                  <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                <DialogTitle className="text-base font-bold text-rose-600 flex items-center gap-2 pt-1">
+                  <Trash2 className="w-5 h-5 text-rose-600 " />
                   Konfirmasi Pembersihan Catatan Aktivitas
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4 py-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 flex items-start gap-2.5 text-rose-800 dark:text-rose-300">
-                  <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800">
+                  <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 " />
                   <div className="space-y-1 text-xs leading-relaxed">
                     <p className="font-semibold">Tindakan Permanen</p>
                     <p>
                       Seluruh catatan aktivitas yang lebih lama dari rentang waktu yang Anda tentukan di bawah ini akan dihapus secara permanen dari basis data SIMESA.
                     </p>
                     {hasDownloadedExcel && (
-                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                      <p className="text-[11px] text-emerald-700 font-medium">
                         ✓ Berkas cadangan Excel telah tersimpan di perangkat Anda.
                       </p>
                     )}
@@ -942,11 +924,11 @@ export function ActivityLogView() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-semibold text-slate-700 ">
                     Pilih Batas Waktu Retensi Data
                   </label>
                   <Select value={purgeDays} onValueChange={(val) => setPurgeDays(val || "180")}>
-                    <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+                    <SelectTrigger className="h-10 text-xs rounded-xl bg-slate-50 border-slate-200">
                       <SelectValue placeholder="Pilih batas waktu" />
                     </SelectTrigger>
                     <SelectContent>
@@ -959,7 +941,7 @@ export function ActivityLogView() {
                 </div>
               </div>
 
-              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <DialogFooter className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 <Button
                   type="button"
                   variant="outline"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -42,12 +42,14 @@ export default function LoginPage() {
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const redirectedRef = useRef(false);
 
   // Redirect automatically if user already has an active session
   useEffect(() => {
-    if (!sessionLoading && session) {
+    if (!sessionLoading && session && !redirectedRef.current) {
+      redirectedRef.current = true;
       const appRole = (session?.user as Record<string, unknown>)?.appRole as string | undefined;
-      router.push(getPortalForRole(appRole || "SISWA"));
+      router.replace(getPortalForRole(appRole || "SISWA"));
     }
   }, [sessionLoading, session, router]);
 
@@ -392,7 +394,7 @@ export default function LoginPage() {
             {lockoutSeconds > 0 ? (
               <div className="rounded-xl border border-amber-300 bg-amber-50/95 p-3.5 text-xs text-amber-900 shadow-xs space-y-2">
                 <div className="flex items-center gap-2 font-bold text-amber-950">
-                  <Clock className="h-4 w-4 text-amber-600 animate-pulse" />
+                  <Clock className="h-4 w-4 text-amber-600" />
                   <span>Akses Masuk Terkunci Sementara</span>
                 </div>
                 <p className="text-amber-800 text-[11px] leading-relaxed">

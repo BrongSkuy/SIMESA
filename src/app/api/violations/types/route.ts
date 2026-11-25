@@ -3,7 +3,9 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { violationTypes } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
+import { THRESHOLDS_CONFIG_CODE } from "@/lib/violations";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/violations/types — Ambil katalog jenis pelanggaran
 export async function GET() {
@@ -36,6 +38,11 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await req.json();
     const { id, kode, namaPelanggaran, kategori, poinDefault, deskripsiSanksi } = body;
@@ -47,15 +54,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const normalizedKode = String(kode).trim();
+    const parsedPoin = Number(poinDefault);
+    if (!Number.isInteger(parsedPoin) || parsedPoin < 1 || parsedPoin > 100) {
+      return NextResponse.json(
+        { error: "Bobot poin baku harus berupa bilangan bulat antara 1 sampai 100" },
+        { status: 400 }
+      );
+    }
+
+    if (normalizedKode === THRESHOLDS_CONFIG_CODE) {
+      return NextResponse.json(
+        { error: "Kode aturan ini dicadangkan oleh sistem" },
+        { status: 400 }
+      );
+    }
+
     if (id) {
+      const [existingRule] = await db
+        .select({ id: violationTypes.id, kode: violationTypes.kode })
+        .from(violationTypes)
+        .where(eq(violationTypes.id, id))
+        .limit(1);
+
+      if (!existingRule || existingRule.kode === THRESHOLDS_CONFIG_CODE) {
+        return NextResponse.json(
+          { error: "Aturan pelanggaran tidak ditemukan" },
+          { status: 404 }
+        );
+      }
+
+      // Cek bentrok kode dengan aturan lain
+      const [duplicate] = await db
+        .select({ id: violationTypes.id })
+        .from(violationTypes)
+        .where(eq(violationTypes.kode, normalizedKode))
+        .limit(1);
+
+      if (duplicate && duplicate.id !== id) {
+        return NextResponse.json(
+          { error: `Kode aturan ${normalizedKode} sudah digunakan` },
+          { status: 409 }
+        );
+      }
+
       // Update existing
       const [updated] = await db
         .update(violationTypes)
         .set({
-          kode,
+          kode: normalizedKode,
           namaPelanggaran,
           kategori,
-          poinDefault: Number(poinDefault) || 10,
+          poinDefault: parsedPoin,
           deskripsiSanksi: deskripsiSanksi || "",
         })
         .where(eq(violationTypes.id, id))
@@ -68,14 +118,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Cek kode unik sebelum insert baru
+    const [existingByKode] = await db
+      .select({ id: violationTypes.id })
+      .from(violationTypes)
+      .where(eq(violationTypes.kode, normalizedKode))
+      .limit(1);
+
+    if (existingByKode) {
+      return NextResponse.json(
+        { error: `Kode aturan ${normalizedKode} sudah terdaftar` },
+        { status: 409 }
+      );
+    }
+
     // Insert new
     const [inserted] = await db
       .insert(violationTypes)
       .values({
-        kode,
+        kode: normalizedKode,
         namaPelanggaran,
         kategori,
-        poinDefault: Number(poinDefault) || 10,
+        poinDefault: parsedPoin,
         deskripsiSanksi: deskripsiSanksi || "",
         isActive: true,
       })

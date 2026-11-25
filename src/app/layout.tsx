@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title:
@@ -25,9 +40,9 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className="h-full bg-white antialiased"
+      className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full bg-slate-50 antialiased`}
     >
-      <body className="min-h-full font-sans text-slate-800 antialiased bg-white flex flex-col">
+      <body className="min-h-full font-sans text-slate-800 antialiased bg-slate-50 flex flex-col">
         {children}
         <Toaster position="top-right" richColors />
       </body>
