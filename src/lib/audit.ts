@@ -165,57 +165,57 @@ export function getActionBadgeStyle(action: AuditAction): {
   switch (action) {
     case "LOGIN":
       return {
-        bg: "bg-emerald-500/10 dark:bg-emerald-500/15 group-hover/row:bg-emerald-500/25",
-        text: "text-emerald-700 dark:text-emerald-400 group-hover/row:text-emerald-300",
-        border: "border-emerald-200 dark:border-emerald-800/40 group-hover/row:border-emerald-400/50",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+        border: "border-emerald-200",
       };
     case "LOGOUT":
       return {
-        bg: "bg-slate-500/10 dark:bg-slate-500/15 group-hover/row:bg-slate-700/50",
-        text: "text-slate-700 dark:text-slate-400 group-hover/row:text-slate-200",
-        border: "border-slate-200 dark:border-slate-700 group-hover/row:border-slate-500/50",
+        bg: "bg-slate-100",
+        text: "text-slate-700",
+        border: "border-slate-200",
       };
     case "CREATE":
       return {
-        bg: "bg-blue-500/10 dark:bg-blue-500/15 group-hover/row:bg-blue-500/25",
-        text: "text-blue-700 dark:text-blue-400 group-hover/row:text-blue-300",
-        border: "border-blue-200 dark:border-blue-800/40 group-hover/row:border-blue-400/50",
+        bg: "bg-blue-50",
+        text: "text-blue-700",
+        border: "border-blue-200",
       };
     case "UPDATE":
       return {
-        bg: "bg-amber-500/10 dark:bg-amber-500/15 group-hover/row:bg-amber-500/25",
-        text: "text-amber-700 dark:text-amber-400 group-hover/row:text-amber-300",
-        border: "border-amber-200 dark:border-amber-800/40 group-hover/row:border-amber-400/50",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+        border: "border-amber-200",
       };
     case "DELETE":
       return {
-        bg: "bg-rose-500/10 dark:bg-rose-500/15 group-hover/row:bg-rose-500/25",
-        text: "text-rose-700 dark:text-rose-400 group-hover/row:text-rose-300",
-        border: "border-rose-200 dark:border-rose-800/40 group-hover/row:border-rose-400/50",
+        bg: "bg-rose-50",
+        text: "text-rose-700",
+        border: "border-rose-200",
       };
     case "APPROVE":
       return {
-        bg: "bg-teal-500/10 dark:bg-teal-500/15 group-hover/row:bg-teal-500/25",
-        text: "text-teal-700 dark:text-teal-400 group-hover/row:text-teal-300",
-        border: "border-teal-200 dark:border-teal-800/40 group-hover/row:border-teal-400/50",
+        bg: "bg-teal-50",
+        text: "text-teal-700",
+        border: "border-teal-200",
       };
     case "PRINT":
       return {
-        bg: "bg-indigo-500/10 dark:bg-indigo-500/15 group-hover/row:bg-indigo-500/25",
-        text: "text-indigo-700 dark:text-indigo-400 group-hover/row:text-indigo-300",
-        border: "border-indigo-200 dark:border-indigo-800/40 group-hover/row:border-indigo-400/50",
+        bg: "bg-indigo-50",
+        text: "text-indigo-700",
+        border: "border-indigo-200",
       };
     case "EXPORT":
       return {
-        bg: "bg-cyan-500/10 dark:bg-cyan-500/15 group-hover/row:bg-cyan-500/25",
-        text: "text-cyan-700 dark:text-cyan-400 group-hover/row:text-cyan-300",
-        border: "border-cyan-200 dark:border-cyan-800/40 group-hover/row:border-cyan-400/50",
+        bg: "bg-cyan-50",
+        text: "text-cyan-700",
+        border: "border-cyan-200",
       };
     default:
       return {
-        bg: "bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800",
-        text: "text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200",
-        border: "border-slate-200 dark:border-slate-700 group-hover/row:border-slate-600",
+        bg: "bg-slate-100",
+        text: "text-slate-700",
+        border: "border-slate-200",
       };
   }
 }
@@ -231,52 +231,52 @@ export function getModuleBadgeStyle(module: AuditModule): {
   switch (module) {
     case "AUTENTIKASI":
       return {
-        bg: "bg-purple-500/10 dark:bg-purple-500/15 group-hover/row:bg-purple-500/25",
-        text: "text-purple-700 dark:text-purple-300 group-hover/row:text-purple-200",
-        border: "border-purple-200 dark:border-purple-800/40 group-hover/row:border-purple-400/50",
+        bg: "bg-purple-50",
+        text: "text-purple-700",
+        border: "border-purple-200",
       };
     case "AKADEMIK_NILAI":
       return {
-        bg: "bg-blue-500/10 dark:bg-blue-500/15 group-hover/row:bg-blue-500/25",
-        text: "text-blue-700 dark:text-blue-300 group-hover/row:text-blue-200",
-        border: "border-blue-200 dark:border-blue-800/40 group-hover/row:border-blue-400/50",
+        bg: "bg-blue-50",
+        text: "text-blue-700",
+        border: "border-blue-200",
       };
     case "PRESENSI":
       return {
-        bg: "bg-emerald-500/10 dark:bg-emerald-500/15 group-hover/row:bg-emerald-500/25",
-        text: "text-emerald-700 dark:text-emerald-300 group-hover/row:text-emerald-200",
-        border: "border-emerald-200 dark:border-emerald-800/40 group-hover/row:border-emerald-400/50",
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+        border: "border-emerald-200",
       };
     case "BUKU_POIN":
       return {
-        bg: "bg-amber-500/10 dark:bg-amber-500/15 group-hover/row:bg-amber-500/25",
-        text: "text-amber-700 dark:text-amber-300 group-hover/row:text-amber-200",
-        border: "border-amber-200 dark:border-amber-800/40 group-hover/row:border-amber-400/50",
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+        border: "border-amber-200",
       };
     case "KONSELING_BK":
       return {
-        bg: "bg-rose-500/10 dark:bg-rose-500/15 group-hover/row:bg-rose-500/25",
-        text: "text-rose-700 dark:text-rose-300 group-hover/row:text-rose-200",
-        border: "border-rose-200 dark:border-rose-800/40 group-hover/row:border-rose-400/50",
+        bg: "bg-rose-50",
+        text: "text-rose-700",
+        border: "border-rose-200",
       };
     case "E_RAPOR":
       return {
-        bg: "bg-indigo-500/10 dark:bg-indigo-500/15 group-hover/row:bg-indigo-500/25",
-        text: "text-indigo-700 dark:text-indigo-300 group-hover/row:text-indigo-200",
-        border: "border-indigo-200 dark:border-indigo-800/40 group-hover/row:border-indigo-400/50",
+        bg: "bg-indigo-50",
+        text: "text-indigo-700",
+        border: "border-indigo-200",
       };
     case "MANAJEMEN_PENGGUNA":
       return {
-        bg: "bg-sky-500/10 dark:bg-sky-500/15 group-hover/row:bg-sky-500/25",
-        text: "text-sky-700 dark:text-sky-300 group-hover/row:text-sky-200",
-        border: "border-sky-200 dark:border-sky-800/40 group-hover/row:border-sky-400/50",
+        bg: "bg-sky-50",
+        text: "text-sky-700",
+        border: "border-sky-200",
       };
     case "SISTEM":
     default:
       return {
-        bg: "bg-slate-500/10 dark:bg-slate-500/15 group-hover/row:bg-slate-700/50",
-        text: "text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200",
-        border: "border-slate-200 dark:border-slate-700 group-hover/row:border-slate-500/50",
+        bg: "bg-slate-100",
+        text: "text-slate-700",
+        border: "border-slate-200",
       };
   }
 }

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { StatCard } from "@/components/shared/stat-card";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -475,7 +476,7 @@ export function EraporManagementView({
   // Jika sedang membuka pratinjau cetak rapor seorang siswa:
   if (activeReportData) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4">
+      <div className="min-h-screen bg-slate-50 p-4">
         <ReportCardPrintView
           data={activeReportData}
           onBack={() => setActiveReportData(null)}
@@ -486,130 +487,111 @@ export function EraporManagementView({
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Cockpit Banner Menyatu */}
-      <section className="relative overflow-hidden -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 pt-7 pb-8 bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-xs">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-44 bg-blue-500/10 blur-3xl pointer-events-none rounded-full" />
+      <PageHeader
+        title="Laporan Hasil Belajar Siswa (E-Rapor)"
+        badge={portal === "admin" ? "Portal Admin" : "Portal Guru"}
+        description="Rekap nilai akhir, catatan wali kelas, dan pencetakan rapor resmi semester"
+        icon={FileSpreadsheet}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            if (filteredStudents.length > 0) {
+              handlePreviewReport(filteredStudents[0].studentId);
+            } else {
+              toast.info("Belum ada data siswa untuk pratinjau rapor");
+            }
+          }}
+          disabled={
+            loadingPrint || !summaryData || filteredStudents.length === 0
+          }
+          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+        >
+          {loadingPrint ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1e3a8a]" />
+          ) : (
+            <Eye className="w-3.5 h-3.5 text-[#1e3a8a]" />
+          )}
+          Pratinjau Contoh
+        </button>
 
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto pb-8 space-y-3.5">
-            <div className="space-y-1.5">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
-                Laporan Hasil Belajar Siswa (E-Rapor)
-              </h1>
-              <p className="text-xs sm:text-sm text-blue-200/75 max-w-2xl leading-relaxed">
-                Rekapitulasi capaian nilai akhir bagi rata murni, catatan wali
-                kelas, dan pencetakan dokumen rapor resmi ({portal === "admin" ? "Portal Admin" : "Portal Guru"})
-              </p>
-            </div>
+        <button
+          type="button"
+          onClick={openBulkPrintModal}
+          disabled={loadingClasses || kelasList.length === 0}
+          className="inline-flex items-center gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <Printer className="w-3.5 h-3.5" />
+          Cetak Massal
+        </button>
 
-            {/* Tombol Header: Pratinjau Contoh Rapor & Cetak Semua */}
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  if (filteredStudents.length > 0) {
-                    handlePreviewReport(filteredStudents[0].studentId);
-                  } else {
-                    toast.info("Belum ada data siswa untuk pratinjau rapor");
-                  }
-                }}
-                disabled={
-                  loadingPrint || !summaryData || filteredStudents.length === 0
-                }
-                className="inline-flex items-center bg-white/[0.06] hover:bg-white/10 active:bg-white/15 border border-white/15 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
-              >
-                {loadingPrint ? (
-                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin text-blue-300" />
-                ) : (
-                  <Eye className="w-3.5 h-3.5 mr-2 text-blue-300" />
-                )}
-                Pratinjau Contoh Rapor
-              </button>
+        <button
+          type="button"
+          onClick={() => setPublishModalOpen(true)}
+          disabled={!selectedKelas || loadingSummary || stats.total === 0}
+          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <Send className="w-3.5 h-3.5" />
+          Terbitkan Rapor
+        </button>
+      </PageHeader>
 
-              <button
-                type="button"
-                onClick={openBulkPrintModal}
-                disabled={loadingClasses || kelasList.length === 0}
-                className="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs hover:shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all cursor-pointer disabled:opacity-50"
-              >
-                <Printer className="w-3.5 h-3.5 mr-2 text-blue-100" />
-                Cetak Semua
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setPublishModalOpen(true)}
-                disabled={!selectedKelas || loadingSummary || stats.total === 0}
-                className="inline-flex items-center bg-emerald-600/90 hover:bg-emerald-500 active:bg-emerald-700 border border-emerald-400/40 rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
-              >
-                <Send className="w-3.5 h-3.5 mr-2 text-emerald-100" />
-                Terbitkan Rapor
-              </button>
-            </div>
-          </div>
-
-          {/* 4 Kartu Metrik Utama */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            <StatCard
-              variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="TOTAL SISWA"
-              value={stats.total}
-              icon={Users}
-              color="blue"
-              footerLeft="Siswa atau Siswi Aktif"
-              footerRight="Kelas Terpilih"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-emerald-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="TUNTAS KKM"
-              value={stats.tuntas}
-              icon={CheckCircle2}
-              color="emerald"
-              footerLeft={`Standar KKM ${activeDefaultKkm}`}
-              footerRight="KKM Tercapai"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-amber-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="PERLU PERBAIKAN"
-              value={stats.remidi}
-              icon={AlertCircle}
-              color="amber"
-              footerLeft="Nilai di Bawah Target"
-              footerRight="Perlu Remidi"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl bg-white/[0.035] backdrop-blur-xs border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-pointer shadow-xs"
-              title="RAPOR DISAHKAN"
-              value={`${stats.disahkan} dari ${stats.total}`}
-              icon={GraduationCap}
-              color="blue"
-              footerLeft={`${stats.adaCatatan} Siswa Ber-catatan`}
-              footerRight="Status Terverifikasi"
-            />
-          </div>
-        </div>
+      {/* 4 Kartu Metrik Utama */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          className="rounded-xl border border-slate-200/90 shadow-2xs"
+          title="Total Siswa"
+          value={stats.total}
+          icon={Users}
+          color="blue"
+          footerLeft="Siswa aktif"
+          footerRight="Kelas terpilih"
+        />
+        <StatCard
+          className="rounded-xl border border-slate-200/90 shadow-2xs"
+          title="Tuntas KKM"
+          value={stats.tuntas}
+          icon={CheckCircle2}
+          color="emerald"
+          footerLeft={`Standar KKM ${activeDefaultKkm}`}
+          footerRight="KKM tercapai"
+        />
+        <StatCard
+          className="rounded-xl border border-slate-200/90 shadow-2xs"
+          title="Perlu Perbaikan"
+          value={stats.remidi}
+          icon={AlertCircle}
+          color="amber"
+          footerLeft="Nilai di bawah KKM"
+          footerRight="Perlu remidi"
+        />
+        <StatCard
+          className="rounded-xl border border-slate-200/90 shadow-2xs"
+          title="Rapor Disahkan"
+          value={`${stats.disahkan} dari ${stats.total}`}
+          icon={GraduationCap}
+          color="blue"
+          footerLeft={`${stats.adaCatatan} siswa bercatatan`}
+          footerRight="Terverifikasi"
+        />
       </section>
 
       {/* 2. Container Konten Utama */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="space-y-6">
         {/* Class Selection & Homeroom Info */}
         {kelasList.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-10 text-center space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
               <Users className="h-5 w-5" />
             </div>
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <p className="text-xs font-semibold text-slate-700 ">
               Belum Ada Data Kelas Terdaftar
             </p>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1 shrink-0">
+              <span className="text-xs font-semibold text-slate-500 mr-1 shrink-0">
                 Pilih Kelas:
               </span>
               {kelasList.map((c) => (
@@ -620,7 +602,7 @@ export function EraporManagementView({
                   className={`px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer ${
                     selectedKelas === c.namaKelas
                       ? "bg-[#1F4E78] text-white shadow-xs"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
                   Kelas {c.namaKelas}
@@ -629,18 +611,18 @@ export function EraporManagementView({
             </div>
 
             {summaryData && (
-              <div className="flex items-center gap-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 shadow-xs shrink-0">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">
+              <div className="flex items-center gap-2 text-xs bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-xs shrink-0">
+                <span className="text-slate-500 font-medium">
                   Wali Kelas:
                 </span>
-                <span className="font-semibold text-slate-900 dark:text-white">
+                <span className="font-semibold text-slate-900 ">
                   {summaryData.waliKelas}
                 </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span className="text-slate-500 dark:text-slate-400 font-medium">
+                <span className="text-slate-300 ">•</span>
+                <span className="text-slate-500 font-medium">
                   Periode:
                 </span>
-                <span className="font-semibold text-blue-700 dark:text-blue-400">
+                <span className="font-semibold text-blue-700 ">
                   {summaryData.periode.replace("-", " ")}
                 </span>
               </div>
@@ -649,14 +631,14 @@ export function EraporManagementView({
         )}
 
         {/* 3. DETAIL MATRIKS RAPOR SISWA TABLE */}
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="space-y-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="space-y-3 pb-3 border-b border-slate-100 ">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                <CardTitle className="text-base font-bold text-slate-900 tracking-tight">
                   Rekapitulasi Rapor Siswa Kelas {selectedKelas}
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <CardDescription className="text-xs text-slate-500 mt-0.5">
                   Menampilkan {filteredStudents.length} dari{" "}
                   {summaryData?.students.length || 0} siswa • Nilai akhir
                   dihitung dengan metode bagi rata murni
@@ -664,22 +646,22 @@ export function EraporManagementView({
               </div>
 
               {/* Legend Warna Penanda KKM (Opsi A — 3 Warna Dinamis) */}
-              <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-lg px-3 py-1.5">
-                <span className="text-slate-500 dark:text-slate-400 font-semibold">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1.5">
+                <span className="text-slate-500 font-semibold">
                   Penanda KKM ({activeDefaultKkm}):
                 </span>
-                <span className="inline-flex items-center gap-1 text-rose-600 dark:text-rose-400">
+                <span className="inline-flex items-center gap-1 text-rose-600 ">
                   <span className="w-2 h-2 rounded-full bg-rose-500" />
                   &lt; {activeDefaultKkm}
                 </span>
-                <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <span className="inline-flex items-center gap-1 text-amber-600 ">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
                   {activeDefaultKkm === 100
                     ? "100 (Batas)"
                     : `${activeDefaultKkm}–${Math.min(100, activeDefaultKkm + 4)} (Batas)`}
                 </span>
                 {activeDefaultKkm + 5 <= 100 && (
-                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1 text-emerald-600 ">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     &ge; {activeDefaultKkm + 5}
                   </span>
@@ -695,7 +677,7 @@ export function EraporManagementView({
                   placeholder="Cari nama siswa atau NIS..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-8 text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                  className="pl-8 h-8 text-xs bg-white border-slate-200"
                 />
               </div>
 
@@ -841,7 +823,7 @@ export function EraporManagementView({
           ) : filteredStudents.length === 0 ? (
             <div className="py-16 text-center text-slate-400">
               <FileSpreadsheet className="w-8 h-8 mx-auto mb-2 opacity-40" />
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <p className="text-sm font-semibold text-slate-700 ">
                 Tidak ada data siswa
               </p>
               <p className="text-xs text-slate-500 mt-1">
@@ -852,7 +834,7 @@ export function EraporManagementView({
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/75 dark:bg-slate-800/50">
+                  <TableRow className="bg-slate-50/75 ">
                     <TableHead className="pl-6 text-center w-12 whitespace-nowrap text-xs">
                       No
                     </TableHead>
@@ -891,24 +873,24 @@ export function EraporManagementView({
                     return (
                       <TableRow
                         key={`${s.studentId}-${idx}`}
-                        className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+                        className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                       >
-                        <TableCell className="pl-6 text-center font-mono text-xs text-slate-500 group-hover/row:text-slate-400 whitespace-nowrap">
+                        <TableCell className="pl-6 text-center font-mono text-xs text-slate-500 whitespace-nowrap">
                           {idx + 1}
                         </TableCell>
-                        <TableCell className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 tabular-nums whitespace-nowrap">
+                        <TableCell className="font-mono text-xs font-semibold text-slate-700 tabular-nums whitespace-nowrap">
                           {s.nis}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                            <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0 transition-colors">
                               {getInitials(s.namaLengkap || "")}
                             </div>
                             <div>
-                              <span className="text-xs font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors block">
+                              <span className="text-xs font-bold text-slate-900 transition-colors block">
                                 {s.namaLengkap}
                               </span>
-                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                              <span className="text-[11px] text-slate-500 transition-colors">
                                 {s.jenisKelamin === "L" ? "Siswa" : "Siswi"} •
                                 Hadir: {s.presensi.hadir} • Sakit:{" "}
                                 {s.presensi.sakit} • Izin: {s.presensi.izin} •
@@ -929,17 +911,17 @@ export function EraporManagementView({
                             <span className="text-slate-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-center font-mono text-xs font-medium text-slate-700 dark:text-slate-300 group-hover/row:text-slate-200 whitespace-nowrap tabular-nums">
+                        <TableCell className="text-center font-mono text-xs font-medium text-slate-700 whitespace-nowrap tabular-nums">
                           {s.jumlahMapelTerisi} dari {s.totalMapel} Mapel
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-colors ${
                               s.statusKetuntasan === "Semua Tuntas"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/row:bg-emerald-500/15 group-hover/row:text-emerald-300 group-hover/row:border-emerald-500/30"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : s.statusKetuntasan === "Perlu Perbaikan"
-                                ? "bg-amber-50 text-amber-700 border-amber-200 group-hover/row:bg-amber-500/15 group-hover/row:text-amber-300 group-hover/row:border-amber-500/30"
-                                : "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-slate-100 text-slate-700 border-slate-200"
                             }`}
                           >
                             {s.statusKetuntasan}
@@ -947,11 +929,11 @@ export function EraporManagementView({
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
                           {s.hasCatatan ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-emerald-600 group-hover/row:text-emerald-300 font-semibold">
+                            <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold">
                               <CheckCircle2 className="w-3.5 h-3.5" /> Terisi
                             </span>
                           ) : (
-                            <span className="text-xs text-slate-400 group-hover/row:text-slate-400 italic">
+                            <span className="text-xs text-slate-400 italic">
                               Belum Diisi
                             </span>
                           )}
@@ -961,8 +943,8 @@ export function EraporManagementView({
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors ${
                               s.statusRapor === "Disahkan" ||
                               s.statusRapor === "Diterbitkan"
-                                ? "bg-blue-50 text-[#1e3a8a] border-blue-200 group-hover/row:bg-blue-500/15 group-hover/row:text-blue-300 group-hover/row:border-blue-500/30"
-                                : "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
+                                ? "bg-blue-50 text-[#1e3a8a] border-blue-200"
+                                : "bg-slate-100 text-slate-700 border-slate-200"
                             }`}
                           >
                             {s.statusRapor}
@@ -974,10 +956,10 @@ export function EraporManagementView({
                               variant="ghost"
                               size="xs"
                               onClick={() => handleOpenNoteModal(s)}
-                              className="h-7 px-2 text-xs gap-1 group-hover/row:text-blue-300 group-hover/row:hover:bg-blue-900/50"
+                              className="h-7 px-2 text-xs gap-1"
                               title="Input Catatan Wali Kelas dan Ekstrakurikuler"
                             >
-                              <Edit3 className="w-3.5 h-3.5 text-blue-500 group-hover/row:text-blue-300" />
+                              <Edit3 className="w-3.5 h-3.5 text-blue-500 " />
                               Catatan
                             </Button>
                             <Button
@@ -985,10 +967,10 @@ export function EraporManagementView({
                               size="xs"
                               onClick={() => handlePreviewReport(s.studentId)}
                               disabled={loadingPrint}
-                              className="h-7 px-2 text-xs gap-1 group-hover/row:bg-blue-900/40 group-hover/row:border-blue-500/40 group-hover/row:text-white"
+                              className="h-7 px-2 text-xs gap-1"
                               title="Pratinjau dan Cetak Rapor"
                             >
-                              <Printer className="w-3.5 h-3.5 text-slate-500 group-hover/row:text-slate-300" />
+                              <Printer className="w-3.5 h-3.5 text-slate-500 " />
                               Rapor
                             </Button>
                           </div>

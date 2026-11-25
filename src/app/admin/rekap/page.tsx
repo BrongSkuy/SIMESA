@@ -338,20 +338,20 @@ export default function AdminRekapPage() {
                 </div>
 
                 {/* Chart */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:bg-[#091524] hover:border-slate-800 hover:shadow-xl group space-y-3 cursor-pointer">
-                  <div className="pb-3.5 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-                    <CardTitle className="text-base font-semibold text-slate-900 group-hover:text-white tracking-tight transition-colors">
+                <div className="rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-3">
+                  <div className="pb-3.5 border-b border-slate-100 transition-colors">
+                    <CardTitle className="text-base font-semibold text-slate-900 tracking-tight transition-colors">
                       Distribusi Status Kehadiran Tersimpan
                     </CardTitle>
-                    <CardDescription className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 transition-colors">
+                    <CardDescription className="text-xs text-slate-500 mt-0.5 transition-colors">
                       Kelas {selectedClass} · Perbandingan frekuensi Hadir,
                       Izin, Sakit, dan Alfa
                     </CardDescription>
                   </div>
 
                   {/* Custom Modern Legend Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 pt-1 border-b border-slate-100 group-hover:border-slate-800/80 transition-colors">
-                    <div className="flex items-center gap-4 text-xs font-medium text-slate-600 group-hover:text-slate-300 transition-colors">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 pt-1 border-b border-slate-100 transition-colors">
+                    <div className="flex items-center gap-4 text-xs font-medium text-slate-600 transition-colors">
                       <div className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]" />
                         <span>Hadir</span>
@@ -369,7 +369,7 @@ export default function AdminRekapPage() {
                         <span>Alfa</span>
                       </div>
                     </div>
-                    <span className="text-[11px] text-slate-400 group-hover:text-slate-400 font-normal transition-colors">
+                    <span className="text-[11px] text-slate-400 font-normal transition-colors">
                       Perbandingan jumlah per kategori kehadiran
                     </span>
                   </div>
@@ -389,12 +389,12 @@ export default function AdminRekapPage() {
                           />
                           <XAxis
                             dataKey="status"
-                            tick={{ fontSize: 12, fill: "#94A3B8", fontWeight: 600 }}
-                            axisLine={{ stroke: "#94A3B8", strokeOpacity: 0.3 }}
+                            tick={{ fontSize: 12, fill: "#64748B", fontWeight: 600 }}
+                            axisLine={{ stroke: "#CBD5E1", strokeOpacity: 0.8 }}
                             tickLine={false}
                           />
                           <YAxis
-                            tick={{ fontSize: 11, fill: "#94A3B8" }}
+                            tick={{ fontSize: 11, fill: "#64748B" }}
                             axisLine={false}
                             tickLine={false}
                             allowDecimals={false}
@@ -464,39 +464,39 @@ export default function AdminRekapPage() {
                           rekapData.map((r) => (
                             <TableRow
                               key={r.id}
-                              className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                              className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                             >
-                              <TableCell className="pl-6 font-mono text-slate-600 group-hover/row:text-slate-400 transition-colors">
+                              <TableCell className="pl-6 font-mono text-slate-600 transition-colors">
                                 {r.nis}
                               </TableCell>
-                              <TableCell className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                              <TableCell className="font-semibold text-slate-800 transition-colors">
                                 {r.nama}
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border border-emerald-200 group-hover/row:border-emerald-500/30 transition-colors">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors">
                                   {r.hadir}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-amber-50 group-hover/row:bg-amber-500/15 text-amber-700 group-hover/row:text-amber-300 border border-amber-200 group-hover/row:border-amber-500/30 transition-colors">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-colors">
                                   {r.izin}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-blue-50 text-blue-700 border border-blue-200 transition-colors">
                                   {r.sakit}
                                 </span>
                               </TableCell>
                               <TableCell className="text-center">
-                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-rose-50 group-hover/row:bg-rose-500/15 text-rose-700 group-hover/row:text-rose-300 border border-rose-200 group-hover/row:border-rose-500/30 transition-colors">
+                                <span className="inline-flex min-w-7 justify-center px-2 py-0.5 rounded-md text-xs tabular-nums font-semibold bg-rose-50 text-rose-700 border border-rose-200 transition-colors">
                                   {r.alfa}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right pr-6">
                                 <div className="inline-flex items-center justify-end gap-2">
-                                  <div className="w-14 bg-slate-100 group-hover/row:bg-slate-800 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
+                                  <div className="w-14 bg-slate-100 h-1.5 rounded-xs overflow-hidden hidden sm:block transition-colors">
                                     <div
-                                      className="bg-[#1e3a8a] group-hover/row:bg-blue-500 h-full rounded-xs transition-colors"
+                                      className="bg-[#1e3a8a] h-full rounded-xs transition-colors"
                                       style={{
                                         width: `${Math.min(100, Math.max(0, r.persen))}%`,
                                       }}
@@ -505,10 +505,10 @@ export default function AdminRekapPage() {
                                   <span
                                     className={`font-mono font-bold transition-colors ${
                                       r.persen >= 90
-                                        ? "text-emerald-700 group-hover/row:text-emerald-400"
+                                        ? "text-emerald-700 "
                                         : r.persen >= 75
-                                          ? "text-amber-700 group-hover/row:text-amber-400"
-                                          : "text-rose-700 group-hover/row:text-rose-400"
+                                          ? "text-amber-700 "
+                                          : "text-rose-700 "
                                     }`}
                                   >
                                     {r.persen}%
@@ -518,7 +518,7 @@ export default function AdminRekapPage() {
                               {criteriaKeys.map((k) => (
                                 <TableCell
                                   key={k}
-                                  className="text-right pr-5 font-mono font-semibold text-slate-700 group-hover/row:text-slate-300 transition-colors"
+                                  className="text-right pr-5 font-mono font-semibold text-slate-700 transition-colors"
                                 >
                                   {r.nilai?.[k] || 0}
                                 </TableCell>

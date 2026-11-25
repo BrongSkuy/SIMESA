@@ -120,17 +120,17 @@ export function QuickViolationModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-lg bg-white border border-slate-200">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 ">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+              <DialogTitle className="text-base font-bold text-slate-900 ">
                 Catat Pelanggaran Siswa
               </DialogTitle>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 ">
                 Pencatatan buku poin kedisiplinan dan tata tertib sekolah
               </p>
             </div>
@@ -139,21 +139,21 @@ export function QuickViolationModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {error && (
-            <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs border border-red-200 dark:border-red-500/20">
+            <div className="p-2.5 rounded-lg bg-red-50 text-red-600 text-xs border border-red-200">
               {error}
             </div>
           )}
 
           {/* Pilih Siswa */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <Label className="text-xs font-semibold text-slate-700 ">
               Pilih Siswa <span className="text-red-500">*</span>
             </Label>
             <Select
               value={selectedStudentId}
               onValueChange={(val) => setSelectedStudentId(val || "")}
             >
-              <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+              <SelectTrigger className="w-full text-xs bg-slate-50 border-slate-200">
                 <SelectValue placeholder="-- Pilih Siswa --" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
@@ -168,14 +168,14 @@ export function QuickViolationModal({
 
           {/* Pilih Jenis Pelanggaran */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <Label className="text-xs font-semibold text-slate-700 ">
               Jenis Pelanggaran <span className="text-red-500">*</span>
             </Label>
             <Select
               value={selectedTypeId}
               onValueChange={(val) => handleTypeChange(val || "")}
             >
-              <SelectTrigger className="w-full text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+              <SelectTrigger className="w-full text-xs bg-slate-50 border-slate-200">
                 <SelectValue placeholder="-- Pilih Aturan Pelanggaran --" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
@@ -191,7 +191,7 @@ export function QuickViolationModal({
           {/* Poin & Tanggal */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <Label className="text-xs font-semibold text-slate-700 ">
                 Bobot Poin
               </Label>
               <Input
@@ -200,26 +200,26 @@ export function QuickViolationModal({
                 max="100"
                 value={poin}
                 onChange={(e) => setPoin(Number(e.target.value))}
-                className="text-xs font-bold text-red-600 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                className="text-xs font-bold text-red-600 bg-slate-50 border-slate-200"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <Label className="text-xs font-semibold text-slate-700 ">
                 Tanggal Kejadian
               </Label>
               <Input
                 type="date"
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
-                className="text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                className="text-xs bg-slate-50 border-slate-200"
               />
             </div>
           </div>
 
           {/* Lokasi Kejadian */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <Label className="text-xs font-semibold text-slate-700 ">
               Lokasi Kejadian
             </Label>
             <Input
@@ -227,13 +227,13 @@ export function QuickViolationModal({
               placeholder="Contoh: Gerbang Depan, Koridor Kelas, Kantin..."
               value={lokasi}
               onChange={(e) => setLokasi(e.target.value)}
-              className="text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+              className="text-xs bg-slate-50 border-slate-200"
             />
           </div>
 
           {/* Kronologi Singkat */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <Label className="text-xs font-semibold text-slate-700 ">
               Keterangan / Kronologi Singkat
             </Label>
             <Textarea
@@ -241,7 +241,7 @@ export function QuickViolationModal({
               placeholder="Catatan kronologi kejadian pelanggaran..."
               value={keterangan}
               onChange={(e) => setKeterangan(e.target.value)}
-              className="text-xs bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 resize-none"
+              className="text-xs bg-slate-50 border-slate-200 resize-none"
             />
           </div>
 

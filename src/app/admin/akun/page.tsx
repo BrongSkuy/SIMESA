@@ -826,29 +826,29 @@ export default function AdminAkunPage() {
                 paginatedAccounts.map((a, i) => (
                   <TableRow
                     key={a.id}
-                    className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                    className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                   >
-                    <TableCell className="pl-6 font-mono text-slate-500 group-hover/row:text-slate-400 transition-colors">
+                    <TableCell className="pl-6 font-mono text-slate-500 transition-colors">
                       {startIndex + i + 1}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
-                        <div className="h-7 w-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-white font-semibold flex items-center justify-center text-xs border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                        <div className="h-7 w-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs border border-slate-200 shrink-0 transition-colors">
                           {getInitials(a.name)}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-slate-800 group-hover/row:text-white transition-colors">
+                          <span className="font-semibold text-slate-800 transition-colors">
                             {a.name}
                           </span>
                           {a.isCurrentUser && (
-                            <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-50 text-blue-700 border border-blue-200 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-300 group-hover/row:border-blue-500/40">
+                            <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-50 text-blue-700 border border-blue-200">
                               Anda
                             </span>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-slate-600 group-hover/row:text-slate-300 transition-colors">
+                    <TableCell className="font-mono text-slate-600 transition-colors">
                       {a.username || "-"}
                     </TableCell>
                     <TableCell>
@@ -856,7 +856,7 @@ export default function AdminAkunPage() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border transition-colors ${getRolePill(
                             a.appRole
-                          )} group-hover/row:bg-slate-800 group-hover/row:text-slate-200 group-hover/row:border-slate-700`}
+                          )}   `}
                         >
                           {ROLE_CONFIGS[a.appRole as AppRole]?.label ||
                             a.appRole ||
@@ -865,7 +865,7 @@ export default function AdminAkunPage() {
                         {a.additionalRoles?.map((extra) => (
                           <span
                             key={extra.id}
-                            className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border bg-amber-50 text-amber-800 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200 group-hover/row:border-amber-500/40 transition-colors"
+                            className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border bg-amber-50 text-amber-800 border-amber-200 transition-colors"
                           >
                             {formatExtraRoleBadge(extra)}
                           </span>
@@ -876,8 +876,8 @@ export default function AdminAkunPage() {
                       <span
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border transition-colors ${
                           !a.banned
-                            ? "bg-emerald-50 group-hover/row:bg-emerald-500/15 text-emerald-700 group-hover/row:text-emerald-300 border-emerald-200 group-hover/row:border-emerald-500/30"
-                            : "bg-rose-50 group-hover/row:bg-rose-500/15 text-rose-700 group-hover/row:text-rose-300 border-rose-200 group-hover/row:border-rose-500/30"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
                         }`}
                       >
                         <span
@@ -893,7 +893,7 @@ export default function AdminAkunPage() {
                         <Button
                           variant="ghost"
                           size="xs"
-                          className="gap-1 text-slate-700 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 transition-colors"
+                          className="gap-1 text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                           onClick={() => openEdit(a)}
                         >
                           <Edit className="h-3 w-3" /> Edit
@@ -901,7 +901,7 @@ export default function AdminAkunPage() {
                         <Button
                           variant="ghost"
                           size="xs"
-                          className="gap-1 text-amber-700 group-hover/row:text-amber-400 hover:text-amber-800 hover:bg-amber-50 group-hover/row:hover:bg-amber-950/40 transition-colors"
+                          className="gap-1 text-amber-700 hover:text-amber-800 hover:bg-amber-50 transition-colors"
                           onClick={() => openReset(a)}
                         >
                           <KeyRound className="h-3 w-3" /> Reset Sandi
@@ -916,7 +916,7 @@ export default function AdminAkunPage() {
                                 ? "Akun yang sedang digunakan login tidak dapat ditangguhkan"
                                 : "Tangguhkan akses akun"
                             }
-                            className="gap-1 text-rose-600 group-hover/row:text-rose-400 hover:text-rose-700 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 transition-colors disabled:opacity-30"
+                            className="gap-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors disabled:opacity-30"
                             onClick={() =>
                               setStatusTarget({ account: a, setBanned: true })
                             }
@@ -927,7 +927,7 @@ export default function AdminAkunPage() {
                           <Button
                             variant="ghost"
                             size="xs"
-                            className="gap-1 text-emerald-600 group-hover/row:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 group-hover/row:hover:bg-emerald-950/40 transition-colors"
+                            className="gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
                             onClick={() =>
                               setStatusTarget({ account: a, setBanned: false })
                             }

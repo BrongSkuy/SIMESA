@@ -88,7 +88,7 @@ export function StudentViolationView() {
             Memuat data catatan kedisiplinan Anda...
           </div>
         ) : !profile ? (
-          <div className="p-8 text-center text-xs text-slate-500 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="p-8 text-center text-xs text-slate-500 rounded-xl border border-slate-200 bg-white">
             Data profil siswa belum ditemukan.
           </div>
         ) : (
@@ -119,19 +119,19 @@ export function StudentViolationView() {
             </div>
 
             {/* Riwayat Pelanggaran */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-              <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="p-4 border-b border-slate-200 ">
+                <h3 className="text-sm font-bold text-slate-900 ">
                   Riwayat Catatan Pelanggaran Tata Tertib
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500 ">
                   Daftar kejadian yang dicatat oleh guru piket, wali kelas, atau guru bimbingan konseling
                 </p>
               </div>
 
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/75 dark:bg-slate-800/50">
+                  <TableRow className="bg-slate-50/75 ">
                     <TableHead className="w-12 text-center text-xs">No</TableHead>
                     <TableHead className="text-xs">Tanggal</TableHead>
                     <TableHead className="text-xs">Pelanggaran</TableHead>
@@ -146,7 +146,7 @@ export function StudentViolationView() {
                       <TableCell colSpan={6} className="text-center py-12">
                         <div className="flex flex-col items-center justify-center text-slate-500">
                           <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
-                          <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          <p className="text-xs font-semibold text-slate-800 ">
                             Tidak Ada Catatan Pelanggaran
                           </p>
                           <p className="text-[11px] text-slate-400 mt-0.5">
@@ -157,13 +157,13 @@ export function StudentViolationView() {
                     </TableRow>
                   ) : (
                     profile.violations.map((v, i) => (
-                      <TableRow key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                      <TableRow key={v.id} className="hover:bg-slate-50/50 ">
                         <TableCell className="text-center text-xs text-slate-500">{i + 1}</TableCell>
-                        <TableCell className="text-xs font-mono text-slate-600 dark:text-slate-400">
+                        <TableCell className="text-xs font-mono text-slate-600 ">
                           {v.tanggal}
                         </TableCell>
                         <TableCell className="text-xs">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          <span className="font-semibold text-slate-800 ">
                             {v.namaPelanggaran}
                           </span>
                           {v.keterangan && (
