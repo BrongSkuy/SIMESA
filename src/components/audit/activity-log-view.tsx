@@ -334,14 +334,61 @@ export function ActivityLogView() {
         title="Riwayat Aktivitas dan Audit Trail"
         description="Catatan aktivitas pengguna, perubahan data akademik, dan keamanan akses sistem"
         icon={Activity}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Aktivitas Hari Ini"
+              value={loading ? "..." : summary.totalHariIni}
+              icon={Activity}
+              color="blue"
+              footerLeft="Aktivitas terkini"
+              footerRight="Tanggal berjalan"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Akademik & Nilai"
+              value={loading ? "..." : summary.akademikNilaiCount}
+              icon={GraduationCap}
+              color="blue"
+              footerLeft="Capaian belajar"
+              footerRight="Nilai dan rapor"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Kesiswaan & Disiplin"
+              value={loading ? "..." : summary.kesiswaanDisiplinCount}
+              icon={ShieldCheck}
+              color="amber"
+              footerLeft="Buku poin siswa"
+              footerRight="Layanan BK"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Keamanan & Akses"
+              value={loading ? "..." : summary.keamananAkunCount}
+              icon={KeyRound}
+              color="slate"
+              footerLeft="Sesi pengguna"
+              footerRight="Proteksi akun"
+            />
+          </div>
+        }
       >
         <button
           type="button"
           disabled={isExportingCSV}
           onClick={handleExportCSV}
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer disabled:opacity-50"
         >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
           {isExportingCSV ? "Mengekspor CSV..." : "Ekspor CSV"}
         </button>
 
@@ -351,7 +398,7 @@ export function ActivityLogView() {
             fetchSummary();
             fetchLogs(1);
           }}
-          className="inline-flex items-center gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           Segarkan Data
@@ -361,56 +408,13 @@ export function ActivityLogView() {
           <button
             type="button"
             onClick={openPurgeModal}
-            className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-rose-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 rounded-lg px-3.5 py-2 text-xs font-semibold text-rose-200 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Bersihkan Log Usang
           </button>
         )}
       </PageHeader>
-
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Aktivitas Hari Ini"
-          value={loading ? "..." : summary.totalHariIni}
-          icon={Activity}
-          color="blue"
-          footerLeft="Aktivitas terkini"
-          footerRight="Tanggal berjalan"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Akademik & Nilai"
-          value={loading ? "..." : summary.akademikNilaiCount}
-          icon={GraduationCap}
-          color="blue"
-          footerLeft="Capaian belajar"
-          footerRight="Nilai dan rapor"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Kesiswaan & Disiplin"
-          value={loading ? "..." : summary.kesiswaanDisiplinCount}
-          icon={ShieldCheck}
-          color="amber"
-          footerLeft="Buku poin siswa"
-          footerRight="Layanan BK"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Keamanan & Akses"
-          value={loading ? "..." : summary.keamananAkunCount}
-          icon={KeyRound}
-          color="slate"
-          footerLeft="Sesi pengguna"
-          footerRight="Proteksi akun"
-        />
-      </section>
 
       {/* 2. Filter Bar Interaktif */}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">

@@ -277,67 +277,71 @@ export function CounselingManagementView() {
         title="Bimbingan Konseling dan Kesiswaan"
         description="Catatan sesi bimbingan siswa, pemantauan perkembangan, dan penerbitan dispensasi kelas"
         icon={HeartHandshake}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Sesi Bulan Ini"
+              value={loading ? "..." : summary.totalSesiBulanIni}
+              icon={HeartHandshake}
+              color="blue"
+              footerLeft="Bimbingan terdaftar"
+              footerRight="Bulan berjalan"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Dalam Pemantauan"
+              value={loading ? "..." : summary.totalDalamPemantauan}
+              icon={Clock}
+              color="amber"
+              footerLeft="Kasus aktif"
+              footerRight="Perlu pendampingan"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Kasus Selesai"
+              value={loading ? "..." : summary.totalSelesai}
+              icon={CheckCircle2}
+              color="emerald"
+              footerLeft="Telah tuntas dibina"
+              footerRight="Selesai"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Dispensasi Hari Ini"
+              value={loading ? "..." : summary.totalDispensasiHariIni}
+              icon={FileText}
+              color="blue"
+              footerLeft="Izin aktif kelas"
+              footerRight="KBM berlangsung"
+            />
+          </div>
+        }
       >
         <button
           type="button"
           onClick={openNewDispensation}
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer"
         >
-          <FileText className="w-3.5 h-3.5 text-[#1e3a8a]" />
+          <FileText className="w-3.5 h-3.5 text-blue-300" />
           Buat Surat Dispensasi
         </button>
         <button
           type="button"
           onClick={openNewCounseling}
-          className="inline-flex items-center gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           Catat Konseling Baru
         </button>
       </PageHeader>
-
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Sesi Bulan Ini"
-          value={loading ? "..." : summary.totalSesiBulanIni}
-          icon={HeartHandshake}
-          color="blue"
-          footerLeft="Bimbingan terdaftar"
-          footerRight="Bulan berjalan"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Dalam Pemantauan"
-          value={loading ? "..." : summary.totalDalamPemantauan}
-          icon={Clock}
-          color="amber"
-          footerLeft="Kasus aktif"
-          footerRight="Perlu pendampingan"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Kasus Selesai"
-          value={loading ? "..." : summary.totalSelesai}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft="Telah tuntas dibina"
-          footerRight="Selesai"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Dispensasi Hari Ini"
-          value={loading ? "..." : summary.totalDispensasiHariIni}
-          icon={FileText}
-          color="blue"
-          footerLeft="Izin aktif kelas"
-          footerRight="KBM berlangsung"
-        />
-      </section>
 
       {/* Navigasi Tab Terpadu */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

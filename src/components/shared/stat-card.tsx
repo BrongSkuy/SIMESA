@@ -62,11 +62,11 @@ export function StatCard({
       onClick={onClick}
       className={cn(
         isDark
-          ? "bg-slate-900/60 text-white"
+          ? "bg-white/[0.04] text-white"
           : "bg-white text-slate-900 transition-colors",
         onClick &&
           (isDark
-            ? "cursor-pointer hover:bg-slate-800/80"
+            ? "cursor-pointer hover:bg-white/[0.08]"
             : "cursor-pointer hover:bg-slate-50/70"),
         "p-4 sm:p-5 flex flex-col justify-between",
         className
@@ -132,7 +132,7 @@ export function StatCard({
           className={cn(
             "mt-3.5 pt-2.5 flex items-center justify-between gap-2 text-xs",
             isDark
-              ? "border-t border-slate-800"
+              ? "border-t border-white/10"
               : "border-t border-slate-100"
           )}
         >

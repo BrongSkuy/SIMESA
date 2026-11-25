@@ -345,91 +345,95 @@ export default function AdminDashboard() {
         title="Beranda Administrator"
         description="Ringkasan kehadiran siswa dan hasil evaluasi SPK metode SAW"
         badge={
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 border border-slate-200/80 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.07] border border-white/10 px-3 py-1 text-xs font-medium text-blue-200">
+            <Calendar className="w-3.5 h-3.5 text-blue-300" />
             {stats.periodeRangeLabel || "Semester Aktif"}
           </span>
+        }
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Total Siswa"
+              value={stats.totalSiswa}
+              icon={Users}
+              color="blue"
+              footerLeft={
+                stats.totalKelas ? `${stats.totalKelas} Kelas` : "Siswa Terdaftar"
+              }
+              footerRight={
+                stats.totalSiswa > 0 && stats.totalKelas
+                  ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
+                  : undefined
+              }
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Total Guru"
+              value={stats.totalGuru}
+              icon={GraduationCap}
+              color="slate"
+              footerLeft="Tenaga Pendidik & Pengampu"
+              footerRight="Aktif Mengajar"
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title={
+                stats.isTodayData === false
+                  ? "Kehadiran Terakhir"
+                  : "Kehadiran Hari Ini"
+              }
+              value={`${stats.kehadiranHariIni}%`}
+              icon={CheckCircle2}
+              color="emerald"
+              trend={
+                todayDiff !== 0
+                  ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
+                  : undefined
+              }
+              footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
+              footerRight={
+                (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
+                  ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
+                  : "Lengkap"
+              }
+            />
+
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Status Evaluasi SPK"
+              value={
+                stats.isSpkPublished
+                  ? "Terpublikasi"
+                  : leaderboard.length > 0 && spkValid
+                    ? "Siap Dihitung"
+                    : leaderboard.length > 0
+                      ? "Draf Perhitungan"
+                      : "Belum Dihitung"
+              }
+              icon={BarChart3}
+              color="amber"
+              footerLeft="Parameter Penilaian"
+              footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
+            />
+          </div>
         }
       >
         <button
           type="button"
           onClick={handleExportReport}
-          className="inline-flex items-center gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
         >
           <Download className="w-3.5 h-3.5" />
           Ekspor Laporan
         </button>
       </PageHeader>
-
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Total Siswa"
-          value={stats.totalSiswa}
-          icon={Users}
-          color="blue"
-          footerLeft={
-            stats.totalKelas ? `${stats.totalKelas} Kelas` : "Siswa Terdaftar"
-          }
-          footerRight={
-            stats.totalSiswa > 0 && stats.totalKelas
-              ? `~${Math.round(stats.totalSiswa / stats.totalKelas)} siswa/kelas`
-              : undefined
-          }
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Total Guru"
-          value={stats.totalGuru}
-          icon={GraduationCap}
-          color="slate"
-          footerLeft="Tenaga Pendidik & Pengampu"
-          footerRight="Aktif Mengajar"
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title={
-            stats.isTodayData === false
-              ? "Kehadiran Terakhir"
-              : "Kehadiran Hari Ini"
-          }
-          value={`${stats.kehadiranHariIni}%`}
-          icon={CheckCircle2}
-          color="emerald"
-          trend={
-            todayDiff !== 0
-              ? { value: Math.abs(todayDiff), isPositive: todayDiff >= 0 }
-              : undefined
-          }
-          footerLeft={`${stats.activeDayHadir ?? 0} dari ${stats.activeDayTotal ?? stats.totalSiswa} siswa hadir`}
-          footerRight={
-            (stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0) > 0
-              ? `${(stats.activeDayIzinSakit ?? 0) + (stats.activeDayAlfa ?? 0)} tidak hadir`
-              : "Lengkap"
-          }
-        />
-
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Status Evaluasi SPK"
-          value={
-            stats.isSpkPublished
-              ? "Terpublikasi"
-              : leaderboard.length > 0 && spkValid
-                ? "Siap Dihitung"
-                : leaderboard.length > 0
-                  ? "Draf Perhitungan"
-                  : "Belum Dihitung"
-          }
-          icon={BarChart3}
-          color="amber"
-          footerLeft="Parameter Penilaian"
-          footerRight={`${stats.totalCriteria ?? (criteriaList.length || 5)} Kriteria SAW`}
-        />
-      </section>
 
       {/* Baris Grafik & Pintasan (2/3 + 1/3) */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">

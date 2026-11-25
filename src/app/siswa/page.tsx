@@ -158,62 +158,65 @@ export default function SiswaDashboard() {
         badge={`Kelas ${profile.kelas}`}
         description={`Selamat datang, ${profile.namaLengkap} (NIS ${profile.nis}) · Pantau presensi dan capaian evaluasi semester Anda`}
         icon={LayoutDashboard}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Persentase Kehadiran"
+              value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
+              icon={CalendarCheck}
+              color="emerald"
+              footerLeft="Akumulasi semester aktif"
+              footerRight="Presensi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Total Pertemuan Hadir"
+              value={stats?.totalHadir ?? 0}
+              icon={Trophy}
+              color="blue"
+              footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
+              footerRight="Tercatat"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Ketidakhadiran"
+              value={
+                stats
+                  ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
+                  : 0
+              }
+              icon={Medal}
+              color="amber"
+              footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
+              footerRight="Rincian"
+            />
+          </div>
+        }
       >
         <Link href="/siswa/absensi">
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs transition-colors cursor-pointer"
+            className="gap-1.5 cursor-pointer"
           >
-            <CalendarCheck className="h-3.5 w-3.5 text-slate-500" />
+            <CalendarCheck className="h-3.5 w-3.5" />
             Riwayat Absensi
           </Button>
         </Link>
         <Link href="/siswa/nilai">
           <Button
             size="sm"
-            className="gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-2xs transition-colors cursor-pointer"
+            className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/25 cursor-pointer"
           >
             <ClipboardList className="h-3.5 w-3.5" />
             Transkrip Nilai
           </Button>
         </Link>
       </PageHeader>
-
-      {/* 3 KPI Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Persentase Kehadiran"
-          value={stats ? `${stats.persentaseKehadiran}%` : "0%"}
-          icon={CalendarCheck}
-          color="emerald"
-          footerLeft="Akumulasi semester aktif"
-          footerRight="Presensi"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Total Pertemuan Hadir"
-          value={stats?.totalHadir ?? 0}
-          icon={Trophy}
-          color="blue"
-          footerLeft={`Dari ${stats?.totalRecords ?? 0} total catatan sesi`}
-          footerRight="Tercatat"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Ketidakhadiran"
-          value={
-            stats
-              ? stats.totalIzin + stats.totalSakit + stats.totalAlfa
-              : 0
-          }
-          icon={Medal}
-          color="amber"
-          footerLeft={`${stats?.totalIzin ?? 0} Izin · ${stats?.totalSakit ?? 0} Sakit · ${stats?.totalAlfa ?? 0} Alfa`}
-          footerRight="Rincian"
-        />
-      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         {/* Attendance Chart */}

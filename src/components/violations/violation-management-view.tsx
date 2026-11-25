@@ -383,6 +383,50 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
         badge="Tata Tertib"
         description="Pemantauan akumulasi poin pelanggaran siswa dan penerbitan surat peringatan resmi"
         icon={ShieldAlert}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Total Kasus Pelanggaran"
+              value={loading ? "..." : stats.totalCases}
+              icon={AlertTriangle}
+              color="blue"
+              footerLeft="Tercatat dalam sistem"
+              footerRight="Tahun ajaran aktif"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Siswa Berpoin"
+              value={loading ? "..." : stats.studentsWithPoints}
+              icon={Users}
+              color="slate"
+              footerLeft="Memiliki catatan aktif"
+              footerRight="Perlu evaluasi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Perlu Pembinaan"
+              value={loading ? "..." : stats.studentsNeedIntervention}
+              icon={ShieldAlert}
+              color="amber"
+              footerLeft="Akumulasi ≥ 30 poin"
+              footerRight="Atensi khusus BK"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Surat Peringatan Terbit"
+              value={loading ? "..." : stats.spCount}
+              icon={FileCheck2}
+              color="rose"
+              footerLeft="SP 1, SP 2, dan SP 3"
+              footerRight="Tindak lanjut wali"
+            />
+          </div>
+        }
       >
         <button
           type="button"
@@ -390,60 +434,20 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
             setEditingRule({ kategori: "Ringan", poinDefault: 10 });
             setRuleModalOpen(true);
           }}
-          className="inline-flex items-center bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer"
         >
-          <Settings className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+          <Settings className="w-3.5 h-3.5 mr-1.5 text-blue-300" />
           Aturan Pelanggaran
         </button>
         <button
           type="button"
           onClick={() => handleOpenQuickModal()}
-          className="inline-flex items-center bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />
           Catat Pelanggaran
         </button>
       </PageHeader>
-
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Total Kasus Pelanggaran"
-          value={loading ? "..." : stats.totalCases}
-          icon={AlertTriangle}
-          color="blue"
-          footerLeft="Tercatat dalam sistem"
-          footerRight="Tahun ajaran aktif"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Siswa Berpoin"
-          value={loading ? "..." : stats.studentsWithPoints}
-          icon={Users}
-          color="slate"
-          footerLeft="Memiliki catatan aktif"
-          footerRight="Perlu evaluasi"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Perlu Pembinaan"
-          value={loading ? "..." : stats.studentsNeedIntervention}
-          icon={ShieldAlert}
-          color="amber"
-          footerLeft="Akumulasi ≥ 30 poin"
-          footerRight="Atensi khusus BK"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Surat Peringatan Terbit"
-          value={loading ? "..." : stats.spCount}
-          icon={FileCheck2}
-          color="rose"
-          footerLeft="SP 1, SP 2, dan SP 3"
-          footerRight="Tindak lanjut wali"
-        />
-      </section>
 
       {/* 2. Container Konten Utama */}
       <div className="space-y-6">

@@ -492,6 +492,50 @@ export function EraporManagementView({
         badge={portal === "admin" ? "Portal Admin" : "Portal Guru"}
         description="Rekap nilai akhir, catatan wali kelas, dan pencetakan rapor resmi semester"
         icon={FileSpreadsheet}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Total Siswa"
+              value={stats.total}
+              icon={Users}
+              color="blue"
+              footerLeft="Siswa aktif"
+              footerRight="Kelas terpilih"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Tuntas KKM"
+              value={stats.tuntas}
+              icon={CheckCircle2}
+              color="emerald"
+              footerLeft={`Standar KKM ${activeDefaultKkm}`}
+              footerRight="KKM tercapai"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Perlu Perbaikan"
+              value={stats.remidi}
+              icon={AlertCircle}
+              color="amber"
+              footerLeft="Nilai di bawah KKM"
+              footerRight="Perlu remidi"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Rapor Disahkan"
+              value={`${stats.disahkan} dari ${stats.total}`}
+              icon={GraduationCap}
+              color="blue"
+              footerLeft={`${stats.adaCatatan} siswa bercatatan`}
+              footerRight="Terverifikasi"
+            />
+          </div>
+        }
       >
         <button
           type="button"
@@ -505,12 +549,12 @@ export function EraporManagementView({
           disabled={
             loadingPrint || !summaryData || filteredStudents.length === 0
           }
-          className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer disabled:opacity-50"
         >
           {loadingPrint ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1e3a8a]" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-300" />
           ) : (
-            <Eye className="w-3.5 h-3.5 text-[#1e3a8a]" />
+            <Eye className="w-3.5 h-3.5 text-blue-300" />
           )}
           Pratinjau Contoh
         </button>
@@ -519,7 +563,7 @@ export function EraporManagementView({
           type="button"
           onClick={openBulkPrintModal}
           disabled={loadingClasses || kelasList.length === 0}
-          className="inline-flex items-center gap-1.5 bg-[#1e3a8a] hover:bg-[#172554] rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
         >
           <Printer className="w-3.5 h-3.5" />
           Cetak Massal
@@ -529,52 +573,12 @@ export function EraporManagementView({
           type="button"
           onClick={() => setPublishModalOpen(true)}
           disabled={!selectedKelas || loadingSummary || stats.total === 0}
-          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
         >
           <Send className="w-3.5 h-3.5" />
           Terbitkan Rapor
         </button>
       </PageHeader>
-
-      {/* 4 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Total Siswa"
-          value={stats.total}
-          icon={Users}
-          color="blue"
-          footerLeft="Siswa aktif"
-          footerRight="Kelas terpilih"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Tuntas KKM"
-          value={stats.tuntas}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft={`Standar KKM ${activeDefaultKkm}`}
-          footerRight="KKM tercapai"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Perlu Perbaikan"
-          value={stats.remidi}
-          icon={AlertCircle}
-          color="amber"
-          footerLeft="Nilai di bawah KKM"
-          footerRight="Perlu remidi"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Rapor Disahkan"
-          value={`${stats.disahkan} dari ${stats.total}`}
-          icon={GraduationCap}
-          color="blue"
-          footerLeft={`${stats.adaCatatan} siswa bercatatan`}
-          footerRight="Terverifikasi"
-        />
-      </section>
 
       {/* 2. Container Konten Utama */}
       <div className="space-y-6">

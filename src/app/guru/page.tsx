@@ -88,49 +88,59 @@ export default function GuruDashboard() {
         badge="Portal Guru"
         icon={LayoutDashboard}
         description={`Selamat bertugas, ${teacherName}. Kelola presensi harian dan penilaian kelas Anda.`}
+        bottomContent={
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Kelas Diampu"
+              value={data?.totalKelasDiampu ?? 0}
+              icon={Users}
+              color="blue"
+              footerLeft="Kelas aktif mengajar & perwalian"
+              footerRight="Terjadwal"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Presensi Hari Ini"
+              value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
+              icon={ClipboardCheck}
+              color="amber"
+              footerLeft="Seluruh mapel kelas tercatat"
+              footerRight="Harian"
+            />
+            <StatCard
+              variant="dark"
+              className="rounded-xl border border-white/10"
+              title="Rata-rata Kehadiran"
+              value={data?.rataRataKehadiran ?? "-"}
+              icon={CheckCircle2}
+              color="emerald"
+              footerLeft="Akumulasi mapel yang diampu"
+              footerRight="Optimal"
+            />
+          </div>
+        }
       >
         <Link href="/guru/nilai">
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 cursor-pointer"
+          >
             <PenLine className="h-3.5 w-3.5" /> Input Nilai
           </Button>
         </Link>
         <Link href="/guru/absensi">
-          <Button size="sm" className="gap-1.5">
+          <Button
+            size="sm"
+            className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/25 cursor-pointer"
+          >
             <ClipboardCheck className="h-3.5 w-3.5" /> Buka Presensi
           </Button>
         </Link>
       </PageHeader>
-
-      {/* 3 Kartu Metrik Utama */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Kelas Diampu"
-          value={data?.totalKelasDiampu ?? 0}
-          icon={Users}
-          color="blue"
-          footerLeft="Kelas aktif mengajar & perwalian"
-          footerRight="Terjadwal"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Presensi Hari Ini"
-          value={`${data?.sudahDiabsenHariIni ?? 0} / ${data?.totalKelasDiampu ?? 0}`}
-          icon={ClipboardCheck}
-          color="amber"
-          footerLeft="Seluruh mapel kelas tercatat"
-          footerRight="Harian"
-        />
-        <StatCard
-          className="rounded-xl border border-slate-200/90 shadow-2xs"
-          title="Rata-rata Kehadiran"
-          value={data?.rataRataKehadiran ?? "-"}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft="Akumulasi mapel yang diampu"
-          footerRight="Optimal"
-        />
-      </section>
 
       {error && (
         <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-800">
