@@ -57,7 +57,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="relative h-12 w-12 animate-pulse">
+          <div className="relative h-12 w-12">
             <Image
               src="/logo.png?v=3"
               alt="Logo SMK Penerbangan Dirgantara"
@@ -69,7 +69,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           </div>
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a8a]" />
           <p className="text-xs font-medium text-slate-500">
-            {isSigningOut() ? "Mengakhiri sesi SIMESA..." : "Memuat ruang kerja SIMESA..."}
+            {isSigningOut() ? "Mengakhiri sesi SIMESA..." : "Memuat SIMESA..."}
           </p>
         </div>
       </div>
@@ -83,7 +83,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen flex flex-col bg-white text-slate-800">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
         {/* Sticky Dark Enterprise Top Navigation Bar */}
         <Topbar user={user} onMenuClick={() => setMobileOpen(true)} />
 
@@ -91,7 +91,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-[280px] p-0 bg-[#091424] border-white/10 text-white"
+            className="w-[280px] p-0 bg-[#0F172A] border-slate-800 text-white"
           >
             <SheetTitle className="sr-only">Menu Navigasi SIMESA SMK Penerbangan Dirgantara</SheetTitle>
             <Sidebar role={user.role} onToggle={() => setMobileOpen(false)} />

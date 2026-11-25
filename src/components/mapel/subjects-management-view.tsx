@@ -970,24 +970,24 @@ export function SubjectsManagementView({
                   paginatedSubjects.map((mapel, i) => (
                     <TableRow
                       key={mapel.id}
-                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                     >
-                      <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500 transition-colors">
+                      <TableCell className="text-center font-mono text-slate-400 transition-colors">
                         {(safePage - 1) * ITEMS_PER_PAGE + i + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-md bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-600 group-hover/row:text-blue-300 border border-blue-100 group-hover/row:border-blue-500/30 shrink-0 transition-colors">
+                          <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 shrink-0 transition-colors">
                             <BookOpen className="w-3.5 h-3.5" />
                           </div>
-                          <span className="font-semibold text-slate-900 group-hover/row:text-white transition-colors">
+                          <span className="font-semibold text-slate-900 transition-colors">
                             {mapel.namaMapel}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium text-slate-700 group-hover/row:text-slate-300 transition-colors">
+                      <TableCell className="font-medium text-slate-700 transition-colors">
                         {mapel.guruPengampu || (
-                          <span className="text-slate-400 group-hover/row:text-slate-500 italic transition-colors">
+                          <span className="text-slate-400 italic transition-colors">
                             Belum ditentukan
                           </span>
                         )}
@@ -1001,14 +1001,14 @@ export function SubjectsManagementView({
                               return (
                                 <span
                                   key={trimmed}
-                                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-700 group-hover/row:text-blue-300 border border-blue-200 group-hover/row:border-blue-500/30 transition-colors"
+                                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 transition-colors"
                                 >
                                   {trimmed}
                                 </span>
                               );
                             })
                           ) : (
-                            <span className="text-xs text-slate-400 group-hover/row:text-slate-500 transition-colors">
+                            <span className="text-xs text-slate-400 transition-colors">
                               -
                             </span>
                           )}
@@ -1021,7 +1021,7 @@ export function SubjectsManagementView({
                               type="button"
                               aria-label={`Edit ${mapel.namaMapel}`}
                               onClick={() => openEdit(mapel)}
-                              className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 group-hover/row:text-slate-300 hover:text-blue-600 hover:bg-blue-50 group-hover/row:hover:bg-slate-800 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
+                              className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-colors cursor-pointer"
                             >
                               <Edit className="h-3.5 w-3.5" />
                             </button>
@@ -1029,7 +1029,7 @@ export function SubjectsManagementView({
                               type="button"
                               aria-label={`Hapus ${mapel.namaMapel}`}
                               onClick={() => setDeleteTarget(mapel)}
-                              className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 group-hover/row:text-slate-400 hover:text-rose-600 hover:bg-rose-50 group-hover/row:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                              className="inline-flex items-center justify-center h-7.5 w-7.5 rounded-md text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -1069,21 +1069,21 @@ export function SubjectsManagementView({
                   paginatedKkmList.map((item, i) => (
                     <TableRow
                       key={item.key}
-                      className="group/row transition-all duration-200 hover:bg-[#091524] hover:shadow-md cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
                     >
-                      <TableCell className="text-center font-mono text-slate-400 group-hover/row:text-slate-500 transition-colors">
+                      <TableCell className="text-center font-mono text-slate-400 transition-colors">
                         {(safePage - 1) * ITEMS_PER_PAGE + i + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-md bg-blue-50 group-hover/row:bg-blue-500/15 text-blue-600 group-hover/row:text-blue-300 border border-blue-100 group-hover/row:border-blue-500/30 shrink-0 transition-colors">
+                          <div className="p-1.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 shrink-0 transition-colors">
                             <BookOpen className="w-3.5 h-3.5" />
                           </div>
                           <div>
-                            <span className="font-semibold text-slate-900 group-hover/row:text-white transition-colors block">
+                            <span className="font-semibold text-slate-900 transition-colors block">
                               {item.namaMapel}
                             </span>
-                            <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400">
+                            <span className="text-[11px] text-slate-500 ">
                               {item.kelasList.length > 0
                                 ? `Kelas: ${item.kelasList.join(", ")}`
                                 : "Semua Kelas"}
@@ -1092,7 +1092,7 @@ export function SubjectsManagementView({
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center min-w-[52px] px-2.5 py-1 rounded-lg font-mono font-bold text-sm bg-blue-50 text-blue-800 border border-blue-200 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-200 group-hover/row:border-blue-400/40 transition-colors tabular-nums">
+                        <span className="inline-flex items-center justify-center min-w-[52px] px-2.5 py-1 rounded-lg font-mono font-bold text-sm bg-blue-50 text-blue-800 border border-blue-200 transition-colors tabular-nums">
                           {item.kkm}
                         </span>
                       </TableCell>
@@ -1101,20 +1101,20 @@ export function SubjectsManagementView({
                           className={cn(
                             "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-colors",
                             item.isCustomKkm
-                              ? "bg-amber-50 text-amber-800 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200 group-hover/row:border-amber-400/40"
-                              : "bg-slate-100 text-slate-600 border-slate-200 group-hover/row:bg-slate-800 group-hover/row:text-slate-300 group-hover/row:border-slate-700"
+                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
                           )}
                         >
                           {item.isCustomKkm ? "KKM Khusus" : "Standar Default"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300 max-w-sm">
+                      <TableCell className="text-xs text-slate-600 max-w-sm">
                         {item.capaianKompetensi ? (
                           <span className="line-clamp-2">
                             {item.capaianKompetensi}
                           </span>
                         ) : (
-                          <span className="text-slate-400 group-hover/row:text-slate-500 italic">
+                          <span className="text-slate-400 italic">
                             Menggunakan narasi otomatis standar
                           </span>
                         )}
@@ -1126,7 +1126,7 @@ export function SubjectsManagementView({
                             variant="outline"
                             size="xs"
                             onClick={() => openEditKkmModal(item)}
-                            className="h-7 px-2.5 text-xs gap-1 group-hover/row:bg-blue-900/40 group-hover/row:border-blue-500/40 group-hover/row:text-white cursor-pointer"
+                            className="h-7 px-2.5 text-xs gap-1 cursor-pointer"
                           >
                             <Edit className="h-3 w-3" />
                             Atur KKM

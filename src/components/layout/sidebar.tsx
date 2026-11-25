@@ -34,30 +34,29 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
   const isPortalAdmin = currentPortal === "/admin";
   const isPortalGuru = currentPortal === "/guru";
 
+  const activeLinkClass = "bg-white/12 text-white font-semibold";
+  const inactiveLinkClass =
+    "text-slate-300 hover:bg-white/[0.06] hover:text-white font-medium";
+
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#091424] via-[#0d1e38] to-[#0a1526] text-white">
+    <div className="flex h-full flex-col bg-[#0F172A] text-white">
       {/* Header Brand */}
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 h-16 shrink-0">
-        <div className="relative h-9 w-9 shrink-0">
+      <div className="flex items-center gap-3 border-b border-slate-800 px-4 h-16 shrink-0">
+        <div className="relative h-8 w-8 shrink-0">
           <Image
             src="/logo.png?v=2"
             alt="Logo SMK Penerbangan Dirgantara"
             fill
-            sizes="36px"
+            sizes="32px"
             unoptimized
             className="object-contain"
           />
         </div>
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-extrabold tracking-wide text-white uppercase">
-              SIMESA
-            </span>
-            <span className="text-[10px] font-medium text-amber-300/90 border border-amber-400/30 px-1 rounded-sm">
-              SMK
-            </span>
-          </div>
-          <p className="text-[11px] text-blue-200/80 truncate mt-0.5">
+          <span className="text-sm font-bold tracking-tight text-white">
+            SIMESA
+          </span>
+          <p className="text-[11px] text-slate-400 truncate mt-0.5">
             {roleConfig ? roleConfig.label : "Portal Pengguna"}
           </p>
         </div>
@@ -73,20 +72,23 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/admin"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
-                    pathname === "/admin"
-                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                    pathname === "/admin" ? activeLinkClass : inactiveLinkClass
                   )}
                 >
-                  <LayoutDashboard className={cn("w-4 h-4", pathname === "/admin" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard
+                    className={cn(
+                      "w-4 h-4",
+                      pathname === "/admin" ? "text-amber-300" : "text-slate-400"
+                    )}
+                  />
                   Beranda
                 </Link>
               </div>
 
               {ADMIN_DROPDOWN_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-1">
-                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-blue-200/70">
+                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -99,16 +101,17 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         href={item.href}
                         onClick={onToggle}
                         className={cn(
-                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
-                          active
-                            ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                            : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                          active ? activeLinkClass : inactiveLinkClass
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
-                          <span>{item.label}</span>
-                        </div>
+                        <Icon
+                          className={cn(
+                            "w-4 h-4",
+                            active ? "text-amber-300" : "text-slate-400"
+                          )}
+                        />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })}
@@ -122,20 +125,23 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/guru"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
-                    pathname === "/guru"
-                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                    pathname === "/guru" ? activeLinkClass : inactiveLinkClass
                   )}
                 >
-                  <LayoutDashboard className={cn("w-4 h-4", pathname === "/guru" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard
+                    className={cn(
+                      "w-4 h-4",
+                      pathname === "/guru" ? "text-amber-300" : "text-slate-400"
+                    )}
+                  />
                   Beranda
                 </Link>
               </div>
 
               {GURU_DROPDOWN_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-1">
-                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-blue-200/70">
+                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -148,16 +154,17 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         href={item.href}
                         onClick={onToggle}
                         className={cn(
-                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
-                          active
-                            ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                            : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                          active ? activeLinkClass : inactiveLinkClass
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
-                          <span>{item.label}</span>
-                        </div>
+                        <Icon
+                          className={cn(
+                            "w-4 h-4",
+                            active ? "text-amber-300" : "text-slate-400"
+                          )}
+                        />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })}
@@ -169,13 +176,20 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/guru/leaderboard"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
                     pathname === "/guru/leaderboard"
-                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   )}
                 >
-                  <Trophy className={cn("w-4 h-4", pathname === "/guru/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  <Trophy
+                    className={cn(
+                      "w-4 h-4",
+                      pathname === "/guru/leaderboard"
+                        ? "text-amber-300"
+                        : "text-slate-400"
+                    )}
+                  />
                   Leaderboard
                 </Link>
               </div>
@@ -187,20 +201,23 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/siswa"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
-                    pathname === "/siswa"
-                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                    pathname === "/siswa" ? activeLinkClass : inactiveLinkClass
                   )}
                 >
-                  <LayoutDashboard className={cn("w-4 h-4", pathname === "/siswa" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard
+                    className={cn(
+                      "w-4 h-4",
+                      pathname === "/siswa" ? "text-amber-300" : "text-slate-400"
+                    )}
+                  />
                   Beranda
                 </Link>
               </div>
 
               {SISWA_DROPDOWN_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-1">
-                  <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-blue-200/70">
+                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -213,16 +230,17 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                         href={item.href}
                         onClick={onToggle}
                         className={cn(
-                          "flex items-center justify-between rounded-lg px-3 py-2 text-xs transition-all border",
-                          active
-                            ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                            : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
+                          active ? activeLinkClass : inactiveLinkClass
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className={cn("w-4 h-4", active ? "text-amber-300" : "text-blue-200")} />
-                          <span>{item.label}</span>
-                        </div>
+                        <Icon
+                          className={cn(
+                            "w-4 h-4",
+                            active ? "text-amber-300" : "text-slate-400"
+                          )}
+                        />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })}
@@ -234,13 +252,20 @@ export function Sidebar({ role, onToggle }: SidebarProps) {
                   href="/siswa/leaderboard"
                   onClick={onToggle}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-all border",
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
                     pathname === "/siswa/leaderboard"
-                      ? "bg-white/10 border-amber-400/40 text-amber-200 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.1)]"
-                      : "border-transparent text-blue-100/80 hover:bg-white/10 hover:text-white font-medium"
+                      ? activeLinkClass
+                      : inactiveLinkClass
                   )}
                 >
-                  <Trophy className={cn("w-4 h-4", pathname === "/siswa/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  <Trophy
+                    className={cn(
+                      "w-4 h-4",
+                      pathname === "/siswa/leaderboard"
+                        ? "text-amber-300"
+                        : "text-slate-400"
+                    )}
+                  />
                   Leaderboard
                 </Link>
               </div>

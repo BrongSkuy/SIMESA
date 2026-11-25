@@ -241,7 +241,7 @@ export function QuickCounselingModal({
         </DialogHeader>
 
         {errorMessage && (
-          <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 p-3 rounded-md text-xs flex items-center gap-2">
+          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-md text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -321,7 +321,7 @@ export function QuickCounselingModal({
                       key={cat}
                       className={`flex items-center gap-2 p-2.5 rounded-md border cursor-pointer transition text-xs ${
                         kategori === cat
-                          ? "border-amber-600 bg-amber-50/70 dark:bg-amber-950/40 font-semibold text-amber-900 dark:text-amber-200"
+                          ? "border-amber-600 bg-amber-50/70 font-semibold text-amber-900"
                           : "border-border hover:bg-muted/50 text-foreground"
                       }`}
                     >

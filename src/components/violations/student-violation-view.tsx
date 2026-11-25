@@ -152,7 +152,7 @@ export function StudentViolationView() {
             Memuat buku saku kedisiplinan Anda...
           </div>
         ) : !profile ? (
-          <div className="p-8 text-center text-xs text-slate-500 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="p-8 text-center text-xs text-slate-500 rounded-xl border border-slate-200 bg-white">
             Data profil siswa belum ditemukan.
           </div>
         ) : (
@@ -274,12 +274,12 @@ export function StudentViolationView() {
             </div>
 
             {/* Riwayat Pelanggaran */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-              <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="p-4 sm:p-5 border-b border-slate-200">
+                <h3 className="text-sm font-bold text-slate-900">
                   Riwayat Catatan Pelanggaran Tata Tertib
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Daftar kejadian yang dicatat oleh guru piket, wali kelas, atau guru bimbingan konseling
                 </p>
               </div>
@@ -287,7 +287,7 @@ export function StudentViolationView() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50/75 dark:bg-slate-800/50">
+                    <TableRow className="bg-slate-50/75">
                       <TableHead className="w-12 text-center text-xs">No</TableHead>
                       <TableHead className="text-xs">Tanggal</TableHead>
                       <TableHead className="text-xs">Pelanggaran</TableHead>
@@ -302,7 +302,7 @@ export function StudentViolationView() {
                         <TableCell colSpan={6} className="text-center py-12">
                           <div className="flex flex-col items-center justify-center text-slate-500">
                             <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
-                            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                            <p className="text-xs font-semibold text-slate-800">
                               Tidak Ada Catatan Pelanggaran
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -315,20 +315,20 @@ export function StudentViolationView() {
                       profile.violations.map((v, i) => (
                         <TableRow
                           key={v.id}
-                          className="group/row transition-colors hover:bg-[#091524] border-b border-slate-100 dark:border-slate-800 last:border-0"
+                          className="transition-colors hover:bg-slate-50/70 border-b border-slate-100 last:border-0"
                         >
-                          <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">
+                          <TableCell className="text-center text-xs text-slate-500">
                             {i + 1}
                           </TableCell>
-                          <TableCell className="text-xs font-mono text-slate-600 dark:text-slate-400 group-hover/row:text-slate-300 whitespace-nowrap">
+                          <TableCell className="text-xs font-mono text-slate-600 whitespace-nowrap">
                             {formatShortDateId(v.tanggal)}
                           </TableCell>
                           <TableCell className="text-xs">
-                            <span className="font-semibold text-slate-800 dark:text-slate-200 group-hover/row:text-white block">
+                            <span className="font-semibold text-slate-800 block">
                               {v.namaPelanggaran}
                             </span>
                             {v.keterangan && (
-                              <span className="block text-[11px] text-slate-500 group-hover/row:text-slate-400 italic mt-0.5">
+                              <span className="block text-[11px] text-slate-500 italic mt-0.5">
                                 &ldquo;{v.keterangan}&rdquo;
                               </span>
                             )}
@@ -336,12 +336,12 @@ export function StudentViolationView() {
                           <TableCell className="text-center text-xs">
                             <Badge
                               variant="secondary"
-                              className={`text-[10px] font-semibold transition-colors ${
+                              className={`text-[10px] font-semibold ${
                                 v.kategori === "Ringan"
-                                  ? "bg-blue-50 text-blue-700 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-200"
+                                  ? "bg-blue-50 text-blue-700"
                                   : v.kategori === "Sedang"
-                                  ? "bg-amber-50 text-amber-700 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200"
-                                  : "bg-red-50 text-red-700 group-hover/row:bg-rose-500/25 group-hover/row:text-rose-200"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-red-50 text-red-700"
                               }`}
                             >
                               {v.kategori}
@@ -351,23 +351,23 @@ export function StudentViolationView() {
                             className={`text-center font-bold font-mono text-xs ${
                               v.status === "Selesai Dibina"
                                 ? "text-slate-400 line-through"
-                                : "text-red-600 group-hover/row:text-red-400"
+                                : "text-red-600"
                             }`}
                           >
                             +{v.poin}
                           </TableCell>
                           <TableCell className="text-xs">
                             <span
-                              className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded transition-colors ${
+                              className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded ${
                                 v.status === "Selesai Dibina"
-                                  ? "bg-emerald-50 text-emerald-700 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-200"
-                                  : "bg-amber-50 text-amber-700 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-amber-50 text-amber-700"
                               }`}
                             >
                               {v.status === "Selesai Dibina" ? (
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600 group-hover/row:text-emerald-300" />
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                               ) : (
-                                <Clock className="w-3 h-3 text-amber-600 group-hover/row:text-amber-300" />
+                                <Clock className="w-3 h-3 text-amber-600" />
                               )}
                               {v.status}
                             </span>

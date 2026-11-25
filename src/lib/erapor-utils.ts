@@ -53,7 +53,7 @@ export function getKkmAverageColorInfo(
   if (rataRata === null || !Number.isFinite(rataRata)) {
     return {
       tier: "empty",
-      textClass: "text-slate-400 group-hover/row:text-slate-400",
+      textClass: "text-slate-400",
       label: "Belum Dinilai",
     };
   }
@@ -64,7 +64,7 @@ export function getKkmAverageColorInfo(
   if (rounded < threshold) {
     return {
       tier: "below",
-      textClass: "text-rose-600 group-hover/row:text-rose-300",
+      textClass: "text-rose-600",
       label: "Di Bawah KKM",
     };
   }
@@ -72,14 +72,14 @@ export function getKkmAverageColorInfo(
   if (rounded < threshold + 5) {
     return {
       tier: "borderline",
-      textClass: "text-amber-600 group-hover/row:text-amber-300",
+      textClass: "text-amber-600",
       label: "Tuntas Batas",
     };
   }
 
   return {
     tier: "above",
-    textClass: "text-emerald-600 group-hover/row:text-emerald-300",
+    textClass: "text-emerald-600",
     label: "Di Atas KKM",
   };
 }

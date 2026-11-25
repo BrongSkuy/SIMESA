@@ -209,17 +209,17 @@ export function getStatusKasusBadge(status: CaseStatus) {
     case "Dalam Pemantauan":
       return {
         label: "Dalam Pemantauan",
-        badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800",
+        badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
       };
     case "Selesai":
       return {
         label: "Selesai",
-        badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800",
+        badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
       };
     case "Rujukan Kasus":
       return {
         label: "Rujukan Kasus",
-        badgeClass: "bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-300 dark:border-purple-800",
+        badgeClass: "bg-purple-50 text-purple-800 border-purple-200",
       };
     default:
       return {
@@ -236,12 +236,12 @@ export function getKerahasiaanBadge(tingkat: ConfidentialityLevel) {
   if (tingkat === "Rahasia") {
     return {
       label: "Rahasia",
-      badgeClass: "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-200",
     };
   }
   return {
     label: "Umum",
-    badgeClass: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-300 dark:border-blue-800",
+    badgeClass: "bg-blue-50 text-blue-800 border-blue-200",
   };
 }
 
@@ -253,17 +253,17 @@ export function getDispensasiStatusBadge(status: DispensationStatus) {
     case "Aktif":
       return {
         label: "Aktif",
-        badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800",
+        badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
       };
     case "Selesai":
       return {
         label: "Selesai",
-        badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800",
+        badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
       };
     case "Dibatalkan":
       return {
         label: "Dibatalkan",
-        badgeClass: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700",
+        badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
       };
     default:
       return {

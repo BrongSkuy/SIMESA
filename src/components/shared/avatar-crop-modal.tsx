@@ -18,7 +18,7 @@ import {
   Check,
   X,
   Loader2,
-  Sparkles,
+  Crop,
 } from "lucide-react";
 
 interface AvatarCropModalProps {
@@ -175,7 +175,7 @@ export function AvatarCropModal({
       <DialogContent className="sm:max-w-md p-5 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200">
         <DialogHeader className="gap-1 pb-1 border-b border-slate-100">
           <div className="flex items-center gap-2 text-[#1e3a8a]">
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <Crop className="w-4 h-4 text-[#1e3a8a]" />
             <DialogTitle className="text-base font-bold text-slate-900">
               Sesuaikan Foto Profil
             </DialogTitle>

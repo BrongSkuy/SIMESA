@@ -434,21 +434,21 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
         <button
           type="button"
           className={cn(
-            "inline-flex items-center gap-1 xl:gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all focus:outline-none cursor-pointer whitespace-nowrap",
+            "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors focus:outline-none cursor-pointer whitespace-nowrap",
             groupActive
-              ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-              : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+              ? "bg-white/12 text-white font-semibold"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
           )}
         >
-          <GroupIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", groupActive ? "text-amber-300" : "text-blue-200")} />
+          <GroupIcon className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", groupActive ? "text-amber-300" : "text-slate-400")} />
           {group.label}
-          <ChevronDown className={cn("w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 group-hover:rotate-180", groupActive ? "text-amber-300" : "text-blue-200 group-hover:text-white")} />
+          <ChevronDown className={cn("w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-200 group-hover:rotate-180", groupActive ? "text-slate-200" : "text-slate-400 group-hover:text-white")} />
         </button>
 
         {/* Dropdown Container dengan Invisible Bridge */}
         <div className="absolute left-0 top-full pt-2 w-72 invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-150 z-50">
-          <div className="rounded-2xl bg-white/98 backdrop-blur-lg p-2 shadow-2xl border border-slate-200/90 text-slate-800">
-            <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+          <div className="rounded-xl bg-white p-1.5 shadow-lg border border-slate-200 text-slate-800">
+            <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
               {group.sectionTitle}
             </div>
             {group.items.map((item) => {
@@ -459,16 +459,16 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-start gap-3 p-2 rounded-xl transition-colors",
+                    "flex items-start gap-2.5 p-2 rounded-lg transition-colors",
                     item.dividerBefore &&
                       "border-t border-slate-100 mt-1 pt-2",
                     active
-                      ? "bg-blue-50 text-[#1e3a8a]"
+                      ? "bg-blue-50/90 text-[#1e3a8a]"
                       : "hover:bg-slate-50 text-slate-700"
                   )}
                 >
-                  <div className="p-1.5 rounded-lg bg-blue-50 text-[#1e3a8a] shrink-0 mt-0.5">
-                    <ItemIcon className="w-4 h-4" />
+                  <div className="p-1.5 rounded-md bg-slate-100 text-[#1e3a8a] shrink-0 mt-0.5">
+                    <ItemIcon className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p
@@ -479,7 +479,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                     >
                       {item.label}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                       {item.description}
                     </p>
                   </div>
@@ -493,61 +493,62 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#091424] via-[#0d1e38] to-[#0a1526] border-b border-white/10 text-white shadow-md backdrop-blur-md">
+    <header className="sticky top-0 z-50 bg-[#0F172A] border-b border-slate-800 text-white">
       <div className="w-full px-3 sm:px-5 lg:px-6 xl:px-8">
-        <div className="flex items-center justify-between h-20 gap-2 sm:gap-4">
+        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4">
           {/* Sisi Kiri: Tombol Menu Mobile & Brand Sekolah */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
             <button
               type="button"
               onClick={onMenuClick}
-              className="lg:hidden p-2.5 -ml-1 sm:-ml-2 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+              className="lg:hidden p-2 -ml-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
               aria-label="Buka menu navigasi"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
 
-            <Link href={homeHref} className="flex items-center space-x-2.5 sm:space-x-3.5 group py-1 min-w-0">
-              <div className="relative h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center shrink-0 drop-shadow-sm ring-1 ring-white/15 rounded-full p-0.5 bg-white/5">
+            <Link href={homeHref} className="flex items-center gap-2.5 py-1 min-w-0">
+              <div className="relative h-9 w-9 flex items-center justify-center shrink-0 rounded-lg bg-white/[0.06] border border-white/10 p-1">
                 <Image
                   src="/logo.png?v=2"
                   alt="Logo SMK Penerbangan Dirgantara"
                   fill
-                  sizes="48px"
+                  sizes="36px"
                   unoptimized
                   className="object-contain"
                 />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  <span className="text-base sm:text-lg lg:text-xl font-extrabold tracking-wide text-white uppercase drop-shadow-xs">
+              <div className="min-w-0 leading-tight">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base font-bold tracking-tight text-white">
                     SIMESA
                   </span>
-                  <span className="hidden md:inline-flex items-center text-[10px] sm:text-[11px] font-semibold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 sm:px-2.5 py-0.5 rounded-full tracking-wide shadow-xs whitespace-nowrap">
+                  <span className="hidden xl:inline-block h-3.5 w-px bg-slate-700" />
+                  <span className="hidden xl:inline text-xs font-medium text-slate-400 whitespace-nowrap">
                     SMK Penerbangan Dirgantara
                   </span>
                 </div>
-                <p className="hidden 2xl:block text-[11px] sm:text-xs text-blue-200/90 mt-0.5 font-medium leading-none truncate max-w-[280px]">
-                  {roleMeta.subtitle}
+                <p className="hidden sm:block xl:hidden text-[11px] text-slate-400 font-medium truncate max-w-[180px]">
+                  SMK Penerbangan Dirgantara
                 </p>
               </div>
             </Link>
           </div>
 
           {/* Sisi Tengah: Menu Navigasi Horizontal */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-1.5 shrink-0">
+          <nav className="hidden lg:flex items-center gap-1 shrink-0">
             {isPortalAdmin ? (
               <>
                 <Link
                   href="/admin"
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors whitespace-nowrap",
                     pathname === "/admin"
-                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-white/12 text-white font-semibold"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/admin" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/admin" ? "text-amber-300" : "text-slate-400")} />
                   Beranda
                 </Link>
 
@@ -558,13 +559,13 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/guru"
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors whitespace-nowrap",
                     pathname === "/guru"
-                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-white/12 text-white font-semibold"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru" ? "text-amber-300" : "text-slate-400")} />
                   Beranda
                 </Link>
 
@@ -573,13 +574,13 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/guru/leaderboard"
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors whitespace-nowrap",
                     pathname === "/guru/leaderboard"
-                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-white/12 text-white font-semibold"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/guru/leaderboard" ? "text-amber-300" : "text-slate-400")} />
                   Leaderboard
                 </Link>
               </>
@@ -588,13 +589,13 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/siswa"
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors whitespace-nowrap",
                     pathname === "/siswa"
-                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-white/12 text-white font-semibold"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa" ? "text-amber-300" : "text-blue-200")} />
+                  <LayoutDashboard className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa" ? "text-amber-300" : "text-slate-400")} />
                   Beranda
                 </Link>
 
@@ -603,13 +604,13 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <Link
                   href="/siswa/leaderboard"
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3.5 xl:py-2 text-xs xl:text-sm font-medium rounded-lg transition-all whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-1.5 text-xs xl:text-[13px] font-medium rounded-lg transition-colors whitespace-nowrap",
                     pathname === "/siswa/leaderboard"
-                      ? "text-amber-200 bg-transparent border border-amber-400/40 hover:border-amber-400/70 font-semibold shadow-[0_0_12px_rgba(251,191,36,0.12)]"
-                      : "text-blue-100/80 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-white/12 text-white font-semibold"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa/leaderboard" ? "text-amber-300" : "text-blue-200")} />
+                  <Trophy className={cn("w-3.5 h-3.5 xl:w-4 xl:h-4", pathname === "/siswa/leaderboard" ? "text-amber-300" : "text-slate-400")} />
                   Leaderboard
                 </Link>
               </>
@@ -617,25 +618,25 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
           </nav>
 
           {/* Sisi Kanan: Tahun Ajaran & Profil Pengguna */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Badge Konteks Tahun Ajaran */}
-            <div className="hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-transparent border border-amber-400/30 hover:border-amber-400/60 text-xs text-amber-200/90 font-medium transition-colors shadow-xs whitespace-nowrap shrink-0">
-              <CalendarCheck className="w-3.5 h-3.5 text-amber-300" />
+            <div className="hidden 2xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 text-xs text-slate-300 font-medium whitespace-nowrap shrink-0">
+              <CalendarCheck className="w-3.5 h-3.5 text-slate-400" />
               <span>{academicYearDisplay}</span>
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex items-center justify-between gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-2 rounded-2xl bg-transparent hover:bg-amber-400/5 border border-amber-400/40 hover:border-amber-400/80 hover:shadow-[0_0_15px_rgba(251,191,36,0.12)] transition-all focus:outline-none cursor-pointer w-auto max-w-[180px] min-[390px]:max-w-[210px] sm:w-64 sm:max-w-none lg:w-auto lg:max-w-[200px] xl:w-64 xl:max-w-none shadow-xs group shrink-0"
+                className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.09] border border-white/10 transition-colors focus:outline-none cursor-pointer max-w-[180px] sm:max-w-[230px] shrink-0"
               >
-                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 ring-1 ring-amber-400/20 group-hover:bg-amber-400/15 group-hover:border-amber-400/50 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 overflow-hidden relative shadow-xs transition-colors">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-slate-800 text-slate-100 border border-slate-700 flex items-center justify-center font-semibold text-xs shrink-0 overflow-hidden relative">
                     {user.image ? (
                       <Image
                         src={user.image}
                         alt={user.nama}
                         fill
-                        sizes="40px"
+                        sizes="32px"
                         unoptimized
                         className="object-cover"
                       />
@@ -644,21 +645,20 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                     )}
                   </div>
                   <div className="block text-left leading-tight min-w-0 flex-1">
-                    <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-amber-100 truncate max-w-[85px] min-[390px]:max-w-[110px] sm:max-w-none lg:max-w-[115px] xl:max-w-none transition-colors">
+                    <div className="text-xs font-semibold text-white truncate max-w-[90px] sm:max-w-[130px]">
                       {user.nama}
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-emerald-400 font-medium mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                      <span className="truncate">{roleMeta.label}</span>
+                    <div className="text-[10px] text-slate-400 font-medium truncate">
+                      {roleMeta.label}
                     </div>
                   </div>
                 </div>
-                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300/80 group-hover:text-amber-300 shrink-0 transition-colors" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
                 align="end"
-                className="w-64 p-2 rounded-2xl border border-slate-200/80 shadow-2xl bg-white/98 backdrop-blur-xl text-slate-800 animate-in fade-in-50 zoom-in-95 duration-150"
+                className="w-64 p-1.5 rounded-xl border border-slate-200 shadow-lg bg-white text-slate-800"
               >
                 {/* Header Identitas Pengguna */}
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100/80 mb-1 flex items-center gap-3">

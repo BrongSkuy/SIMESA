@@ -348,20 +348,20 @@ export default function SiswaEraporPage() {
                     return (
                       <TableRow
                         key={`${sub.mapel}-${idx}`}
-                        className="group/row transition-colors hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                        className="group/row transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                       >
                         <TableCell className="text-center font-mono text-xs text-slate-400">
                           {idx + 1}
                         </TableCell>
                         <TableCell>
-                          <span className="text-xs font-semibold text-slate-900 group-hover/row:text-white block">
+                          <span className="text-xs font-semibold text-slate-900 block">
                             {sub.mapel}
                           </span>
-                          <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400">
+                          <span className="text-[11px] text-slate-500 ">
                             {sub.guruPengampu}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center font-mono text-xs text-slate-600 group-hover/row:text-slate-300">
+                        <TableCell className="text-center font-mono text-xs text-slate-600 ">
                           {sub.kkm}
                         </TableCell>
                         <TableCell className="text-center font-mono text-sm font-bold tabular-nums">
@@ -373,10 +373,10 @@ export default function SiswaEraporPage() {
                             <span className="text-slate-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-center font-bold text-xs text-slate-800 group-hover/row:text-white">
+                        <TableCell className="text-center font-bold text-xs text-slate-800 ">
                           {sub.predikat}
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300 max-w-md leading-relaxed">
+                        <TableCell className="text-xs text-slate-600 max-w-md leading-relaxed">
                           {sub.deskripsi}
                         </TableCell>
                       </TableRow>
