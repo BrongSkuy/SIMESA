@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { studentReportNotes, academicYears, students } from "@/db/schema";
+import { studentReportNotes, academicYears, students, spkScores } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -105,6 +105,33 @@ export async function POST(request: NextRequest) {
       periode = activeYear
         ? `${activeYear.tahunAjaran}-${activeYear.semester}`
         : DEFAULT_PERIODE;
+    }
+
+    // Validasi: jangan izinkan menerbitkan rapor bila belum ada nilai mapel sama sekali
+    if (statusRapor === "Diterbitkan") {
+      const studentScores = await db
+        .select({ mapel: spkScores.mapel })
+        .from(spkScores)
+        .where(
+          and(
+            eq(spkScores.studentId, studentId),
+            eq(spkScores.periode, periode)
+          )
+        )
+        .all();
+
+      const hasMapelScore = studentScores.some(
+        (s) => s.mapel && s.mapel !== "Umum"
+      );
+      if (!hasMapelScore) {
+        return NextResponse.json(
+          {
+            error:
+              "Rapor belum dapat diterbitkan karena siswa belum memiliki nilai mata pelajaran pada periode ini.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const existing = await db

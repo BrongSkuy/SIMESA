@@ -209,3 +209,116 @@ export function hasAnyRole(
   if (targetRoles.includes(primaryRole as AppRole)) return true;
   return additionalRoles.some((r) => targetRoles.includes(r as AppRole));
 }
+
+/**
+ * Peran utama kategori guru yang dapat diberikan peran tambahan (multi-role)
+ */
+export const TEACHER_CATEGORY_ROLES: AppRole[] = [
+  "GURU",
+  "WALI_KELAS",
+  "GURU_PIKET",
+  "GURU_BK",
+  "PEMBINA_EKSKUL",
+];
+
+/**
+ * Daftar peran tambahan yang dapat dirangkap oleh guru
+ */
+export const ADDITIONAL_TEACHER_ROLES: AppRole[] = [
+  "WALI_KELAS",
+  "GURU_BK",
+  "GURU_PIKET",
+  "PEMBINA_EKSKUL",
+];
+
+/**
+ * Daftar peran yang dapat dibuat langsung dari halaman Manajemen Akun
+ * (Akun siswa dibuat melalui menu Data Siswa agar data kelas dan angkatan lengkap)
+ */
+export const STAFF_CREATABLE_ROLES: AppRole[] = APP_ROLES.filter(
+  (r) => r !== "SISWA"
+);
+
+export function isTeacherCategoryRole(role?: string | null): boolean {
+  if (!role) return false;
+  return TEACHER_CATEGORY_ROLES.includes(role.toUpperCase() as AppRole);
+}
+
+export function parseRoleMetadata(metadata?: string | null): {
+  kelas?: string;
+  ekskul?: string;
+} {
+  if (!metadata) return {};
+  try {
+    const parsed = JSON.parse(metadata);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export interface ExtraRoleInput {
+  role: string;
+  kelas?: string | null;
+  ekskul?: string | null;
+  metadata?: string | null;
+}
+
+export interface SanitizedExtraRole {
+  role: AppRole;
+  metadata: string | null;
+  kelas?: string;
+}
+
+/**
+ * Validasi dan format peran tambahan guru beserta metadata kelas atau ekskul
+ */
+export function sanitizeAdditionalTeacherRoles(
+  primaryRole: AppRole,
+  rawRoles: unknown
+): SanitizedExtraRole[] {
+  if (!isTeacherCategoryRole(primaryRole) || !Array.isArray(rawRoles)) {
+    return [];
+  }
+  const seen = new Set<AppRole>();
+  const result: SanitizedExtraRole[] = [];
+
+  for (const item of rawRoles) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as ExtraRoleInput;
+    const roleCode = String(rec.role || "").toUpperCase().trim() as AppRole;
+    if (
+      !ADDITIONAL_TEACHER_ROLES.includes(roleCode) ||
+      roleCode === primaryRole ||
+      seen.has(roleCode)
+    ) {
+      continue;
+    }
+
+    const existingMeta = parseRoleMetadata(rec.metadata);
+    let metadataStr: string | null = null;
+    let waliKelasTarget: string | undefined;
+
+    if (roleCode === "WALI_KELAS") {
+      const kelas = (rec.kelas ?? existingMeta.kelas ?? "").trim();
+      if (kelas) {
+        metadataStr = JSON.stringify({ kelas });
+        waliKelasTarget = kelas;
+      }
+    } else if (roleCode === "PEMBINA_EKSKUL") {
+      const ekskul = (rec.ekskul ?? existingMeta.ekskul ?? "").trim();
+      if (ekskul) {
+        metadataStr = JSON.stringify({ ekskul });
+      }
+    }
+
+    seen.add(roleCode);
+    result.push({
+      role: roleCode,
+      metadata: metadataStr,
+      ...(waliKelasTarget ? { kelas: waliKelasTarget } : {}),
+    });
+  }
+
+  return result;
+}

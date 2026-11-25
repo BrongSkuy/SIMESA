@@ -7,10 +7,11 @@ import {
   spkGradingCategories,
   spkResults,
 } from "@/db/schema";
+import { userRoles } from "@/db/auth-schema";
 import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getPortalForRole } from "@/lib/rbac";
+import { getPortalForRole, parseRoleMetadata } from "@/lib/rbac";
 
 // PUT /api/classes/[id] — update class and cascade rename across related tables
 export async function PUT(
@@ -104,6 +105,22 @@ export async function PUT(
               .update(subjects)
               .set({ kelasDiampu: newParts.join(", ") })
               .where(eq(subjects.id, subj.id))
+              .run();
+          }
+        }
+
+        const waliRoleRows = await tx
+          .select()
+          .from(userRoles)
+          .where(eq(userRoles.role, "WALI_KELAS"))
+          .all();
+        for (const wr of waliRoleRows) {
+          const meta = parseRoleMetadata(wr.metadata);
+          if (meta.kelas === oldClass.namaKelas) {
+            await tx
+              .update(userRoles)
+              .set({ metadata: JSON.stringify({ ...meta, kelas: namaKelas }) })
+              .where(eq(userRoles.id, wr.id))
               .run();
           }
         }
