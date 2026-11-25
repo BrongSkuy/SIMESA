@@ -124,7 +124,7 @@ describe("Validasi Menu Navigasi Siswa (Ringkas Akademik dan Kesiswaan)", () => 
   });
 
   it("mempertahankan SISWA_NAV_ITEMS untuk kompatibilitas backward", () => {
-    expect(SISWA_NAV_ITEMS).toHaveLength(7);
+    expect(SISWA_NAV_ITEMS).toHaveLength(6);
     const navHrefs = SISWA_NAV_ITEMS.map((item) => item.href);
     expect(navHrefs).toContain("/siswa");
     expect(navHrefs).toContain("/siswa/pelanggaran");
