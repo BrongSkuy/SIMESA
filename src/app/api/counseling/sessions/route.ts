@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getPortalForRole } from "@/lib/rbac";
 import { getUserFullRoles } from "@/lib/rbac-server";
 import { db } from "@/db";
 import { students } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import {
   getCounselingSessions,
   createCounselingSession,
@@ -84,30 +85,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const counselorId = counselorNameCustom || session.user.name || "Guru BK";
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const username = (session.user as Record<string, unknown>)?.username as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    const isStaff = portal === "/admin" || portal === "/guru";
+
+    let resolvedStudentId = studentId;
+    if (!isStaff) {
+      const conditions = [eq(students.userId, session.user.id)];
+      if (username) conditions.push(eq(students.nis, username));
+      const [ownStudent] = await db
+        .select({ id: students.id })
+        .from(students)
+        .where(conditions.length > 1 ? or(...conditions) : conditions[0])
+        .limit(1);
+
+      if (!ownStudent || (studentId && studentId !== ownStudent.id)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      resolvedStudentId = ownStudent.id;
+    }
+
+    const counselorId = isStaff
+      ? counselorNameCustom || session.user.name || "Guru BK"
+      : "Guru BK Sekolah";
 
     const result = await createCounselingSession({
-      studentId,
+      studentId: resolvedStudentId,
       counselorId,
       tanggal,
       waktuMulai,
       waktuSelesai,
       kategori,
-      jenisLayanan,
-      tingkatKerahasiaan,
+      jenisLayanan: isStaff ? jenisLayanan : "Konseling Perorangan",
+      tingkatKerahasiaan: isStaff ? tingkatKerahasiaan : "Umum",
       pokokMasalah,
-      pendekatanKonseling,
-      hasilKonseling,
-      tindakLanjut,
-      statusKasus,
-      createDispensation: Boolean(createDispensation),
+      pendekatanKonseling: isStaff ? pendekatanKonseling : undefined,
+      hasilKonseling: isStaff ? hasilKonseling : undefined,
+      tindakLanjut: isStaff ? tindakLanjut : undefined,
+      statusKasus: isStaff ? statusKasus : "Dalam Pemantauan",
+      createDispensation: isStaff ? Boolean(createDispensation) : false,
     });
 
     // Catat ke riwayat aktivitas (audit trail)
     const [targetStudent] = await db
       .select({ namaLengkap: students.namaLengkap })
       .from(students)
-      .where(eq(students.id, studentId))
+      .where(eq(students.id, resolvedStudentId))
       .limit(1);
 
     const reqHeaders = await headers();
@@ -122,9 +146,9 @@ export async function POST(req: NextRequest) {
       userRole: (session.user as any).role || "guru_bk",
       action: "CREATE",
       module: "KONSELING_BK",
-      targetId: studentId,
+      targetId: resolvedStudentId,
       targetName: targetStudent?.namaLengkap || "Siswa",
-      description: `Mencatat sesi konseling ${jenisLayanan} (${kategori}) untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      description: `Mencatat sesi konseling ${isStaff ? jenisLayanan : "Konseling Perorangan"} (${kategori}) untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
       details: {
         sessionId: result.session?.id,
         kategori,

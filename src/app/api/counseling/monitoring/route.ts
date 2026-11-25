@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
+import { getLocalIsoDate, MONITORING_ASPECTS, type MonitoringAspect } from "@/lib/counseling";
 import {
   getStudentMonitoringLogs,
   createStudentMonitoringLog,
@@ -43,6 +46,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await req.json();
     const {
       studentId,
@@ -53,15 +62,20 @@ export async function POST(req: NextRequest) {
       recordedByCustom,
     } = body;
 
-    if (!studentId || !aspekPengamatan || !catatanPerkembangan) {
+    if (
+      !studentId ||
+      !aspekPengamatan ||
+      !catatanPerkembangan ||
+      !MONITORING_ASPECTS.includes(aspekPengamatan as MonitoringAspect)
+    ) {
       return NextResponse.json(
-        { error: "Siswa, aspek pengamatan, dan catatan perkembangan wajib diisi" },
+        { error: "Siswa, aspek pengamatan yang valid, dan catatan perkembangan wajib diisi" },
         { status: 400 }
       );
     }
 
     const recordedBy = recordedByCustom || session.user.name || "Guru Pendamping";
-    const realDate = tanggal || new Date().toISOString().split("T")[0];
+    const realDate = tanggal || getLocalIsoDate();
 
     const created = await createStudentMonitoringLog({
       studentId,
@@ -70,6 +84,18 @@ export async function POST(req: NextRequest) {
       aspekPengamatan,
       catatanPerkembangan,
       rekomendasi,
+    });
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru Pendamping",
+      userRole: appRole || "guru",
+      action: "CREATE",
+      module: "KONSELING_BK",
+      targetId: studentId,
+      targetName: "Catatan Pantauan Siswa",
+      description: `Menambahkan catatan pantauan karakter (${aspekPengamatan})`,
+      details: { monitoringId: created.id, aspekPengamatan },
     });
 
     return NextResponse.json(created, { status: 201 });

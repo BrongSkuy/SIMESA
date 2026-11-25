@@ -10,6 +10,12 @@ import {
   updateDispensationLetter,
 } from "@/lib/counseling-server";
 import { logActivity } from "@/lib/audit-server";
+import { getPortalForRole } from "@/lib/rbac";
+import {
+  DISPENSATION_STATUSES,
+  getLocalIsoDate,
+  type DispensationStatus,
+} from "@/lib/counseling";
 
 // GET /api/counseling/dispensation — Mengambil daftar surat dispensasi kelas
 export async function GET(req: NextRequest) {
@@ -50,6 +56,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await req.json();
     const {
       studentId,
@@ -69,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     const diterbitkanOleh = diterbitkanOlehCustom || session.user.name || "Petugas BK";
-    const realDate = tanggal || new Date().toISOString().split("T")[0];
+    const realDate = tanggal || getLocalIsoDate();
 
     const created = await createDispensationLetter({
       studentId,
@@ -124,12 +136,22 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { id, statusDispensasi, keterangan } = body;
 
-    if (!id || !statusDispensasi) {
+    if (
+      !id ||
+      !statusDispensasi ||
+      !DISPENSATION_STATUSES.includes(statusDispensasi as DispensationStatus)
+    ) {
       return NextResponse.json(
-        { error: "ID surat dan status baru wajib ditentukan" },
+        { error: "ID surat dan status dispensasi yang valid wajib ditentukan" },
         { status: 400 }
       );
     }
@@ -137,6 +159,25 @@ export async function PATCH(req: NextRequest) {
     const updated = await updateDispensationLetter(id, {
       statusDispensasi,
       keterangan,
+    });
+
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Surat dispensasi tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Petugas BK",
+      userRole: appRole || "guru_bk",
+      action: "UPDATE",
+      module: "KONSELING_BK",
+      targetId: updated.studentId,
+      targetName: updated.nomorSurat,
+      description: `Memperbarui status surat dispensasi ${updated.nomorSurat} menjadi ${statusDispensasi}`,
+      details: { dispensationId: id, statusDispensasi },
     });
 
     return NextResponse.json(updated);

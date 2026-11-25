@@ -22,24 +22,30 @@ import {
   HeartHandshake,
   FileText,
   UserCheck,
-  CheckCircle2,
-  Clock,
-  Shield,
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   COUNSELING_CATEGORIES,
   COUNSELING_SERVICES,
-  CONFIDENTIALITY_LEVELS,
   MONITORING_ASPECTS,
   DISPENSATION_REASONS,
+  getKerahasiaanOptionLabel,
   CounselingCategory,
   CounselingService,
   ConfidentialityLevel,
   MonitoringAspect,
   DispensationReason,
 } from "@/lib/counseling";
+
+function getLocalIsoDate(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 export interface StudentOption {
   id: string;
@@ -53,6 +59,7 @@ interface QuickCounselingModalProps {
   onOpenChange: (open: boolean) => void;
   mode: "counseling" | "monitoring" | "dispensation";
   studentsList: StudentOption[];
+  defaultStudentId?: string;
   onSuccess: () => void;
 }
 
@@ -61,6 +68,7 @@ export function QuickCounselingModal({
   onOpenChange,
   mode,
   studentsList,
+  defaultStudentId,
   onSuccess,
 }: QuickCounselingModalProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +76,7 @@ export function QuickCounselingModal({
 
   // Form states
   const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [tanggal, setTanggal] = useState(new Date().toISOString().split("T")[0]);
+  const [tanggal, setTanggal] = useState(getLocalIsoDate);
   const [waktuMulai, setWaktuMulai] = useState("09:00");
   const [waktuSelesai, setWaktuSelesai] = useState("09:45");
   const [kategori, setKategori] = useState<CounselingCategory>("Akademik dan Belajar");
@@ -93,7 +101,8 @@ export function QuickCounselingModal({
   useEffect(() => {
     if (open) {
       setErrorMessage(null);
-      setTanggal(new Date().toISOString().split("T")[0]);
+      setTanggal(getLocalIsoDate());
+      setSelectedStudentId(defaultStudentId || "");
       if (mode === "counseling") {
         setPokokMasalah("");
         setPendekatanKonseling("");
@@ -107,7 +116,7 @@ export function QuickCounselingModal({
         setKeteranganDispensasi("");
       }
     }
-  }, [open, mode]);
+  }, [open, mode, defaultStudentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,6 +159,11 @@ export function QuickCounselingModal({
           const errData = await res.json();
           throw new Error(errData.error || "Gagal mencatat sesi konseling");
         }
+        toast.success(
+          createDispensation
+            ? "Sesi konseling dicatat dan surat dispensasi otomatis diterbitkan"
+            : "Sesi bimbingan konseling berhasil disimpan"
+        );
       } else if (mode === "monitoring") {
         if (!catatanPerkembangan.trim()) {
           setErrorMessage("Catatan perkembangan perilaku siswa wajib diisi.");
@@ -173,6 +187,7 @@ export function QuickCounselingModal({
           const errData = await res.json();
           throw new Error(errData.error || "Gagal menyimpan catatan pemantauan");
         }
+        toast.success("Catatan pantauan karakter siswa berhasil disimpan");
       } else if (mode === "dispensation") {
         const res = await fetch("/api/counseling/dispensation", {
           method: "POST",
@@ -191,6 +206,7 @@ export function QuickCounselingModal({
           const errData = await res.json();
           throw new Error(errData.error || "Gagal menerbitkan surat dispensasi");
         }
+        toast.success("Surat dispensasi kelas resmi berhasil diterbitkan");
       }
 
       onSuccess();
@@ -208,18 +224,18 @@ export function QuickCounselingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 bg-white dark:bg-slate-900">
         <DialogHeader className="border-b pb-3">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
             {mode === "counseling" && (
               <>
-                <HeartHandshake className="w-5 h-5 text-amber-600" />
+                <HeartHandshake className="w-5 h-5 text-teal-600" />
                 Catat Sesi Bimbingan Konseling Baru
               </>
             )}
             {mode === "monitoring" && (
               <>
-                <UserCheck className="w-5 h-5 text-blue-600" />
+                <UserCheck className="w-5 h-5 text-teal-600" />
                 Tambah Catatan Pemantauan Karakter Siswa
               </>
             )}
@@ -253,13 +269,26 @@ export function QuickCounselingModal({
             <Label className="text-xs font-semibold">
               Pilih Siswa yang Bersangkutan <span className="text-rose-500">*</span>
             </Label>
-            <Select value={selectedStudentId} onValueChange={(val) => { if (val) setSelectedStudentId(val); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih nama siswa atau nomor induk siswa..." />
+            <Select
+              value={selectedStudentId}
+              onValueChange={(val) => {
+                if (val) setSelectedStudentId(val);
+              }}
+            >
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue placeholder="Pilih nama siswa atau nomor induk siswa...">
+                  {(val) => {
+                    if (!val) return "Pilih nama siswa atau nomor induk siswa...";
+                    const student = studentsList.find((s) => s.id === val);
+                    return student
+                      ? `${student.namaLengkap} • NIS ${student.nis} • Kelas ${student.kelas}`
+                      : "Pilih nama siswa atau nomor induk siswa...";
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {studentsList.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
+                  <SelectItem key={s.id} value={s.id} className="text-xs">
                     {s.namaLengkap} • NIS {s.nis} • Kelas {s.kelas}
                   </SelectItem>
                 ))}
@@ -283,28 +312,32 @@ export function QuickCounselingModal({
                 required
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
-                Jam Mulai <span className="text-rose-500">*</span>
-              </Label>
-              <Input
-                type="time"
-                value={waktuMulai}
-                onChange={(e) => setWaktuMulai(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">
-                Jam Selesai <span className="text-rose-500">*</span>
-              </Label>
-              <Input
-                type="time"
-                value={waktuSelesai}
-                onChange={(e) => setWaktuSelesai(e.target.value)}
-                required
-              />
-            </div>
+            {mode !== "monitoring" && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">
+                    Jam Mulai <span className="text-rose-500">*</span>
+                  </Label>
+                  <Input
+                    type="time"
+                    value={waktuMulai}
+                    onChange={(e) => setWaktuMulai(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">
+                    Jam Selesai <span className="text-rose-500">*</span>
+                  </Label>
+                  <Input
+                    type="time"
+                    value={waktuSelesai}
+                    onChange={(e) => setWaktuSelesai(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* FORM KHUSUS SESI KONSELING */}
@@ -319,9 +352,9 @@ export function QuickCounselingModal({
                   {COUNSELING_CATEGORIES.map((cat) => (
                     <label
                       key={cat}
-                      className={`flex items-center gap-2 p-2.5 rounded-md border cursor-pointer transition text-xs ${
+                      className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition text-xs ${
                         kategori === cat
-                          ? "border-amber-600 bg-amber-50/70 font-semibold text-amber-900"
+                          ? "border-teal-600 bg-teal-50/80 font-semibold text-teal-900"
                           : "border-border hover:bg-muted/50 text-foreground"
                       }`}
                     >
@@ -330,7 +363,7 @@ export function QuickCounselingModal({
                         name="counseling-category"
                         checked={kategori === cat}
                         onChange={() => setKategori(cat)}
-                        className="text-amber-600 focus:ring-amber-500"
+                        className="accent-teal-600"
                       />
                       <span>{cat}</span>
                     </label>
@@ -346,14 +379,18 @@ export function QuickCounselingModal({
                   </Label>
                   <Select
                     value={jenisLayanan}
-                    onValueChange={(val) => { if (val) setJenisLayanan(val as CounselingService); }}
+                    onValueChange={(val) => {
+                      if (val) setJenisLayanan(val as CounselingService);
+                    }}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
+                    <SelectTrigger className="w-full text-xs">
+                      <SelectValue>
+                        {(val) => val || "Pilih bentuk layanan..."}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {COUNSELING_SERVICES.map((srv) => (
-                        <SelectItem key={srv} value={srv}>
+                        <SelectItem key={srv} value={srv} className="text-xs">
                           {srv}
                         </SelectItem>
                       ))}
@@ -367,16 +404,20 @@ export function QuickCounselingModal({
                   </Label>
                   <Select
                     value={tingkatKerahasiaan}
-                    onValueChange={(val) => { if (val) setTingkatKerahasiaan(val as ConfidentialityLevel); }}
+                    onValueChange={(val) => {
+                      if (val) setTingkatKerahasiaan(val as ConfidentialityLevel);
+                    }}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
+                    <SelectTrigger className="w-full text-xs">
+                      <SelectValue>
+                        {(val) => getKerahasiaanOptionLabel(val)}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Umum">
+                      <SelectItem value="Umum" className="text-xs">
                         Umum (Wali kelas dapat ikut membaca catatan)
                       </SelectItem>
-                      <SelectItem value="Rahasia">
+                      <SelectItem value="Rahasia" className="text-xs">
                         Rahasia (Khusus Guru BK dan Kepala Sekolah)
                       </SelectItem>
                     </SelectContent>
@@ -390,7 +431,7 @@ export function QuickCounselingModal({
                   Pokok Masalah yang Dibahas <span className="text-rose-500">*</span>
                 </Label>
                 <textarea
-                  className="w-full min-h-[70px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[70px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Contoh: Siswa merasa kesulitan konsentrasi belajar mandiri dan memiliki kecemasan menjelang ujian kejuruan..."
                   value={pokokMasalah}
                   onChange={(e) => setPokokMasalah(e.target.value)}
@@ -404,7 +445,7 @@ export function QuickCounselingModal({
                   Solusi dan Pendekatan Konseling
                 </Label>
                 <textarea
-                  className="w-full min-h-[60px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[60px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Contoh: Memberikan bimbingan manajemen waktu dan teknik relaksasi belajar terarah..."
                   value={pendekatanKonseling}
                   onChange={(e) => setPendekatanKonseling(e.target.value)}
@@ -417,7 +458,7 @@ export function QuickCounselingModal({
                   Rencana Tindak Lanjut
                 </Label>
                 <textarea
-                  className="w-full min-h-[50px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[50px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Contoh: Evaluasi sesi kedua dijadwalkan hari Selasa pekan depan jam istirahat pertama..."
                   value={tindakLanjut}
                   onChange={(e) => setTindakLanjut(e.target.value)}
@@ -425,13 +466,13 @@ export function QuickCounselingModal({
               </div>
 
               {/* Checkbox Dispensasi Otomatis */}
-              <div className="p-3 bg-muted/40 border border-border rounded-md">
+              <div className="p-3 bg-teal-50/50 dark:bg-teal-950/20 border border-teal-200/70 dark:border-teal-900/50 rounded-lg">
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={createDispensation}
                     onChange={(e) => setCreateDispensation(e.target.checked)}
-                    className="mt-0.5 rounded text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 rounded accent-teal-600"
                   />
                   <div className="text-xs">
                     <span className="font-semibold text-foreground">
@@ -455,14 +496,18 @@ export function QuickCounselingModal({
                 </Label>
                 <Select
                   value={aspekPengamatan}
-                  onValueChange={(val) => { if (val) setAspekPengamatan(val as MonitoringAspect); }}
+                  onValueChange={(val) => {
+                    if (val) setAspekPengamatan(val as MonitoringAspect);
+                  }}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
+                  <SelectTrigger className="w-full text-xs">
+                    <SelectValue>
+                      {(val) => val || "Pilih aspek pengamatan..."}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {MONITORING_ASPECTS.map((asp) => (
-                      <SelectItem key={asp} value={asp}>
+                      <SelectItem key={asp} value={asp} className="text-xs">
                         {asp}
                       </SelectItem>
                     ))}
@@ -475,7 +520,7 @@ export function QuickCounselingModal({
                   Catatan Pengamatan Perkembangan <span className="text-rose-500">*</span>
                 </Label>
                 <textarea
-                  className="w-full min-h-[80px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[80px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Tuliskan catatan konkret terkait kemajuan atau perubahan perilaku siswa saat di lingkungan sekolah..."
                   value={catatanPerkembangan}
                   onChange={(e) => setCatatanPerkembangan(e.target.value)}
@@ -488,7 +533,7 @@ export function QuickCounselingModal({
                   Rekomendasi Pembinaan atau Tindakan
                 </Label>
                 <textarea
-                  className="w-full min-h-[60px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[60px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Contoh: Berikan apresiasi positif atas kedisiplinan dan tugaskan pendampingan teman sebaya..."
                   value={rekomendasi}
                   onChange={(e) => setRekomendasi(e.target.value)}
@@ -506,14 +551,18 @@ export function QuickCounselingModal({
                 </Label>
                 <Select
                   value={keperluan}
-                  onValueChange={(val) => { if (val) setKeperluan(val as DispensationReason); }}
+                  onValueChange={(val) => {
+                    if (val) setKeperluan(val as DispensationReason);
+                  }}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
+                  <SelectTrigger className="w-full text-xs">
+                    <SelectValue>
+                      {(val) => val || "Pilih keperluan izin..."}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {DISPENSATION_REASONS.map((reason) => (
-                      <SelectItem key={reason} value={reason}>
+                      <SelectItem key={reason} value={reason} className="text-xs">
                         {reason}
                       </SelectItem>
                     ))}
@@ -526,7 +575,7 @@ export function QuickCounselingModal({
                   Keterangan Tambahan Keperluan Izin
                 </Label>
                 <textarea
-                  className="w-full min-h-[70px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-ring focus:outline-none"
+                  className="w-full min-h-[70px] p-2.5 text-xs rounded-md border border-input bg-background focus:ring-2 focus:ring-teal-500/40 focus:outline-none"
                   placeholder="Contoh: Beristirahat sementara di ruang UKS karena mengalami pusing saat praktikum kejuruan..."
                   value={keteranganDispensasi}
                   onChange={(e) => setKeteranganDispensasi(e.target.value)}
@@ -541,13 +590,14 @@ export function QuickCounselingModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
+              className="cursor-pointer"
             >
               Batalkan
             </Button>
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-blue-900 hover:bg-blue-800 text-white min-w-[120px]"
+              className="bg-teal-700 hover:bg-teal-800 text-white min-w-[120px] cursor-pointer"
             >
               {submitting ? (
                 <>

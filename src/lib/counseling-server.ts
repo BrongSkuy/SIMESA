@@ -25,19 +25,25 @@ import {
 import { calculateActiveViolationPoints } from "./violations";
 
 /**
- * Mengambil ringkasan statistik layanan konseling untuk StatCard
+ * Mengambil ringkasan statistik layanan konseling (menghormati asas kerahasiaan peran pengguna)
  */
-export async function getCounselingOverviewSummary(): Promise<CounselingOverviewSummary> {
+export async function getCounselingOverviewSummary(
+  canViewConfidential: boolean = true
+): Promise<CounselingOverviewSummary> {
   const allSessions = await db.select().from(counselingSessions);
   const allDispensations = await db.select().from(dispensationLetters);
+
+  const visibleSessions = canViewConfidential
+    ? allSessions
+    : allSessions.filter((s) => s.tingkatKerahasiaan !== "Rahasia");
 
   const now = new Date();
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  const totalSesiBulanIni = allSessions.filter((s) => s.tanggal.startsWith(currentMonthStr)).length;
-  const totalDalamPemantauan = allSessions.filter((s) => s.statusKasus === "Dalam Pemantauan").length;
-  const totalSelesai = allSessions.filter((s) => s.statusKasus === "Selesai").length;
+  const totalSesiBulanIni = visibleSessions.filter((s) => s.tanggal.startsWith(currentMonthStr)).length;
+  const totalDalamPemantauan = visibleSessions.filter((s) => s.statusKasus === "Dalam Pemantauan").length;
+  const totalSelesai = visibleSessions.filter((s) => s.statusKasus === "Selesai").length;
   const totalDispensasiHariIni = allDispensations.filter(
     (d) => d.tanggal === todayStr && d.statusDispensasi === "Aktif"
   ).length;
