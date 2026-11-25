@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   GURU_DROPDOWN_GROUPS,
   GURU_NAV_ITEMS,
+  SISWA_DROPDOWN_GROUPS,
   SISWA_NAV_ITEMS,
 } from "../../components/layout/topbar";
 
@@ -87,5 +88,47 @@ describe("Validasi Menu Navigasi Guru & Bebas Simbol Slash (Fitur Layout)", () =
     SISWA_NAV_ITEMS.forEach((item) => {
       expect(item.label).not.toContain("/");
     });
+  });
+});
+
+describe("Validasi Menu Navigasi Siswa (Ringkas Akademik dan Kesiswaan)", () => {
+  it("memiliki 2 grup dropdown utama untuk peran siswa: Akademik dan Kesiswaan", () => {
+    expect(SISWA_DROPDOWN_GROUPS).toHaveLength(2);
+    expect(SISWA_DROPDOWN_GROUPS[0].label).toBe("Akademik");
+    expect(SISWA_DROPDOWN_GROUPS[1].label).toBe("Kesiswaan");
+  });
+
+  it("memastikan seluruh label, sectionTitle, dan deskripsi menu siswa bebas dari karakter slash ('/')", () => {
+    SISWA_DROPDOWN_GROUPS.forEach((group) => {
+      expect(group.label).not.toContain("/");
+      expect(group.sectionTitle).not.toContain("/");
+      group.items.forEach((item) => {
+        expect(item.label).not.toContain("/");
+        expect(item.description).not.toContain("/");
+      });
+    });
+  });
+
+  it("memastikan sub-menu Akademik siswa memuat Riwayat Absensi, Nilai Saya, dan E-Rapor", () => {
+    const akademik = SISWA_DROPDOWN_GROUPS.find((g) => g.label === "Akademik");
+    expect(akademik).toBeDefined();
+    const hrefs = akademik!.items.map((i) => i.href);
+    expect(hrefs).toEqual(["/siswa/absensi", "/siswa/nilai", "/siswa/erapor"]);
+  });
+
+  it("memastikan sub-menu Kesiswaan siswa memuat Buku Poin dan Konseling BK", () => {
+    const kesiswaan = SISWA_DROPDOWN_GROUPS.find((g) => g.label === "Kesiswaan");
+    expect(kesiswaan).toBeDefined();
+    const hrefs = kesiswaan!.items.map((i) => i.href);
+    expect(hrefs).toEqual(["/siswa/pelanggaran", "/siswa/konseling"]);
+  });
+
+  it("mempertahankan SISWA_NAV_ITEMS untuk kompatibilitas backward", () => {
+    expect(SISWA_NAV_ITEMS).toHaveLength(6);
+    const navHrefs = SISWA_NAV_ITEMS.map((item) => item.href);
+    expect(navHrefs).toContain("/siswa");
+    expect(navHrefs).toContain("/siswa/pelanggaran");
+    expect(navHrefs).toContain("/siswa/konseling");
+    expect(navHrefs).toContain("/siswa/leaderboard");
   });
 });

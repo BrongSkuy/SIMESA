@@ -8,8 +8,12 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
-import { generateWarningLetterNumber } from "@/lib/violations";
+import {
+  generateWarningLetterNumber,
+  calculateActiveViolationPoints,
+} from "@/lib/violations";
 import { logActivity } from "@/lib/audit-server";
+import { getPortalForRole } from "@/lib/rbac";
 
 // GET /api/violations/warning-letters — Ambil riwayat surat peringatan
 export async function GET(req: NextRequest) {
@@ -66,24 +70,43 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await req.json();
     const { studentId, tingkatSp, tanggalTerbit, nomorSuratCustom, statusPanggilan, catatanMediasi } = body;
 
-    if (!studentId || !tingkatSp) {
+    const parsedTingkat = Number(tingkatSp);
+    if (!studentId || ![1, 2, 3].includes(parsedTingkat)) {
       return NextResponse.json(
-        { error: "Siswa dan tingkat SP wajib ditentukan" },
+        { error: "Siswa dan tingkat SP (1, 2, atau 3) wajib ditentukan" },
         { status: 400 }
       );
     }
 
-    // Hitung akumulasi poin saat ini
+    const [targetStudent] = await db
+      .select({ id: students.id, namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    if (!targetStudent) {
+      return NextResponse.json(
+        { error: "Data siswa tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    // Hitung akumulasi poin aktif saat ini (status !== "Selesai Dibina")
     const violations = await db
-      .select({ poin: studentViolations.poin })
+      .select({ poin: studentViolations.poin, status: studentViolations.status })
       .from(studentViolations)
       .where(eq(studentViolations.studentId, studentId));
 
-    const totalPoints = violations.reduce((s, v) => s + (v.poin || 0), 0);
+    const totalPoints = calculateActiveViolationPoints(violations);
 
     // Hitung urutan surat yang sudah ada di database untuk sequence number
     const countLetters = await db.select().from(warningLetters);
@@ -108,25 +131,19 @@ export async function POST(req: NextRequest) {
       .returning();
 
     // Catat ke riwayat aktivitas (audit trail)
-    const [targetStudent] = await db
-      .select({ namaLengkap: students.namaLengkap })
-      .from(students)
-      .where(eq(students.id, studentId))
-      .limit(1);
-
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Guru BK",
-      userRole: (session.user as any).role || "guru_bk",
+      userRole: appRole || "guru_bk",
       action: "APPROVE",
       module: "BUKU_POIN",
       targetId: studentId,
-      targetName: targetStudent?.namaLengkap || "Siswa",
-      description: `Menerbitkan Surat Peringatan (SP ${tingkatSp}) Nomor ${realNomor} untuk siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      targetName: targetStudent.namaLengkap || "Siswa",
+      description: `Menerbitkan Surat Peringatan (SP ${parsedTingkat}) Nomor ${realNomor} untuk siswa ${targetStudent.namaLengkap || "Siswa"}`,
       details: {
         letterId: inserted.id,
         nomorSurat: realNomor,
-        tingkatSp: Number(tingkatSp),
+        tingkatSp: parsedTingkat,
         totalPoinSaatSp: totalPoints,
       },
     });

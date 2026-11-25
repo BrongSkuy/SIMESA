@@ -22,6 +22,7 @@ import {
   ConfidentialityLevel,
   CounselingService,
 } from "./counseling";
+import { calculateActiveViolationPoints } from "./violations";
 
 /**
  * Mengambil ringkasan statistik layanan konseling untuk StatCard
@@ -453,7 +454,7 @@ export async function getStudentCounselingProfile(studentId: string, canViewConf
     .where(eq(studentViolations.studentId, studentId))
     .orderBy(desc(studentViolations.tanggal));
 
-  const totalPoinPelanggaran = rawViolations.reduce((sum, v) => sum + (v.poin || 0), 0);
+  const totalPoinPelanggaran = calculateActiveViolationPoints(rawViolations);
 
   const letters = await db
     .select()

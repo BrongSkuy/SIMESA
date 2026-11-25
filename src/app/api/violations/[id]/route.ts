@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { studentViolations } from "@/db/schema";
+import { studentViolations, students } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { getPortalForRole } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit-server";
+
+const ALLOWED_STATUSES = ["Tercatat", "Diproses BK", "Selesai Dibina"] as const;
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -15,6 +19,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -35,9 +44,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const updateData: Partial<typeof studentViolations.$inferInsert> = {};
-    if (status) updateData.status = status;
+    if (status !== undefined) {
+      if (!ALLOWED_STATUSES.includes(status)) {
+        return NextResponse.json(
+          { error: "Status pembinaan tidak valid" },
+          { status: 400 }
+        );
+      }
+      updateData.status = status;
+    }
     if (tindakLanjut !== undefined) updateData.tindakLanjut = tindakLanjut;
-    if (typeof poin === "number") updateData.poin = poin;
+    if (poin !== undefined) {
+      if (!Number.isInteger(poin) || poin < 1 || poin > 100) {
+        return NextResponse.json(
+          { error: "Bobot poin harus berupa bilangan bulat antara 1 sampai 100" },
+          { status: 400 }
+        );
+      }
+      updateData.poin = poin;
+    }
     if (keterangan !== undefined) updateData.keterangan = keterangan;
     if (lokasi !== undefined) updateData.lokasi = lokasi;
 
@@ -46,6 +71,29 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       .set(updateData)
       .where(eq(studentViolations.id, id))
       .returning();
+
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, existing.studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru",
+      userRole: appRole || "guru",
+      action: "UPDATE",
+      module: "BUKU_POIN",
+      targetId: existing.studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Memperbarui status pelanggaran siswa ${targetStudent?.namaLengkap || "Siswa"} menjadi ${updated.status}`,
+      details: {
+        violationId: id,
+        previousStatus: existing.status,
+        newStatus: updated.status,
+        poin: updated.poin,
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -68,6 +116,11 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
+    const portal = getPortalForRole(appRole || "");
+    if (portal !== "/admin" && portal !== "/guru") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { id } = await params;
 
@@ -85,6 +138,28 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     }
 
     await db.delete(studentViolations).where(eq(studentViolations.id, id));
+
+    const [targetStudent] = await db
+      .select({ namaLengkap: students.namaLengkap })
+      .from(students)
+      .where(eq(students.id, existing.studentId))
+      .limit(1);
+
+    await logActivity({
+      userId: session.user.id,
+      userName: session.user.name || "Guru",
+      userRole: appRole || "guru",
+      action: "DELETE",
+      module: "BUKU_POIN",
+      targetId: existing.studentId,
+      targetName: targetStudent?.namaLengkap || "Siswa",
+      description: `Menghapus catatan pelanggaran (${existing.poin} poin) milik siswa ${targetStudent?.namaLengkap || "Siswa"}`,
+      details: {
+        violationId: id,
+        poin: existing.poin,
+        status: existing.status,
+      },
+    });
 
     return NextResponse.json({
       success: true,
