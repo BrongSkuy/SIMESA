@@ -21,9 +21,11 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  FileSpreadsheet,
+  BookMarked,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getStudentEraporGateInfo, type EraporStatus } from "@/lib/erapor-utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +112,11 @@ interface ScoreData {
   kehadiran: KehadiranData | null;
   totalSkorSPK: number;
   rankUmum?: number | null;
+  erapor?: {
+    statusRapor: EraporStatus;
+    canPrint: boolean;
+    updatedAt: string | null;
+  };
 }
 
 const CARDS_PER_PAGE = 6;
@@ -360,7 +367,7 @@ export default function SiswaNilaiPage() {
       <PageHeader
         title="Transkrip Nilai & Skor SPK Saya"
         badge="Portal Siswa"
-        description="Rincian nilai per mata pelajaran, komponen Tugas/UTS/UAS, dan akumulasi skor evaluasi SPK SAW"
+        description="Rincian nilai per mata pelajaran, komponen Tugas, UTS, UAS, dan skor evaluasi SPK SAW"
         icon={ClipboardList}
       />
 
@@ -383,7 +390,7 @@ export default function SiswaNilaiPage() {
                 }`}
               >
                 <CheckCircle2 className="h-3 w-3" />
-                {completenessStats.lengkap}/{completenessStats.total} Mapel
+                {completenessStats.lengkap} dari {completenessStats.total} Mapel
                 Lengkap
               </span>
             )}
@@ -401,16 +408,33 @@ export default function SiswaNilaiPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-          <Link href="/siswa/erapor" className="self-center sm:self-auto">
+          {data.erapor?.canPrint ? (
+            <Link href="/siswa/erapor" className="self-center sm:self-auto">
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-2 text-xs shadow-md w-full sm:w-auto cursor-pointer"
+              >
+                <BookMarked className="w-4 h-4" />
+                Buka E-Rapor
+              </Button>
+            </Link>
+          ) : (
             <Button
-              variant="default"
+              type="button"
+              variant="outline"
               size="sm"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-2 text-xs shadow-md w-full sm:w-auto"
+              onClick={() => {
+                const gate = getStudentEraporGateInfo(data.erapor?.statusRapor);
+                toast.info(gate.message);
+              }}
+              className="bg-white/[0.05] hover:bg-white/10 border-white/15 text-slate-300 hover:text-white font-medium gap-2 text-xs w-full sm:w-auto cursor-pointer"
+              title={getStudentEraporGateInfo(data.erapor?.statusRapor).message}
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Lihat E-Rapor Internal
+              <Lock className="w-3.5 h-3.5 text-amber-300" />
+              E-Rapor ({getStudentEraporGateInfo(data.erapor?.statusRapor).badgeLabel})
             </Button>
-          </Link>
+          )}
 
           <div className="flex items-center gap-3.5 rounded-xl bg-white/[0.04] px-4 py-3 border border-white/10 w-full sm:w-auto justify-between sm:justify-start shrink-0">
             <div className="p-2 rounded-lg bg-amber-400/15 text-amber-300 border border-amber-400/30">

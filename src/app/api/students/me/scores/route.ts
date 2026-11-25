@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { students } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { students, studentReportNotes } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { buildStudentScoreTranscript } from "@/lib/spk";
+import { canStudentPrintErapor, type EraporStatus } from "@/lib/erapor-utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,7 +37,38 @@ export async function GET() {
 
   try {
     const transcript = await buildStudentScoreTranscript(student);
-    return NextResponse.json(transcript);
+
+    let statusRapor: EraporStatus = "Draf";
+    let eraporUpdatedAt: string | null = null;
+    if (transcript.periode) {
+      const [note] = await db
+        .select({
+          statusRapor: studentReportNotes.statusRapor,
+          updatedAt: studentReportNotes.updatedAt,
+        })
+        .from(studentReportNotes)
+        .where(
+          and(
+            eq(studentReportNotes.studentId, student.id),
+            eq(studentReportNotes.periode, transcript.periode)
+          )
+        )
+        .limit(1);
+
+      if (note?.statusRapor) {
+        statusRapor = note.statusRapor as EraporStatus;
+        eraporUpdatedAt = note.updatedAt || null;
+      }
+    }
+
+    return NextResponse.json({
+      ...transcript,
+      erapor: {
+        statusRapor,
+        canPrint: canStudentPrintErapor(statusRapor),
+        updatedAt: eraporUpdatedAt,
+      },
+    });
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Gagal memuat nilai siswa";
