@@ -474,39 +474,39 @@ export function StudentCounselingView() {
                         {sessionList.map((item) => (
                           <div
                             key={item.id}
-                            className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-1.5 group/row transition-all duration-200 hover:bg-[#091524] hover:border-slate-700"
+                            className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-1.5 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
                           >
                             <div className="flex flex-wrap justify-between items-center gap-2">
-                              <span className="font-bold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">
+                              <span className="font-bold text-slate-900 dark:text-white">
                                 {item.kategori}
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200 group-hover/row:bg-teal-500/20 group-hover/row:text-teal-200 group-hover/row:border-teal-400/40 transition-colors">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200">
                                   Umum
                                 </span>
                                 <Badge
                                   variant="outline"
                                   className={cn(
-                                    "text-[10px] font-semibold transition-colors",
+                                    "text-[10px] font-semibold",
                                     item.statusKasus === "Selesai"
-                                      ? "bg-emerald-50 text-emerald-800 border-emerald-200 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-200 group-hover/row:border-emerald-400/40"
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                                       : item.statusKasus === "Rujukan Kasus"
-                                      ? "bg-purple-50 text-purple-800 border-purple-200 group-hover/row:bg-purple-500/20 group-hover/row:text-purple-200 group-hover/row:border-purple-400/40"
-                                      : "bg-amber-50 text-amber-800 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200 group-hover/row:border-amber-400/40"
+                                      ? "bg-purple-50 text-purple-800 border-purple-200"
+                                      : "bg-amber-50 text-amber-800 border-amber-200"
                                   )}
                                 >
                                   {item.statusKasus}
                                 </Badge>
                               </div>
                             </div>
-                            <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] font-mono transition-colors">
+                            <p className="text-slate-500 text-[11px] font-mono">
                               {formatTanggalIndonesia(item.tanggal)} | Pukul {item.waktuMulai} - {item.waktuSelesai} | {item.counselorName}
                             </p>
-                            <p className="text-slate-800 dark:text-slate-200 group-hover/row:text-slate-200 line-clamp-2 transition-colors">
+                            <p className="text-slate-800 dark:text-slate-200 line-clamp-2">
                               {item.pokokMasalah}
                             </p>
                             {item.tindakLanjut && (
-                              <p className="text-slate-500 group-hover/row:text-slate-400 italic text-[11px] transition-colors">
+                              <p className="text-slate-500 italic text-[11px]">
                                 Tindak lanjut: {item.tindakLanjut}
                               </p>
                             )}
@@ -533,31 +533,31 @@ export function StudentCounselingView() {
                       {allDispensations.map((disp) => (
                         <div
                           key={disp.id}
-                          className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group/row transition-all duration-200 hover:bg-[#091524] hover:border-slate-700"
+                          className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
                         >
                           <div className="space-y-1 text-xs">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono font-bold text-teal-900 dark:text-teal-300 group-hover/row:text-teal-300 transition-colors">
+                              <span className="font-mono font-bold text-teal-900 dark:text-teal-300">
                                 {disp.nomorSurat}
                               </span>
                               <Badge
                                 variant="outline"
                                 className={cn(
-                                  "text-[10px] font-semibold transition-colors",
+                                  "text-[10px] font-semibold",
                                   disp.statusDispensasi === "Aktif"
-                                    ? "bg-amber-50 text-amber-800 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200 group-hover/row:border-amber-400/40"
+                                    ? "bg-amber-50 text-amber-800 border-amber-200"
                                     : disp.statusDispensasi === "Selesai"
-                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-200 group-hover/row:border-emerald-400/40"
-                                    : "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-700 group-hover/row:text-slate-200"
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                    : "bg-slate-100 text-slate-700 border-slate-200"
                                 )}
                               >
                                 {disp.statusDispensasi}
                               </Badge>
                             </div>
-                            <p className="font-semibold text-slate-900 dark:text-white group-hover/row:text-white transition-colors">
+                            <p className="font-semibold text-slate-900 dark:text-white">
                               {disp.keperluan}
                             </p>
-                            <p className="text-slate-500 group-hover/row:text-slate-400 text-[11px] transition-colors">
+                            <p className="text-slate-500 text-[11px]">
                               {formatTanggalIndonesia(disp.tanggal)} |{" "}
                               {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                             </p>
@@ -568,7 +568,7 @@ export function StudentCounselingView() {
                             variant="outline"
                             size="sm"
                             onClick={() => handlePrint(disp)}
-                            className="h-8 px-3 text-xs gap-1.5 shrink-0 bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 group-hover/row:bg-blue-500/20 group-hover/row:border-blue-400/60 group-hover/row:text-blue-100 group-hover/row:hover:bg-blue-600 group-hover/row:hover:text-white group-hover/row:hover:border-blue-500 transition-colors cursor-pointer"
+                            className="h-8 px-3 text-xs gap-1.5 shrink-0 bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors cursor-pointer"
                           >
                             <Printer className="w-3.5 h-3.5" />
                             Lihat Surat

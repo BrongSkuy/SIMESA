@@ -98,11 +98,11 @@ function getStatusDotMeta(status: CaseStatus): {
 function getDispStatusBadgeClass(status: DispensationStatus): string {
   switch (status) {
     case "Aktif":
-      return "bg-amber-50 text-amber-800 border-amber-200 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200 group-hover/row:border-amber-400/40";
+      return "bg-amber-50 text-amber-800 border-amber-200";
     case "Selesai":
-      return "bg-emerald-50 text-emerald-800 border-emerald-200 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-200 group-hover/row:border-emerald-400/40";
+      return "bg-emerald-50 text-emerald-800 border-emerald-200";
     default:
-      return "bg-slate-100 text-slate-700 border-slate-200 group-hover/row:bg-slate-700 group-hover/row:text-slate-200 group-hover/row:border-slate-600";
+      return "bg-slate-100 text-slate-700 border-slate-200";
   }
 }
 
@@ -907,28 +907,28 @@ export function CounselingManagementView() {
                         filteredLogs.map((log) => (
                           <TableRow
                             key={log.id}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                            className="transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                           >
-                            <TableCell className="text-xs font-mono text-slate-700 group-hover/row:text-slate-300 whitespace-nowrap align-top">
+                            <TableCell className="text-xs font-mono text-slate-700 whitespace-nowrap align-top">
                               {formatShortDateId(log.tanggal)}
                             </TableCell>
                             <TableCell className="align-top text-xs">
-                              <span className="font-bold text-slate-900 group-hover/row:text-white block">
+                              <span className="font-bold text-slate-900 block">
                                 {log.studentName}
                               </span>
-                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400">
+                              <span className="text-[11px] text-slate-500">
                                 Kelas {log.studentKelas} | Pengamat: {log.recorderName}
                               </span>
                             </TableCell>
                             <TableCell className="align-top">
-                              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200 group-hover/row:bg-teal-500/20 group-hover/row:text-teal-200 group-hover/row:border-teal-400/40 whitespace-nowrap">
+                              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200 whitespace-nowrap">
                                 {log.aspekPengamatan}
                               </span>
                             </TableCell>
-                            <TableCell className="text-xs text-slate-800 group-hover/row:text-slate-200 max-w-sm whitespace-normal break-words leading-relaxed align-top">
+                            <TableCell className="text-xs text-slate-800 max-w-sm whitespace-normal break-words leading-relaxed align-top">
                               {log.catatanPerkembangan}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-500 group-hover/row:text-slate-400 italic max-w-xs whitespace-normal break-words leading-relaxed align-top">
+                            <TableCell className="text-xs text-slate-500 italic max-w-xs whitespace-normal break-words leading-relaxed align-top">
                               {log.rekomendasi || "-"}
                             </TableCell>
                           </TableRow>
@@ -1019,33 +1019,33 @@ export function CounselingManagementView() {
                         filteredDispensations.map((disp) => (
                           <TableRow
                             key={disp.id}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                            className="transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                           >
-                            <TableCell className="font-mono text-xs font-bold text-teal-900 group-hover/row:text-teal-300 whitespace-nowrap align-top">
+                            <TableCell className="font-mono text-xs font-bold text-teal-900 whitespace-nowrap align-top">
                               {disp.nomorSurat}
                             </TableCell>
                             <TableCell className="text-xs align-top">
-                              <span className="font-bold text-slate-900 group-hover/row:text-white block">
+                              <span className="font-bold text-slate-900 block">
                                 {disp.studentName}
                               </span>
-                              <span className="text-[11px] font-mono text-slate-500 group-hover/row:text-slate-400">
+                              <span className="text-[11px] font-mono text-slate-500">
                                 Kelas {disp.studentKelas} | NIS {disp.studentNis}
                               </span>
                             </TableCell>
                             <TableCell className="text-xs align-top whitespace-nowrap">
-                              <span className="font-semibold text-slate-900 group-hover/row:text-white block">
+                              <span className="font-semibold text-slate-900 block">
                                 {formatTanggalIndonesia(disp.tanggal)}
                               </span>
-                              <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400">
+                              <span className="text-[11px] text-slate-500">
                                 {formatRentangWaktu(disp.jamMulai, disp.jamSelesai)}
                               </span>
                             </TableCell>
                             <TableCell className="text-xs align-top max-w-xs whitespace-normal break-words leading-relaxed">
-                              <span className="font-semibold text-slate-900 group-hover/row:text-white block">
+                              <span className="font-semibold text-slate-900 block">
                                 {disp.keperluan}
                               </span>
                               {disp.keterangan && (
-                                <span className="text-[11px] text-slate-500 group-hover/row:text-slate-400 italic block mt-0.5">
+                                <span className="text-[11px] text-slate-500 italic block mt-0.5">
                                   {disp.keterangan}
                                 </span>
                               )}
@@ -1067,7 +1067,7 @@ export function CounselingManagementView() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlePrintDispensation(disp)}
-                                className="h-7 px-2.5 text-xs gap-1 bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 group-hover/row:bg-blue-500/20 group-hover/row:border-blue-400/60 group-hover/row:text-blue-100 group-hover/row:hover:bg-blue-600 group-hover/row:hover:text-white group-hover/row:hover:border-blue-500 transition-colors cursor-pointer"
+                                className="h-7 px-2.5 text-xs gap-1 bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors cursor-pointer"
                                 title="Cetak Surat Izin"
                               >
                                 <Printer className="w-3.5 h-3.5" />
@@ -1082,7 +1082,7 @@ export function CounselingManagementView() {
                                   onClick={() =>
                                     handleUpdateDispensationStatus(disp.id, "Selesai")
                                   }
-                                  className="h-7 px-2 text-xs text-emerald-700 group-hover/row:text-emerald-300 group-hover/row:hover:bg-emerald-500/25 group-hover/row:hover:text-emerald-100 transition-colors cursor-pointer"
+                                  className="h-7 px-2 text-xs text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors cursor-pointer"
                                   title="Tandai Selesai"
                                 >
                                   <CheckCircle2 className="w-3.5 h-3.5 mr-1" />

@@ -1267,21 +1267,21 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                         violationsList.map((v, i) => (
                           <TableRow
                             key={v.id}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                            className="transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                           >
-                            <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">
+                            <TableCell className="text-center text-xs text-slate-500">
                               {i + 1}
                             </TableCell>
-                            <TableCell className="text-xs font-mono text-slate-600 group-hover/row:text-slate-300 whitespace-nowrap">
+                            <TableCell className="text-xs font-mono text-slate-600 whitespace-nowrap">
                               {formatShortDateId(v.tanggal)}
                             </TableCell>
                             <TableCell className="text-xs">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-[11px] border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                                <div className="w-7 h-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-[11px] border border-slate-200 shrink-0">
                                   {getInitials(v.namaSiswa || "")}
                                 </div>
                                 <div>
-                                  <span className="font-bold text-slate-900 group-hover/row:text-white block transition-colors">
+                                  <span className="font-bold text-slate-900 block">
                                     {v.namaSiswa}
                                   </span>
                                   <span className="text-[10px] text-slate-400 font-mono">
@@ -1290,15 +1290,15 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-xs font-semibold text-slate-700 group-hover/row:text-slate-200">
+                            <TableCell className="text-xs font-semibold text-slate-700">
                               {v.kelas}
                             </TableCell>
                             <TableCell className="text-xs">
-                              <span className="font-semibold text-slate-800 group-hover/row:text-white block transition-colors">
+                              <span className="font-semibold text-slate-800 block">
                                 {v.namaPelanggaran}
                               </span>
                               {v.keterangan && (
-                                <span className="block text-[11px] text-slate-500 group-hover/row:text-slate-400 italic mt-0.5">
+                                <span className="block text-[11px] text-slate-500 italic mt-0.5">
                                   &ldquo;{v.keterangan}&rdquo;
                                 </span>
                               )}
@@ -1306,12 +1306,12 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                             <TableCell className="text-center text-xs">
                               <Badge
                                 variant="secondary"
-                                className={`text-[10px] font-semibold transition-colors ${
+                                className={`text-[10px] font-semibold ${
                                   v.kategori === "Ringan"
-                                    ? "bg-blue-50 text-blue-700 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-200"
+                                    ? "bg-blue-50 text-blue-700"
                                     : v.kategori === "Sedang"
-                                    ? "bg-amber-50 text-amber-700 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200"
-                                    : "bg-red-50 text-red-700 group-hover/row:bg-rose-500/25 group-hover/row:text-rose-200"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-red-50 text-red-700"
                                 }`}
                               >
                                 {v.kategori}
@@ -1322,28 +1322,28 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 "text-center font-bold text-xs font-mono",
                                 v.status === "Selesai Dibina"
                                   ? "text-slate-400 line-through"
-                                  : "text-red-600 group-hover/row:text-red-400"
+                                  : "text-red-600"
                               )}
                             >
                               +{v.poin}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300">
+                            <TableCell className="text-xs text-slate-600">
                               {v.lokasi || "-"}
                             </TableCell>
                             <TableCell className="text-xs">
                               <span
-                                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded transition-colors ${
+                                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded ${
                                   v.status === "Selesai Dibina"
-                                    ? "bg-emerald-50 text-emerald-700 group-hover/row:bg-emerald-500/20 group-hover/row:text-emerald-200"
+                                    ? "bg-emerald-50 text-emerald-700"
                                     : v.status === "Diproses BK"
-                                    ? "bg-amber-50 text-amber-700 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200"
-                                    : "bg-slate-100 text-slate-700 group-hover/row:bg-slate-800 group-hover/row:text-slate-200"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-slate-100 text-slate-700"
                                 }`}
                               >
                                 {v.status === "Selesai Dibina" ? (
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600 group-hover/row:text-emerald-300" />
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                 ) : (
-                                  <Clock className="w-3 h-3 text-amber-600 group-hover/row:text-amber-300" />
+                                  <Clock className="w-3 h-3 text-amber-600" />
                                 )}
                                 {v.status}
                               </span>
@@ -1355,7 +1355,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                   variant="ghost"
                                   disabled={busyViolationId === v.id}
                                   onClick={() => handleUpdateViolationStatus(v.id, "Tercatat")}
-                                  className="h-7 px-2 text-xs text-amber-700 group-hover/row:text-amber-300 group-hover/row:hover:bg-amber-500/25 group-hover/row:hover:text-amber-100 transition-colors cursor-pointer"
+                                  className="h-7 px-2 text-xs text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors cursor-pointer"
                                   title="Aktifkan kembali catatan ke akumulasi poin"
                                 >
                                   <Clock className="w-3.5 h-3.5 mr-1" />
@@ -1367,7 +1367,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                   variant="ghost"
                                   disabled={busyViolationId === v.id}
                                   onClick={() => handleUpdateViolationStatus(v.id, "Selesai Dibina")}
-                                  className="h-7 px-2 text-xs text-emerald-600 group-hover/row:text-emerald-300 group-hover/row:hover:bg-emerald-500/25 group-hover/row:hover:text-emerald-100 transition-colors cursor-pointer"
+                                  className="h-7 px-2 text-xs text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors cursor-pointer"
                                   title="Tandai Selesai Dibina dan kurangi poin aktif"
                                 >
                                   <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
@@ -1379,7 +1379,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 variant="ghost"
                                 disabled={busyViolationId === v.id}
                                 onClick={() => handleDeleteViolation(v.id)}
-                                className="h-7 px-2 text-xs text-red-600 group-hover/row:text-rose-300 group-hover/row:hover:bg-rose-500/25 group-hover/row:hover:text-rose-100 transition-colors cursor-pointer"
+                                className="h-7 px-2 text-xs text-red-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
                                 title="Hapus Catatan"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1467,26 +1467,26 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                         filteredWarningLetters.map((l, i) => (
                           <TableRow
                             key={l.id}
-                            className="group/row transition-all duration-200 hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                            className="transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                           >
-                            <TableCell className="text-center text-xs text-slate-500 group-hover/row:text-slate-400">
+                            <TableCell className="text-center text-xs text-slate-500">
                               {i + 1}
                             </TableCell>
-                            <TableCell className="font-mono text-xs font-semibold text-slate-800 group-hover/row:text-white">
+                            <TableCell className="font-mono text-xs font-semibold text-slate-800">
                               {l.nomorSurat}
                             </TableCell>
                             <TableCell className="text-center">
-                              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 group-hover/row:bg-rose-500/25 group-hover/row:text-rose-200 transition-colors">
+                              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800">
                                 SP {l.tingkatSp}
                               </span>
                             </TableCell>
                             <TableCell className="text-xs">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-md bg-slate-100 group-hover/row:bg-slate-800 text-slate-700 group-hover/row:text-slate-200 font-semibold flex items-center justify-center text-[11px] border border-slate-200 group-hover/row:border-slate-700 shrink-0 transition-colors">
+                                <div className="w-7 h-7 rounded-md bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-[11px] border border-slate-200 shrink-0">
                                   {getInitials(l.namaSiswa || "")}
                                 </div>
                                 <div>
-                                  <span className="font-bold text-slate-900 group-hover/row:text-white block transition-colors">
+                                  <span className="font-bold text-slate-900 block">
                                     {l.namaSiswa}
                                   </span>
                                   <span className="text-[10px] text-slate-400 font-mono">
@@ -1495,20 +1495,20 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-xs font-semibold text-slate-700 group-hover/row:text-slate-200">
+                            <TableCell className="text-xs font-semibold text-slate-700">
                               {l.kelas}
                             </TableCell>
-                            <TableCell className="text-center text-xs font-bold font-mono text-red-600 group-hover/row:text-red-400">
+                            <TableCell className="text-center text-xs font-bold font-mono text-red-600">
                               {l.totalPoinSaatSp} Poin
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300 font-mono">
+                            <TableCell className="text-xs text-slate-600 font-mono">
                               {formatShortDateId(l.tanggalTerbit)}
                             </TableCell>
-                            <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300">
+                            <TableCell className="text-xs text-slate-600">
                               {l.diterbitkanOleh}
                             </TableCell>
                             <TableCell className="text-xs">
-                              <span className="text-[11px] font-medium text-slate-700 group-hover/row:text-slate-200">
+                              <span className="text-[11px] font-medium text-slate-700">
                                 {l.statusPanggilan}
                               </span>
                             </TableCell>
@@ -1517,7 +1517,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleOpenPrintPreview(l)}
-                                className="h-7 px-2.5 text-xs bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 inline-flex items-center gap-1 group-hover/row:bg-blue-500/20 group-hover/row:border-blue-400/60 group-hover/row:text-blue-100 group-hover/row:hover:bg-blue-600 group-hover/row:hover:text-white group-hover/row:hover:border-blue-500 transition-colors cursor-pointer"
+                                className="h-7 px-2.5 text-xs bg-blue-50/70 text-[#1F4E78] border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 inline-flex items-center gap-1 transition-colors cursor-pointer"
                               >
                                 <Printer className="w-3.5 h-3.5" />
                                 <span>Cetak Surat</span>
@@ -1576,32 +1576,32 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                       {violationTypesList.map((t) => (
                         <TableRow
                           key={t.id}
-                          className="group/row transition-all duration-200 hover:bg-[#091524] border-b border-slate-100 last:border-0"
+                          className="transition-colors hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                         >
-                          <TableCell className="font-mono text-xs font-bold text-slate-700 group-hover/row:text-slate-200">
+                          <TableCell className="font-mono text-xs font-bold text-slate-700">
                             {t.kode}
                           </TableCell>
-                          <TableCell className="text-xs font-semibold text-slate-900 group-hover/row:text-white">
+                          <TableCell className="text-xs font-semibold text-slate-900">
                             {t.namaPelanggaran}
                           </TableCell>
                           <TableCell className="text-center text-xs">
                             <Badge
                               variant="secondary"
-                              className={`text-[10px] font-semibold transition-colors ${
+                              className={`text-[10px] font-semibold ${
                                 t.kategori === "Ringan"
-                                  ? "bg-blue-50 text-blue-700 group-hover/row:bg-blue-500/20 group-hover/row:text-blue-200"
+                                  ? "bg-blue-50 text-blue-700"
                                   : t.kategori === "Sedang"
-                                  ? "bg-amber-50 text-amber-700 group-hover/row:bg-amber-500/20 group-hover/row:text-amber-200"
-                                  : "bg-red-50 text-red-700 group-hover/row:bg-rose-500/25 group-hover/row:text-rose-200"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-red-50 text-red-700"
                               }`}
                             >
                               {t.kategori}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-center text-xs font-bold font-mono text-red-600 group-hover/row:text-red-400">
+                          <TableCell className="text-center text-xs font-bold font-mono text-red-600">
                             +{t.poinDefault} Poin
                           </TableCell>
-                          <TableCell className="text-xs text-slate-600 group-hover/row:text-slate-300">
+                          <TableCell className="text-xs text-slate-600">
                             {t.deskripsiSanksi || "-"}
                           </TableCell>
                           <TableCell className="text-right pr-4">
@@ -1613,7 +1613,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                                 setRulePoinInput(String(t.poinDefault));
                                 setRuleModalOpen(true);
                               }}
-                              className="h-7 px-2 text-xs text-blue-600 group-hover/row:text-sky-300 group-hover/row:hover:bg-sky-500/25 group-hover/row:hover:text-sky-100 transition-colors cursor-pointer"
+                              className="h-7 px-2 text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer"
                             >
                               Edit
                             </Button>
