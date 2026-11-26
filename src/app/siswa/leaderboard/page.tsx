@@ -260,7 +260,7 @@ export default function SiswaLeaderboardPage() {
         </div>
       ) : isPublished === false ? (
         <div className="flex flex-col items-center justify-center py-10">
-          <div className="max-w-xl w-full rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
+          <div className="max-w-xl w-full rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group">
             <div className="bg-slate-50/80 p-6 border-b border-slate-200 flex items-center gap-4 transition-colors">
               <div className="h-12 w-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0 transition-colors">
                 <Lock className="h-5 w-5" />
@@ -335,7 +335,7 @@ export default function SiswaLeaderboardPage() {
                 return (
                   <div
                     key={student.studentId}
-                    className={`rounded-2xl border border-slate-200/80 bg-white p-5 hover:border-slate-300/90  hover:shadow-sm transition-all duration-300 group cursor-pointer flex flex-col justify-between ${
+                    className={`rounded-2xl border border-slate-200/80 bg-white p-5 hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between ${
                       isMe ? "ring-2 ring-blue-500/30" : ""
                     }`}
                   >
@@ -458,7 +458,7 @@ export default function SiswaLeaderboardPage() {
                           return (
                             <TableRow
                               key={entry.studentId}
-                              className={`group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0 ${rowAccent}`}
+                              className={`group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0 ${rowAccent}`}
                             >
                               <TableCell className="pl-6">
                                 <RankBadge rank={entry.rank} />

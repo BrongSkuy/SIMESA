@@ -301,7 +301,7 @@ export default function ProfilSiswaPage() {
     >
       <div className="grid gap-6 md:grid-cols-5">
         {/* Kolom Identitas & Foto */}
-        <div className="md:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-6">
+        <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             {/* Foto Profil & Info Identitas Bersatu */}
             <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100">
@@ -495,7 +495,7 @@ export default function ProfilSiswaPage() {
         </div>
 
         {/* Kolom Update Password */}
-        <div className="md:col-span-3 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="md:col-span-3 space-y-4">
           <div className="pb-3 border-b border-slate-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <KeyRound className="h-4 w-4 text-blue-600" /> Perbarui Kata Sandi

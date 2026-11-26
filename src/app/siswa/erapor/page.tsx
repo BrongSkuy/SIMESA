@@ -101,12 +101,26 @@ export default function SiswaEraporPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-7 h-7 animate-spin text-blue-600" />
-        <p className="text-xs text-slate-500 font-medium">
-          Memuat E-Rapor Siswa...
-        </p>
-      </div>
+      <ModulePageShell
+        theme="emerald"
+        eyebrow="Laporan Hasil Belajar | Portal Siswa"
+        title="E-Rapor Siswa"
+        description="Memuat laporan hasil belajar resmi semester aktif."
+        stats={[
+          { label: "Rata-rata Rapor", value: "...", tone: "blue" },
+          { label: "Ketuntasan KKM", value: "...", tone: "emerald" },
+          { label: "Presensi Semester", value: "..." },
+          { label: "Status Rapor", value: "..." },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
+          <p className="text-xs text-slate-500 font-medium">
+            Memuat E-Rapor Siswa...
+          </p>
+        </div>
+      </ModulePageShell>
     );
   }
 

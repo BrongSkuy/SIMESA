@@ -257,9 +257,24 @@ export default function AdminGuruPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        title="Data Guru"
+        eyebrow="Data Master | Portal Admin"
+        description="Daftar dewan guru, nomor induk pegawai (NIP), dan status keaktifan staf pengajar."
+        icon={GraduationCap}
+        theme="navy"
+        stats={[
+          { label: "Total Pengajar", value: "...", sublabel: "Terdaftar di sistem" },
+          { label: "Guru Aktif", value: "...", sublabel: "Sedang bertugas", tone: "emerald" },
+          { label: "Nonaktif", value: "...", sublabel: "Tidak aktif" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat data dewan guru...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -699,7 +714,7 @@ export default function AdminGuruPage() {
                 paginatedTeachers.map((guru, i) => (
                   <TableRow
                     key={guru.id}
-                    className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                    className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                   >
                     <TableCell className="text-center font-mono text-slate-400 ">
                       {(safePage - 1) * ITEMS_PER_PAGE + i + 1}

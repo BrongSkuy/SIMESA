@@ -861,7 +861,7 @@ export default function AdminNilaiSayaPage() {
                     return (
                       <div
                         key={`${subj.namaMapel}-${idx}`}
-                        className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                        className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between"
                       >
                         <div>
                           {/* Header Mapel & Guru */}
@@ -1127,7 +1127,7 @@ export default function AdminNilaiSayaPage() {
                         return (
                           <TableRow
                             key={`${subj.namaMapel}-${idx}`}
-                            className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                            className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                           >
                             <TableCell className="pl-5 font-semibold text-slate-800 transition-colors">
                               {subj.labelMapel}
@@ -1470,7 +1470,7 @@ export default function AdminNilaiSayaPage() {
                       {data.criteria.map((c) => (
                         <TableRow
                           key={c.id}
-                          className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                          className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                         >
                           <TableCell className="pl-6 font-semibold text-slate-800 transition-colors">
                             {c.namaKriteria}
@@ -1503,7 +1503,7 @@ export default function AdminNilaiSayaPage() {
                         </TableRow>
                       ))}
                       {/* Total Row */}
-                      <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
+                      <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-colors duration-200">
                         <TableCell
                           colSpan={5}
                           className="pl-6 font-bold text-slate-900 transition-colors"

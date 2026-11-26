@@ -242,7 +242,7 @@ export function ModulePageShell({
           {stats && stats.length > 0 && (
             <div
               className={cn(
-                "rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/15 grid divide-y sm:divide-y-0 sm:divide-x divide-white/12 shadow-xs",
+                "rounded-xl overflow-hidden bg-white/[0.08] backdrop-blur-md border border-white/15 grid divide-y sm:divide-y-0 sm:divide-x divide-white/12 shadow-xs",
                 statColsClass
               )}
             >
@@ -278,8 +278,8 @@ export function ModulePageShell({
                       type="button"
                       onClick={stat.onClick}
                       className={cn(
-                        "px-4 py-2.5 text-left transition-colors cursor-pointer hover:bg-white/[0.06]",
-                        stat.active && "bg-white/[0.10]"
+                        "px-4 py-2.5 text-left transition-colors duration-200 cursor-pointer hover:bg-white/[0.09] active:bg-white/[0.13] focus-visible:outline-none focus-visible:bg-white/[0.10]",
+                        stat.active && "bg-white/[0.11]"
                       )}
                     >
                       {content}
@@ -290,7 +290,7 @@ export function ModulePageShell({
                 return (
                   <div
                     key={`${stat.label}-${idx}`}
-                    className="px-4 py-2.5 text-left"
+                    className="px-4 py-2.5 text-left transition-colors duration-200 hover:bg-white/[0.07]"
                   >
                     {content}
                   </div>

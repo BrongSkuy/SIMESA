@@ -208,9 +208,24 @@ export default function AdminKelasPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        title="Data Kelas"
+        eyebrow="Data Master | Portal Admin"
+        description="Kelola daftar kelas, tingkat kelas, dan alokasi wali kelas."
+        icon={Building2}
+        theme="navy"
+        stats={[
+          { label: "Total Kelas", value: "...", sublabel: "Rombel aktif" },
+          { label: "Dengan Wali Kelas", value: "...", sublabel: "Sudah ditetapkan", tone: "emerald" },
+          { label: "Total Siswa", value: "...", sublabel: "Seluruh rombel", tone: "blue" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat daftar kelas...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 

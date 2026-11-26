@@ -104,9 +104,24 @@ export default function AdminSpkPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        title="Konfigurasi Bobot Kriteria SPK"
+        eyebrow="Konfigurasi SPK | Metode SAW"
+        description="Atur distribusi bobot persentase evaluasi untuk pemeringkatan siswa terbaik."
+        icon={Settings2}
+        theme="royal"
+        stats={[
+          { label: "Total Akumulasi Bobot", value: "...", sublabel: "Memuat konfigurasi" },
+          { label: "Status Validasi", value: "...", sublabel: "Memeriksa bobot" },
+          { label: "Jumlah Kriteria", value: "...", sublabel: "Otomatis & manual", tone: "blue" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-indigo-600" />
+          <p className="text-xs font-medium">Memuat konfigurasi SPK SAW...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 

@@ -129,7 +129,7 @@ export function StudentViolationView() {
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-[#091424]/75 via-[#0d1e38]/75 to-[#0a1526]/92 pointer-events-none" />
 
-        <div className="relative z-10 max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 border border-white/15 text-amber-200">
               <BookOpen className="w-3 h-3" />
@@ -145,7 +145,7 @@ export function StudentViolationView() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {loading ? (
           <div className="py-20 text-center text-xs text-slate-500">
             <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#1F4E78]" />

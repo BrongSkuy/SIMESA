@@ -179,7 +179,7 @@ export function StudentCounselingView() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#081a24] via-[#0c2937]/85 to-[#0f3443]/45 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#081a24]/50 via-transparent to-[#091c26]/92 pointer-events-none" />
 
-        <div className="relative z-10 max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 border border-teal-300/25 text-teal-200">
               <HeartHandshake className="w-3 h-3 text-teal-300" />
@@ -195,7 +195,7 @@ export function StudentCounselingView() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center min-h-[300px] space-y-3">
             <Loader2 className="w-7 h-7 animate-spin text-teal-700" />
@@ -339,9 +339,9 @@ export function StudentCounselingView() {
             {/* 3. FORMULIR PERMOHONAN MANDIRI + RIWAYAT SESI & DISPENSASI */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Kiri (5 cols): Formulir Permohonan Bimbingan Konseling Mandiri */}
-              <div className="lg:col-span-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs self-start">
-                <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
-                  <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+              <div className="lg:col-span-5 rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs self-start">
+                <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70">
+                  <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
                     <Send className="w-4 h-4 text-teal-600" />
                     Ajukan Permohonan Bimbingan
                   </h3>
@@ -448,10 +448,10 @@ export function StudentCounselingView() {
               {/* Kanan (7 cols): Riwayat Sesi & Arsip Surat Dispensasi */}
               <div className="lg:col-span-7 space-y-5">
                 {/* Riwayat Sesi & Pembinaan */}
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-                  <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between gap-2">
+                <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+                  <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between gap-2">
                     <div>
-                      <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                      <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
                         <HeartHandshake className="w-4 h-4 text-teal-600" />
                         Riwayat Sesi dan Pembinaan
                       </h3>
@@ -474,10 +474,10 @@ export function StudentCounselingView() {
                         {sessionList.map((item) => (
                           <div
                             key={item.id}
-                            className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-1.5 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
+                            className="p-3.5 rounded-xl border border-slate-200/80 bg-white text-xs space-y-1.5 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
                           >
                             <div className="flex flex-wrap justify-between items-center gap-2">
-                              <span className="font-bold text-slate-900 dark:text-white">
+                              <span className="font-bold text-slate-900">
                                 {item.kategori}
                               </span>
                               <div className="flex items-center gap-1.5">
@@ -502,7 +502,7 @@ export function StudentCounselingView() {
                             <p className="text-slate-500 text-[11px] font-mono">
                               {formatTanggalIndonesia(item.tanggal)} | Pukul {item.waktuMulai} - {item.waktuSelesai} | {item.counselorName}
                             </p>
-                            <p className="text-slate-800 dark:text-slate-200 line-clamp-2">
+                            <p className="text-slate-800 line-clamp-2">
                               {item.pokokMasalah}
                             </p>
                             {item.tindakLanjut && (
@@ -519,9 +519,9 @@ export function StudentCounselingView() {
 
                 {/* Daftar Semua Surat Dispensasi Siswa (bila lebih dari 1 atau arsip) */}
                 {allDispensations.length > 0 && (
-                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
-                    <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                  <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+                    <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900">
                         <FileText className="w-4 h-4 text-teal-600" />
                         Arsip Surat Dispensasi Anda
                       </h3>
@@ -533,11 +533,11 @@ export function StudentCounselingView() {
                       {allDispensations.map((disp) => (
                         <div
                           key={disp.id}
-                          className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
+                          className="p-3.5 rounded-xl border border-slate-200/80 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-colors hover:bg-slate-50/90 hover:border-slate-300"
                         >
                           <div className="space-y-1 text-xs">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-mono font-bold text-teal-900 dark:text-teal-300">
+                              <span className="font-mono font-bold text-teal-900">
                                 {disp.nomorSurat}
                               </span>
                               <Badge
@@ -554,7 +554,7 @@ export function StudentCounselingView() {
                                 {disp.statusDispensasi}
                               </Badge>
                             </div>
-                            <p className="font-semibold text-slate-900 dark:text-white">
+                            <p className="font-semibold text-slate-900">
                               {disp.keperluan}
                             </p>
                             <p className="text-slate-500 text-[11px]">

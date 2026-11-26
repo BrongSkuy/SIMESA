@@ -680,32 +680,66 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
             </div>
           </div>
 
-          {/* 1 Strip Ringkasan Metrik Kaca Ramping (4 Angka dalam 1 Bar) */}
-          <div className="rounded-xl bg-white/[0.09] backdrop-blur-md border border-white/15 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/15 shadow-xs">
-            <div className="px-4 py-2.5 flex items-center justify-center gap-2 text-xs">
+          {/* 1 Strip Ringkasan Metrik Kaca Ramping (4 Angka Interaktif dalam 1 Bar) */}
+          <div className="rounded-xl overflow-hidden bg-white/[0.09] backdrop-blur-md border border-white/15 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/15 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab("logs")}
+              className={cn(
+                "px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors duration-200 cursor-pointer hover:bg-white/[0.09] active:bg-white/[0.13]",
+                activeTab === "logs" && "bg-white/[0.11]"
+              )}
+            >
               <span className="font-mono font-extrabold text-sm text-white tabular-nums">
                 {loading ? "..." : stats.totalCases}
               </span>
               <span className="text-blue-100/80 font-medium">Kasus Aktif</span>
-            </div>
-            <div className="px-4 py-2.5 flex items-center justify-center gap-2 text-xs">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("students");
+                setPointSegment("berpoin");
+              }}
+              className={cn(
+                "px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors duration-200 cursor-pointer hover:bg-white/[0.09] active:bg-white/[0.13]",
+                activeTab === "students" && pointSegment === "berpoin" && "bg-white/[0.11]"
+              )}
+            >
               <span className="font-mono font-extrabold text-sm text-white tabular-nums">
                 {loading ? "..." : stats.studentsWithPoints}
               </span>
               <span className="text-blue-100/80 font-medium">Siswa Berpoin</span>
-            </div>
-            <div className="px-4 py-2.5 flex items-center justify-center gap-2 text-xs">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("students");
+                setPointSegment("sp");
+              }}
+              className={cn(
+                "px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors duration-200 cursor-pointer hover:bg-white/[0.09] active:bg-white/[0.13]",
+                activeTab === "students" && pointSegment === "sp" && "bg-white/[0.11]"
+              )}
+            >
               <span className="font-mono font-extrabold text-sm text-amber-300 tabular-nums">
                 {loading ? "..." : stats.studentsNeedIntervention}
               </span>
               <span className="text-blue-100/80 font-medium">Perlu Pembinaan</span>
-            </div>
-            <div className="px-4 py-2.5 flex items-center justify-center gap-2 text-xs">
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("letters")}
+              className={cn(
+                "px-4 py-2.5 flex items-center justify-center gap-2 text-xs transition-colors duration-200 cursor-pointer hover:bg-white/[0.09] active:bg-white/[0.13]",
+                activeTab === "letters" && "bg-white/[0.11]"
+              )}
+            >
               <span className="font-mono font-extrabold text-sm text-rose-300 tabular-nums">
                 {loading ? "..." : stats.spCount}
               </span>
               <span className="text-blue-100/80 font-medium">SP Terbit</span>
-            </div>
+            </button>
           </div>
         </div>
       </section>

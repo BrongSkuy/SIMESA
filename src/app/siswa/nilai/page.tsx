@@ -219,9 +219,24 @@ export default function SiswaNilaiPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        theme="navy"
+        eyebrow="Transkrip Akademik | Portal Siswa"
+        title="Transkrip Nilai Saya"
+        description="Rincian nilai mata pelajaran, komponen Tugas, UTS, UAS, dan skor prestasi semester."
+        stats={[
+          { label: "Skor Prestasi", value: "...", sublabel: "dari 100", tone: "amber" },
+          { label: "Mapel Lengkap", value: "..." },
+          { label: "Kehadiran", value: "...", tone: "emerald" },
+          { label: "Periode Aktif", value: "..." },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat transkrip nilai Anda...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -648,7 +663,7 @@ export default function SiswaNilaiPage() {
                 return (
                   <div
                     key={`${subj.namaMapel}-${idx}`}
-                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between"
                   >
                     <div>
                       {/* Header Mapel & Guru */}
@@ -919,7 +934,7 @@ export default function SiswaNilaiPage() {
                     return (
                       <TableRow
                         key={`${subj.namaMapel}-${idx}`}
-                        className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                        className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                       >
                         <TableCell className="pl-5 font-semibold text-slate-800 transition-colors">
                           {subj.labelMapel}
@@ -1257,7 +1272,7 @@ export default function SiswaNilaiPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between cursor-pointer"
+                  className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:border-slate-300/90 hover:shadow-sm transition-all duration-300 group flex flex-col justify-between"
                 >
                   <div className="pb-3 border-b border-slate-100 transition-colors">
                     <div className="flex items-start justify-between gap-2">
@@ -1408,7 +1423,7 @@ export default function SiswaNilaiPage() {
                   {data.criteria.map((c) => (
                     <TableRow
                       key={c.id}
-                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                     >
                       <TableCell className="pl-6 font-semibold text-slate-800 transition-colors">
                         {c.namaKriteria}
@@ -1439,7 +1454,7 @@ export default function SiswaNilaiPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-all duration-200 cursor-pointer">
+                  <TableRow className="group/row bg-slate-50/90 hover:bg-slate-50/90 border-t-2 border-slate-200 transition-colors duration-200">
                     <TableCell
                       colSpan={4}
                       className="pl-6 font-bold text-slate-900 transition-colors"

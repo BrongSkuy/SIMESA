@@ -320,7 +320,7 @@ export default function ManajemenDataPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column: Academic Years Management */}
         <div className="lg:col-span-2">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
+          <div className="rounded-xl border border-slate-200/75 bg-slate-50/35 p-5 sm:p-6 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
               <div>
                 <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">

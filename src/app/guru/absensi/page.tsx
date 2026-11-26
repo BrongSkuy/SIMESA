@@ -1156,7 +1156,7 @@ export default function GuruAbsensiPage() {
                         return (
                           <tr
                             key={siswa.studentId}
-                            className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer"
+                            className="group/row transition-colors duration-200 hover:bg-slate-50/90"
                           >
                             <td className="px-5 py-3 text-slate-500 font-mono transition-colors">
                               {i + 1}

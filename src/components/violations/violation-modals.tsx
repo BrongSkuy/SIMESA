@@ -70,9 +70,9 @@ export function ViolationRuleModal({
 }: ViolationRuleModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-md bg-white border border-slate-200">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
+          <DialogTitle className="text-base font-bold text-slate-900">
             {editingRule?.id
               ? "Edit Aturan Pelanggaran"
               : "Tambah Jenis Pelanggaran"}
@@ -219,9 +219,9 @@ export function ViolationIssueSpModal({
 }: ViolationIssueSpModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-md bg-white border border-slate-200">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
             <FileCheck2 className="w-5 h-5 text-red-600" />
             <span>Terbitkan Surat Peringatan (SP)</span>
           </DialogTitle>
@@ -316,9 +316,9 @@ export function ViolationThresholdModal({
 }: ViolationThresholdModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-md bg-white border border-slate-200">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-[#0d1e38]" />
             <span>Atur Ambang Batas Meter Poin</span>
           </DialogTitle>

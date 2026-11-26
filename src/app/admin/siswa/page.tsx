@@ -568,9 +568,24 @@ export default function AdminSiswaPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        title="Data Siswa"
+        eyebrow="Data Master | Portal Admin"
+        description="Profil lengkap, biodata, NIS, dan alokasi kelas seluruh siswa."
+        icon={Users}
+        theme="navy"
+        stats={[
+          { label: "Total Siswa", value: "...", sublabel: "Terdaftar di sistem" },
+          { label: "Siswa Aktif", value: "...", sublabel: "Status aktif belajar", tone: "emerald" },
+          { label: "Total Kelas", value: "...", sublabel: "Rombel tersedia", tone: "blue" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat data siswa...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -586,6 +601,11 @@ export default function AdminSiswaPage() {
           label: "Total Siswa",
           value: students.length,
           sublabel: "Terdaftar di sistem",
+          onClick: () => {
+            setFilterKelas("all");
+            setSearch("");
+          },
+          active: filterKelas === "all" && !search,
         },
         {
           label: "Siswa Aktif",
@@ -1058,7 +1078,7 @@ export default function AdminSiswaPage() {
                 paginatedStudents.map((siswa, i) => (
                   <TableRow
                     key={siswa.id}
-                    className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                    className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                   >
                     <TableCell className="text-center font-mono text-slate-400 ">
                       {(safePage - 1) * ITEMS_PER_PAGE + i + 1}

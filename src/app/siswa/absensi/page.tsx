@@ -257,9 +257,25 @@ export default function SiswaAbsensiPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
-      </div>
+      <ModulePageShell
+        theme="navy"
+        eyebrow="Kehadiran | Portal Siswa"
+        title="Riwayat Kehadiran & Presensi"
+        description="Rekam jejak kehadiran Anda per tanggal dan per mata pelajaran sepanjang semester."
+        stats={[
+          { label: "Hadir", value: "...", tone: "emerald" },
+          { label: "Izin", value: "...", tone: "amber" },
+          { label: "Sakit", value: "...", tone: "blue" },
+          { label: "Alfa", value: "...", tone: "rose" },
+          { label: "% Kehadiran", value: "..." },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
+          <p className="text-xs font-medium">Memuat riwayat kehadiran...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -516,7 +532,7 @@ export default function SiswaAbsensiPage() {
                           return (
                             <TableRow
                               key={`${r.id}-${i}`}
-                              className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                              className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                             >
                               <TableCell className="pl-5">
                                 <p className="text-xs font-semibold text-slate-800 transition-colors">
@@ -679,7 +695,7 @@ export default function SiswaAbsensiPage() {
                   {perMapelChartData.map((row) => (
                     <TableRow
                       key={row.mapel}
-                      className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                      className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                     >
                       <TableCell className="pl-5">
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 transition-colors">

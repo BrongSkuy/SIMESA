@@ -544,18 +544,23 @@ export function SubjectsManagementView({
           label: "Alokasi Mapel",
           value: subjects.length,
           sublabel: "Total penugasan",
+          onClick: () => setViewMode("all"),
+          active: viewMode === "all",
         },
         {
           label: "Mapel Unik",
           value: uniqueMapelKkmList.length,
           sublabel: "Kurikulum aktif",
           tone: "blue",
+          onClick: () => setViewMode("kkm"),
+          active: viewMode === "kkm",
         },
         {
           label: "KKM Default",
           value: defaultKkm,
           sublabel: "Standar minimal",
           tone: "emerald",
+          onClick: () => setViewMode("kkm"),
         },
       ]}
       actions={

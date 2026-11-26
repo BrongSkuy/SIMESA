@@ -236,9 +236,24 @@ export default function AdminRekapPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
-      </div>
+      <ModulePageShell
+        title="Rekapitulasi Kehadiran & Nilai"
+        eyebrow="Analitik Kelas | Portal Admin"
+        description="Pantau matriks akumulasi presensi dan perolehan nilai kriteria SPK per kelas."
+        icon={BarChart3}
+        theme="navy"
+        stats={[
+          { label: "Siswa di Kelas", value: "..." },
+          { label: "Rata-rata Kehadiran", value: "...", tone: "emerald" },
+          { label: "Kriteria Evaluasi", value: "...", tone: "blue" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat rekapitulasi kelas...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -527,7 +542,7 @@ export default function AdminRekapPage() {
                           rekapData.map((r) => (
                             <TableRow
                               key={r.id}
-                              className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                              className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                             >
                               <TableCell className="pl-6 font-mono text-slate-600 transition-colors">
                                 {r.nis}

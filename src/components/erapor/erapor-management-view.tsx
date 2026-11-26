@@ -488,24 +488,41 @@ export function EraporManagementView({
           label: "Total Siswa",
           value: stats.total,
           sublabel: selectedKelas ? `Kelas ${selectedKelas}` : "Kelas terpilih",
+          onClick: resetAllFilters,
+          active: !hasActiveFilter,
         },
         {
           label: "Tuntas KKM",
           value: stats.tuntas,
           sublabel: `Standar KKM ${activeDefaultKkm}`,
           tone: "emerald",
+          onClick: () => {
+            setKetuntasanFilter("Semua Tuntas");
+            setStatusRaporFilter("all");
+          },
+          active: ketuntasanFilter === "Semua Tuntas",
         },
         {
           label: "Perlu Perbaikan",
           value: stats.remidi,
           sublabel: "Nilai di bawah KKM",
           tone: stats.remidi > 0 ? "amber" : "default",
+          onClick: () => {
+            setKetuntasanFilter("Perlu Perbaikan");
+            setStatusRaporFilter("all");
+          },
+          active: ketuntasanFilter === "Perlu Perbaikan",
         },
         {
           label: "Rapor Disahkan",
           value: `${stats.disahkan}/${stats.total}`,
           sublabel: `${stats.adaCatatan} siswa bercatatan`,
           tone: "blue",
+          onClick: () => {
+            setStatusRaporFilter("Disahkan");
+            setKetuntasanFilter("all");
+          },
+          active: statusRaporFilter === "Disahkan",
         },
       ]}
       actions={

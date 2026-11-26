@@ -810,7 +810,7 @@ export default function AdminDashboard() {
                   return (
                     <tr
                       key={entry.studentId}
-                      className="transition-colors duration-150 hover:bg-slate-50/90 group/row cursor-pointer"
+                      className="transition-colors duration-150 hover:bg-slate-50/90 group/row"
                     >
                       <td className="py-3 px-4 text-center">
                         <span

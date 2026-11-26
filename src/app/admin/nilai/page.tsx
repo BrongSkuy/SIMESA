@@ -1006,7 +1006,7 @@ export default function AdminNilaiPage() {
                         return (
                           <tr
                             key={siswa.studentId}
-                            className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer"
+                            className="group/row transition-colors duration-200 hover:bg-slate-50/90"
                           >
                             <td className="px-4 py-2.5 text-slate-500 font-mono sticky left-0 bg-white transition-colors">
                               {i + 1}

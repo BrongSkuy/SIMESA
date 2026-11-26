@@ -936,7 +936,7 @@ export default function AdminLeaderboardPage() {
                     return (
                       <TableRow
                         key={entry.studentId}
-                        className={`group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0 ${rowAccent}`}
+                        className={`group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0 ${rowAccent}`}
                       >
                         <TableCell className="pl-6">
                           <RankBadge rank={entry.rank} />

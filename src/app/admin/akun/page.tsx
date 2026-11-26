@@ -423,9 +423,24 @@ export default function AdminAkunPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-      </div>
+      <ModulePageShell
+        theme="obsidian"
+        eyebrow="Administrasi Sistem | Portal Admin"
+        title="Manajemen Akun & Hak Akses"
+        description="Kelola kredensial login, otorisasi peran (RBAC), dan status aktif pengguna sistem."
+        stats={[
+          { label: "Total Akun", value: "..." },
+          { label: "Guru & Staf", value: "...", tone: "blue" },
+          { label: "Akun Siswa", value: "...", tone: "emerald" },
+          { label: "Akun Aktif", value: "...", tone: "emerald" },
+        ]}
+        sheetClassName="p-8"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-2.5 text-slate-500">
+          <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+          <p className="text-xs font-medium">Memuat daftar akun pengguna...</p>
+        </div>
+      </ModulePageShell>
     );
   }
 
@@ -482,9 +497,26 @@ export default function AdminAkunPage() {
       title="Manajemen Akun & Hak Akses"
       description="Kelola kredensial login, otorisasi peran (RBAC), dan status aktif pengguna sistem."
       stats={[
-        { label: "Total Akun", value: accounts.length },
-        { label: "Guru & Staf", value: totalStaff, tone: "blue" },
-        { label: "Akun Siswa", value: totalSiswa, tone: "emerald" },
+        {
+          label: "Total Akun",
+          value: accounts.length,
+          onClick: () => setFilterRole("all"),
+          active: filterRole === "all",
+        },
+        {
+          label: "Guru & Staf",
+          value: totalStaff,
+          tone: "blue",
+          onClick: () => setFilterRole("GURU"),
+          active: filterRole === "GURU",
+        },
+        {
+          label: "Akun Siswa",
+          value: totalSiswa,
+          tone: "emerald",
+          onClick: () => setFilterRole("SISWA"),
+          active: filterRole === "SISWA",
+        },
         totalBanned > 0
           ? { label: "Ditangguhkan", value: totalBanned, tone: "rose" }
           : {
@@ -630,7 +662,7 @@ export default function AdminAkunPage() {
                 paginatedAccounts.map((a, i) => (
                   <TableRow
                     key={a.id}
-                    className="group/row transition-all duration-200 hover:bg-slate-50/90 cursor-pointer border-b border-slate-100 last:border-0"
+                    className="group/row transition-colors duration-200 hover:bg-slate-50/90 border-b border-slate-100 last:border-0"
                   >
                     <TableCell className="pl-6 font-mono text-slate-500 transition-colors">
                       {startIndex + i + 1}

@@ -224,7 +224,7 @@ export function QuickCounselingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 bg-white dark:bg-slate-900">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 bg-white">
         <DialogHeader className="border-b pb-3">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
             {mode === "counseling" && (
@@ -466,7 +466,7 @@ export function QuickCounselingModal({
               </div>
 
               {/* Checkbox Dispensasi Otomatis */}
-              <div className="p-3 bg-teal-50/50 dark:bg-teal-950/20 border border-teal-200/70 dark:border-teal-900/50 rounded-lg">
+              <div className="p-3 bg-teal-50/50 border border-teal-200/70 rounded-lg">
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
