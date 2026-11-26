@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  parseExcelSheetSmart,
+  scoreCellStyle,
+} from "@/lib/excel-styled";
 import {
   PenLine,
   Save,
@@ -343,9 +347,11 @@ export default function AdminNilaiPage() {
     .toLowerCase()
     .includes("akademik");
 
-  const handleDownloadTemplate = () => {
-    const templateData = siswaList.map((s) => {
+  const handleDownloadTemplate = async () => {
+    if (siswaList.length === 0) return toast.error("Tidak ada siswa");
+    const templateData = siswaList.map((s, idx) => {
       const baseRow: Record<string, string | number> = {
+        No: idx + 1,
         NIS: s.nis,
         NamaLengkap: s.namaLengkap,
       };
@@ -354,17 +360,99 @@ export default function AdminNilaiPage() {
       });
       return baseRow;
     });
-    if (templateData.length === 0) return toast.error("Tidak ada siswa");
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Format Nilai");
-    XLSX.writeFile(wb, `Template_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
-    toast.success("Template nilai berhasil diunduh!");
+    try {
+      await downloadStyledExcel(
+        `Template_Nilai_${selectedKelas}_${selectedMapel}.xlsx`,
+        [
+          {
+            name: "Format Nilai",
+            title: "Template Input Nilai Siswa",
+            theme: "navy",
+            metadata: [
+              { label: "Kelas", value: selectedKelas },
+              { label: "Mata Pelajaran", value: selectedMapel },
+              {
+                label: "Kriteria",
+                value: activeCriteriaObj?.namaKriteria || "-",
+              },
+              { label: "Jumlah Siswa", value: `${siswaList.length} Siswa` },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 14,
+                align: "center",
+                numFmt: "@",
+              },
+              {
+                key: "NamaLengkap",
+                header: "NamaLengkap",
+                minWidth: 26,
+                align: "left",
+              },
+              ...categories.map((c) => ({
+                key: c,
+                header: c,
+                minWidth: 14,
+                align: "center" as const,
+                isInputColumn: true,
+                validation: {
+                  type: "decimal" as const,
+                  min: 0,
+                  max: 100,
+                  promptTitle: `Input Nilai ${c}`,
+                  prompt: "Masukkan angka antara 0 sampai 100.",
+                  errorTitle: "Nilai Di Luar Batas",
+                  error: "Nilai harus berupa angka antara 0 sampai 100.",
+                },
+              })),
+            ],
+            rows: templateData,
+            footerNote:
+              "Isi nilai hanya pada kolom berwarna kuning (rentang 0-100). Jangan mengubah kolom NIS dan nama header tabel agar proses impor berhasil.",
+          },
+        ],
+        {
+          title: "Panduan Pengisian Template Input Nilai",
+          theme: "navy",
+          steps: [
+            "Buka sheet 'Format Nilai' dan isi angka nilai hanya pada kolom berwarna kuning.",
+            "Pastikan nilai berada dalam rentang 0 sampai 100 (boleh menggunakan desimal, misal 85.5).",
+            "Jangan mengubah urutan atau isi kolom NIS dan Nama Header pada baris 5.",
+            "Simpan berkas (.xlsx), lalu unggah kembali melalui tombol 'Impor Excel' di SIMESA.",
+          ],
+          columnsGuide: [
+            {
+              kolom: "No & NIS",
+              aturan: "Identitas referensi siswa dari sistem (jangan diubah).",
+              contoh: "2024001",
+            },
+            {
+              kolom: "NamaLengkap",
+              aturan: "Nama lengkap siswa terdaftar (jangan diubah).",
+              contoh: "Andi Prasetyo",
+            },
+            {
+              kolom: categories.join(" / ") || "Kategori Nilai",
+              aturan: "Kolom input wajib diisi angka 0 sampai 100. Kosongkan jika belum ada nilai.",
+              contoh: "88",
+            },
+          ],
+        }
+      );
+      toast.success("Template nilai berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengunduh template nilai");
+    }
   };
 
-  const handleExportExcel = () => {
-    const dataToExport = siswaList.map((s) => {
+  const handleExportExcel = async () => {
+    if (siswaList.length === 0) return toast.error("Tidak ada siswa");
+    const dataToExport = siswaList.map((s, idx) => {
       const row: Record<string, string | number> = {
+        No: idx + 1,
         NIS: s.nis,
         NamaLengkap: s.namaLengkap,
       };
@@ -377,12 +465,85 @@ export default function AdminNilaiPage() {
       row["Rata-rata"] = getAverage(s.studentId);
       return row;
     });
-    if (dataToExport.length === 0) return toast.error("Tidak ada siswa");
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Data Nilai");
-    XLSX.writeFile(wb, `Data_Nilai_${selectedKelas}_${selectedMapel}.xlsx`);
-    toast.success("Data nilai berhasil diekspor!");
+
+    const summaryRow: Record<string, string | number> = {
+      No: "",
+      NIS: "",
+      NamaLengkap: "Rata-rata Kelas",
+    };
+    categories.forEach((c) => {
+      const vals = dataToExport
+        .map((r) => Number(r[c]))
+        .filter((v) => Number.isFinite(v) && String(v) !== "");
+      summaryRow[c] =
+        vals.length > 0
+          ? Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1))
+          : "-";
+    });
+    const avgVals = dataToExport
+      .map((r) => Number(r["Rata-rata"]))
+      .filter((v) => Number.isFinite(v));
+    summaryRow["Rata-rata"] =
+      avgVals.length > 0
+        ? Number((avgVals.reduce((a, b) => a + b, 0) / avgVals.length).toFixed(1))
+        : "-";
+
+    try {
+      await downloadStyledExcel(
+        `Data_Nilai_${selectedKelas}_${selectedMapel}.xlsx`,
+        [
+          {
+            name: "Data Nilai",
+            title: "Rekap Data Penilaian Siswa",
+            theme: "navy",
+            metadata: [
+              { label: "Kelas", value: selectedKelas },
+              { label: "Mata Pelajaran", value: selectedMapel },
+              {
+                label: "Kriteria",
+                value: activeCriteriaObj?.namaKriteria || "-",
+              },
+              { label: "Total Siswa", value: `${siswaList.length} Siswa` },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 14,
+                align: "center",
+                numFmt: "@",
+              },
+              {
+                key: "NamaLengkap",
+                header: "Nama Lengkap",
+                minWidth: 26,
+                align: "left",
+              },
+              ...categories.map((c) => ({
+                key: c,
+                header: c,
+                minWidth: 13,
+                align: "center" as const,
+                semanticStyle: scoreCellStyle,
+              })),
+              {
+                key: "Rata-rata",
+                header: "Rata-rata",
+                minWidth: 13,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+            ],
+            rows: dataToExport,
+            summaryRow,
+          },
+        ]
+      );
+      toast.success("Data nilai berhasil diekspor!");
+    } catch {
+      toast.error("Gagal mengekspor data nilai");
+    }
   };
 
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -391,10 +552,9 @@ export default function AdminNilaiPage() {
     setImporting(true);
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows =
-        XLSX.utils.sheet_to_json<Record<string, string | number>>(sheet);
+      const rows = parseExcelSheetSmart(data, {
+        expectedHeaders: ["NIS", "NamaLengkap", ...categories],
+      });
 
       if (rows.length === 0) {
         toast.error("File excel kosong");
@@ -402,8 +562,12 @@ export default function AdminNilaiPage() {
       }
 
       let matchCount = 0;
-      const excelCategories = categories.filter(
-        (c) => rows[0] && (c in rows[0] || c.toLowerCase() in rows[0])
+      const allHeaders = new Set<string>();
+      rows.forEach((row) => {
+        Object.keys(row).forEach((k) => allHeaders.add(k.trim().toLowerCase()));
+      });
+      const excelCategories = categories.filter((c) =>
+        allHeaders.has(c.trim().toLowerCase())
       );
 
       if (excelCategories.length === 0 && categories.length > 0) {

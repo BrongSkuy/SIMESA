@@ -17,7 +17,11 @@ import {
   Printer,
 } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  podiumRowStyle,
+  scoreCellStyle,
+} from "@/lib/excel-styled";
 import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import LeaderboardCard, {
@@ -283,20 +287,77 @@ export default function AdminLeaderboardPage() {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (data.length === 0) return;
-    const templateData = data.map((d) => ({
+    const rows = data.map((d) => ({
       Rank: d.rank,
       NIS: d.nis,
       NamaSiswa: d.namaLengkap,
       Kelas: d.kelas,
-      SkorSPK_Persen: d.persentase,
-      RawScore: d.rawScore,
+      SkorSPK_Persen: `${d.persentase}%`,
+      RawScore: Number(d.rawScore.toFixed(4)),
     }));
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Leaderboard " + activeTab);
-    XLSX.writeFile(wb, `Leaderboard_${activeTab}_SPK.xlsx`);
+    try {
+      await downloadStyledExcel(`Leaderboard_${activeTab}_SPK.xlsx`, [
+        {
+          name: `Leaderboard ${activeTab}`,
+          title:
+            activeTab === "umum"
+              ? "Peringkat Umum Siswa Berprestasi (SPK SAW)"
+              : `Peringkat Siswa Berprestasi Kelas ${activeTab}`,
+          theme: "royal",
+          metadata: [
+            {
+              label: "Periode",
+              value: publishStatus?.periode || "Semester Aktif",
+            },
+            {
+              label: "Cakupan",
+              value: activeTab === "umum" ? "Seluruh Kelas" : `Kelas ${activeTab}`,
+            },
+            { label: "Total Peserta", value: `${data.length} Siswa` },
+          ],
+          columns: [
+            { key: "Rank", header: "Peringkat", width: 12, align: "center" },
+            {
+              key: "NIS",
+              header: "NIS",
+              minWidth: 14,
+              align: "center",
+              numFmt: "@",
+            },
+            {
+              key: "NamaSiswa",
+              header: "Nama Lengkap Siswa",
+              minWidth: 28,
+              align: "left",
+            },
+            { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+            {
+              key: "SkorSPK_Persen",
+              header: "Skor Prestasi (%)",
+              width: 18,
+              align: "center",
+              semanticStyle: scoreCellStyle,
+            },
+            {
+              key: "RawScore",
+              header: "Skor SAW",
+              width: 14,
+              align: "center",
+              numFmt: "0.0000",
+            },
+          ],
+          rows,
+          rowStyle: (row) => podiumRowStyle(row.Rank),
+          footerNote:
+            "Baris berwarna emas, perak, dan perunggu menandakan Peringkat 1, 2, dan 3 berdasarkan perhitungan SPK SAW.",
+        },
+      ]);
+      toast.success("Data leaderboard berhasil diekspor!");
+    } catch {
+      toast.error("Gagal mengekspor data leaderboard");
+    }
   };
 
   const handleExportPDF = () => {
@@ -304,66 +365,73 @@ export default function AdminLeaderboardPage() {
   };
 
   // Ekspor daftar penilaian kosong ke Excel (.xlsx) dengan kop formal
-  const handleExportMissingExcel = () => {
+  const handleExportMissingExcel = async () => {
     if (!validation?.missing || validation.missing.length === 0) {
       toast.error("Tidak ada data penilaian kosong untuk diunduh.");
       return;
     }
 
     const periode = publishStatus?.periode || "Semester Aktif";
-    const exportTime = new Date().toLocaleString("id-ID", {
-      dateStyle: "full",
-      timeStyle: "short",
-    });
-
-    // Susun data tabel dengan kop formal
-    const sheetData: (string | number)[][] = [
-      ["DAFTAR PENILAIAN BELUM LENGKAP (SPK SAW)"],
-      ["SMK PENERBANGAN DIRGANTARA - SIMESA"],
-      [`Periode Semester: ${periode}`],
-      [`Waktu Ekspor: ${exportTime} WIB`],
-      [
-        "Catatan: Mohon Bapak dan Ibu Guru pengajar atau Wali Kelas melengkapi item penilaian berikut sebelum perilisan leaderboard resmi.",
-      ],
-      [], // Baris kosong pemisah
-      [
-        "No",
-        "Siswa atau Cakupan",
-        "Kelas",
-        "Kriteria atau Mata Pelajaran",
-        "Status dan Penyebab",
-      ],
-    ];
-
-    validation.missing.forEach((item, index) => {
-      sheetData.push([
-        index + 1,
-        item.studentName,
-        item.kelas,
-        item.criteriaName,
-        item.reason,
-      ]);
-    });
-
-    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-
-    // Set lebar kolom yang proporsional
-    worksheet["!cols"] = [
-      { wch: 6 },  // No
-      { wch: 28 }, // Siswa
-      { wch: 14 }, // Kelas
-      { wch: 38 }, // Kriteria / Mata Pelajaran
-      { wch: 35 }, // Status / Penyebab
-    ];
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Penilaian Kosong");
-
     const safePeriode = periode.replace(/[/\\?%*:|"<> ]/g, "_");
     const fileName = `Daftar_Penilaian_Kosong_SMK_Dirgantara_${safePeriode}.xlsx`;
 
-    XLSX.writeFile(workbook, fileName);
-    toast.success("Berhasil mengunduh daftar penilaian kosong (.xlsx)!");
+    try {
+      await downloadStyledExcel(fileName, [
+        {
+          name: "Penilaian Kosong",
+          title: "Daftar Penilaian Belum Lengkap (SPK SAW)",
+          theme: "royal",
+          landscape: true,
+          metadata: [
+            { label: "Periode Semester", value: periode },
+            {
+              label: "Total Belum Lengkap",
+              value: `${validation.missing.length} Item`,
+            },
+          ],
+          columns: [
+            { key: "No", header: "No", width: 6, align: "center" },
+            {
+              key: "Siswa",
+              header: "Siswa / Cakupan",
+              minWidth: 28,
+              align: "left",
+            },
+            { key: "Kelas", header: "Kelas", width: 13, align: "center" },
+            {
+              key: "Kriteria",
+              header: "Kriteria / Mata Pelajaran",
+              minWidth: 34,
+              align: "left",
+              wrapText: true,
+            },
+            {
+              key: "Status",
+              header: "Status & Penyebab",
+              minWidth: 34,
+              align: "left",
+              wrapText: true,
+              semanticStyle: () => ({
+                fillArgb: "FFFFF7ED",
+                fontArgb: "FF9A3412",
+              }),
+            },
+          ],
+          rows: validation.missing.map((item, index) => ({
+            No: index + 1,
+            Siswa: item.studentName,
+            Kelas: item.kelas,
+            Kriteria: item.criteriaName,
+            Status: item.reason,
+          })),
+          footerNote:
+            "Mohon Bapak/Ibu Guru pengajar atau Wali Kelas melengkapi item penilaian di atas sebelum perilisan leaderboard resmi.",
+        },
+      ]);
+      toast.success("Berhasil mengunduh daftar penilaian kosong (.xlsx)!");
+    } catch {
+      toast.error("Gagal mengunduh daftar penilaian kosong");
+    }
   };
 
   const handleUploadArsip = (e: React.ChangeEvent<HTMLInputElement>) => {

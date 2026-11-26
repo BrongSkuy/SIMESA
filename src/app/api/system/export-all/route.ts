@@ -3,7 +3,16 @@ import { db } from "@/db";
 import { students, teachers, attendance, spkScores, spkCriteria, classes, subjects, spkGradingCategories, academicYears } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import * as XLSX from "xlsx";
+import {
+  buildStyledWorkbookBuffer,
+  attendanceStatusCellStyle,
+  podiumRowStyle,
+  scoreCellStyle,
+  statusBadgeCellStyle,
+  type StyledSheetConfig,
+  type StyledColumnDef,
+  type ExcelCellValue,
+} from "@/lib/excel-styled";
 import { calculateSPK } from "@/lib/spk";
 import { getTodayWIB } from "@/lib/utils";
 import { getPortalForRole } from "@/lib/rbac";
@@ -28,7 +37,29 @@ export async function GET() {
     const allGradingCats = await db.select().from(spkGradingCategories);
     const allAcademicYears = await db.select().from(academicYears);
 
-    const wb = XLSX.utils.book_new();
+    const sheets: StyledSheetConfig[] = [];
+    const backupDate = getTodayWIB();
+    const pushTableSheet = (
+      name: string,
+      title: string,
+      columns: StyledColumnDef[],
+      rows: Array<Record<string, ExcelCellValue>>,
+      options?: Pick<StyledSheetConfig, "theme" | "rowStyle" | "landscape">
+    ) => {
+      sheets.push({
+        name,
+        title,
+        theme: options?.theme ?? "obsidian",
+        landscape: options?.landscape ?? columns.length > 5,
+        metadata: [
+          { label: "Tanggal Backup", value: backupDate },
+          { label: "Jumlah Baris", value: `${rows.length} Data` },
+        ],
+        columns,
+        rows,
+        rowStyle: options?.rowStyle,
+      });
+    };
 
     // Pre-create Maps to optimize lookups to O(1)
     const studentMap = new Map(allStudents.map(s => [s.id, s]));
@@ -73,7 +104,20 @@ export async function GET() {
       JenisKelamin: s.jenisKelamin,
       Status: s.status,
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(siswaData.length > 0 ? siswaData : [{}]), "Data Siswa");
+    pushTableSheet(
+      "Data Siswa",
+      "Cadangan Data Siswa",
+      [
+        { key: "ID", header: "ID", minWidth: 16, align: "left" },
+        { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+        { key: "NamaLengkap", header: "Nama Lengkap", minWidth: 26, align: "left" },
+        { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+        { key: "Angkatan", header: "Angkatan", width: 12, align: "center", numFmt: "@" },
+        { key: "JenisKelamin", header: "Jenis Kelamin", width: 14, align: "center" },
+        { key: "Status", header: "Status", width: 13, align: "center", semanticStyle: statusBadgeCellStyle },
+      ],
+      siswaData
+    );
 
     // Sheet 2: Guru
     const guruData = allTeachers.map(t => ({
@@ -82,7 +126,17 @@ export async function GET() {
       NamaLengkap: t.namaLengkap,
       Status: t.status,
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(guruData.length > 0 ? guruData : [{}]), "Data Guru");
+    pushTableSheet(
+      "Data Guru",
+      "Cadangan Data Guru",
+      [
+        { key: "ID", header: "ID", minWidth: 16, align: "left" },
+        { key: "NIP", header: "NIP", minWidth: 18, align: "center", numFmt: "@" },
+        { key: "NamaLengkap", header: "Nama Lengkap", minWidth: 28, align: "left" },
+        { key: "Status", header: "Status", width: 13, align: "center", semanticStyle: statusBadgeCellStyle },
+      ],
+      guruData
+    );
 
     // Sheet 3: Kelas
     const kelasData = allClasses.map(c => ({
@@ -91,7 +145,17 @@ export async function GET() {
       Tingkat: c.tingkat,
       WaliKelas: c.waliKelas || "",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kelasData.length > 0 ? kelasData : [{}]), "Data Kelas");
+    pushTableSheet(
+      "Data Kelas",
+      "Cadangan Data Kelas",
+      [
+        { key: "ID", header: "ID", minWidth: 16, align: "left" },
+        { key: "NamaKelas", header: "Nama Kelas", width: 16, align: "center" },
+        { key: "Tingkat", header: "Tingkat", width: 12, align: "center" },
+        { key: "WaliKelas", header: "Wali Kelas", minWidth: 26, align: "left" },
+      ],
+      kelasData
+    );
 
     // Sheet 4: Mapel
     const mapelData = allSubjects.map(s => {
@@ -103,7 +167,17 @@ export async function GET() {
         KelasDiampu: s.kelasDiampu || "",
       };
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mapelData.length > 0 ? mapelData : [{}]), "Data Mapel");
+    pushTableSheet(
+      "Data Mapel",
+      "Cadangan Data Mata Pelajaran",
+      [
+        { key: "ID", header: "ID", minWidth: 16, align: "left" },
+        { key: "NamaMapel", header: "Nama Mapel", minWidth: 24, align: "left" },
+        { key: "GuruPengampu", header: "Guru Pengampu", minWidth: 26, align: "left" },
+        { key: "KelasDiampu", header: "Kelas Diampu", minWidth: 22, align: "left", wrapText: true },
+      ],
+      mapelData
+    );
 
     // Sheet 5: Absensi
     const absensiData = allAttendance.map(a => {
@@ -117,7 +191,19 @@ export async function GET() {
         Periode: a.periode,
       };
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(absensiData.length > 0 ? absensiData : [{}]), "Data Absensi");
+    pushTableSheet(
+      "Data Absensi",
+      "Cadangan Data Presensi",
+      [
+        { key: "Tanggal", header: "Tanggal", width: 14, align: "center" },
+        { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+        { key: "NamaSiswa", header: "Nama Siswa", minWidth: 26, align: "left" },
+        { key: "Mapel", header: "Mata Pelajaran", minWidth: 20, align: "left" },
+        { key: "Status", header: "Status", width: 13, align: "center", semanticStyle: attendanceStatusCellStyle },
+        { key: "Periode", header: "Periode", width: 18, align: "center" },
+      ],
+      absensiData
+    );
 
     // Sheet 6: Nilai SPK
     const nilaiData = allScores.map(sc => {
@@ -133,7 +219,20 @@ export async function GET() {
         Periode: sc.periode,
       };
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(nilaiData.length > 0 ? nilaiData : [{}]), "Data Nilai");
+    pushTableSheet(
+      "Data Nilai",
+      "Cadangan Data Penilaian SPK",
+      [
+        { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+        { key: "NamaSiswa", header: "Nama Siswa", minWidth: 26, align: "left" },
+        { key: "Kriteria", header: "Kriteria", minWidth: 18, align: "left" },
+        { key: "Mapel", header: "Mata Pelajaran", minWidth: 20, align: "left" },
+        { key: "Nilai", header: "Nilai", width: 12, align: "center", semanticStyle: scoreCellStyle },
+        { key: "Details", header: "Rincian", minWidth: 24, maxWidth: 40, align: "left", wrapText: true },
+        { key: "Periode", header: "Periode", width: 18, align: "center" },
+      ],
+      nilaiData
+    );
 
     // Sheet 7: Kriteria SPK
     const criteriaData = allCriteria.map(c => ({
@@ -143,7 +242,18 @@ export async function GET() {
       Tipe: c.tipe,
       Deskripsi: c.deskripsi || "",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(criteriaData.length > 0 ? criteriaData : [{}]), "Kriteria SPK");
+    pushTableSheet(
+      "Kriteria SPK",
+      "Cadangan Kriteria SPK SAW",
+      [
+        { key: "ID", header: "ID", minWidth: 16, align: "left" },
+        { key: "NamaKriteria", header: "Nama Kriteria", minWidth: 24, align: "left" },
+        { key: "Bobot", header: "Bobot (%)", width: 12, align: "center" },
+        { key: "Tipe", header: "Tipe", width: 14, align: "center" },
+        { key: "Deskripsi", header: "Deskripsi", minWidth: 30, align: "left", wrapText: true },
+      ],
+      criteriaData
+    );
 
     // Sheet 7b: Kategori Penilaian & Periode Akademik
     const gradingCatsData = allGradingCats.map(gc => ({
@@ -153,14 +263,34 @@ export async function GET() {
       Kategori: gc.categories,
       Periode: gc.periode,
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(gradingCatsData.length > 0 ? gradingCatsData : [{}]), "Kategori Penilaian");
+    pushTableSheet(
+      "Kategori Penilaian",
+      "Cadangan Kategori Penilaian",
+      [
+        { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+        { key: "Mapel", header: "Mata Pelajaran", minWidth: 20, align: "left" },
+        { key: "Kriteria", header: "Kriteria", minWidth: 18, align: "left" },
+        { key: "Kategori", header: "Daftar Kategori", minWidth: 26, align: "left", wrapText: true },
+        { key: "Periode", header: "Periode", width: 18, align: "center" },
+      ],
+      gradingCatsData
+    );
 
     const academicYearsData = allAcademicYears.map(ay => ({
       TahunAjaran: ay.tahunAjaran,
       Semester: ay.semester,
       Status: ay.isActive ? "Aktif" : "Arsip",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(academicYearsData.length > 0 ? academicYearsData : [{}]), "Periode Akademik");
+    pushTableSheet(
+      "Periode Akademik",
+      "Cadangan Periode Tahun Ajaran",
+      [
+        { key: "TahunAjaran", header: "Tahun Ajaran", width: 18, align: "center" },
+        { key: "Semester", header: "Semester", width: 14, align: "center" },
+        { key: "Status", header: "Status", width: 14, align: "center", semanticStyle: statusBadgeCellStyle },
+      ],
+      academicYearsData
+    );
 
     // Sheet 8: Penugasan Guru-Kelas (derived from waliKelas + attendance-based assignments)
     const guruKelasRows: { NIP: string; NamaGuru: string; Kelas: string; Peran: string }[] = [];
@@ -212,8 +342,28 @@ export async function GET() {
       const teacher = teacherMap.get(ts.teacherId!);
       return { NIP: teacher?.nip || ts.teacherId, NamaGuru: teacher?.namaLengkap || "-", Mapel: ts.namaMapel, KelasDiampu: ts.kelasDiampu || "-" };
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(guruKelasRows.length > 0 ? guruKelasRows : [{}]), "Guru-Kelas");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tSubjData.length > 0 ? tSubjData : [{}]), "Guru-Mapel");
+    pushTableSheet(
+      "Guru-Kelas",
+      "Cadangan Penugasan Guru-Kelas",
+      [
+        { key: "NIP", header: "NIP", minWidth: 16, align: "center", numFmt: "@" },
+        { key: "NamaGuru", header: "Nama Guru", minWidth: 26, align: "left" },
+        { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+        { key: "Peran", header: "Peran", width: 16, align: "center" },
+      ],
+      guruKelasRows
+    );
+    pushTableSheet(
+      "Guru-Mapel",
+      "Cadangan Penugasan Guru-Mapel",
+      [
+        { key: "NIP", header: "NIP", minWidth: 16, align: "center", numFmt: "@" },
+        { key: "NamaGuru", header: "Nama Guru", minWidth: 26, align: "left" },
+        { key: "Mapel", header: "Mata Pelajaran", minWidth: 22, align: "left" },
+        { key: "KelasDiampu", header: "Kelas Diampu", minWidth: 22, align: "left", wrapText: true },
+      ],
+      tSubjData
+    );
 
     // Sheet 9: Leaderboard SPK (Umum)
     const spkLeaderboard = await calculateSPK("umum");
@@ -222,15 +372,27 @@ export async function GET() {
       NIS: d.nis,
       NamaSiswa: d.namaLengkap,
       Kelas: d.kelas,
-      Skor_SPK: d.rawScore,
+      Skor_SPK: Number(d.rawScore.toFixed(4)),
       Persentase: d.persentase + "%",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(leaderboardData.length > 0 ? leaderboardData : [{}]), "Leaderboard Umum");
+    pushTableSheet(
+      "Leaderboard Umum",
+      "Leaderboard SPK SAW (Umum)",
+      [
+        { key: "Rank", header: "Peringkat", width: 12, align: "center" },
+        { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+        { key: "NamaSiswa", header: "Nama Siswa", minWidth: 28, align: "left" },
+        { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+        { key: "Skor_SPK", header: "Skor SPK", width: 14, align: "center", numFmt: "0.0000" },
+        { key: "Persentase", header: "Persentase (%)", width: 16, align: "center", semanticStyle: scoreCellStyle },
+      ],
+      leaderboardData,
+      { theme: "royal", rowStyle: (row) => podiumRowStyle(row.Rank) }
+    );
 
     // Leaderboards for each class
     for (const c of allClasses) {
       const classStudents = spkLeaderboard.filter(d => d.kelas === c.namaKelas);
-      // Re-sort and rank them for this specific class
       const sortedClass = classStudents.sort((a, b) => b.rawScore - a.rawScore || a.namaLengkap.localeCompare(b.namaLengkap));
       const spkClass = sortedClass.map((s, idx) => ({ ...s, rank: idx + 1 }));
 
@@ -238,16 +400,28 @@ export async function GET() {
         Rank: d.rank,
         NIS: d.nis,
         NamaSiswa: d.namaLengkap,
-        Skor_SPK: d.rawScore,
+        Skor_SPK: Number(d.rawScore.toFixed(4)),
         Persentase: d.persentase + "%",
       }));
-      // Excel sheet names have a max length of 31 characters. Avoid long names.
       const sheetName = `Leaderboard ${c.namaKelas}`.substring(0, 31);
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classData.length > 0 ? classData : [{}]), sheetName);
+      pushTableSheet(
+        sheetName,
+        `Leaderboard SPK SAW — Kelas ${c.namaKelas}`,
+        [
+          { key: "Rank", header: "Peringkat", width: 12, align: "center" },
+          { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+          { key: "NamaSiswa", header: "Nama Siswa", minWidth: 28, align: "left" },
+          { key: "Skor_SPK", header: "Skor SPK", width: 14, align: "center", numFmt: "0.0000" },
+          { key: "Persentase", header: "Persentase (%)", width: 16, align: "center", semanticStyle: scoreCellStyle },
+        ],
+        classData,
+        { theme: "royal", rowStyle: (row) => podiumRowStyle(row.Rank) }
+      );
     }
 
-    // Generate buffer
-    const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+    // Generate styled workbook buffer
+    const arrayBuf = await buildStyledWorkbookBuffer(sheets);
+    const buf = Buffer.from(arrayBuf);
 
     return new NextResponse(buf, {
       status: 200,

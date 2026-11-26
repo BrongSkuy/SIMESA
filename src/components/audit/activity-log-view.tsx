@@ -43,7 +43,10 @@ import {
   ArrowLeft,
   ShieldAlert,
 } from "lucide-react";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  statusBadgeCellStyle,
+} from "@/lib/excel-styled";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -120,35 +123,65 @@ export function ActivityLogView() {
       }
 
       const excelRows = data.map((item, idx) => ({
-        "No": idx + 1,
-        "Waktu Pencatatan": formatAuditTimestamp(item.createdAt),
-        "Nama Aktor": item.userName,
-        "Peran Pengguna": formatRoleLabel(item.userRole),
-        "Modul Sistem": MODULE_LABELS[item.module] || item.module,
-        "Jenis Aksi": ACTION_LABELS[item.action] || item.action,
-        "Target Objek": item.targetName || "-",
-        "Uraian Kegiatan": item.description,
-        "Alamat IP": item.ipAddress || "127.0.0.1",
-        "Snapshot Metadata": item.details || "-",
+        No: idx + 1,
+        Waktu: formatAuditTimestamp(item.createdAt),
+        Aktor: item.userName,
+        Peran: formatRoleLabel(item.userRole),
+        Modul: MODULE_LABELS[item.module] || item.module,
+        Aksi: ACTION_LABELS[item.action] || item.action,
+        Target: item.targetName || "-",
+        Uraian: item.description,
+        IP: item.ipAddress || "127.0.0.1",
+        Metadata: item.details || "-",
       }));
 
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelRows);
-      ws["!cols"] = [
-        { wch: 6 },
-        { wch: 28 },
-        { wch: 26 },
-        { wch: 18 },
-        { wch: 24 },
-        { wch: 20 },
-        { wch: 25 },
-        { wch: 55 },
-        { wch: 16 },
-        { wch: 40 },
-      ];
-      XLSX.utils.book_append_sheet(wb, ws, "Riwayat Aktivitas");
       const dateStr = new Date().toISOString().split("T")[0];
-      XLSX.writeFile(wb, `Cadangan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`);
+      await downloadStyledExcel(
+        `Cadangan_Riwayat_Aktivitas_SIMESA_${dateStr}.xlsx`,
+        [
+          {
+            name: "Riwayat Aktivitas",
+            title: "Arsip Cadangan Riwayat Aktivitas & Audit Trail",
+            theme: "obsidian",
+            landscape: true,
+            metadata: [
+              { label: "Total Catatan", value: `${excelRows.length} Log` },
+              { label: "Tanggal Arsip", value: dateStr },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              { key: "Waktu", header: "Waktu Pencatatan", width: 24, align: "center" },
+              { key: "Aktor", header: "Nama Aktor", minWidth: 22, align: "left" },
+              { key: "Peran", header: "Peran Pengguna", width: 18, align: "center" },
+              { key: "Modul", header: "Modul Sistem", width: 22, align: "center" },
+              {
+                key: "Aksi",
+                header: "Jenis Aksi",
+                width: 18,
+                align: "center",
+                semanticStyle: statusBadgeCellStyle,
+              },
+              { key: "Target", header: "Target Objek", minWidth: 22, align: "left" },
+              {
+                key: "Uraian",
+                header: "Uraian Kegiatan",
+                width: 44,
+                align: "left",
+                wrapText: true,
+              },
+              { key: "IP", header: "Alamat IP", width: 16, align: "center" },
+              {
+                key: "Metadata",
+                header: "Snapshot Metadata",
+                width: 34,
+                align: "left",
+                wrapText: true,
+              },
+            ],
+            rows: excelRows,
+          },
+        ]
+      );
 
       setHasDownloadedExcel(true);
       toast.success("Berkas cadangan Excel (.xlsx) berhasil diunduh");

@@ -12,7 +12,11 @@ import {
   Printer,
 } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  podiumRowStyle,
+  scoreCellStyle,
+} from "@/lib/excel-styled";
 import { ModulePageShell } from "@/components/shared/module-page-shell";
 import LeaderboardCard, {
   LeaderboardPagination,
@@ -188,21 +192,71 @@ export default function GuruLeaderboardPage() {
     setActiveTab(nextTab);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (data.length === 0) return;
-    const templateData = data.map((d) => ({
+    const rows = data.map((d) => ({
       Rank: d.rank,
       NIS: d.nis,
       NamaSiswa: d.namaLengkap,
       Kelas: d.kelas,
-      SkorPrestasi_Persen: d.persentase,
-      RawScore: d.rawScore,
+      SkorPrestasi_Persen: `${d.persentase}%`,
+      RawScore: Number(d.rawScore.toFixed(4)),
     }));
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Peringkat " + activeTab);
-    XLSX.writeFile(wb, `Peringkat_Siswa_${activeTab}.xlsx`);
-    toast.success("Data peringkat siswa berhasil diekspor");
+    try {
+      await downloadStyledExcel(`Peringkat_Siswa_${activeTab}.xlsx`, [
+        {
+          name: `Peringkat ${activeTab}`,
+          title:
+            activeTab === "umum"
+              ? "Peringkat Umum Siswa Berprestasi"
+              : `Peringkat Siswa Berprestasi Kelas ${activeTab}`,
+          theme: "royal",
+          metadata: [
+            {
+              label: "Cakupan",
+              value: activeTab === "umum" ? "Seluruh Kelas" : `Kelas ${activeTab}`,
+            },
+            { label: "Total Peserta", value: `${data.length} Siswa` },
+          ],
+          columns: [
+            { key: "Rank", header: "Peringkat", width: 12, align: "center" },
+            {
+              key: "NIS",
+              header: "NIS",
+              minWidth: 14,
+              align: "center",
+              numFmt: "@",
+            },
+            {
+              key: "NamaSiswa",
+              header: "Nama Lengkap Siswa",
+              minWidth: 28,
+              align: "left",
+            },
+            { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+            {
+              key: "SkorPrestasi_Persen",
+              header: "Skor Prestasi (%)",
+              width: 18,
+              align: "center",
+              semanticStyle: scoreCellStyle,
+            },
+            {
+              key: "RawScore",
+              header: "Skor SAW",
+              width: 14,
+              align: "center",
+              numFmt: "0.0000",
+            },
+          ],
+          rows,
+          rowStyle: (row) => podiumRowStyle(row.Rank),
+        },
+      ]);
+      toast.success("Data peringkat siswa berhasil diekspor");
+    } catch {
+      toast.error("Gagal mengekspor data peringkat siswa");
+    }
   };
 
   const handleExportPDF = () => {

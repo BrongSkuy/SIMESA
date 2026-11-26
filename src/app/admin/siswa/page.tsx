@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  parseExcelSheetSmart,
+  statusBadgeCellStyle,
+} from "@/lib/excel-styled";
 import {
   Users,
   Plus,
@@ -289,49 +293,211 @@ export default function AdminSiswaPage() {
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
+    const classNames = classes.map((c) => c.namaKelas).filter(Boolean);
+    const defaultKelas = classNames[0] || "X-A";
     const templateData = [
       {
         NIS: "2024001",
         NamaLengkap: "Contoh Nama Siswa",
-        Kelas: "X-A",
+        Kelas: defaultKelas,
         Angkatan: "2024",
         JenisKelamin: "L",
       },
     ];
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    ws["!cols"] = [
-      { wch: 12 },
-      { wch: 25 },
-      { wch: 10 },
-      { wch: 10 },
-      { wch: 14 },
-    ];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
-    XLSX.writeFile(wb, "template_data_siswa.xlsx");
-    toast.success("Template berhasil diunduh!");
+    try {
+      await downloadStyledExcel(
+        "template_data_siswa.xlsx",
+        [
+          {
+            name: "Data Siswa",
+            title: "Template Impor Data Siswa Baru",
+            theme: "navy",
+            metadata: [
+              { label: "Total Kelas Terdaftar", value: `${classNames.length} Kelas` },
+              { label: "Format", value: "Isi mulai baris 6 (hapus/timpa baris contoh)" },
+            ],
+            columns: [
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 16,
+                align: "center",
+                numFmt: "@",
+                isInputColumn: true,
+              },
+              {
+                key: "NamaLengkap",
+                header: "NamaLengkap",
+                minWidth: 28,
+                align: "left",
+                isInputColumn: true,
+              },
+              {
+                key: "Kelas",
+                header: "Kelas",
+                minWidth: 14,
+                align: "center",
+                isInputColumn: true,
+                ...(classNames.length > 0
+                  ? {
+                      validation: {
+                        type: "list" as const,
+                        options: classNames,
+                        promptTitle: "Pilih Kelas",
+                        prompt: "Pilih kelas yang sudah terdaftar di SIMESA.",
+                        errorTitle: "Kelas Tidak Terdaftar",
+                        error: "Gunakan nama kelas yang terdaftar di sistem.",
+                      },
+                    }
+                  : {}),
+              },
+              {
+                key: "Angkatan",
+                header: "Angkatan",
+                minWidth: 14,
+                align: "center",
+                numFmt: "@",
+                isInputColumn: true,
+              },
+              {
+                key: "JenisKelamin",
+                header: "JenisKelamin",
+                minWidth: 16,
+                align: "center",
+                isInputColumn: true,
+                validation: {
+                  type: "list",
+                  options: ["L", "P"],
+                  promptTitle: "Jenis Kelamin",
+                  prompt: "Pilih L (Laki-laki) atau P (Perempuan).",
+                  errorTitle: "Format Salah",
+                  error: "Gunakan L untuk Laki-laki atau P untuk Perempuan.",
+                },
+              },
+            ],
+            rows: templateData,
+            extraInputRows: 25,
+            footerNote:
+              "Timpa baris contoh di baris 6 dengan data siswa sebenarnya. Jangan mengubah nama header pada baris 5.",
+          },
+        ],
+        {
+          title: "Panduan Pengisian Template Data Siswa",
+          theme: "navy",
+          steps: [
+            "Buka sheet 'Data Siswa' lalu ganti baris contoh (baris 6) dengan data siswa sebenarnya.",
+            "Tambahkan siswa baru pada baris kuning yang sudah disiapkan di bawahnya.",
+            "Gunakan dropdown Excel pada kolom 'Kelas' dan 'JenisKelamin' agar tidak terjadi salah ketik.",
+            "Simpan berkas (.xlsx), lalu unggah melalui tombol 'Impor Excel' di halaman Data Siswa.",
+          ],
+          columnsGuide: [
+            {
+              kolom: "NIS",
+              aturan: "Nomor Induk Siswa unik (wajib diisi, tidak boleh duplikat).",
+              contoh: "2024001",
+            },
+            {
+              kolom: "NamaLengkap",
+              aturan: "Nama lengkap peserta didik.",
+              contoh: "Putri Ayu Wulandari",
+            },
+            {
+              kolom: "Kelas",
+              aturan: "Nama kelas aktif sesuai Data Kelas SIMESA.",
+              contoh: defaultKelas,
+            },
+            {
+              kolom: "Angkatan",
+              aturan: "Tahun masuk siswa (4 digit).",
+              contoh: "2024",
+            },
+            {
+              kolom: "JenisKelamin",
+              aturan: "Wajib 'L' (Laki-laki) atau 'P' (Perempuan).",
+              contoh: "L",
+            },
+          ],
+        }
+      );
+      toast.success("Template berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengunduh template data siswa");
+    }
   };
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
     if (filtered.length === 0) {
       toast.error("Tidak ada data siswa untuk diekspor");
       return;
     }
-    const templateData = filtered.map((s, i) => ({
+    const exportRows = filtered.map((s, i) => ({
       No: i + 1,
       NIS: s.nis,
-      "Nama Lengkap": s.namaLengkap,
+      NamaLengkap: s.namaLengkap,
       Kelas: s.kelas,
       Angkatan: s.angkatan,
-      "Jenis Kelamin": s.jenisKelamin,
+      JenisKelamin: s.jenisKelamin,
       Status: s.status,
     }));
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
-    XLSX.writeFile(wb, `Data_Siswa_Export.xlsx`);
-    toast.success("Data siswa berhasil diekspor!");
+    try {
+      await downloadStyledExcel("Data_Siswa_Export.xlsx", [
+        {
+          name: "Data Siswa",
+          title: "Daftar Data Siswa Aktif",
+          theme: "navy",
+          landscape: true,
+          metadata: [
+            {
+              label: "Filter Kelas",
+              value: filterKelas === "all" ? "Semua Kelas" : `Kelas ${filterKelas}`,
+            },
+            { label: "Total Siswa", value: `${filtered.length} Siswa` },
+          ],
+          columns: [
+            { key: "No", header: "No", width: 6, align: "center" },
+            {
+              key: "NIS",
+              header: "NIS",
+              minWidth: 14,
+              align: "center",
+              numFmt: "@",
+            },
+            {
+              key: "NamaLengkap",
+              header: "Nama Lengkap",
+              minWidth: 28,
+              align: "left",
+            },
+            { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+            {
+              key: "Angkatan",
+              header: "Angkatan",
+              width: 12,
+              align: "center",
+              numFmt: "@",
+            },
+            {
+              key: "JenisKelamin",
+              header: "Jenis Kelamin",
+              width: 15,
+              align: "center",
+            },
+            {
+              key: "Status",
+              header: "Status",
+              width: 14,
+              align: "center",
+              semanticStyle: statusBadgeCellStyle,
+            },
+          ],
+          rows: exportRows,
+        },
+      ]);
+      toast.success("Data siswa berhasil diekspor!");
+    } catch {
+      toast.error("Gagal mengekspor data siswa");
+    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,9 +506,16 @@ export default function AdminSiswaPage() {
     setImporting(true);
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet);
+      const rows = parseExcelSheetSmart(data, {
+        expectedHeaders: [
+          "NIS",
+          "NamaLengkap",
+          "Nama Lengkap",
+          "Kelas",
+          "Angkatan",
+          "JenisKelamin",
+        ],
+      });
 
       if (rows.length === 0) {
         toast.error("File kosong atau format tidak sesuai");

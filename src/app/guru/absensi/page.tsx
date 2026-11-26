@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  parseExcelSheetSmart,
+  attendanceStatusCellStyle,
+  scoreCellStyle,
+} from "@/lib/excel-styled";
 import {
   ClipboardCheck,
   Save,
@@ -398,7 +403,7 @@ export default function GuruAbsensiPage() {
     alfa: Object.values(attendanceData).filter((s) => s === "Alfa").length,
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     if (!showGrid || siswaList.length === 0) {
       toast.error("Muat absensi terlebih dahulu untuk men-download template");
       return;
@@ -409,18 +414,91 @@ export default function GuruAbsensiPage() {
       NamaLengkap: s.namaLengkap,
       StatusKehadiran: "",
     }));
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    ws["!cols"] = [{ wch: 5 }, { wch: 12 }, { wch: 25 }, { wch: 18 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Absensi");
-    XLSX.writeFile(
-      wb,
-      `template_absensi_${selectedKelas}_${selectedMapel}_${tanggal}.xlsx`
-    );
-    toast.success("Template absensi berhasil diunduh!");
+    try {
+      await downloadStyledExcel(
+        `template_absensi_${selectedKelas}_${selectedMapel}_${tanggal}.xlsx`,
+        [
+          {
+            name: "Absensi",
+            title: "Template Presensi Kehadiran Siswa",
+            theme: "navy",
+            metadata: [
+              { label: "Kelas", value: selectedKelas },
+              { label: "Mata Pelajaran", value: selectedMapel },
+              { label: "Tanggal", value: tanggal },
+              { label: "Total Siswa", value: `${siswaList.length} Siswa` },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 14,
+                align: "center",
+                numFmt: "@",
+              },
+              {
+                key: "NamaLengkap",
+                header: "NamaLengkap",
+                minWidth: 28,
+                align: "left",
+              },
+              {
+                key: "StatusKehadiran",
+                header: "StatusKehadiran",
+                minWidth: 22,
+                align: "center",
+                isInputColumn: true,
+                validation: {
+                  type: "list",
+                  options: ["Hadir", "Izin", "Sakit", "Alfa"],
+                  promptTitle: "Pilih Status Kehadiran",
+                  prompt: "Pilih Hadir, Izin, Sakit, atau Alfa (bisa juga ketik H / I / S / A).",
+                  errorTitle: "Status Tidak Valid",
+                  error: "Gunakan salah satu: Hadir, Izin, Sakit, atau Alfa.",
+                },
+              },
+            ],
+            rows: templateData,
+            footerNote:
+              "Pilih status kehadiran pada kolom berwarna kuning menggunakan dropdown (Hadir / Izin / Sakit / Alfa). Jangan mengubah kolom NIS dan header tabel.",
+          },
+        ],
+        {
+          title: "Panduan Pengisian Template Presensi",
+          theme: "navy",
+          steps: [
+            "Buka sheet 'Absensi' dan isi kolom 'StatusKehadiran' (berwarna kuning).",
+            "Gunakan dropdown Excel pada tiap baris atau ketik langsung: Hadir (H), Izin (I), Sakit (S), atau Alfa (A).",
+            "Jangan mengubah nomor NIS maupun baris judul header pada baris 5.",
+            "Simpan file (.xlsx) lalu unggah kembali lewat tombol 'Impor Excel' di halaman Presensi.",
+          ],
+          columnsGuide: [
+            {
+              kolom: "No & NIS",
+              aturan: "Identitas siswa otomatis dari sistem (jangan diubah).",
+              contoh: "2024001",
+            },
+            {
+              kolom: "NamaLengkap",
+              aturan: "Nama lengkap siswa sesuai kelas (jangan diubah).",
+              contoh: "Andi Prasetyo",
+            },
+            {
+              kolom: "StatusKehadiran",
+              aturan: "Wajib salah satu dari: Hadir, Izin, Sakit, Alfa (atau singkat H, I, S, A).",
+              contoh: "Hadir",
+            },
+          ],
+        }
+      );
+      toast.success("Template absensi berhasil diunduh!");
+    } catch {
+      toast.error("Gagal mengunduh template absensi");
+    }
   };
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
     if (!showGrid || siswaList.length === 0) {
       toast.error("Muat absensi terlebih dahulu untuk mengekspor data");
       return;
@@ -431,15 +509,60 @@ export default function GuruAbsensiPage() {
       NamaLengkap: s.namaLengkap,
       StatusKehadiran: attendanceData[s.studentId] || "Hadir",
     }));
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    ws["!cols"] = [{ wch: 5 }, { wch: 12 }, { wch: 25 }, { wch: 18 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Absensi");
-    XLSX.writeFile(
-      wb,
-      `data_absensi_${selectedKelas}_${selectedMapel}_${tanggal}.xlsx`
-    );
-    toast.success("Data absensi berhasil diekspor!");
+    try {
+      await downloadStyledExcel(
+        `data_absensi_${selectedKelas}_${selectedMapel}_${tanggal}.xlsx`,
+        [
+          {
+            name: "Absensi",
+            title: "Daftar Presensi Kehadiran Siswa",
+            theme: "navy",
+            metadata: [
+              { label: "Kelas", value: selectedKelas },
+              { label: "Mata Pelajaran", value: selectedMapel },
+              { label: "Tanggal", value: tanggal },
+              {
+                label: "Ringkasan",
+                value: `H:${summary.hadir}  I:${summary.izin}  S:${summary.sakit}  A:${summary.alfa}`,
+              },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 14,
+                align: "center",
+                numFmt: "@",
+              },
+              {
+                key: "NamaLengkap",
+                header: "Nama Lengkap",
+                minWidth: 28,
+                align: "left",
+              },
+              {
+                key: "StatusKehadiran",
+                header: "Status Kehadiran",
+                minWidth: 20,
+                align: "center",
+                semanticStyle: attendanceStatusCellStyle,
+              },
+            ],
+            rows: exportData,
+            summaryRow: {
+              No: "",
+              NIS: "",
+              NamaLengkap: `Total: ${siswaList.length} Siswa`,
+              StatusKehadiran: `H:${summary.hadir} | I:${summary.izin} | S:${summary.sakit} | A:${summary.alfa}`,
+            },
+          },
+        ]
+      );
+      toast.success("Data absensi berhasil diekspor!");
+    } catch {
+      toast.error("Gagal mengekspor data absensi");
+    }
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,9 +576,9 @@ export default function GuruAbsensiPage() {
     setImporting(true);
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet);
+      const rows = parseExcelSheetSmart(data, {
+        expectedHeaders: ["NIS", "NamaLengkap", "StatusKehadiran", "Status"],
+      });
 
       if (rows.length === 0) {
         toast.error("File kosong atau format tidak sesuai");
@@ -573,14 +696,54 @@ export default function GuruAbsensiPage() {
       return rowObj;
     });
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kehadiran");
-    XLSX.writeFile(
-      wb,
-      `rekap_kehadiran_${selectedKelas}_${selectedMapel}.xlsx`
-    );
-    toast.success("Rekap kehadiran berhasil diekspor");
+    void downloadStyledExcel(
+      `rekap_kehadiran_${selectedKelas}_${selectedMapel}.xlsx`,
+      [
+        {
+          name: "Rekap Kehadiran",
+          title: "Rekap Matriks Riwayat Kehadiran Siswa",
+          theme: "navy",
+          landscape: true,
+          metadata: [
+            { label: "Kelas", value: selectedKelas },
+            { label: "Mata Pelajaran", value: selectedMapel },
+            { label: "Jumlah Pertemuan", value: `${historyData.dates.length} Sesi` },
+          ],
+          columns: [
+            { key: "No", header: "No", width: 6, align: "center" },
+            {
+              key: "NIS",
+              header: "NIS",
+              minWidth: 13,
+              align: "center",
+              numFmt: "@",
+            },
+            { key: "Nama", header: "Nama Siswa", minWidth: 25, align: "left" },
+            ...historyData.dates.map((d) => ({
+              key: d,
+              header: d,
+              width: 11,
+              align: "center" as const,
+              semanticStyle: attendanceStatusCellStyle,
+            })),
+            { key: "Total Hadir", header: "Hadir", width: 9, align: "center" },
+            { key: "Total Izin", header: "Izin", width: 8, align: "center" },
+            { key: "Total Sakit", header: "Sakit", width: 8, align: "center" },
+            { key: "Total Alfa", header: "Alfa", width: 8, align: "center" },
+            {
+              key: "% Kehadiran",
+              header: "% Hadir",
+              width: 11,
+              align: "center",
+              semanticStyle: scoreCellStyle,
+            },
+          ],
+          rows,
+        },
+      ]
+    )
+      .then(() => toast.success("Rekap kehadiran berhasil diekspor"))
+      .catch(() => toast.error("Gagal mengekspor rekap kehadiran"));
   };
 
   const totalDatesCount = historyData.dates.length;

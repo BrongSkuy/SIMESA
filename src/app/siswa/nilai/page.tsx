@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  scoreCellStyle,
+  statusBadgeCellStyle,
+} from "@/lib/excel-styled";
 import {
   Loader2,
   TrendingUp,
@@ -278,11 +282,14 @@ export default function SiswaNilaiPage() {
     return "bg-slate-100 text-slate-600 border-slate-200 ";
   };
 
-  const handleExportTranscript = () => {
+  const handleExportTranscript = async () => {
     try {
-      const wb = XLSX.utils.book_new();
+      const extraCriteriaNames = Array.from(
+        new Set(
+          subjectsList.flatMap((s) => s.kriteriaLain.map((kl) => kl.namaKriteria))
+        )
+      );
 
-      // Sheet 1: Transkrip Per Mata Pelajaran
       const mapelRows = subjectsList.map((s, idx) => {
         const kompStr = s.akademik
           ? s.akademik.kategoriWajib
@@ -292,65 +299,167 @@ export default function SiswaNilaiPage() {
 
         const rowObj: Record<string, string | number> = {
           No: idx + 1,
-          "Mata Pelajaran": s.labelMapel,
-          "Guru Pengampu": s.guruPengampu,
-          "Rincian Komponen Akademik": kompStr,
-          "Nilai Akhir Akademik":
+          MataPelajaran: s.labelMapel,
+          GuruPengampu: s.guruPengampu,
+          Komponen: kompStr,
+          NilaiAkademik:
             s.akademik?.nilaiAkhir !== null &&
             s.akademik?.nilaiAkhir !== undefined
               ? s.akademik.nilaiAkhir
               : "-",
         };
 
-        s.kriteriaLain.forEach((kl) => {
-          rowObj[kl.namaKriteria] = kl.nilai !== null ? kl.nilai : "-";
+        extraCriteriaNames.forEach((critName) => {
+          const kl = s.kriteriaLain.find((x) => x.namaKriteria === critName);
+          rowObj[critName] = kl && kl.nilai !== null ? kl.nilai : "-";
         });
 
-        rowObj["Kehadiran (%)"] =
+        rowObj["Kehadiran"] =
           s.kehadiran.persentase !== null ? `${s.kehadiran.persentase}%` : "-";
-        rowObj["Rata-Rata Mapel"] =
+        rowObj["RataRata"] =
           s.rataRataMapel !== null ? s.rataRataMapel : "-";
-        rowObj["Status Penilaian"] = s.statusPenilaian;
+        rowObj["Status"] = s.statusPenilaian;
         return rowObj;
       });
 
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(mapelRows),
-        "Transkrip Per Mapel"
-      );
-
-      // Sheet 2: Rincian Skor Prestasi
       const sawRows = data.criteria.map((c, idx) => ({
         No: idx + 1,
-        "Aspek Penilaian": c.namaKriteria,
-        "Tipe Input": c.tipe,
-        "Bobot (%)": c.bobot,
-        "Nilai Rata-Rata": c.nilaiRataRata,
-        "Indeks Capaian": Number(
+        Aspek: c.namaKriteria,
+        Tipe: c.tipe,
+        Bobot: `${c.bobot}%`,
+        RataRata: c.nilaiRataRata,
+        Indeks: Number(
           (c.nilaiNormalisasi ?? c.nilaiRataRata / 100).toFixed(4)
         ),
-        "Kontribusi Nilai": c.nilaiTerbobot,
+        Kontribusi: c.nilaiTerbobot,
       }));
-      sawRows.push({
-        No: sawRows.length + 1,
-        "Aspek Penilaian": "TOTAL SKOR PRESTASI",
-        "Tipe Input": "-",
-        "Bobot (%)": 100,
-        "Nilai Rata-Rata": 0,
-        "Indeks Capaian": 1,
-        "Kontribusi Nilai": data.totalSkorSPK,
-      });
 
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(sawRows),
-        "Rincian Skor Prestasi"
-      );
-
-      XLSX.writeFile(
-        wb,
-        `Transkrip_Nilai_${data.student.nis}_${data.student.namaLengkap.replace(/\s+/g, "_")}.xlsx`
+      await downloadStyledExcel(
+        `Transkrip_Nilai_${data.student.nis}_${data.student.namaLengkap.replace(/\s+/g, "_")}.xlsx`,
+        [
+          {
+            name: "Transkrip Per Mapel",
+            title: "Transkrip Nilai Per Mata Pelajaran",
+            theme: "emerald",
+            landscape: true,
+            metadata: [
+              { label: "Nama Siswa", value: data.student.namaLengkap },
+              { label: "NIS", value: data.student.nis },
+              { label: "Kelas", value: data.student.kelas },
+              { label: "Periode", value: data.periode || "Semester Aktif" },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "MataPelajaran",
+                header: "Mata Pelajaran",
+                minWidth: 24,
+                align: "left",
+              },
+              {
+                key: "GuruPengampu",
+                header: "Guru Pengampu",
+                minWidth: 22,
+                align: "left",
+              },
+              {
+                key: "Komponen",
+                header: "Rincian Komponen Akademik",
+                minWidth: 28,
+                maxWidth: 42,
+                align: "left",
+                wrapText: true,
+              },
+              {
+                key: "NilaiAkademik",
+                header: "Nilai Akhir Akademik",
+                width: 16,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+              ...extraCriteriaNames.map((name) => ({
+                key: name,
+                header: name,
+                minWidth: 14,
+                align: "center" as const,
+                semanticStyle: scoreCellStyle,
+              })),
+              {
+                key: "Kehadiran",
+                header: "Kehadiran (%)",
+                width: 14,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+              {
+                key: "RataRata",
+                header: "Rata-Rata Mapel",
+                width: 15,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+              {
+                key: "Status",
+                header: "Status Penilaian",
+                width: 16,
+                align: "center",
+                semanticStyle: statusBadgeCellStyle,
+              },
+            ],
+            rows: mapelRows,
+          },
+          {
+            name: "Rincian Skor Prestasi",
+            title: "Rincian Akumulasi Skor Prestasi (SPK SAW)",
+            theme: "emerald",
+            metadata: [
+              { label: "Nama Siswa", value: data.student.namaLengkap },
+              { label: "NIS", value: data.student.nis },
+              { label: "Total Skor Prestasi", value: `${data.totalSkorSPK} / 100` },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "Aspek",
+                header: "Aspek Penilaian",
+                minWidth: 26,
+                align: "left",
+              },
+              { key: "Tipe", header: "Tipe Input", width: 14, align: "center" },
+              { key: "Bobot", header: "Bobot (%)", width: 12, align: "center" },
+              {
+                key: "RataRata",
+                header: "Nilai Rata-Rata",
+                width: 16,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+              {
+                key: "Indeks",
+                header: "Indeks Capaian",
+                width: 16,
+                align: "center",
+                numFmt: "0.0000",
+              },
+              {
+                key: "Kontribusi",
+                header: "Kontribusi Nilai",
+                width: 16,
+                align: "center",
+              },
+            ],
+            rows: sawRows,
+            summaryRow: {
+              No: "",
+              Aspek: "TOTAL SKOR PRESTASI",
+              Tipe: "-",
+              Bobot: "100%",
+              RataRata: "-",
+              Indeks: 1,
+              Kontribusi: data.totalSkorSPK,
+            },
+          },
+        ]
       );
       toast.success("Transkrip nilai berhasil diunduh (.xlsx)");
     } catch {

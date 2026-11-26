@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import * as XLSX from "xlsx";
+import { downloadStyledExcel, scoreCellStyle } from "@/lib/excel-styled";
 import { toast } from "sonner";
 import { BarChart3, Loader2, Download, Users } from "lucide-react";
 import {
@@ -335,7 +335,7 @@ export default function GuruRekapPage() {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!rekapData || rekapData.length === 0) return;
     const templateData = rekapData.map((s, i) => {
       const baseRow: Record<string, string | number> = {
@@ -346,7 +346,7 @@ export default function GuruRekapPage() {
         Izin: s.izin,
         Sakit: s.sakit,
         Alfa: s.alfa,
-        "Persentase (%)": s.persen,
+        Persentase: `${s.persen}%`,
       };
       criteriaKeys.forEach((k) => {
         const val = s.nilai?.[k];
@@ -355,11 +355,91 @@ export default function GuruRekapPage() {
       });
       return baseRow;
     });
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kelas");
-    XLSX.writeFile(wb, `Rekap_Kehadiran_Nilai_Kelas_${selectedClass}.xlsx`);
-    toast.success("Rekapitulasi kelas berhasil diekspor!");
+    const avgPersen =
+      rekapData.length > 0
+        ? Math.round(
+            rekapData.reduce((acc, r) => acc + (r.persen || 0), 0) /
+              rekapData.length
+          )
+        : 0;
+    const summaryRow: Record<string, string | number> = {
+      No: "",
+      NIS: "",
+      NamaSiswa: `Total / Rata-rata (${rekapData.length} Siswa)`,
+      Hadir: rekapData.reduce((a, r) => a + r.hadir, 0),
+      Izin: rekapData.reduce((a, r) => a + r.izin, 0),
+      Sakit: rekapData.reduce((a, r) => a + r.sakit, 0),
+      Alfa: rekapData.reduce((a, r) => a + r.alfa, 0),
+      Persentase: `${avgPersen}%`,
+    };
+    criteriaKeys.forEach((k) => {
+      const vals = rekapData
+        .map((r) => r.nilai?.[k])
+        .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+      summaryRow[`Nilai ${k}`] =
+        vals.length > 0
+          ? Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1))
+          : "-";
+    });
+
+    try {
+      await downloadStyledExcel(
+        `Rekap_Kehadiran_Nilai_Kelas_${selectedClass}.xlsx`,
+        [
+          {
+            name: "Rekap Kelas",
+            title: `Rekapitulasi Kehadiran & Nilai Kelas ${selectedClass}`,
+            theme: "navy",
+            landscape: true,
+            metadata: [
+              { label: "Kelas", value: selectedClass },
+              { label: "Mata Pelajaran", value: selectedMapel },
+              { label: "Total Siswa", value: `${rekapData.length} Siswa` },
+              { label: "Rata-rata Kehadiran", value: `${avgPersen}%` },
+            ],
+            columns: [
+              { key: "No", header: "No", width: 6, align: "center" },
+              {
+                key: "NIS",
+                header: "NIS",
+                minWidth: 13,
+                align: "center",
+                numFmt: "@",
+              },
+              {
+                key: "NamaSiswa",
+                header: "Nama Siswa",
+                minWidth: 26,
+                align: "left",
+              },
+              { key: "Hadir", header: "Hadir", width: 9, align: "center" },
+              { key: "Izin", header: "Izin", width: 8, align: "center" },
+              { key: "Sakit", header: "Sakit", width: 8, align: "center" },
+              { key: "Alfa", header: "Alfa", width: 8, align: "center" },
+              {
+                key: "Persentase",
+                header: "Kehadiran (%)",
+                width: 14,
+                align: "center",
+                semanticStyle: scoreCellStyle,
+              },
+              ...criteriaKeys.map((k) => ({
+                key: `Nilai ${k}`,
+                header: `Nilai ${k}`,
+                minWidth: 14,
+                align: "center" as const,
+                semanticStyle: scoreCellStyle,
+              })),
+            ],
+            rows: templateData,
+            summaryRow,
+          },
+        ]
+      );
+      toast.success("Rekapitulasi kelas berhasil diekspor!");
+    } catch {
+      toast.error("Gagal mengekspor rekapitulasi kelas");
+    }
   };
 
   return (

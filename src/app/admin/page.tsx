@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import * as XLSX from "xlsx";
+import {
+  downloadStyledExcel,
+  podiumRowStyle,
+  scoreCellStyle,
+  type StyledSheetConfig,
+} from "@/lib/excel-styled";
 import { toast } from "sonner";
 import {
   Users,
@@ -275,59 +280,102 @@ export default function AdminDashboard() {
     return Object.values(monthBuckets);
   }, [stats.weeklyAttendance, chartMode]);
 
-  const handleExportReport = () => {
+  const handleExportReport = async () => {
     try {
-      const wb = XLSX.utils.book_new();
-
-      const summaryRows = [
-        { Metrik: "Periode Akademik", Nilai: stats.semesterDisplay || stats.tahunAjaran },
-        { Metrik: "Total Siswa Aktif", Nilai: stats.totalSiswa },
-        { Metrik: "Total Guru Pengajar", Nilai: stats.totalGuru },
-        { Metrik: "Total Kelas", Nilai: stats.totalKelas ?? 0 },
-        { Metrik: "Kehadiran Terkini (%)", Nilai: `${stats.kehadiranHariIni}%` },
-        { Metrik: "Rata-rata Kehadiran Semester (%)", Nilai: `${stats.avgAttendance ?? 0}%` },
+      const periodeLabel = stats.semesterDisplay || stats.tahunAjaran;
+      const sheets: StyledSheetConfig[] = [
+        {
+          name: "Ringkasan",
+          title: "Ringkasan Laporan Akademik Sekolah",
+          theme: "navy",
+          metadata: [{ label: "Periode Akademik", value: periodeLabel }],
+          columns: [
+            { key: "Metrik", header: "Indikator / Metrik", minWidth: 34, align: "left" },
+            { key: "Nilai", header: "Nilai", minWidth: 22, align: "center" },
+          ],
+          rows: [
+            { Metrik: "Periode Akademik", Nilai: periodeLabel },
+            { Metrik: "Total Siswa Aktif", Nilai: stats.totalSiswa },
+            { Metrik: "Total Guru Pengajar", Nilai: stats.totalGuru },
+            { Metrik: "Total Kelas", Nilai: stats.totalKelas ?? 0 },
+            { Metrik: "Kehadiran Terkini (%)", Nilai: `${stats.kehadiranHariIni}%` },
+            {
+              Metrik: "Rata-rata Kehadiran Semester (%)",
+              Nilai: `${stats.avgAttendance ?? 0}%`,
+            },
+          ],
+        },
       ];
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(summaryRows),
-        "Ringkasan"
-      );
 
       if ((stats.weeklyAttendance || []).length > 0) {
-        const attRows = (stats.weeklyAttendance || []).map((a) => ({
-          Tanggal: a.tanggal || a.hari,
-          Hari: a.hari,
-          Hadir: a.hadir,
-          Izin: a.izin,
-          Sakit: a.sakit,
-          Alfa: a.alfa,
-        }));
-        XLSX.utils.book_append_sheet(
-          wb,
-          XLSX.utils.json_to_sheet(attRows),
-          "Presensi"
-        );
+        sheets.push({
+          name: "Presensi",
+          title: "Rekap Harian Presensi Sekolah",
+          theme: "navy",
+          metadata: [{ label: "Periode Akademik", value: periodeLabel }],
+          columns: [
+            { key: "Tanggal", header: "Tanggal", minWidth: 16, align: "center" },
+            { key: "Hari", header: "Hari", minWidth: 14, align: "center" },
+            { key: "Hadir", header: "Hadir", width: 11, align: "center" },
+            { key: "Izin", header: "Izin", width: 10, align: "center" },
+            { key: "Sakit", header: "Sakit", width: 10, align: "center" },
+            { key: "Alfa", header: "Alfa", width: 10, align: "center" },
+          ],
+          rows: (stats.weeklyAttendance || []).map((a) => ({
+            Tanggal: a.tanggal || a.hari,
+            Hari: a.hari,
+            Hadir: a.hadir,
+            Izin: a.izin,
+            Sakit: a.sakit,
+            Alfa: a.alfa,
+          })),
+        });
       }
 
       if (leaderboard.length > 0) {
-        const spkRows = leaderboard.map((s) => ({
-          Peringkat: s.rank,
-          NIS: s.nis,
-          "Nama Siswa": s.namaLengkap,
-          Kelas: s.kelas,
-          "Skor SAW": Number(s.rawScore.toFixed(4)),
-          "Persentase (%)": s.persentase,
-        }));
-        XLSX.utils.book_append_sheet(
-          wb,
-          XLSX.utils.json_to_sheet(spkRows),
-          "Peringkat SPK"
-        );
+        sheets.push({
+          name: "Peringkat SPK",
+          title: "Peringkat Siswa Berprestasi (SPK SAW)",
+          theme: "royal",
+          metadata: [
+            { label: "Periode Akademik", value: periodeLabel },
+            { label: "Total Siswa", value: `${leaderboard.length} Siswa` },
+          ],
+          columns: [
+            { key: "Peringkat", header: "Peringkat", width: 12, align: "center" },
+            { key: "NIS", header: "NIS", minWidth: 14, align: "center", numFmt: "@" },
+            { key: "NamaSiswa", header: "Nama Siswa", minWidth: 28, align: "left" },
+            { key: "Kelas", header: "Kelas", width: 12, align: "center" },
+            {
+              key: "SkorSAW",
+              header: "Skor SAW",
+              width: 14,
+              align: "center",
+              numFmt: "0.0000",
+            },
+            {
+              key: "Persentase",
+              header: "Persentase (%)",
+              width: 16,
+              align: "center",
+              semanticStyle: scoreCellStyle,
+            },
+          ],
+          rows: leaderboard.map((s) => ({
+            Peringkat: s.rank,
+            NIS: s.nis,
+            NamaSiswa: s.namaLengkap,
+            Kelas: s.kelas,
+            SkorSAW: Number(s.rawScore.toFixed(4)),
+            Persentase: `${s.persentase}%`,
+          })),
+          rowStyle: (row) => podiumRowStyle(row.Peringkat),
+        });
       }
 
-      XLSX.writeFile(
-        wb,
-        `Laporan_Akademik_SMK_${stats.tahunAjaran.replace("/", "-")}.xlsx`
+      await downloadStyledExcel(
+        `Laporan_Akademik_SMK_${stats.tahunAjaran.replace("/", "-")}.xlsx`,
+        sheets
       );
       toast.success("Laporan berhasil diekspor (.xlsx)");
     } catch {
