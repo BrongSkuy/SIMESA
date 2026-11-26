@@ -11,6 +11,10 @@ import {
   createCounselingSession,
 } from "@/lib/counseling-server";
 import { logActivity } from "@/lib/audit-server";
+import {
+  parseJsonBody,
+  counselingSessionCreateSchema,
+} from "@/lib/api-validation";
 
 // GET /api/counseling/sessions — Mengambil daftar riwayat sesi konseling
 export async function GET(req: NextRequest) {
@@ -60,7 +64,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
+    const parsed = await parseJsonBody(req, counselingSessionCreateSchema);
+    if (!parsed.success) return parsed.response;
     const {
       studentId,
       tanggal,
@@ -76,14 +81,7 @@ export async function POST(req: NextRequest) {
       statusKasus,
       counselorNameCustom,
       createDispensation,
-    } = body;
-
-    if (!studentId || !tanggal || !waktuMulai || !waktuSelesai || !kategori || !jenisLayanan || !pokokMasalah) {
-      return NextResponse.json(
-        { error: "Semua kolom bertanda bintang wajib diisi" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const appRole = (session.user as Record<string, unknown>)?.appRole as string | undefined;
     const username = (session.user as Record<string, unknown>)?.username as string | undefined;
@@ -143,7 +141,7 @@ export async function POST(req: NextRequest) {
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Guru BK",
-      userRole: (session.user as any).role || "guru_bk",
+      userRole: appRole || "guru_bk",
       action: "CREATE",
       module: "KONSELING_BK",
       targetId: resolvedStudentId,

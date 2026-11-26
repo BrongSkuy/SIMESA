@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { PageHeader } from "@/components/shared/page-header";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import LeaderboardCard, {
   LeaderboardPagination,
   LEADERBOARD_ITEMS_PER_PAGE,
@@ -170,6 +171,11 @@ export default function AdminLeaderboardPage() {
   const [showMissingDialog, setShowMissingDialog] = useState(false);
 
   const [archives, setArchives] = useState<ArchiveRow[]>([]);
+  const [deleteArchiveTarget, setDeleteArchiveTarget] = useState<{
+    id: string;
+    namaFile: string;
+  } | null>(null);
+  const [deletingArchive, setDeletingArchive] = useState(false);
   const archiveRef = useRef<HTMLInputElement>(null);
 
   const fetchArchives = async () => {
@@ -396,23 +402,34 @@ export default function AdminLeaderboardPage() {
     if (archiveRef.current) archiveRef.current.value = "";
   };
 
-  const handleDeleteArsip = async (id: string, namaFile: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus arsip " + namaFile + "?")) {
-      return;
-    }
+  const handleDeleteArsip = (id: string, namaFile: string) => {
+    setDeleteArchiveTarget({ id, namaFile });
+  };
+
+  const executeDeleteArsip = async () => {
+    if (!deleteArchiveTarget) return;
+    setDeletingArchive(true);
     try {
-      const r = await fetch(`/api/spk/archives?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
+      const r = await fetch(
+        `/api/spk/archives?id=${encodeURIComponent(deleteArchiveTarget.id)}`,
+        {
+          method: "DELETE",
+        }
+      );
       if (!r.ok) {
         const res = await r.json().catch(() => ({}));
         toast.error(res.error || "Gagal menghapus arsip.");
         return;
       }
-      setArchives((prev) => prev.filter((arc) => arc.id !== id));
+      setArchives((prev) =>
+        prev.filter((arc) => arc.id !== deleteArchiveTarget.id)
+      );
+      setDeleteArchiveTarget(null);
       toast.success("Arsip berhasil dihapus dari database.");
     } catch {
       toast.error("Terjadi kesalahan saat menghapus arsip.");
+    } finally {
+      setDeletingArchive(false);
     }
   };
 
@@ -963,6 +980,23 @@ export default function AdminLeaderboardPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteArchiveTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteArchiveTarget(null);
+        }}
+        title="Hapus Arsip Nilai Rapor?"
+        description={
+          deleteArchiveTarget
+            ? `Arsip ${deleteArchiveTarget.namaFile} akan dihapus permanen dari database.`
+            : ""
+        }
+        confirmLabel="Ya, Hapus Arsip"
+        variant="destructive"
+        loading={deletingArchive}
+        onConfirm={executeDeleteArsip}
+      />
     </div>
   );
 }

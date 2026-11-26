@@ -3,11 +3,12 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getPortalForRole } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit-server";
-import { getLocalIsoDate, MONITORING_ASPECTS, type MonitoringAspect } from "@/lib/counseling";
+import { getLocalIsoDate } from "@/lib/counseling";
 import {
   getStudentMonitoringLogs,
   createStudentMonitoringLog,
 } from "@/lib/counseling-server";
+import { parseJsonBody, monitoringCreateSchema } from "@/lib/api-validation";
 
 // GET /api/counseling/monitoring — Mengambil log pemantauan perkembangan karakter siswa
 export async function GET(req: NextRequest) {
@@ -52,7 +53,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
+    const parsed = await parseJsonBody(req, monitoringCreateSchema);
+    if (!parsed.success) return parsed.response;
     const {
       studentId,
       tanggal,
@@ -60,19 +62,7 @@ export async function POST(req: NextRequest) {
       catatanPerkembangan,
       rekomendasi,
       recordedByCustom,
-    } = body;
-
-    if (
-      !studentId ||
-      !aspekPengamatan ||
-      !catatanPerkembangan ||
-      !MONITORING_ASPECTS.includes(aspekPengamatan as MonitoringAspect)
-    ) {
-      return NextResponse.json(
-        { error: "Siswa, aspek pengamatan yang valid, dan catatan perkembangan wajib diisi" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const recordedBy = recordedByCustom || session.user.name || "Guru Pendamping";
     const realDate = tanggal || getLocalIsoDate();

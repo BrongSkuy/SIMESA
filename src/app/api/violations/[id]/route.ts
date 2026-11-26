@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { getPortalForRole } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit-server";
+import { parseJsonBody, violationPatchSchema } from "@/lib/api-validation";
 
 const ALLOWED_STATUSES = ["Tercatat", "Diproses BK", "Selesai Dibina"] as const;
 
@@ -27,8 +28,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const { id } = await params;
-    const body = await req.json();
-    const { status, tindakLanjut, poin, keterangan, lokasi } = body;
+    const parsed = await parseJsonBody(req, violationPatchSchema);
+    if (!parsed.success) return parsed.response;
+    const { status, tindakLanjut, poin, keterangan, lokasi } = parsed.data;
 
     const [existing] = await db
       .select()

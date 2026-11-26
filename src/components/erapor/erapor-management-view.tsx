@@ -11,7 +11,6 @@ import {
   Users,
   GraduationCap,
   Loader2,
-  Save,
   Eye,
   RotateCcw,
   Filter,
@@ -23,7 +22,6 @@ import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -43,15 +41,17 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   ReportCardPrintView,
   printReportCards,
 } from "@/components/erapor/report-card-print-view";
+import {
+  EraporBulkPrintModal,
+  EraporNoteModal,
+  EraporPublishClassModal,
+} from "@/components/erapor/erapor-modals";
 import type {
   StudentReportCardData,
   ClassReportSummaryItem,
@@ -60,7 +60,6 @@ import {
   DEFAULT_KKM_FALLBACK,
   getKkmAverageColorInfo,
 } from "@/lib/erapor-utils";
-import { cn } from "@/lib/utils";
 
 function getInitials(name: string): string {
   return (
@@ -977,497 +976,46 @@ export function EraporManagementView({
       </div>
 
       {/* MODAL CETAK SEMUA (MASSAL) */}
-      <Dialog open={bulkModalOpen} onOpenChange={setBulkModalOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Printer className="w-4 h-4 text-blue-600" />
-              Cetak Semua E-Rapor (Massal A4)
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Pilih cakupan kelas dan filter siswa yang lembar rapornya akan
-              dicetak berurutan dalam satu dokumen A4.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2 text-xs">
-            {/* Cakupan Kelas */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold block">
-                Cakupan Kelas yang Dicetak
-              </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBulkScope("current")}
-                  className={cn(
-                    "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
-                    bulkScope === "current"
-                      ? "bg-blue-50 border-blue-500 text-blue-900 font-semibold"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  <p className="text-xs font-semibold">Kelas Terpilih</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Hanya Kelas {selectedKelas || "-"}
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setBulkScope("selected")}
-                  className={cn(
-                    "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
-                    bulkScope === "selected"
-                      ? "bg-blue-50 border-blue-500 text-blue-900 font-semibold"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  <p className="text-xs font-semibold">Pilih Kelas</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Pilih beberapa kelas
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setBulkScope("all")}
-                  className={cn(
-                    "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
-                    bulkScope === "all"
-                      ? "bg-blue-50 border-blue-500 text-blue-900 font-semibold"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  <p className="text-xs font-semibold">Seluruh Kelas</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Semua ({kelasList.length} kelas)
-                  </p>
-                </button>
-              </div>
-
-              {bulkScope === "selected" && (
-                <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2">
-                  <p className="text-[11px] font-medium text-slate-600">
-                    Centang kelas yang ingin dicetak:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {kelasList.map((cls) => {
-                      const checked = bulkSelectedClasses.includes(
-                        cls.namaKelas
-                      );
-                      return (
-                        <label
-                          key={cls.id}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs cursor-pointer select-none transition-colors",
-                            checked
-                              ? "bg-blue-600 border-blue-600 text-white font-semibold"
-                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                          )}
-                        >
-                          <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={checked}
-                            onChange={() => {
-                              if (checked) {
-                                setBulkSelectedClasses(
-                                  bulkSelectedClasses.filter(
-                                    (k) => k !== cls.namaKelas
-                                  )
-                                );
-                              } else {
-                                setBulkSelectedClasses([
-                                  ...bulkSelectedClasses,
-                                  cls.namaKelas,
-                                ]);
-                              }
-                            }}
-                          />
-                          Kelas {cls.namaKelas}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Filter Tambahan Cetak Massal */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold block">
-                  Filter Status Rapor
-                </Label>
-                <Select
-                  value={bulkStatusRapor}
-                  onValueChange={(val) => {
-                    if (val) setBulkStatusRapor(val);
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue>
-                      {(val) => {
-                        if (val === "disahkan_diterbitkan")
-                          return "Disahkan dan Diterbitkan";
-                        if (val === "Diterbitkan") return "Hanya Diterbitkan";
-                        if (val === "Disahkan") return "Hanya Disahkan";
-                        if (val === "Draf") return "Hanya Draf";
-                        return "Semua Status Rapor";
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Status Rapor</SelectItem>
-                    <SelectItem value="disahkan_diterbitkan">
-                      Disahkan dan Diterbitkan
-                    </SelectItem>
-                    <SelectItem value="Diterbitkan">
-                      Hanya Diterbitkan
-                    </SelectItem>
-                    <SelectItem value="Disahkan">Hanya Disahkan</SelectItem>
-                    <SelectItem value="Draf">Hanya Draf</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold block">
-                  Filter Ketuntasan Nilai
-                </Label>
-                <Select
-                  value={bulkKetuntasan}
-                  onValueChange={(val) => {
-                    if (val) setBulkKetuntasan(val);
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue>
-                      {(val) => {
-                        if (val === "Semua Tuntas") return "Hanya Semua Tuntas";
-                        if (val === "Perlu Perbaikan")
-                          return "Hanya Perlu Perbaikan";
-                        return "Semua Siswa";
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Siswa</SelectItem>
-                    <SelectItem value="Semua Tuntas">
-                      Hanya Semua Tuntas
-                    </SelectItem>
-                    <SelectItem value="Perlu Perbaikan">
-                      Hanya Perlu Perbaikan
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold block">
-                Urutan Lembar Cetak
-              </Label>
-              <Select
-                value={bulkSortBy}
-                onValueChange={(val) => {
-                  if (val) setBulkSortBy(val);
-                }}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue>
-                    {(val) => {
-                      if (val === "nis_asc") return "Nomor Induk Siswa (NIS)";
-                      if (val === "rata_desc")
-                        return "Nilai Rata-rata Tertinggi";
-                      return "Nama Siswa (A ke Z)";
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nama_asc">
-                    Nama Siswa (A ke Z)
-                  </SelectItem>
-                  <SelectItem value="nis_asc">
-                    Nomor Induk Siswa (NIS)
-                  </SelectItem>
-                  <SelectItem value="rata_desc">
-                    Nilai Rata-rata Tertinggi
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setBulkModalOpen(false)}
-              disabled={loadingBulkPrint}
-            >
-              Batal
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleExecuteBulkPrint}
-              disabled={loadingBulkPrint}
-              className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {loadingBulkPrint ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Printer className="w-3.5 h-3.5" />
-              )}
-              {loadingBulkPrint
-                ? "Menyiapkan Dokumen..."
-                : "Cetak Massal Sekarang (A4)"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EraporBulkPrintModal
+        open={bulkModalOpen}
+        onOpenChange={setBulkModalOpen}
+        selectedKelas={selectedKelas}
+        kelasList={kelasList}
+        bulkScope={bulkScope}
+        onBulkScopeChange={setBulkScope}
+        bulkSelectedClasses={bulkSelectedClasses}
+        onBulkSelectedClassesChange={setBulkSelectedClasses}
+        bulkStatusRapor={bulkStatusRapor}
+        onBulkStatusRaporChange={setBulkStatusRapor}
+        bulkKetuntasan={bulkKetuntasan}
+        onBulkKetuntasanChange={setBulkKetuntasan}
+        bulkSortBy={bulkSortBy}
+        onBulkSortByChange={setBulkSortBy}
+        loadingBulkPrint={loadingBulkPrint}
+        onExecuteBulkPrint={handleExecuteBulkPrint}
+      />
 
       {/* MODAL TERBITKAN RAPOR KELAS */}
-      <Dialog open={publishModalOpen} onOpenChange={setPublishModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <Send className="w-4 h-4 text-emerald-600" />
-              Penerbitan Rapor Kelas {selectedKelas}
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Rapor berstatus Diterbitkan akan langsung dapat dibuka dan dicetak
-              oleh siswa.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-3 gap-2 py-2 text-center">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-              <p className="text-[11px] text-slate-500">Total Siswa</p>
-              <p className="text-base font-bold font-mono text-slate-900">
-                {stats.total}
-              </p>
-            </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5">
-              <p className="text-[11px] text-emerald-700">Siap Terbit</p>
-              <p className="text-base font-bold font-mono text-emerald-700">
-                {stats.siapTerbit}
-              </p>
-            </div>
-            <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-2.5">
-              <p className="text-[11px] text-blue-700">Sudah Terbit</p>
-              <p className="text-base font-bold font-mono text-blue-700">
-                {stats.diterbitkan}
-              </p>
-            </div>
-          </div>
-
-          {stats.total - stats.siapTerbit > 0 && (
-            <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              {stats.total - stats.siapTerbit} siswa belum memiliki nilai mapel
-              dan akan dilewati otomatis.
-            </p>
-          )}
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-2">
-            <div>
-              {stats.diterbitkan > 0 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handlePublishClass("Draf")}
-                  disabled={publishingClass}
-                  className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                >
-                  Tarik ke Draf
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPublishModalOpen(false)}
-                disabled={publishingClass}
-              >
-                Batal
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handlePublishClass("Diterbitkan")}
-                disabled={publishingClass || stats.siapTerbit === 0}
-                className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
-              >
-                {publishingClass ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Send className="w-3.5 h-3.5" />
-                )}
-                Terbitkan Sekarang
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EraporPublishClassModal
+        open={publishModalOpen}
+        onOpenChange={setPublishModalOpen}
+        selectedKelas={selectedKelas}
+        stats={stats}
+        publishingClass={publishingClass}
+        onPublishClass={handlePublishClass}
+      />
 
       {/* MODAL INPUT CATATAN WALI KELAS DAN EKSKUL */}
-      <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Catatan Wali Kelas dan Ekstrakurikuler</DialogTitle>
-            <DialogDescription>
-              {selectedStudentForNote
-                ? `${selectedStudentForNote.namaLengkap} (${selectedStudentForNote.nis}) - Kelas ${selectedKelas}`
-                : "Pengisian catatan evaluasi siswa"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2 text-xs">
-            <div>
-              <Label className="text-xs font-semibold mb-1 block">
-                Catatan Perkembangan Karakter dan Kedisiplinan:
-              </Label>
-              <textarea
-                rows={3}
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="Tuliskan catatan motivasi, kedisiplinan, dan perkembangan sikap siswa atau siswi..."
-                value={noteForm.catatanWaliKelas}
-                onChange={(e) =>
-                  setNoteForm({ ...noteForm, catatanWaliKelas: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs font-semibold mb-1 block">
-                  Nama Kegiatan Ekstrakurikuler:
-                </Label>
-                <Input
-                  className="text-xs"
-                  placeholder="Misal: Pramuka Dirgantara"
-                  value={noteForm.ekskulNama}
-                  onChange={(e) =>
-                    setNoteForm({ ...noteForm, ekskulNama: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold mb-1 block">
-                  Predikat Nilai Ekskul:
-                </Label>
-                <Select
-                  value={noteForm.ekskulNilai || "none"}
-                  onValueChange={(val) => {
-                    setNoteForm({
-                      ...noteForm,
-                      ekskulNilai: !val || val === "none" ? "" : val,
-                    });
-                  }}
-                >
-                  <SelectTrigger className="text-xs">
-                    <SelectValue placeholder="Pilih Nilai">
-                      {(val) => {
-                        if (val === "Sangat Baik") return "Sangat Baik (A)";
-                        if (val === "Baik") return "Baik (B)";
-                        if (val === "Cukup") return "Cukup (C)";
-                        return "Belum diisi";
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Belum diisi</SelectItem>
-                    <SelectItem value="Sangat Baik">
-                      Sangat Baik (A)
-                    </SelectItem>
-                    <SelectItem value="Baik">Baik (B)</SelectItem>
-                    <SelectItem value="Cukup">Cukup (C)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold mb-1 block">
-                Keterangan Capaian Ekskul:
-              </Label>
-              <Input
-                className="text-xs"
-                placeholder="Misal: Aktif dalam kegiatan baris-berbaris dan upacara bendera."
-                value={noteForm.ekskulKeterangan}
-                onChange={(e) =>
-                  setNoteForm({
-                    ...noteForm,
-                    ekskulKeterangan: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold mb-1 block">
-                Status Pengesahan Rapor Siswa:
-              </Label>
-              <Select
-                value={noteForm.statusRapor}
-                onValueChange={(val) => {
-                  if (val) {
-                    setNoteForm({
-                      ...noteForm,
-                      statusRapor: val as "Draf" | "Disahkan" | "Diterbitkan",
-                    });
-                  }
-                }}
-              >
-                <SelectTrigger className="text-xs">
-                  <SelectValue placeholder="Pilih Status">
-                    {(val) => {
-                      if (val === "Disahkan") return "Disahkan Wali Kelas";
-                      if (val === "Diterbitkan") return "Diterbitkan (Resmi)";
-                      return "Draf (Masih Dapat Diubah)";
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Draf">
-                    Draf (Masih Dapat Diubah)
-                  </SelectItem>
-                  <SelectItem value="Disahkan">Disahkan Wali Kelas</SelectItem>
-                  <SelectItem value="Diterbitkan">
-                    Diterbitkan (Resmi)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setNoteModalOpen(false)}
-            >
-              Batal
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveNote}
-              disabled={savingNote}
-              className="gap-2"
-            >
-              {savingNote ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Save className="w-3.5 h-3.5" />
-              )}
-              Simpan Catatan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EraporNoteModal
+        open={noteModalOpen}
+        onOpenChange={setNoteModalOpen}
+        selectedKelas={selectedKelas}
+        selectedStudent={selectedStudentForNote}
+        noteForm={noteForm}
+        onNoteFormChange={setNoteForm}
+        savingNote={savingNote}
+        onSaveNote={handleSaveNote}
+      />
 
       {/* MODAL PRATINJAU CETAK E-RAPOR INTERNAL (SERAGAM DENGAN SP DAN DISPENSASI) */}
       <Dialog

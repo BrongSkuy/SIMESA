@@ -62,44 +62,20 @@ import {
   ROLE_CONFIGS,
   APP_ROLES,
   ADDITIONAL_TEACHER_ROLES,
-  STAFF_CREATABLE_ROLES,
   isTeacherCategoryRole,
   parseRoleMetadata,
   type AppRole,
 } from "@/lib/rbac";
-
-interface ExtraRoleItem {
-  id: string;
-  role: string;
-  metadata?: string | null;
-}
-
-interface AccountRow {
-  id: string;
-  username: string | null;
-  email?: string | null;
-  name: string;
-  appRole: string | null;
-  banned: boolean | null;
-  isCurrentUser?: boolean;
-  additionalRoles?: ExtraRoleItem[];
-}
-
-interface ClassOption {
-  id: string;
-  namaKelas: string;
-  tingkat: string;
-  waliKelas?: string | null;
-}
-
-type ExtraRoleFormState = Record<
-  string,
-  {
-    enabled: boolean;
-    kelas: string;
-    ekskul: string;
-  }
->;
+import {
+  AddAccountDialog,
+  EditAccountDialog,
+  ResetPasswordDialog,
+  AccountStatusAlertDialog,
+  type AccountRow,
+  type ClassOption,
+  type ExtraRoleFormState,
+  type ExtraRoleItem,
+} from "@/components/akun/account-dialogs";
 
 function createEmptyExtraRoleState(): ExtraRoleFormState {
   const state: ExtraRoleFormState = {};
@@ -158,176 +134,6 @@ function getInitials(name: string): string {
       .slice(0, 2)
       .join("")
       .toUpperCase() || "U"
-  );
-}
-
-interface TeacherExtraRolesPanelProps {
-  primaryRole: AppRole;
-  roleState: ExtraRoleFormState;
-  onChange: (next: ExtraRoleFormState) => void;
-  classesList: ClassOption[];
-  idPrefix: string;
-  primaryWaliKelas: string;
-  onPrimaryWaliKelasChange: (kelas: string) => void;
-}
-
-function TeacherExtraRolesPanel({
-  primaryRole,
-  roleState,
-  onChange,
-  classesList,
-  idPrefix,
-  primaryWaliKelas,
-  onPrimaryWaliKelasChange,
-}: TeacherExtraRolesPanelProps) {
-  if (!isTeacherCategoryRole(primaryRole)) {
-    return null;
-  }
-
-  const availableExtras = ADDITIONAL_TEACHER_ROLES.filter(
-    (r) => r !== primaryRole
-  );
-
-  const toggleRole = (role: AppRole, checked: boolean) => {
-    const current = roleState[role] || { enabled: false, kelas: "", ekskul: "" };
-    onChange({
-      ...roleState,
-      [role]: { ...current, enabled: checked },
-    });
-  };
-
-  return (
-    <div className="rounded-xl border border-blue-200/80 bg-blue-50/50 p-3.5 space-y-3">
-      {primaryRole === "WALI_KELAS" && (
-        <div className="rounded-lg border border-blue-200 bg-white p-2.5 space-y-1.5">
-          <Label className="text-xs font-semibold text-slate-800">
-            Kelas Binaan Wali Kelas
-          </Label>
-          <Select
-            value={primaryWaliKelas || "none"}
-            onValueChange={(val) =>
-              onPrimaryWaliKelasChange(val === "none" ? "" : String(val))
-            }
-          >
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Pilih kelas binaan" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Belum ditentukan</SelectItem>
-              {classesList.map((cls) => (
-                <SelectItem key={cls.id} value={cls.namaKelas}>
-                  {cls.namaKelas}
-                  {cls.waliKelas ? ` (Saat ini: ${cls.waliKelas})` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <div className="space-y-0.5">
-        <p className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-          <Shield className="h-3.5 w-3.5 text-blue-600" />
-          Peran Tambahan Guru (Opsional)
-        </p>
-        <p className="text-[11px] text-slate-500 leading-relaxed">
-          Centang tugas tambahan yang dirangkap akun guru ini. Penugasan Wali
-          Kelas akan otomatis disinkronkan dengan Data Kelas.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        {availableExtras.map((extraRole) => {
-          const cfg = ROLE_CONFIGS[extraRole];
-          const itemState = roleState[extraRole] || {
-            enabled: false,
-            kelas: "",
-            ekskul: "",
-          };
-          const checkboxId = `${idPrefix}-extra-${extraRole}`;
-
-          return (
-            <div
-              key={extraRole}
-              className="rounded-lg border border-slate-200/80 bg-white p-2.5 space-y-2"
-            >
-              <label
-                htmlFor={checkboxId}
-                className="flex items-start gap-2.5 cursor-pointer select-none"
-              >
-                <input
-                  id={checkboxId}
-                  type="checkbox"
-                  checked={itemState.enabled}
-                  onChange={(e) => toggleRole(extraRole, e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-800">
-                    {cfg?.label || extraRole}
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    {cfg?.description}
-                  </p>
-                </div>
-              </label>
-
-              {itemState.enabled && extraRole === "WALI_KELAS" && (
-                <div className="pl-6 space-y-1">
-                  <Label className="text-[11px] font-medium text-slate-700">
-                    Kelas Binaan
-                  </Label>
-                  <Select
-                    value={itemState.kelas || "none"}
-                    onValueChange={(val) =>
-                      onChange({
-                        ...roleState,
-                        [extraRole]: {
-                          ...itemState,
-                          kelas: val === "none" ? "" : String(val),
-                        },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Pilih kelas binaan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Belum ditentukan</SelectItem>
-                      {classesList.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.namaKelas}>
-                          {cls.namaKelas}
-                          {cls.waliKelas ? ` (Saat ini: ${cls.waliKelas})` : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {itemState.enabled && extraRole === "PEMBINA_EKSKUL" && (
-                <div className="pl-6 space-y-1">
-                  <Label className="text-[11px] font-medium text-slate-700">
-                    Nama Ekstrakurikuler
-                  </Label>
-                  <Input
-                    placeholder="Contoh: Pramuka, Paskibra, Futsal"
-                    className="h-8 text-xs"
-                    value={itemState.ekskul}
-                    onChange={(e) =>
-                      onChange({
-                        ...roleState,
-                        [extraRole]: { ...itemState, ekskul: e.target.value },
-                      })
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
@@ -956,381 +762,66 @@ export default function AdminAkunPage() {
         )}
       </div>
 
-      {/* Dialog Tambah Akun Baru (Khusus Superadmin) */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4 text-blue-600" />
-              Tambah Akun Pengguna Baru
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Buat akun akses untuk pimpinan, manajemen, guru, atau staf
-              layanan. Akun siswa tetap dibuat melalui menu Data Siswa.
-            </DialogDescription>
-          </DialogHeader>
+      <AddAccountDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        name={formAddName}
+        onNameChange={setFormAddName}
+        username={formAddUsername}
+        onUsernameChange={setFormAddUsername}
+        password={formAddPassword}
+        onPasswordChange={setFormAddPassword}
+        email={formAddEmail}
+        onEmailChange={setFormAddEmail}
+        role={formAddRole}
+        onRoleChange={setFormAddRole}
+        gender={formAddGender}
+        onGenderChange={setFormAddGender}
+        extraRoles={formAddExtraRoles}
+        onExtraRolesChange={setFormAddExtraRoles}
+        waliKelas={formAddWaliKelas}
+        onWaliKelasChange={setFormAddWaliKelas}
+        classesList={classesList}
+        saving={saving}
+        onSubmit={handleAdd}
+      />
 
-          <div className="grid gap-4 py-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="add-name" className="text-xs font-medium">
-                Nama Lengkap <span className="text-rose-500">*</span>
-              </Label>
-              <Input
-                id="add-name"
-                placeholder="Contoh: Drs. H. Mulyadi, M.M."
-                value={formAddName}
-                onChange={(e) => setFormAddName(e.target.value)}
-              />
-            </div>
+      <EditAccountDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        editItem={editItem}
+        isSuperadmin={isSuperadmin}
+        name={formEditName}
+        onNameChange={setFormEditName}
+        username={formEditUsername}
+        onUsernameChange={setFormEditUsername}
+        role={formEditRole}
+        onRoleChange={setFormEditRole}
+        extraRoles={formEditExtraRoles}
+        onExtraRolesChange={setFormEditExtraRoles}
+        waliKelas={formEditWaliKelas}
+        onWaliKelasChange={setFormEditWaliKelas}
+        classesList={classesList}
+        saving={saving}
+        onSubmit={handleEdit}
+      />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="add-username" className="text-xs font-medium">
-                  Username Login atau NIP <span className="text-rose-500">*</span>
-                </Label>
-                <Input
-                  id="add-username"
-                  placeholder="Minimal 4 karakter"
-                  className="font-mono"
-                  value={formAddUsername}
-                  onChange={(e) => setFormAddUsername(e.target.value)}
-                />
-              </div>
+      <ResetPasswordDialog
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        resetItem={resetItem}
+        newPassword={formNewPassword}
+        onNewPasswordChange={setFormNewPassword}
+        saving={saving}
+        onSubmit={handleReset}
+      />
 
-              <div className="space-y-1.5">
-                <Label htmlFor="add-password" className="text-xs font-medium">
-                  Kata Sandi Awal <span className="text-rose-500">*</span>
-                </Label>
-                <Input
-                  id="add-password"
-                  type="text"
-                  placeholder="Minimal 4 karakter"
-                  className="font-mono"
-                  value={formAddPassword}
-                  onChange={(e) => setFormAddPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="add-email" className="text-xs font-medium">
-                Email (Opsional)
-              </Label>
-              <Input
-                id="add-email"
-                type="email"
-                placeholder="Otomatis dibuatkan dari username bila dikosongkan"
-                value={formAddEmail}
-                onChange={(e) => setFormAddEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium">
-                  Peran Utama Akun <span className="text-rose-500">*</span>
-                </Label>
-                <Select
-                  value={formAddRole}
-                  onValueChange={(val) => setFormAddRole(val as AppRole)}
-                >
-                  <SelectTrigger className="text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STAFF_CREATABLE_ROLES.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {ROLE_CONFIGS[role]?.label || role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {isTeacherCategoryRole(formAddRole) && (
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Jenis Kelamin</Label>
-                  <Select
-                    value={formAddGender}
-                    onValueChange={(val) =>
-                      setFormAddGender(val === "P" ? "P" : "L")
-                    }
-                  >
-                    <SelectTrigger className="text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="L">Laki-laki</SelectItem>
-                      <SelectItem value="P">Perempuan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-
-            <p className="text-[11px] text-slate-500 -mt-1">
-              {ROLE_CONFIGS[formAddRole]?.description}
-            </p>
-
-            <TeacherExtraRolesPanel
-              primaryRole={formAddRole}
-              roleState={formAddExtraRoles}
-              onChange={setFormAddExtraRoles}
-              classesList={classesList}
-              idPrefix="add"
-              primaryWaliKelas={formAddWaliKelas}
-              onPrimaryWaliKelasChange={setFormAddWaliKelas}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>
-              Batal
-            </Button>
-            <Button onClick={handleAdd} disabled={saving}>
-              {saving ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : null}
-              Buat Akun Baru
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Edit Profile & Peran */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Profil &amp; Peran Akun</DialogTitle>
-            <DialogDescription className="text-xs">
-              Perbarui nama lengkap, username kredensial, dan otorisasi peran
-              akun ini.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-name" className="text-xs font-medium">
-                Nama Lengkap
-              </Label>
-              <Input
-                id="edit-name"
-                value={formEditName}
-                onChange={(e) => setFormEditName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-username" className="text-xs font-medium">
-                Username Login
-              </Label>
-              <Input
-                id="edit-username"
-                placeholder="Masukkan username"
-                className="font-mono"
-                value={formEditUsername}
-                onChange={(e) => setFormEditUsername(e.target.value)}
-              />
-              <p className="text-xs text-slate-500">
-                Username digunakan untuk autentikasi masuk bersama kata sandi
-                (otomatis tersinkronisasi dengan NIS atau NIP).
-              </p>
-            </div>
-
-            {isSuperadmin &&
-              (editItem?.appRole || "").toUpperCase() === "SISWA" && (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                  Peran akun siswa terhubung langsung dengan Data Siswa dan
-                  tidak dapat diubah menjadi peran staf atau guru.
-                </div>
-              )}
-
-            {isSuperadmin &&
-              (editItem?.appRole || "").toUpperCase() !== "SISWA" && (
-                <div className="space-y-3 pt-2 border-t border-slate-200">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-900">
-                      Peran Utama (Hak Akses)
-                    </Label>
-                    <Select
-                      value={formEditRole}
-                      disabled={Boolean(editItem?.isCurrentUser)}
-                      onValueChange={(val) => setFormEditRole(val as AppRole)}
-                    >
-                      <SelectTrigger className="text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STAFF_CREATABLE_ROLES.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {ROLE_CONFIGS[role]?.label || role}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {editItem?.isCurrentUser ? (
-                      <p className="text-[11px] text-amber-700">
-                        Peran utama akun yang sedang digunakan login tidak dapat
-                        diubah.
-                      </p>
-                    ) : (
-                      <p className="text-[11px] text-slate-500">
-                        {ROLE_CONFIGS[formEditRole]?.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <TeacherExtraRolesPanel
-                    primaryRole={formEditRole}
-                    roleState={formEditExtraRoles}
-                    onChange={setFormEditExtraRoles}
-                    classesList={classesList}
-                    idPrefix="edit"
-                    primaryWaliKelas={formEditWaliKelas}
-                    onPrimaryWaliKelasChange={setFormEditWaliKelas}
-                  />
-                </div>
-              )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Batal
-            </Button>
-            <Button onClick={handleEdit} disabled={saving}>
-              {saving ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : null}
-              Simpan Perubahan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Reset Password */}
-      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset Kata Sandi Pengguna</DialogTitle>
-            <DialogDescription className="text-xs">
-              Tetapkan kata sandi baru untuk akun{" "}
-              <span className="font-semibold text-slate-900">
-                {resetItem?.name}
-              </span>
-              .
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-3">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 space-y-2">
-              <p className="text-xs font-semibold text-slate-800">
-                Referensi Kredensial Bawaan
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">
-                  Sandi Bawaan (Default):
-                </span>
-                <code className="rounded bg-white px-2 py-0.5 text-xs font-mono font-bold text-slate-900 border border-slate-200">
-                  {resetItem?.username || "-"}
-                </code>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Sandi bawaan akun baru sama dengan Username. Kata sandi aktif
-                terenkripsi satu arah sehingga tidak dapat dibaca langsung.
-              </p>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="new-password" className="text-xs font-medium">
-                Kata Sandi Baru
-              </Label>
-              <Input
-                id="new-password"
-                type="text"
-                placeholder="Masukkan minimal 4 karakter..."
-                value={formNewPassword}
-                onChange={(e) => setFormNewPassword(e.target.value)}
-                className="font-mono"
-              />
-              <p className="text-xs text-amber-700">
-                Sandi baru akan langsung menggantikan sandi lama pengguna.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setResetOpen(false)}>
-              Batal
-            </Button>
-            <Button onClick={handleReset} disabled={saving}>
-              {saving ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : null}
-              Konfirmasi Reset Sandi
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* AlertDialog Confirm Suspend / Activate */}
-      <AlertDialog
-        open={!!statusTarget}
-        onOpenChange={(open) => {
-          if (!open) setStatusTarget(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {statusTarget?.setBanned
-                ? "Tangguhkan Akses Akun?"
-                : "Aktifkan Kembali Akses Akun?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs leading-relaxed">
-              {statusTarget?.setBanned ? (
-                <>
-                  Apakah Anda yakin ingin menangguhkan akun{" "}
-                  <strong className="text-slate-900">
-                    {statusTarget.account.name}
-                  </strong>{" "}
-                  ({statusTarget.account.username || "-"})? Seluruh sesi login
-                  aktif pengguna ini akan langsung dihentikan dan statusnya
-                  menjadi nonaktif.
-                </>
-              ) : (
-                <>
-                  Apakah Anda yakin ingin mengaktifkan kembali akun{" "}
-                  <strong className="text-slate-900">
-                    {statusTarget?.account.name}
-                  </strong>{" "}
-                  ({statusTarget?.account.username || "-"}) agar dapat masuk ke
-                  sistem?
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setStatusTarget(null)}
-              disabled={saving}
-            >
-              Batal
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={saving}
-              className={
-                statusTarget?.setBanned
-                  ? "bg-rose-600 hover:bg-rose-700 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
-              }
-              onClick={() => {
-                if (statusTarget) {
-                  toggleStatus(statusTarget.account, statusTarget.setBanned);
-                }
-              }}
-            >
-              {saving ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : null}
-              {statusTarget?.setBanned ? "Ya, Tangguhkan" : "Ya, Aktifkan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AccountStatusAlertDialog
+        statusTarget={statusTarget}
+        onClose={() => setStatusTarget(null)}
+        saving={saving}
+        onConfirm={toggleStatus}
+      />
     </div>
   );
 }

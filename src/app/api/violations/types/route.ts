@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { eq, asc } from "drizzle-orm";
 import { THRESHOLDS_CONFIG_CODE } from "@/lib/violations";
 import { getPortalForRole } from "@/lib/rbac";
+import { parseJsonBody, violationTypePostSchema } from "@/lib/api-validation";
 
 // GET /api/violations/types — Ambil katalog jenis pelanggaran
 export async function GET() {
@@ -44,24 +45,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { id, kode, namaPelanggaran, kategori, poinDefault, deskripsiSanksi } = body;
+    const parsed = await parseJsonBody(req, violationTypePostSchema);
+    if (!parsed.success) return parsed.response;
+    const { id, kode, namaPelanggaran, kategori, poinDefault, deskripsiSanksi } =
+      parsed.data;
 
-    if (!kode || !namaPelanggaran || !kategori) {
-      return NextResponse.json(
-        { error: "Kode, nama pelanggaran, dan kategori wajib diisi" },
-        { status: 400 }
-      );
-    }
-
-    const normalizedKode = String(kode).trim();
-    const parsedPoin = Number(poinDefault);
-    if (!Number.isInteger(parsedPoin) || parsedPoin < 1 || parsedPoin > 100) {
-      return NextResponse.json(
-        { error: "Bobot poin baku harus berupa bilangan bulat antara 1 sampai 100" },
-        { status: 400 }
-      );
-    }
+    const normalizedKode = kode;
+    const parsedPoin = poinDefault;
 
     if (normalizedKode === THRESHOLDS_CONFIG_CODE) {
       return NextResponse.json(

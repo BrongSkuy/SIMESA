@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, studentUpdateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { students } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -19,7 +20,9 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseJsonBody(request, studentUpdateSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   try {
     // Build update payload — include nis only if provided

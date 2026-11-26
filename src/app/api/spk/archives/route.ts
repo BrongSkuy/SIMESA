@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, spkArchivePostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { leaderboardArchives } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -42,15 +43,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { namaFile, pathFile, periode } = body;
-
-    if (!namaFile || !pathFile) {
-      return NextResponse.json(
-        { error: "Nama file dan konten file wajib diisi" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, spkArchivePostSchema);
+    if (!parsed.success) return parsed.response;
+    const { namaFile, pathFile, periode } = parsed.data;
 
     const id = crypto.randomUUID();
     const uploadedAt = new Date().toISOString();

@@ -14,22 +14,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  FileCheck2,
   Search,
   Plus,
   Printer,
@@ -43,20 +27,22 @@ import {
   MapPin,
   BookOpen,
   SlidersHorizontal,
-  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { QuickViolationModal } from "./quick-violation-modal";
+import {
+  ViolationIssueSpModal,
+  ViolationRuleModal,
+  ViolationThresholdModal,
+} from "./violation-modals";
 import {
   WarningLetterPrintModal,
   WarningLetterData,
 } from "./warning-letter-print-modal";
 import {
   SANCTION_THRESHOLDS,
-  sanitizePoinInput,
-  sanitizeThresholdInput,
   validateSanctionThresholds,
-  getSpTingkatLabel,
   type SanctionThresholds,
 } from "@/lib/violations";
 import { cn } from "@/lib/utils";
@@ -268,6 +254,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
   const [spCatatan, setSpCatatan] = useState("");
   const [spSubmitting, setSpSubmitting] = useState(false);
   const [busyViolationId, setBusyViolationId] = useState<string | null>(null);
+  const [confirmDeleteViolationId, setConfirmDeleteViolationId] = useState<string | null>(null);
 
   // Request sequence guard untuk mencegah race condition saat ganti filter kelas cepat
   const loadReqIdRef = useRef(0);
@@ -573,9 +560,14 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
     }
   };
 
-  const handleDeleteViolation = async (violationId: string) => {
+  const handleDeleteViolation = (violationId: string) => {
     if (busyViolationId === violationId) return;
-    if (!confirm("Batalkan dan hapus catatan pelanggaran ini?")) return;
+    setConfirmDeleteViolationId(violationId);
+  };
+
+  const executeDeleteViolation = async () => {
+    const violationId = confirmDeleteViolationId;
+    if (!violationId || busyViolationId === violationId) return;
     setBusyViolationId(violationId);
     try {
       const res = await fetch(`/api/violations/${violationId}`, {
@@ -583,6 +575,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
       });
       if (res.ok) {
         toast.success("Catatan pelanggaran dihapus dan poin diperbarui");
+        setConfirmDeleteViolationId(null);
         await loadData();
       } else {
         const d = await res.json().catch(() => ({}));
@@ -1665,288 +1658,55 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
       />
 
       {/* MODAL 3: Form Tambah dan Edit Aturan Pelanggaran */}
-      <Dialog open={ruleModalOpen} onOpenChange={setRuleModalOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-              {editingRule?.id ? "Edit Aturan Pelanggaran" : "Tambah Jenis Pelanggaran"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSaveRule} className="space-y-3 pt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs">Kode Aturan</Label>
-                <Input
-                  placeholder="Contoh: TATIB-08"
-                  value={editingRule?.kode || ""}
-                  onChange={(e) => setEditingRule({ ...editingRule, kode: e.target.value })}
-                  className="text-xs"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Kategori</Label>
-                <Select
-                  value={editingRule?.kategori || "Ringan"}
-                  onValueChange={(val) =>
-                    setEditingRule({
-                      ...editingRule,
-                      kategori: (val as "Ringan" | "Sedang" | "Berat") || "Ringan",
-                    })
-                  }
-                >
-                  <SelectTrigger className="text-xs">
-                    <SelectValue>{(val) => val || "Ringan"}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ringan" className="text-xs">Ringan</SelectItem>
-                    <SelectItem value="Sedang" className="text-xs">Sedang</SelectItem>
-                    <SelectItem value="Berat" className="text-xs">Berat</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Nama Pelanggaran</Label>
-              <Input
-                placeholder="Contoh: Membawa barang terlarang..."
-                value={editingRule?.namaPelanggaran || ""}
-                onChange={(e) =>
-                  setEditingRule({ ...editingRule, namaPelanggaran: e.target.value })
-                }
-                className="text-xs"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Bobot Poin Baku</Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                placeholder="1 sampai 100"
-                value={rulePoinInput}
-                onChange={(e) => setRulePoinInput(sanitizePoinInput(e.target.value))}
-                className="text-xs font-mono font-bold"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Arahan Tindakan Sanksi atau Pembinaan</Label>
-              <Input
-                placeholder="Contoh: Teguran lisan & pemanggilan orang tua"
-                value={editingRule?.deskripsiSanksi || ""}
-                onChange={(e) =>
-                  setEditingRule({ ...editingRule, deskripsiSanksi: e.target.value })
-                }
-                className="text-xs"
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setRuleModalOpen(false)}
-                className="cursor-pointer"
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={ruleSubmitting}
-                className="bg-[#0d1e38] hover:bg-[#162f54] text-white cursor-pointer"
-              >
-                {ruleSubmitting ? "Menyimpan..." : "Simpan Aturan"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ViolationRuleModal
+        open={ruleModalOpen}
+        onOpenChange={setRuleModalOpen}
+        editingRule={editingRule}
+        onEditingRuleChange={setEditingRule}
+        rulePoinInput={rulePoinInput}
+        onRulePoinInputChange={setRulePoinInput}
+        submitting={ruleSubmitting}
+        onSubmit={handleSaveRule}
+      />
 
       {/* MODAL 4: Terbitkan Surat Peringatan (SP) Baru */}
-      <Dialog open={spModalOpen} onOpenChange={setSpModalOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <FileCheck2 className="w-5 h-5 text-red-600" />
-              <span>Terbitkan Surat Peringatan (SP)</span>
-            </DialogTitle>
-            <p className="text-xs text-slate-500">
-              Siswa: <strong>{targetStudentForSp?.namaLengkap}</strong> ({targetStudentForSp?.kelas}) | Akumulasi:{" "}
-              <strong className="text-red-600">{targetStudentForSp?.totalPoints} Poin</strong>
-            </p>
-          </DialogHeader>
-
-          <form onSubmit={handleIssueSpSubmit} className="space-y-3 pt-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Tingkat Surat Peringatan</Label>
-              <Select
-                value={String(spTingkat)}
-                onValueChange={(val) => setSpTingkat(Number(val) || 1)}
-              >
-                <SelectTrigger className="text-xs font-semibold">
-                  <SelectValue>{(val) => getSpTingkatLabel(val || 1)}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1" className="text-xs">Surat Peringatan I (SP 1)</SelectItem>
-                  <SelectItem value="2" className="text-xs">Surat Peringatan II (SP 2)</SelectItem>
-                  <SelectItem value="3" className="text-xs">
-                    Surat Peringatan III (SP 3 atau Terakhir)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs">Catatan Mediasi atau Jadwal Pemanggilan Orang Tua</Label>
-              <Input
-                placeholder="Contoh: Pemanggilan wali murid hari Senin jam 09.00 WIB"
-                value={spCatatan}
-                onChange={(e) => setSpCatatan(e.target.value)}
-                className="text-xs"
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setSpModalOpen(false)}
-                className="cursor-pointer"
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={spSubmitting}
-                className="bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
-              >
-                {spSubmitting ? "Menerbitkan..." : "Terbitkan SP Resmi"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ViolationIssueSpModal
+        open={spModalOpen}
+        onOpenChange={setSpModalOpen}
+        targetStudent={targetStudentForSp}
+        spTingkat={spTingkat}
+        onSpTingkatChange={setSpTingkat}
+        spCatatan={spCatatan}
+        onSpCatatanChange={setSpCatatan}
+        submitting={spSubmitting}
+        onSubmit={handleIssueSpSubmit}
+      />
 
       {/* MODAL 5: Pengaturan Ambang Batas Meter Poin (Khusus Admin) */}
-      <Dialog open={thresholdModalOpen} onOpenChange={setThresholdModalOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-[#0d1e38]" />
-              <span>Atur Ambang Batas Meter Poin</span>
-            </DialogTitle>
-            <p className="text-xs text-slate-500">
-              Sesuaikan batas akumulasi poin untuk pembinaan lisan dan penerbitan SP 1, SP 2, serta SP 3.
-            </p>
-          </DialogHeader>
+      <ViolationThresholdModal
+        open={thresholdModalOpen}
+        onOpenChange={setThresholdModalOpen}
+        thresholdForm={thresholdForm}
+        onThresholdFormChange={setThresholdForm}
+        savingThresholds={savingThresholds}
+        onSaveThresholds={handleSaveThresholds}
+      />
 
-          <div className="grid grid-cols-2 gap-3 py-2">
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Pembinaan Lisan</Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={thresholdForm.PEMBINAAN_LISAN}
-                onChange={(e) =>
-                  setThresholdForm((prev) => ({
-                    ...prev,
-                    PEMBINAAN_LISAN: sanitizeThresholdInput(e.target.value),
-                  }))
-                }
-                className="h-9 text-xs font-mono font-bold"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Batas SP 1</Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={thresholdForm.SP_1}
-                onChange={(e) =>
-                  setThresholdForm((prev) => ({
-                    ...prev,
-                    SP_1: sanitizeThresholdInput(e.target.value),
-                  }))
-                }
-                className="h-9 text-xs font-mono font-bold"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Batas SP 2</Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={thresholdForm.SP_2}
-                onChange={(e) =>
-                  setThresholdForm((prev) => ({
-                    ...prev,
-                    SP_2: sanitizeThresholdInput(e.target.value),
-                  }))
-                }
-                className="h-9 text-xs font-mono font-bold"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold">Batas SP 3 (Maks. Meter)</Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                value={thresholdForm.SP_3}
-                onChange={(e) =>
-                  setThresholdForm((prev) => ({
-                    ...prev,
-                    SP_3: sanitizeThresholdInput(e.target.value),
-                  }))
-                }
-                className="h-9 text-xs font-mono font-bold"
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={savingThresholds}
-              onClick={() => handleSaveThresholds(true)}
-              className="text-xs text-slate-600 hover:text-slate-900 gap-1 cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Default (30-50-75-100)
-            </Button>
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={savingThresholds}
-                onClick={() => setThresholdModalOpen(false)}
-                className="cursor-pointer"
-              >
-                Batal
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                disabled={savingThresholds}
-                onClick={() => handleSaveThresholds(false)}
-                className="bg-[#0d1e38] hover:bg-[#162f54] text-white cursor-pointer"
-              >
-                {savingThresholds ? "Menyimpan..." : "Simpan Ambang"}
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={Boolean(confirmDeleteViolationId)}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteViolationId(null);
+        }}
+        title="Hapus Catatan Pelanggaran?"
+        description="Catatan pelanggaran ini akan dibatalkan dan poin siswa akan dihitung ulang."
+        confirmLabel="Ya, Hapus Catatan"
+        variant="destructive"
+        loading={
+          Boolean(confirmDeleteViolationId) &&
+          busyViolationId === confirmDeleteViolationId
+        }
+        onConfirm={executeDeleteViolation}
+      />
     </div>
   );
 }

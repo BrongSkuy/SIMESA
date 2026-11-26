@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, loginSecurityPostSchema } from "@/lib/api-validation";
 import {
   checkLoginStatus,
   recordFailedAttempt,
@@ -32,15 +33,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { action, identifier } = body;
-
-    if (!identifier) {
-      return NextResponse.json(
-        { error: "Identifier wajib disertakan" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, loginSecurityPostSchema);
+    if (!parsed.success) return parsed.response;
+    const { action, identifier } = parsed.data;
 
     const ip = getClientIp(request);
 

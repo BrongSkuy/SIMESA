@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, attendancePostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { attendance, students, academicYears, spkPublishStatus } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
@@ -112,33 +113,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: {
-      tanggal: string;
-      mapel?: string;
-      records: Array<{
-        studentId: string;
-        status: "Hadir" | "Izin" | "Sakit" | "Alfa";
-      }>;
-    } = await request.json();
+    const parsed = await parseJsonBody(request, attendancePostSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
 
-    const rawMapel = body.mapel?.trim();
-
-    if (!body.tanggal || !Array.isArray(body.records) || body.records.length === 0) {
-      return NextResponse.json(
-        { error: "Data absensi tidak valid" },
-        { status: 400 }
-      );
-    }
-
-    const hasInvalidStatus = body.records.some(
-      (r) => !r.studentId || !VALID_STATUSES.has(r.status)
-    );
-    if (hasInvalidStatus) {
-      return NextResponse.json(
-        { error: "Terdapat ID siswa atau status kehadiran yang tidak valid." },
-        { status: 400 }
-      );
-    }
+    const rawMapel = body.mapel;
 
     const todayStr = getTodayWIB();
     if (body.tanggal > todayStr) {

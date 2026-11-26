@@ -51,10 +51,16 @@ import {
   DEFAULT_KKM_FALLBACK,
   deduplicateSubjectsForKkm,
   parseKkmNumber,
-  sanitizeKkmInput,
   type RawCurriculumForKkm,
   type UniqueMapelKkmItem,
 } from "@/lib/erapor-utils";
+import {
+  SubjectCreateDialog,
+  SubjectEditDialog,
+  DefaultKkmDialog,
+  SubjectKkmDialog,
+  DeleteSubjectDialog,
+} from "@/components/mapel/subjects-dialogs";
 
 interface SubjectRow {
   id: string;
@@ -545,103 +551,25 @@ export function SubjectsManagementView({
         icon={BookOpen}
       >
         {canManage && (
-          <Dialog
+          <SubjectCreateDialog
             open={dialogOpen}
             onOpenChange={(open) => {
               setDialogOpen(open);
               if (!open) resetForm();
             }}
-          >
-            <DialogTrigger
-              render={
-                <Button size="sm" className="cursor-pointer">
-                  <Plus className="h-3.5 w-3.5" />
-                  Tambah Mata Pelajaran
-                </Button>
-              }
-            />
-            <DialogContent className="rounded-lg border-slate-200">
-              <DialogHeader>
-                <DialogTitle className="text-base font-bold text-slate-900">
-                  Tambah Mata Pelajaran
-                </DialogTitle>
-                <DialogDescription className="text-xs text-slate-500">
-                  Masukkan detail mata pelajaran dan alokasi kelas pengampu.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-3">
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="nama-mapel"
-                    className="text-xs font-semibold"
-                  >
-                    Nama Mata Pelajaran
-                  </Label>
-                  <Input
-                    id="nama-mapel"
-                    placeholder="Contoh: Matematika Lanjut"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className="h-9 text-xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="guru" className="text-xs font-semibold">
-                    Guru Pengampu
-                  </Label>
-                  <Select
-                    value={formGuru}
-                    onValueChange={(val) => setFormGuru(val || "none")}
-                  >
-                    <SelectTrigger id="guru" className="h-9 text-xs">
-                      <SelectValue placeholder="Pilih guru pengampu (opsional)">
-                        {(value) => {
-                          if (value === "none" || !value)
-                            return "Belum ditentukan";
-                          const teacher = teachers.find((t) => t.id === value);
-                          return teacher
-                            ? teacher.namaLengkap
-                            : "Belum ditentukan";
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Belum ditentukan</SelectItem>
-                      {teachers.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.namaLengkap}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">
-                    Kelas yang Diampu
-                  </Label>
-                  {renderClassMultiSelect()}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    resetForm();
-                  }}
-                >
-                  Batal
-                </Button>
-                <Button size="sm" onClick={handleCreate} disabled={saving}>
-                  {saving && (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                  )}
-                  Simpan Mapel
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            formName={formName}
+            onFormNameChange={setFormName}
+            formGuru={formGuru}
+            onFormGuruChange={setFormGuru}
+            teachers={teachers}
+            classMultiSelect={renderClassMultiSelect()}
+            saving={saving}
+            onCancel={() => {
+              setDialogOpen(false);
+              resetForm();
+            }}
+            onSubmit={handleCreate}
+          />
         )}
 
         {!canManage && (
@@ -652,91 +580,25 @@ export function SubjectsManagementView({
         )}
       </PageHeader>
 
-      {/* Dialog Edit Mapel (Khusus Admin) */}
-      <Dialog
+      <SubjectEditDialog
         open={editOpen}
         onOpenChange={(open) => {
           setEditOpen(open);
           if (!open) resetForm();
         }}
-      >
-        <DialogContent className="rounded-lg border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900">
-              Edit Mata Pelajaran
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Perbarui detail mata pelajaran dan penugasan guru.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-3">
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="edit-nama-mapel"
-                className="text-xs font-semibold"
-              >
-                Nama Mata Pelajaran
-              </Label>
-              <Input
-                id="edit-nama-mapel"
-                placeholder="Contoh: Matematika Lanjut"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                className="h-9 text-xs"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-guru" className="text-xs font-semibold">
-                Guru Pengampu
-              </Label>
-              <Select
-                value={formGuru}
-                onValueChange={(val) => setFormGuru(val || "none")}
-              >
-                <SelectTrigger id="edit-guru" className="h-9 text-xs">
-                  <SelectValue placeholder="Pilih guru pengampu (opsional)">
-                    {(value) => {
-                      if (value === "none" || !value) return "Belum ditentukan";
-                      const teacher = teachers.find((t) => t.id === value);
-                      return teacher ? teacher.namaLengkap : "Belum ditentukan";
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Belum ditentukan</SelectItem>
-                  {teachers.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.namaLengkap}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Kelas yang Diampu</Label>
-              {renderClassMultiSelect()}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEditOpen(false);
-                resetForm();
-              }}
-            >
-              Batal
-            </Button>
-            <Button size="sm" onClick={handleEdit} disabled={saving}>
-              {saving && (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              )}
-              Simpan Perubahan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        formName={formName}
+        onFormNameChange={setFormName}
+        formGuru={formGuru}
+        onFormGuruChange={setFormGuru}
+        teachers={teachers}
+        classMultiSelect={renderClassMultiSelect()}
+        saving={saving}
+        onCancel={() => {
+          setEditOpen(false);
+          resetForm();
+        }}
+        onSubmit={handleEdit}
+      />
 
       {/* Toolbar Pencarian + Switch "Semua Mapel" & "KKM" di Sebelah Search */}
       <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -1176,204 +1038,35 @@ export function SubjectsManagementView({
         )}
       </div>
 
-      {/* Dialog Ubah KKM Default Sekolah (Khusus Admin) */}
-      <Dialog
+      <DefaultKkmDialog
         open={defaultKkmDialogOpen}
         onOpenChange={setDefaultKkmDialogOpen}
-      >
-        <DialogContent className="max-w-md rounded-2xl border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900">
-              Ubah KKM Default Sekolah
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Angka ini berlaku otomatis untuk seluruh mata pelajaran yang tidak
-              memiliki penetapan KKM khusus.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="default-kkm-input" className="text-xs font-semibold">
-                Nilai KKM Default (1 sampai 100)
-              </Label>
-              <Input
-                id="default-kkm-input"
-                type="text"
-                inputMode="numeric"
-                placeholder="Contoh: 75"
-                className="h-9 text-sm font-mono font-bold"
-                value={defaultKkmInput}
-                onChange={(e) =>
-                  setDefaultKkmInput(sanitizeKkmInput(e.target.value))
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDefaultKkmDialogOpen(false)}
-              disabled={savingDefaultKkm}
-            >
-              Batal
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveDefaultKkm}
-              disabled={savingDefaultKkm}
-              className="gap-1.5"
-            >
-              {savingDefaultKkm ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Save className="h-3.5 w-3.5" />
-              )}
-              Simpan KKM Default
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        value={defaultKkmInput}
+        onValueChange={setDefaultKkmInput}
+        saving={savingDefaultKkm}
+        onSubmit={handleSaveDefaultKkm}
+      />
 
-      {/* Dialog Atur KKM Per Mapel (Khusus Admin) */}
-      <Dialog open={kkmDialogOpen} onOpenChange={setKkmDialogOpen}>
-        <DialogContent className="max-w-lg rounded-2xl border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900">
-              Atur KKM Mata Pelajaran
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              {kkmTargetItem
-                ? `Penetapan KKM dan narasi capaian untuk ${kkmTargetItem.namaMapel} (Default Sekolah: ${defaultKkm})`
-                : "Penetapan KKM mata pelajaran"}
-            </DialogDescription>
-          </DialogHeader>
+      <SubjectKkmDialog
+        open={kkmDialogOpen}
+        onOpenChange={setKkmDialogOpen}
+        targetItem={kkmTargetItem}
+        defaultKkm={defaultKkm}
+        kkmInputValue={kkmInputValue}
+        onKkmInputChange={setKkmInputValue}
+        capaianValue={kkmCapaianValue}
+        onCapaianChange={setKkmCapaianValue}
+        saving={savingMapelKkm}
+        onResetToDefault={handleResetMapelKkmToDefault}
+        onSubmit={handleSaveMapelKkm}
+      />
 
-          <div className="space-y-4 py-2 text-xs">
-            <div className="space-y-1.5">
-              <Label htmlFor="mapel-kkm-input" className="text-xs font-semibold">
-                Angka KKM Khusus (1 sampai 100)
-              </Label>
-              <Input
-                id="mapel-kkm-input"
-                type="text"
-                inputMode="numeric"
-                placeholder={`Contoh: ${defaultKkm}`}
-                className="h-9 text-sm font-mono font-bold"
-                value={kkmInputValue}
-                onChange={(e) =>
-                  setKkmInputValue(sanitizeKkmInput(e.target.value))
-                }
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="mapel-capaian-input"
-                className="text-xs font-semibold"
-              >
-                Template Materi Capaian Kompetensi (Opsional)
-              </Label>
-              <Input
-                id="mapel-capaian-input"
-                placeholder="Contoh: aljabar linier, trigonometri, dan kalkulus terapan"
-                className="h-9 text-xs"
-                value={kkmCapaianValue}
-                onChange={(e) => setKkmCapaianValue(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2">
-            <div>
-              {kkmTargetItem?.isCustomKkm && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleResetMapelKkmToDefault}
-                  disabled={savingMapelKkm}
-                  className="text-xs text-amber-700 hover:text-amber-800 hover:bg-amber-50 gap-1"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Gunakan Default ({defaultKkm})
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setKkmDialogOpen(false)}
-                disabled={savingMapelKkm}
-              >
-                Batal
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSaveMapelKkm}
-                disabled={savingMapelKkm}
-                className="gap-1.5"
-              >
-                {savingMapelKkm ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Save className="h-3.5 w-3.5" />
-                )}
-                Simpan KKM
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Konfirmasi Hapus Mapel */}
-      <Dialog
-        open={Boolean(deleteTarget)}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-      >
-        <DialogContent className="max-w-md rounded-2xl border-slate-200 p-6">
-          <DialogHeader>
-            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <DialogTitle className="text-base font-bold text-slate-900">
-              Hapus Mata Pelajaran?
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 leading-relaxed">
-              Apakah Anda yakin ingin menghapus mata pelajaran{" "}
-              <strong className="text-slate-800">
-                {deleteTarget?.namaMapel}
-              </strong>
-              ? Mata pelajaran yang telah memiliki data presensi atau nilai
-              tidak dapat dihapus.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleting}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={confirmDelete}
-              disabled={deleting}
-            >
-              {deleting && (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              )}
-              Ya, Hapus Mapel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteSubjectDialog
+        target={deleteTarget}
+        deleting={deleting}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

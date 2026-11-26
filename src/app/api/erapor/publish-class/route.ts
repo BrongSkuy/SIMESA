@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, eraporPublishClassSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import {
   academicYears,
@@ -35,25 +36,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const kelas = typeof body.kelas === "string" ? body.kelas.trim() : "";
-    const targetStatus = body.targetStatus as EraporStatus;
-    let periode =
-      typeof body.periode === "string" ? body.periode.trim() : "";
-
-    if (!kelas) {
-      return NextResponse.json(
-        { error: "Nama kelas wajib dipilih" },
-        { status: 400 }
-      );
-    }
-
-    if (!ALLOWED_STATUSES.includes(targetStatus)) {
-      return NextResponse.json(
-        { error: "Status rapor tujuan tidak valid" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, eraporPublishClassSchema);
+    if (!parsed.success) return parsed.response;
+    const { kelas, targetStatus } = parsed.data;
+    let periode = parsed.data.periode || "";
 
     if (!periode) {
       const [activeYear] = await db

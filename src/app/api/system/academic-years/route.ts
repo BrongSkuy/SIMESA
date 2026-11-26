@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  parseJsonBody,
+  academicYearCreateSchema,
+  academicYearUpdateSchema,
+} from "@/lib/api-validation";
 import { db } from "@/db";
 import { academicYears } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -52,12 +57,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { tahunAjaran, semester, isActive } = body;
-
-    if (!tahunAjaran || !semester) {
-      return NextResponse.json({ error: "Tahun ajaran dan semester wajib diisi" }, { status: 400 });
-    }
+    const parsed = await parseJsonBody(request, academicYearCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const { tahunAjaran, semester, isActive } = parsed.data;
 
     const formatErr = validateTahunAjaranFormat(String(tahunAjaran));
     if (formatErr) {
@@ -117,12 +119,9 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { id, tahunAjaran, semester, isActive } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: "ID wajib diisi" }, { status: 400 });
-    }
+    const parsed = await parseJsonBody(request, academicYearUpdateSchema);
+    if (!parsed.success) return parsed.response;
+    const { id, tahunAjaran, semester, isActive } = parsed.data;
 
     const allYears = await db.select().from(academicYears).all();
     const current = allYears.find((y) => y.id === id);

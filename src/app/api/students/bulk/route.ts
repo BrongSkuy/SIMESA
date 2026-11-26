@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, studentBulkSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { students, classes } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -15,22 +16,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: {
-      students: Array<{
-        nis: string;
-        namaLengkap: string;
-        kelas: string;
-        angkatan: string;
-        jenisKelamin: string;
-      }>;
-    } = await request.json();
-
-    if (!body.students?.length) {
-      return NextResponse.json(
-        { error: "Data siswa kosong" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, studentBulkSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
 
     let successCount = 0;
     const errors: string[] = [];

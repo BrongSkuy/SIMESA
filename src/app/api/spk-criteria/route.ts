@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, spkCriteriaPutSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { academicYears, spkCriteria, spkPublishStatus, spkResults } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -33,29 +34,9 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const body: Array<{ id: string; bobot: number }> = await request.json();
-
-    if (!Array.isArray(body) || body.length === 0) {
-      return NextResponse.json(
-        { error: "Data bobot kriteria tidak valid" },
-        { status: 400 }
-      );
-    }
-
-    // Validate each weight is 0..100
-    for (const item of body) {
-      if (
-        typeof item.bobot !== "number" ||
-        !Number.isFinite(item.bobot) ||
-        item.bobot < 0 ||
-        item.bobot > 100
-      ) {
-        return NextResponse.json(
-          { error: "Setiap bobot kriteria harus bernilai antara 0% hingga 100%" },
-          { status: 400 }
-        );
-      }
-    }
+    const parsed = await parseJsonBody(request, spkCriteriaPutSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
 
     // Validate total = 100
     const total = body.reduce((sum, c) => sum + c.bobot, 0);

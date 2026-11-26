@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, teacherCreateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { teachers } from "@/db/schema";
 import { like, or, eq } from "drizzle-orm";
@@ -46,21 +47,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const nip = String(body.nip || "").trim();
-    const namaLengkap = String(body.namaLengkap || "").trim();
-    const { jenisKelamin, foto } = body;
-
-    if (!nip || !namaLengkap) {
-      return NextResponse.json({ error: "NIP dan nama wajib diisi" }, { status: 400 });
-    }
-
-    if (nip.length < 4) {
-      return NextResponse.json(
-        { error: "NIP minimal harus 4 karakter (untuk keamanan password)" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, teacherCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const { nip, namaLengkap, jenisKelamin, foto } = parsed.data;
 
     // Check explicit existing auth to prevent crash or dangling rows
     const { user } = await import("@/db/auth-schema");

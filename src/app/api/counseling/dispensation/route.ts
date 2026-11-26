@@ -11,11 +11,12 @@ import {
 } from "@/lib/counseling-server";
 import { logActivity } from "@/lib/audit-server";
 import { getPortalForRole } from "@/lib/rbac";
+import { getLocalIsoDate } from "@/lib/counseling";
 import {
-  DISPENSATION_STATUSES,
-  getLocalIsoDate,
-  type DispensationStatus,
-} from "@/lib/counseling";
+  parseJsonBody,
+  dispensationCreateSchema,
+  dispensationPatchSchema,
+} from "@/lib/api-validation";
 
 // GET /api/counseling/dispensation — Mengambil daftar surat dispensasi kelas
 export async function GET(req: NextRequest) {
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
+    const parsed = await parseJsonBody(req, dispensationCreateSchema);
+    if (!parsed.success) return parsed.response;
     const {
       studentId,
       tanggal,
@@ -71,14 +73,7 @@ export async function POST(req: NextRequest) {
       keperluan,
       keterangan,
       diterbitkanOlehCustom,
-    } = body;
-
-    if (!studentId || !jamMulai || !jamSelesai || !keperluan) {
-      return NextResponse.json(
-        { error: "Semua kolom bertanda bintang wajib diisi" },
-        { status: 400 }
-      );
-    }
+    } = parsed.data;
 
     const diterbitkanOleh = diterbitkanOlehCustom || session.user.name || "Petugas BK";
     const realDate = tanggal || getLocalIsoDate();
@@ -103,7 +98,7 @@ export async function POST(req: NextRequest) {
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Petugas BK",
-      userRole: (session.user as any).role || "guru_bk",
+      userRole: appRole || "guru_bk",
       action: "APPROVE",
       module: "KONSELING_BK",
       targetId: studentId,
@@ -142,19 +137,9 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { id, statusDispensasi, keterangan } = body;
-
-    if (
-      !id ||
-      !statusDispensasi ||
-      !DISPENSATION_STATUSES.includes(statusDispensasi as DispensationStatus)
-    ) {
-      return NextResponse.json(
-        { error: "ID surat dan status dispensasi yang valid wajib ditentukan" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(req, dispensationPatchSchema);
+    if (!parsed.success) return parsed.response;
+    const { id, statusDispensasi, keterangan } = parsed.data;
 
     const updated = await updateDispensationLetter(id, {
       statusDispensasi,

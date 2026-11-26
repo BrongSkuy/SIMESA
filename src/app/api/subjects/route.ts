@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, subjectCreateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { subjects, teachers } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -36,12 +37,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { namaMapel, teacherId, kelasDiampu } = body;
-
-    if (!namaMapel) {
-      return NextResponse.json({ error: "Nama pelajaran wajib diisi" }, { status: 400 });
-    }
+    const parsed = await parseJsonBody(request, subjectCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const { namaMapel, teacherId, kelasDiampu } = parsed.data;
 
     const [newSubject] = await db
       .insert(subjects)

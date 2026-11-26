@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, subjectUpdateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import {
   subjects,
@@ -23,15 +24,10 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const namaMapel = String(body.namaMapel || "").trim();
-
-  if (!namaMapel) {
-    return NextResponse.json(
-      { error: "Nama mata pelajaran wajib diisi" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, subjectUpdateSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
+  const namaMapel = body.namaMapel;
 
   try {
     const updated = await db.transaction(async (tx) => {

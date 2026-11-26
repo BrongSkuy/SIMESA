@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, authAccountCreateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { user, userRoles } from "@/db/auth-schema";
 import { teachers } from "@/db/schema";
@@ -79,45 +80,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const cleanName = typeof body.name === "string" ? body.name.trim() : "";
-    const cleanUsername =
-      typeof body.username === "string" ? body.username.trim() : "";
-    const cleanPassword =
-      typeof body.password === "string" ? body.password.trim() : "";
-    const rawRole = String(body.appRole || "")
-      .toUpperCase()
-      .trim() as AppRole;
-    const rawEmail = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const parsed = await parseJsonBody(request, authAccountCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
+    const cleanName = body.name;
+    const cleanUsername = body.username;
+    const cleanPassword = body.password;
+    const rawRole = body.appRole as AppRole;
+    const rawEmail = (body.email || "").trim().toLowerCase();
     const cleanJenisKelamin = body.jenisKelamin === "P" ? "P" : "L";
-
-    if (!cleanName) {
-      return NextResponse.json(
-        { error: "Nama lengkap wajib diisi" },
-        { status: 400 }
-      );
-    }
-
-    if (cleanUsername.length < 4) {
-      return NextResponse.json(
-        { error: "Username login minimal harus 4 karakter" },
-        { status: 400 }
-      );
-    }
-
-    if (cleanPassword.length < 4) {
-      return NextResponse.json(
-        { error: "Kata sandi awal minimal harus 4 karakter" },
-        { status: 400 }
-      );
-    }
-
-    if (!APP_ROLES.includes(rawRole)) {
-      return NextResponse.json(
-        { error: "Peran utama yang dipilih tidak valid" },
-        { status: 400 }
-      );
-    }
 
     if (rawRole === "SISWA") {
       return NextResponse.json(

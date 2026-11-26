@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, authAccountStatusSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { user, session as sessionTable } from "@/db/auth-schema";
 import { students, teachers } from "@/db/schema";
@@ -24,7 +25,9 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseJsonBody(request, authAccountStatusSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   try {
     const isBanned = body.banned === true;

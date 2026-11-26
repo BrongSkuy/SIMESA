@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, curriculumPostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { curriculumTargets } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -68,7 +69,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const parsed = await parseJsonBody(request, curriculumPostSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
     const ipAddress = extractIp(reqHeaders);
     const userRole =
       ((session.user as Record<string, unknown>).appRole as string) || "admin";

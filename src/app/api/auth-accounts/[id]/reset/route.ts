@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, authAccountResetPasswordSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { user, account } from "@/db/auth-schema";
 import { eq } from "drizzle-orm";
@@ -23,14 +24,9 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
-
-  if (!body.newPassword || String(body.newPassword).trim().length < 4) {
-    return NextResponse.json(
-      { error: "Password baru wajib diisi minimal 4 karakter" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, authAccountResetPasswordSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   try {
     const hashedPassword = await hashPassword(String(body.newPassword));

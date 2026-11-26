@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, spkPublishPostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { spkPublishStatus, spkResults, academicYears } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -43,8 +44,9 @@ export async function POST(request: NextRequest) {
      return NextResponse.json({ error: "Forbidden: Hanya admin yang dapat mempublikasikan leaderboard" }, { status: 403 });
   }
 
-  const { periode, bypassValidation } = await request.json();
-  if (!periode) return NextResponse.json({ error: "Parameter periode wajib" }, { status: 400 });
+  const parsed = await parseJsonBody(request, spkPublishPostSchema);
+  if (!parsed.success) return parsed.response;
+  const { periode, bypassValidation } = parsed.data;
 
   try {
     // 1. Strict Validation - check if all criteria are filled for all students

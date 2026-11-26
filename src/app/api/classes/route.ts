@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, classCreateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { classes, students } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -38,17 +39,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const namaKelas = String(body.namaKelas || "").trim();
-    const tingkat = String(body.tingkat || "").trim();
-    const { waliKelas } = body;
-
-    if (!namaKelas || !tingkat) {
-      return NextResponse.json(
-        { error: "Nama kelas dan tingkat wajib diisi" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, classCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const { namaKelas, tingkat, waliKelas } = parsed.data;
 
     const allClasses = await db.select().from(classes).all();
     const duplicate = allClasses.find(

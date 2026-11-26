@@ -4,12 +4,15 @@ import { auth } from "@/lib/auth";
 import { getPortalForRole } from "@/lib/rbac";
 import { getUserFullRoles } from "@/lib/rbac-server";
 import { logActivity } from "@/lib/audit-server";
-import { CASE_STATUSES, type CaseStatus } from "@/lib/counseling";
 import {
   getCounselingSessionById,
   updateCounselingSession,
   deleteCounselingSession,
 } from "@/lib/counseling-server";
+import {
+  parseJsonBody,
+  counselingSessionPatchSchema,
+} from "@/lib/api-validation";
 
 export async function GET(
   req: NextRequest,
@@ -73,19 +76,10 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const body = await req.json();
+    const parsed = await parseJsonBody(req, counselingSessionPatchSchema);
+    if (!parsed.success) return parsed.response;
 
-    if (
-      body.statusKasus !== undefined &&
-      !CASE_STATUSES.includes(body.statusKasus as CaseStatus)
-    ) {
-      return NextResponse.json(
-        { error: "Status kasus konseling tidak valid" },
-        { status: 400 }
-      );
-    }
-
-    const updated = await updateCounselingSession(id, body);
+    const updated = await updateCounselingSession(id, parsed.data);
     if (!updated) {
       return NextResponse.json({ error: "Data sesi konseling tidak ditemukan" }, { status: 404 });
     }

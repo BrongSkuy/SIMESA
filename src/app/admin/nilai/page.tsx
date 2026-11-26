@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SessionSetup } from "@/components/shared/session-setup";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -224,15 +225,13 @@ export default function AdminNilaiPage() {
     }
   }, [selectedKelas, selectedCriteria, selectedMapel, criteria]);
 
+  const [confirmChangeSessionOpen, setConfirmChangeSessionOpen] = useState(false);
+
   const handleChangeSession = () => {
     const isDirty =
       loadedSnapshotRef.current !== JSON.stringify({ categories, details });
-    if (
-      isDirty &&
-      !confirm(
-        "Perubahan penilaian pada sesi ini belum disimpan. Tetap ganti sesi?"
-      )
-    ) {
+    if (isDirty) {
+      setConfirmChangeSessionOpen(true);
       return;
     }
     setShowGrid(false);
@@ -867,6 +866,19 @@ export default function AdminNilaiPage() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmChangeSessionOpen}
+        onOpenChange={setConfirmChangeSessionOpen}
+        title="Ganti Sesi Penilaian?"
+        description="Perubahan penilaian pada sesi ini belum disimpan. Tetap ganti sesi dan abaikan perubahan?"
+        confirmLabel="Ya, Ganti Sesi"
+        variant="default"
+        onConfirm={() => {
+          setConfirmChangeSessionOpen(false);
+          setShowGrid(false);
+        }}
+      />
     </div>
   );
 }

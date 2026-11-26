@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, studentCreateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { students } from "@/db/schema";
 import { eq, like, or } from "drizzle-orm";
@@ -51,22 +52,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { nis, namaLengkap, kelas, angkatan, jenisKelamin, foto } = body;
-
-    if (!nis || !namaLengkap || !kelas || !angkatan || !jenisKelamin) {
-      return NextResponse.json(
-        { error: "Semua field wajib diisi" },
-        { status: 400 }
-      );
-    }
-
-    if (nis.length < 4) {
-      return NextResponse.json(
-        { error: "NIS minimal 4 karakter (digunakan sebagai kata sandi default)" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(request, studentCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const { nis, namaLengkap, kelas, angkatan, jenisKelamin, foto } = parsed.data;
 
     const existingStudent = await db.select().from(students).where(eq(students.nis, nis));
     if (existingStudent.length > 0) {

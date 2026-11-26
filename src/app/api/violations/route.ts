@@ -11,6 +11,7 @@ import { eq, desc, and, like, or } from "drizzle-orm";
 import { getClassDisciplineSummary } from "@/lib/violations-server";
 import { logActivity } from "@/lib/audit-server";
 import { getPortalForRole } from "@/lib/rbac";
+import { parseJsonBody, violationCreateSchema } from "@/lib/api-validation";
 
 // GET /api/violations — List violations with filters or class summary
 export async function GET(req: NextRequest) {
@@ -121,15 +122,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { studentId, violationTypeId, tanggal, poin, lokasi, keterangan, reportedByCustom } = body;
-
-    if (!studentId || !violationTypeId) {
-      return NextResponse.json(
-        { error: "Siswa dan jenis pelanggaran wajib diisi" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(req, violationCreateSchema);
+    if (!parsed.success) return parsed.response;
+    const {
+      studentId,
+      violationTypeId,
+      tanggal,
+      poin,
+      lokasi,
+      keterangan,
+      reportedByCustom,
+    } = parsed.data;
 
     // Cek master violation type
     const [vType] = await db
@@ -180,7 +183,7 @@ export async function POST(req: NextRequest) {
     await logActivity({
       userId: session.user.id,
       userName: session.user.name || "Guru",
-      userRole: (session.user as any).role || "guru",
+      userRole: appRole || "guru",
       action: "CREATE",
       module: "BUKU_POIN",
       targetId: studentId,

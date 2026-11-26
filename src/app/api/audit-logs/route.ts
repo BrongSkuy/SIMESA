@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, auditLogPostSchema } from "@/lib/api-validation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getUserFullRoles } from "@/lib/rbac-server";
@@ -68,22 +69,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { action, module, targetId, targetName, description, details } = body;
-
-    if (!action || !module || !description) {
-      return NextResponse.json(
-        { error: "Parameter action, module, dan description wajib diisi" },
-        { status: 400 }
-      );
-    }
-
-    if (!AUDIT_ACTIONS.includes(action) || !AUDIT_MODULES.includes(module)) {
-      return NextResponse.json(
-        { error: "Nilai action atau module tidak valid" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(req, auditLogPostSchema);
+    if (!parsed.success) return parsed.response;
+    const { action, module, targetId, targetName, description, details } = parsed.data;
 
     // Mendapatkan alamat IP dari headers
     const reqHeaders = await headers();

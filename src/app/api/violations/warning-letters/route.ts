@@ -14,6 +14,7 @@ import {
 } from "@/lib/violations";
 import { logActivity } from "@/lib/audit-server";
 import { getPortalForRole } from "@/lib/rbac";
+import { parseJsonBody, warningLetterPostSchema } from "@/lib/api-validation";
 
 // GET /api/violations/warning-letters — Ambil riwayat surat peringatan
 export async function GET(req: NextRequest) {
@@ -76,16 +77,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const { studentId, tingkatSp, tanggalTerbit, nomorSuratCustom, statusPanggilan, catatanMediasi } = body;
-
-    const parsedTingkat = Number(tingkatSp);
-    if (!studentId || ![1, 2, 3].includes(parsedTingkat)) {
-      return NextResponse.json(
-        { error: "Siswa dan tingkat SP (1, 2, atau 3) wajib ditentukan" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseJsonBody(req, warningLetterPostSchema);
+    if (!parsed.success) return parsed.response;
+    const {
+      studentId,
+      tingkatSp,
+      tanggalTerbit,
+      nomorSuratCustom,
+      statusPanggilan,
+      catatanMediasi,
+    } = parsed.data;
+    const parsedTingkat = tingkatSp;
 
     const [targetStudent] = await db
       .select({ id: students.id, namaLengkap: students.namaLengkap })

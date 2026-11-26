@@ -37,6 +37,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   CounselingSessionItem,
   StudentMonitoringLogItem,
@@ -177,6 +178,7 @@ export function CounselingManagementView() {
   const [modalDefaultStudentId, setModalDefaultStudentId] = useState<string | undefined>();
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [selectedDispensation, setSelectedDispensation] = useState<DispensationLetterItem | null>(null);
+  const [confirmDeleteSessionId, setConfirmDeleteSessionId] = useState<string | null>(null);
 
   // Fetch all data with no-store & race guard
   const fetchData = useCallback(async () => {
@@ -324,9 +326,14 @@ export function CounselingManagementView() {
     }
   };
 
-  const handleDeleteSession = async (sessionId: string) => {
+  const handleDeleteSession = (sessionId: string) => {
     if (busyActionId === sessionId) return;
-    if (!confirm("Hapus catatan sesi konseling ini?")) return;
+    setConfirmDeleteSessionId(sessionId);
+  };
+
+  const executeDeleteSession = async () => {
+    const sessionId = confirmDeleteSessionId;
+    if (!sessionId || busyActionId === sessionId) return;
     setBusyActionId(sessionId);
     try {
       const res = await fetch(`/api/counseling/sessions/${sessionId}`, {
@@ -337,6 +344,7 @@ export function CounselingManagementView() {
         if (selectedSessionId === sessionId) {
           setSelectedSessionId(null);
         }
+        setConfirmDeleteSessionId(null);
         await fetchData();
       } else {
         const d = await res.json().catch(() => ({}));
@@ -1109,6 +1117,22 @@ export function CounselingManagementView() {
         open={printModalOpen}
         onOpenChange={setPrintModalOpen}
         data={selectedDispensation}
+      />
+
+      <ConfirmDialog
+        open={Boolean(confirmDeleteSessionId)}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteSessionId(null);
+        }}
+        title="Hapus Catatan Sesi Konseling?"
+        description="Catatan sesi konseling ini akan dihapus secara permanen."
+        confirmLabel="Ya, Hapus Sesi"
+        variant="destructive"
+        loading={
+          Boolean(confirmDeleteSessionId) &&
+          busyActionId === confirmDeleteSessionId
+        }
+        onConfirm={executeDeleteSession}
       />
     </div>
   );

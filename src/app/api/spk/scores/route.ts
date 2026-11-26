@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, spkScoresPostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import {
   spkScores,
@@ -168,27 +169,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: {
-      kelas: string;
-      criteriaId: string;
-      mapel?: string;
-      categories?: string[];
-      records: Array<{
-        studentId: string;
-        details?: Record<string, number | string>;
-      }>;
-    } = await request.json();
+    const parsed = await parseJsonBody(request, spkScoresPostSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
 
-    const rawMapel = body.mapel?.trim();
-    const kelas = body.kelas?.trim();
-    const criteriaId = body.criteriaId?.trim();
-
-    if (!kelas || !criteriaId || !Array.isArray(body.records)) {
-      return NextResponse.json(
-        { error: "Data nilai tidak valid" },
-        { status: 400 }
-      );
-    }
+    const rawMapel = body.mapel;
+    const kelas = body.kelas;
+    const criteriaId = body.criteriaId;
 
     // Strict Curriculum Subject & Ownership Check for GURU
     if (portal === "/guru") {

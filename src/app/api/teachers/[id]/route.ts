@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, teacherUpdateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { teachers, classes } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -18,7 +19,9 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseJsonBody(request, teacherUpdateSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   try {
     const updated = await db.transaction(async (tx) => {

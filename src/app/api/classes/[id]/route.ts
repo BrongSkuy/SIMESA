@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, classUpdateSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import {
   classes,
@@ -25,16 +26,10 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const namaKelas = String(body.namaKelas || "").trim();
-  const tingkat = String(body.tingkat || "").trim();
-
-  if (!namaKelas || !tingkat) {
-    return NextResponse.json(
-      { error: "Nama kelas dan tingkat wajib diisi" },
-      { status: 400 }
-    );
-  }
+  const parsed = await parseJsonBody(request, classUpdateSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
+  const { namaKelas, tingkat } = body;
 
   try {
     const updated = await db.transaction(async (tx) => {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, authAccountEditSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { user, userRoles } from "@/db/auth-schema";
 import { students, teachers, classes } from "@/db/schema";
@@ -39,7 +40,9 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseJsonBody(request, authAccountEditSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   const wantsRoleChange =
     body.appRole !== undefined || body.additionalRoles !== undefined;

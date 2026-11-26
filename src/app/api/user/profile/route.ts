@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, userProfilePatchSchema } from "@/lib/api-validation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
@@ -27,17 +28,9 @@ export async function PATCH(request: NextRequest) {
   const userId = session.user.id;
   const appRole = (session.user as Record<string, unknown>)?.appRole as string;
 
-  let body: { name?: unknown; image?: unknown };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Format payload tidak valid" },
-      { status: 400 }
-    );
-  }
-
-  const { name, image } = body;
+  const parsed = await parseJsonBody(request, userProfilePatchSchema);
+  if (!parsed.success) return parsed.response;
+  const { name, image } = parsed.data;
 
   try {
     const updateData: { name?: string; image?: string | null } = {};

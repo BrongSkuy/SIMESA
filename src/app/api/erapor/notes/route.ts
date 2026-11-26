@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseJsonBody, eraporNotePostSchema } from "@/lib/api-validation";
 import { db } from "@/db";
 import { studentReportNotes, academicYears, students, spkScores } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -70,21 +71,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const studentId = body.studentId?.trim();
-    let periode = body.periode?.trim();
-    const catatanWaliKelas = body.catatanWaliKelas?.trim() || null;
-    const ekskulNama = body.ekskulNama?.trim() || null;
-    const ekskulNilai = body.ekskulNilai?.trim() || null;
-    const ekskulKeterangan = body.ekskulKeterangan?.trim() || null;
+    const parsed = await parseJsonBody(request, eraporNotePostSchema);
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
+    const studentId = body.studentId;
+    let periode = body.periode;
+    const catatanWaliKelas = body.catatanWaliKelas || null;
+    const ekskulNama = body.ekskulNama || null;
+    const ekskulNilai = body.ekskulNilai || null;
+    const ekskulKeterangan = body.ekskulKeterangan || null;
     const statusRapor = (body.statusRapor || "Draf") as "Draf" | "Disahkan" | "Diterbitkan";
-
-    if (!studentId) {
-      return NextResponse.json(
-        { error: "ID Siswa wajib diisi" },
-        { status: 400 }
-      );
-    }
 
     const [existingStudent] = await db
       .select({ id: students.id })

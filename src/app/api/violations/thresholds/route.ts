@@ -12,6 +12,10 @@ import {
   validateSanctionThresholds,
 } from "@/lib/violations";
 import { getSanctionThresholds } from "@/lib/violations-server";
+import {
+  parseJsonBody,
+  violationThresholdsPostSchema,
+} from "@/lib/api-validation";
 
 export const dynamic = "force-dynamic";
 
@@ -53,9 +57,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
+    const parsed = await parseJsonBody(req, violationThresholdsPostSchema);
+    if (!parsed.success) return parsed.response;
+
     const targetInput =
-      body.resetToDefault === true ? SANCTION_THRESHOLDS : body;
+      "resetToDefault" in parsed.data && parsed.data.resetToDefault === true
+        ? SANCTION_THRESHOLDS
+        : parsed.data;
     const validation = validateSanctionThresholds(targetInput);
 
     if (!validation.valid) {
