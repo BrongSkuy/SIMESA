@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { StatCard } from "@/components/shared/stat-card";
-import { PageHeader } from "@/components/shared/page-header";
+import React, { useState, useEffect, useCallback } from "react";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -30,19 +28,12 @@ import {
 } from "@/components/ui/select";
 import {
   Activity,
-  GraduationCap,
-  ShieldCheck,
-  KeyRound,
   Search,
-  Filter,
   RotateCcw,
   Eye,
   FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  User,
-  Layers,
   Info,
   Trash2,
   AlertTriangle,
@@ -63,14 +54,11 @@ import {
   AUDIT_MODULES,
   MODULE_LABELS,
   ACTION_LABELS,
-  ROLE_LABELS,
   formatRoleLabel,
   formatAuditTimestamp,
   getInitials,
   getActionBadgeStyle,
   getModuleBadgeStyle,
-  AuditAction,
-  AuditModule,
 } from "@/lib/audit";
 
 export function ActivityLogView() {
@@ -98,7 +86,9 @@ export function ActivityLogView() {
 
   // Superadmin Purge / Retensi Data State
   const { data: session } = authClient.useSession();
-  const rawRole = (((session?.user as any)?.appRole || "") as string).toUpperCase();
+  const rawRole = String(
+    (session?.user as Record<string, unknown> | undefined)?.appRole || ""
+  ).toUpperCase();
   const isSuperadmin = rawRole === "SUPERADMIN";
   const [purgeModalOpen, setPurgeModalOpen] = useState(false);
   const [purgeStep, setPurgeStep] = useState<1 | 2>(1);
@@ -329,95 +319,76 @@ export function ActivityLogView() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Riwayat Aktivitas dan Audit Trail"
-        description="Catatan aktivitas pengguna, perubahan data akademik, dan keamanan akses sistem"
-        icon={Activity}
-        bottomContent={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Aktivitas Hari Ini"
-              value={loading ? "..." : summary.totalHariIni}
-              icon={Activity}
-              color="blue"
-              footerLeft="Aktivitas terkini"
-              footerRight="Tanggal berjalan"
-            />
-
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Akademik & Nilai"
-              value={loading ? "..." : summary.akademikNilaiCount}
-              icon={GraduationCap}
-              color="blue"
-              footerLeft="Capaian belajar"
-              footerRight="Nilai dan rapor"
-            />
-
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Kesiswaan & Disiplin"
-              value={loading ? "..." : summary.kesiswaanDisiplinCount}
-              icon={ShieldCheck}
-              color="amber"
-              footerLeft="Buku poin siswa"
-              footerRight="Layanan BK"
-            />
-
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Keamanan & Akses"
-              value={loading ? "..." : summary.keamananAkunCount}
-              icon={KeyRound}
-              color="slate"
-              footerLeft="Sesi pengguna"
-              footerRight="Proteksi akun"
-            />
-          </div>
-        }
-      >
-        <button
-          type="button"
-          disabled={isExportingCSV}
-          onClick={handleExportCSV}
-          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer disabled:opacity-50"
-        >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-          {isExportingCSV ? "Mengekspor CSV..." : "Ekspor CSV"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            fetchSummary();
-            fetchLogs(1);
-          }}
-          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Segarkan Data
-        </button>
-
-        {isSuperadmin && (
+    <ModulePageShell
+      title="Riwayat Aktivitas dan Audit Trail"
+      eyebrow="Audit & Keamanan | Portal Admin"
+      description="Catatan aktivitas pengguna, perubahan data akademik, dan keamanan akses sistem."
+      icon={Activity}
+      theme="obsidian"
+      stats={[
+        {
+          label: "Aktivitas Hari Ini",
+          value: loading ? "..." : summary.totalHariIni,
+          sublabel: "Tanggal berjalan",
+          onClick: handleResetFilters,
+        },
+        {
+          label: "Akademik & Nilai",
+          value: loading ? "..." : summary.akademikNilaiCount,
+          sublabel: "Nilai dan rapor",
+          tone: "blue",
+        },
+        {
+          label: "Kesiswaan & Disiplin",
+          value: loading ? "..." : summary.kesiswaanDisiplinCount,
+          sublabel: "Buku poin & BK",
+          tone: "amber",
+        },
+        {
+          label: "Keamanan & Akses",
+          value: loading ? "..." : summary.keamananAkunCount,
+          sublabel: "Sesi & proteksi akun",
+        },
+      ]}
+      actions={
+        <>
           <button
             type="button"
-            onClick={openPurgeModal}
-            className="inline-flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 rounded-lg px-3.5 py-2 text-xs font-semibold text-rose-200 transition-colors cursor-pointer"
+            disabled={isExportingCSV}
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 bg-white/[0.08] hover:bg-white/15 border border-white/20 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-100 backdrop-blur-xs transition-all cursor-pointer disabled:opacity-50"
           >
-            <Trash2 className="w-3.5 h-3.5" />
-            Bersihkan Log Usang
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            {isExportingCSV ? "Mengekspor CSV..." : "Ekspor CSV"}
           </button>
-        )}
-      </PageHeader>
 
-      {/* 2. Filter Bar Interaktif */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+          <button
+            type="button"
+            onClick={() => {
+              fetchSummary();
+              fetchLogs(1);
+            }}
+            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-xl px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Segarkan Data
+          </button>
+
+          {isSuperadmin && (
+            <button
+              type="button"
+              onClick={openPurgeModal}
+              className="inline-flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 rounded-xl px-3.5 py-2 text-xs font-semibold text-rose-200 transition-all cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Bersihkan Log Usang
+            </button>
+          )}
+        </>
+      }
+    >
+      {/* 2. Filter Bar Interaktif menyatu di bagian atas White Sheet */}
+      <div className="p-4 sm:p-5 border-b border-slate-100 space-y-4">
         <div className="flex flex-col lg:flex-row gap-3.5 items-stretch lg:items-center justify-between">
           {/* Kolom Pencarian Cerdas */}
           <div className="relative flex-1">
@@ -522,7 +493,7 @@ export function ActivityLogView() {
       </div>
 
       {/* 3. Tabel Interaktif SIMESA */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+      <div className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-slate-50/80 border-b border-slate-200/80">
@@ -969,6 +940,6 @@ export function ActivityLogView() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </ModulePageShell>
   );
 }

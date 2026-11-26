@@ -4,17 +4,14 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import * as XLSX from "xlsx";
 import {
-  ClipboardList,
   Loader2,
   TrendingUp,
-  Award,
   BookOpen,
   CheckCircle2,
   AlertCircle,
   Download,
   UserCheck,
   GraduationCap,
-  Layers,
   Clock,
   Search,
   Filter,
@@ -26,11 +23,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getStudentEraporGateInfo, type EraporStatus } from "@/lib/erapor-utils";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -363,59 +359,65 @@ export default function SiswaNilaiPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Transkrip Nilai Saya"
-        badge="Portal Siswa"
-        description="Rincian nilai mata pelajaran, komponen Tugas, UTS, UAS, dan skor prestasi semester"
-        icon={ClipboardList}
-      />
-
-      {/* Score Summary Card */}
-      <div className="rounded-xl bg-white p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Periode: {data.periode || "Aktif"}
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-[#1e3a8a] border border-blue-200">
-              Kelas {data.student.kelas}
-            </span>
-            {completenessStats.total > 0 && (
-              <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${
-                  completenessStats.lengkap === completenessStats.total
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : "bg-amber-50 text-amber-800 border-amber-200"
-                }`}
-              >
-                <CheckCircle2 className="h-3 w-3" />
-                {completenessStats.lengkap} dari {completenessStats.total} Mapel
-                Lengkap
-              </span>
-            )}
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono bg-slate-100 text-slate-600 border border-slate-200">
-              {data.criteria.length} Aspek Penilaian
-            </span>
-          </div>
-          <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900">
-            Ringkasan Skor Prestasi
-          </h2>
-          <p className="text-xs text-slate-500">
-            Skor prestasi diperoleh dari gabungan seluruh aspek penilaian
-            akademik dan kehadiran
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+    <ModulePageShell
+      theme="navy"
+      eyebrow={`Transkrip Akademik | Kelas ${data.student.kelas}`}
+      title="Transkrip Nilai Saya"
+      description="Rincian nilai mata pelajaran, komponen Tugas, UTS, UAS, dan skor prestasi semester."
+      stats={[
+        {
+          label: "Skor Prestasi",
+          value: data.totalSkorSPK,
+          sublabel: "dari 100",
+          tone: "amber",
+        },
+        {
+          label: "Mapel Lengkap",
+          value: `${completenessStats.lengkap}/${completenessStats.total}`,
+          tone:
+            completenessStats.total > 0 &&
+            completenessStats.lengkap === completenessStats.total
+              ? "emerald"
+              : "amber",
+        },
+        ...(data.kehadiran
+          ? [
+              {
+                label: "Kehadiran",
+                value: `${data.kehadiran.persentase}%`,
+                sublabel: `H:${data.kehadiran.hadir} I:${data.kehadiran.izin} S:${data.kehadiran.sakit} A:${data.kehadiran.alfa}`,
+                tone: (data.kehadiran.persentase >= 75
+                  ? "emerald"
+                  : "rose") as "emerald" | "rose",
+              },
+            ]
+          : []),
+        {
+          label: "Periode Aktif",
+          value: data.periode || "Aktif",
+          sublabel: `${data.criteria.length} Aspek`,
+        },
+      ]}
+      actions={
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportTranscript}
+            className="gap-1.5 cursor-pointer text-xs"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Unduh Transkrip (.xlsx)
+          </Button>
           {data.erapor?.canPrint ? (
-            <Link href="/siswa/erapor" className="self-center sm:self-auto">
+            <Link href="/siswa/erapor">
               <Button
                 variant="default"
                 size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold gap-2 text-xs shadow-2xs w-full sm:w-auto cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-1.5 text-xs shadow-xs cursor-pointer"
               >
-                <BookMarked className="w-4 h-4" />
+                <BookMarked className="w-3.5 h-3.5" />
                 Buka E-Rapor
               </Button>
             </Link>
@@ -428,121 +430,31 @@ export default function SiswaNilaiPage() {
                 const gate = getStudentEraporGateInfo(data.erapor?.statusRapor);
                 toast.info(gate.message);
               }}
-              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 font-medium gap-2 text-xs w-full sm:w-auto cursor-pointer"
+              className="gap-1.5 text-xs cursor-pointer"
               title={getStudentEraporGateInfo(data.erapor?.statusRapor).message}
             >
-              <Lock className="w-3.5 h-3.5 text-amber-600" />
+              <Lock className="w-3.5 h-3.5 text-amber-300" />
               E-Rapor ({getStudentEraporGateInfo(data.erapor?.statusRapor).badgeLabel})
             </Button>
           )}
-
-          <div className="flex items-center gap-3.5 rounded-xl bg-slate-50 px-4 py-3 border border-slate-200/90 w-full sm:w-auto justify-between sm:justify-start shrink-0">
-            <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-200/80">
-              <Award className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-slate-500">
-                Total Skor Prestasi
-              </p>
-              <div className="flex items-baseline gap-1.5">
-                <p className="text-2xl font-bold tabular-nums text-[#1e3a8a]">
-                  {data.totalSkorSPK}
-                </p>
-                <span className="text-xs text-slate-500 font-semibold">dari 100</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Attendance Summary */}
-      {data.kehadiran && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
-            <p className="text-xs font-medium text-slate-500">
-              Hadir
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1">
-              {data.kehadiran.hadir}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
-            <p className="text-xs font-medium text-slate-500">
-              Izin
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1">
-              {data.kehadiran.izin}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
-            <p className="text-xs font-medium text-slate-500">
-              Sakit
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1">
-              {data.kehadiran.sakit}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
-            <p className="text-xs font-medium text-slate-500">
-              Alfa
-            </p>
-            <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1">
-              {data.kehadiran.alfa}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs col-span-2 sm:col-span-1">
-            <p className="text-xs font-medium text-slate-500">
-              % Kehadiran
-            </p>
-            <p
-              className={`text-2xl font-bold tabular-nums mt-1 ${
-                getScoreTone(data.kehadiran.persentase).text
-              }`}
-            >
-              {data.kehadiran.persentase}%
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Dual-View Tabs Switcher & Unduh Transkrip Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900">
-            Mode Tampilan Transkrip Evaluasi
-          </h3>
-          <p className="text-xs text-slate-500">
-            Pilih tampilan berdasarkan rincian per mata pelajaran atau per aspek
-            penilaian
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as "mapel" | "kriteria")}
-          >
-            <TabsList>
-              <TabsTrigger value="mapel" className="gap-1.5 cursor-pointer">
-                <GraduationCap className="h-3.5 w-3.5" /> Rincian Per Mapel ({subjectsList.length})
-              </TabsTrigger>
-              <TabsTrigger value="kriteria" className="gap-1.5 cursor-pointer">
-                <Layers className="h-3.5 w-3.5" /> Aspek Penilaian ({data.criteria.length})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleExportTranscript}
-            className="gap-1.5 cursor-pointer text-xs h-8"
-          >
-            <Download className="h-3.5 w-3.5 text-blue-600" />
-            Unduh Transkrip (.xlsx)
-          </Button>
-        </div>
-      </div>
-
+        </>
+      }
+      tabs={[
+        {
+          key: "mapel",
+          label: "Rincian Per Mapel",
+          badge: subjectsList.length,
+        },
+        {
+          key: "kriteria",
+          label: "Aspek Penilaian",
+          badge: data.criteria.length,
+        },
+      ]}
+      activeTab={activeTab}
+      onTabChange={(key) => setActiveTab(key as "mapel" | "kriteria")}
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
       {activeTab === "mapel" ? (
         <div className="space-y-6">
           {/* Toolbar Pencarian & Filter Status Mata Pelajaran */}
@@ -1435,6 +1347,6 @@ export default function SiswaNilaiPage() {
           </div>
         </div>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

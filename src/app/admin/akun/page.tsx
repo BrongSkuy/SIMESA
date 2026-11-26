@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  UserCog,
   UserPlus,
   Search,
   KeyRound,
@@ -11,13 +10,9 @@ import {
   Filter,
   Loader2,
   Edit,
-  ShieldCheck,
-  Users,
-  GraduationCap,
-  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import {
   LeaderboardPagination,
   LEADERBOARD_ITEMS_PER_PAGE,
@@ -32,25 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -500,14 +476,25 @@ export default function AdminAkunPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Manajemen Akun & Hak Akses"
-        badge={`${accounts.length} Akun Terdaftar`}
-        description="Kelola kredensial login, otorisasi peran (RBAC), dan status aktif pengguna sistem"
-        icon={UserCog}
-      >
-        {isSuperadmin && (
+    <ModulePageShell
+      theme="obsidian"
+      eyebrow="Administrasi Sistem | Portal Admin"
+      title="Manajemen Akun & Hak Akses"
+      description="Kelola kredensial login, otorisasi peran (RBAC), dan status aktif pengguna sistem."
+      stats={[
+        { label: "Total Akun", value: accounts.length },
+        { label: "Guru & Staf", value: totalStaff, tone: "blue" },
+        { label: "Akun Siswa", value: totalSiswa, tone: "emerald" },
+        totalBanned > 0
+          ? { label: "Ditangguhkan", value: totalBanned, tone: "rose" }
+          : {
+              label: "Akun Aktif",
+              value: accounts.length - totalBanned,
+              tone: "emerald",
+            },
+      ]}
+      actions={
+        isSuperadmin ? (
           <Button
             type="button"
             size="sm"
@@ -517,64 +504,75 @@ export default function AdminAkunPage() {
             <UserPlus className="h-3.5 w-3.5" />
             Tambah Akun Baru
           </Button>
-        )}
-      </PageHeader>
+        ) : undefined
+      }
+      afterSheet={
+        <>
+          <AddAccountDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            name={formAddName}
+            onNameChange={setFormAddName}
+            username={formAddUsername}
+            onUsernameChange={setFormAddUsername}
+            password={formAddPassword}
+            onPasswordChange={setFormAddPassword}
+            email={formAddEmail}
+            onEmailChange={setFormAddEmail}
+            role={formAddRole}
+            onRoleChange={setFormAddRole}
+            gender={formAddGender}
+            onGenderChange={setFormAddGender}
+            extraRoles={formAddExtraRoles}
+            onExtraRolesChange={setFormAddExtraRoles}
+            waliKelas={formAddWaliKelas}
+            onWaliKelasChange={setFormAddWaliKelas}
+            classesList={classesList}
+            saving={saving}
+            onSubmit={handleAdd}
+          />
 
-      {/* Summary Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500">
-              Guru &amp; Tenaga Kependidikan
-            </p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
-              {totalStaff}{" "}
-              <span className="text-xs font-normal text-slate-500">Akun</span>
-            </p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
-        </div>
+          <EditAccountDialog
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            editItem={editItem}
+            isSuperadmin={isSuperadmin}
+            name={formEditName}
+            onNameChange={setFormEditName}
+            username={formEditUsername}
+            onUsernameChange={setFormEditUsername}
+            role={formEditRole}
+            onRoleChange={setFormEditRole}
+            extraRoles={formEditExtraRoles}
+            onExtraRolesChange={setFormEditExtraRoles}
+            waliKelas={formEditWaliKelas}
+            onWaliKelasChange={setFormEditWaliKelas}
+            classesList={classesList}
+            saving={saving}
+            onSubmit={handleEdit}
+          />
 
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500">Akun Siswa</p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
-              {totalSiswa}{" "}
-              <span className="text-xs font-normal text-slate-500">Akun</span>
-            </p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
-            <GraduationCap className="h-5 w-5" />
-          </div>
-        </div>
+          <ResetPasswordDialog
+            open={resetOpen}
+            onOpenChange={setResetOpen}
+            resetItem={resetItem}
+            newPassword={formNewPassword}
+            onNewPasswordChange={setFormNewPassword}
+            saving={saving}
+            onSubmit={handleReset}
+          />
 
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500">
-              Status Akses Pengguna
-            </p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums mt-0.5">
-              {accounts.length - totalBanned}{" "}
-              <span className="text-xs font-normal text-emerald-600">
-                Aktif
-              </span>
-              {totalBanned > 0 && (
-                <span className="text-xs font-normal text-rose-600 ml-2">
-                  · {totalBanned} Ditangguhkan
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700 border border-slate-200">
-            <Users className="h-5 w-5" />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Card Container */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+          <AccountStatusAlertDialog
+            statusTarget={statusTarget}
+            onClose={() => setStatusTarget(null)}
+            saving={saving}
+            onConfirm={toggleStatus}
+          />
+        </>
+      }
+    >
+      {/* Main Table Container */}
+      <div>
         <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
@@ -761,67 +759,6 @@ export default function AdminAkunPage() {
           </div>
         )}
       </div>
-
-      <AddAccountDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        name={formAddName}
-        onNameChange={setFormAddName}
-        username={formAddUsername}
-        onUsernameChange={setFormAddUsername}
-        password={formAddPassword}
-        onPasswordChange={setFormAddPassword}
-        email={formAddEmail}
-        onEmailChange={setFormAddEmail}
-        role={formAddRole}
-        onRoleChange={setFormAddRole}
-        gender={formAddGender}
-        onGenderChange={setFormAddGender}
-        extraRoles={formAddExtraRoles}
-        onExtraRolesChange={setFormAddExtraRoles}
-        waliKelas={formAddWaliKelas}
-        onWaliKelasChange={setFormAddWaliKelas}
-        classesList={classesList}
-        saving={saving}
-        onSubmit={handleAdd}
-      />
-
-      <EditAccountDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        editItem={editItem}
-        isSuperadmin={isSuperadmin}
-        name={formEditName}
-        onNameChange={setFormEditName}
-        username={formEditUsername}
-        onUsernameChange={setFormEditUsername}
-        role={formEditRole}
-        onRoleChange={setFormEditRole}
-        extraRoles={formEditExtraRoles}
-        onExtraRolesChange={setFormEditExtraRoles}
-        waliKelas={formEditWaliKelas}
-        onWaliKelasChange={setFormEditWaliKelas}
-        classesList={classesList}
-        saving={saving}
-        onSubmit={handleEdit}
-      />
-
-      <ResetPasswordDialog
-        open={resetOpen}
-        onOpenChange={setResetOpen}
-        resetItem={resetItem}
-        newPassword={formNewPassword}
-        onNewPasswordChange={setFormNewPassword}
-        saving={saving}
-        onSubmit={handleReset}
-      />
-
-      <AccountStatusAlertDialog
-        statusTarget={statusTarget}
-        onClose={() => setStatusTarget(null)}
-        saving={saving}
-        onConfirm={toggleStatus}
-      />
-    </div>
+    </ModulePageShell>
   );
 }

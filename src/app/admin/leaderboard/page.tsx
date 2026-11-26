@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import LeaderboardCard, {
   LeaderboardPagination,
@@ -452,32 +452,90 @@ export default function AdminLeaderboardPage() {
   const hasMissing = validation ? !validation.isValid : false;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Peringkat Leaderboard & Arsip SPK"
-        badge="SPK SAW"
-        description="Pemeringkatan siswa berprestasi berbasis Simple Additive Weighting (SAW) dan manajemen publikasi semester"
-        icon={Trophy}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 hide-on-print"
-          onClick={handleExport}
-          disabled={data.length === 0}
-        >
-          <Download className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 hide-on-print"
-          onClick={handleExportPDF}
-          disabled={data.length === 0}
-        >
-          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak PDF
-        </Button>
-      </PageHeader>
+    <ModulePageShell
+      title="Peringkat Leaderboard & Arsip SPK"
+      eyebrow="SPK SAW | Portal Admin"
+      description="Pemeringkatan siswa berprestasi berbasis Simple Additive Weighting (SAW) dan manajemen publikasi semester."
+      icon={Trophy}
+      theme="royal"
+      tabsLabel="Filter peringkat per kelas"
+      tabs={[
+        { key: "umum", label: "Peringkat Umum" },
+        ...classes.map((c) => ({
+          key: c.namaKelas,
+          label: `Kelas ${c.namaKelas}`,
+        })),
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      stats={[
+        {
+          label: "Periode Aktif",
+          value: publishStatus?.periode || "Aktif",
+          sublabel: "Tahun ajaran berjalan",
+        },
+        {
+          label: "Status Rilis",
+          value: publishStatus?.isPublished ? "Terpublikasi" : "Mode Draf",
+          sublabel: publishStatus?.isPublished
+            ? "Terbuka di portal siswa"
+            : "Internal admin",
+          tone: publishStatus?.isPublished ? "emerald" : "amber",
+        },
+        {
+          label: "Siswa Terperingkat",
+          value: loading ? "..." : data.length,
+          sublabel: activeTab === "umum" ? "Semua kelas" : `Kelas ${activeTab}`,
+          tone: "blue",
+        },
+        {
+          label: "Arsip Rapor",
+          value: archives.length,
+          sublabel: "Dokumen tersimpan",
+        },
+      ]}
+      actions={
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 hide-on-print"
+            onClick={handleExport}
+            disabled={data.length === 0}
+          >
+            <Download className="h-3.5 w-3.5" /> Ekspor Excel
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 hide-on-print"
+            onClick={handleExportPDF}
+            disabled={data.length === 0}
+          >
+            <Printer className="h-3.5 w-3.5" /> Cetak PDF
+          </Button>
+        </>
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+      afterSheet={
+        <ConfirmDialog
+          open={Boolean(deleteArchiveTarget)}
+          onOpenChange={(open) => {
+            if (!open) setDeleteArchiveTarget(null);
+          }}
+          title="Hapus Arsip Nilai Rapor?"
+          description={
+            deleteArchiveTarget
+              ? `Arsip ${deleteArchiveTarget.namaFile} akan dihapus permanen dari database.`
+              : ""
+          }
+          confirmLabel="Ya, Hapus Arsip"
+          variant="destructive"
+          loading={deletingArchive}
+          onConfirm={executeDeleteArsip}
+        />
+      }
+    >
 
       <style
         dangerouslySetInnerHTML={{
@@ -980,23 +1038,6 @@ export default function AdminLeaderboardPage() {
           </div>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={Boolean(deleteArchiveTarget)}
-        onOpenChange={(open) => {
-          if (!open) setDeleteArchiveTarget(null);
-        }}
-        title="Hapus Arsip Nilai Rapor?"
-        description={
-          deleteArchiveTarget
-            ? `Arsip ${deleteArchiveTarget.namaFile} akan dihapus permanen dari database.`
-            : ""
-        }
-        confirmLabel="Ya, Hapus Arsip"
-        variant="destructive"
-        loading={deletingArchive}
-        onConfirm={executeDeleteArsip}
-      />
-    </div>
+    </ModulePageShell>
   );
 }

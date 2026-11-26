@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { SessionSetup } from "@/components/shared/session-setup";
 import { SearchableSelect } from "@/components/ui/searchable-select";
@@ -462,14 +462,56 @@ export default function AdminNilaiPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Input Nilai Multi-Kategori"
-        badge="Operasional"
-        description="Kelola komponen penilaian seperti Tugas, UTS, UAS, dan Praktek untuk perhitungan kriteria SPK SAW"
-        icon={PenLine}
-      >
-        {showGrid && (
+    <ModulePageShell
+      title="Input Nilai Multi-Kategori"
+      eyebrow="Akademik | Portal Admin"
+      description="Kelola komponen penilaian seperti Tugas, UTS, UAS, dan Praktek untuk perhitungan kriteria SPK SAW."
+      icon={PenLine}
+      theme="navy"
+      stats={
+        showGrid
+          ? [
+              {
+                label: "Total Siswa",
+                value: siswaList.length,
+                sublabel: `Kelas ${selectedKelas}`,
+              },
+              {
+                label: "Kategori Penilaian",
+                value: categories.length,
+                sublabel: isAkademik ? "Kolom nilai aktif" : "Aspek non-akademik",
+                tone: "blue",
+              },
+              {
+                label: "Mata Pelajaran",
+                value: selectedMapel === "Umum" ? "Umum" : selectedMapel,
+                sublabel: "Target penilaian",
+              },
+              {
+                label: "Bobot Kriteria",
+                value: activeCriteriaObj
+                  ? `${formatBobotPct(activeCriteriaObj.bobot)}%`
+                  : "-",
+                sublabel: activeCriteriaObj?.namaKriteria || "SPK SAW",
+                tone: "emerald",
+              },
+            ]
+          : [
+              {
+                label: "Kelas Tersedia",
+                value: classes.length,
+                sublabel: "Target penilaian",
+              },
+              {
+                label: "Kriteria SPK",
+                value: criteria.length,
+                sublabel: "Parameter evaluasi",
+                tone: "blue",
+              },
+            ]
+      }
+      actions={
+        showGrid ? (
           <>
             <Button
               variant="outline"
@@ -477,7 +519,7 @@ export default function AdminNilaiPage() {
               className="gap-1.5"
               onClick={handleDownloadTemplate}
             >
-              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+              <Download className="h-3.5 w-3.5" /> Template
             </Button>
             <Button
               variant="outline"
@@ -485,7 +527,7 @@ export default function AdminNilaiPage() {
               className="gap-1.5"
               onClick={handleExportExcel}
             >
-              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+              <Save className="h-3.5 w-3.5" /> Ekspor Excel
             </Button>
             <Button
               variant="outline"
@@ -497,7 +539,7 @@ export default function AdminNilaiPage() {
               {importing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-3.5 w-3.5 text-slate-500" />
+                <Upload className="h-3.5 w-3.5" />
               )}
               Impor Excel
             </Button>
@@ -509,8 +551,24 @@ export default function AdminNilaiPage() {
               onChange={handleImportExcel}
             />
           </>
-        )}
-      </PageHeader>
+        ) : undefined
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+      afterSheet={
+        <ConfirmDialog
+          open={confirmChangeSessionOpen}
+          onOpenChange={setConfirmChangeSessionOpen}
+          title="Ganti Sesi Penilaian?"
+          description="Perubahan penilaian pada sesi ini belum disimpan. Tetap ganti sesi dan abaikan perubahan?"
+          confirmLabel="Ya, Ganti Sesi"
+          variant="default"
+          onConfirm={() => {
+            setConfirmChangeSessionOpen(false);
+            setShowGrid(false);
+          }}
+        />
+      }
+    >
 
       <SessionSetup
         active={showGrid}
@@ -866,19 +924,6 @@ export default function AdminNilaiPage() {
           </div>
         </>
       )}
-
-      <ConfirmDialog
-        open={confirmChangeSessionOpen}
-        onOpenChange={setConfirmChangeSessionOpen}
-        title="Ganti Sesi Penilaian?"
-        description="Perubahan penilaian pada sesi ini belum disimpan. Tetap ganti sesi dan abaikan perubahan?"
-        confirmLabel="Ya, Ganti Sesi"
-        variant="default"
-        onConfirm={() => {
-          setConfirmChangeSessionOpen(false);
-          setShowGrid(false);
-        }}
-      />
-    </div>
+    </ModulePageShell>
   );
 }

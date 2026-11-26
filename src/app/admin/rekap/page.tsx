@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
-import { BarChart3, Loader2, Download, Users, CheckCircle2 } from "lucide-react";
+import { BarChart3, Loader2, Download } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -14,8 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
@@ -26,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 interface StudentRekap {
@@ -270,13 +268,39 @@ export default function AdminRekapPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Rekapitulasi Kehadiran & Nilai"
-        badge="Analitik Kelas"
-        description="Pantau matriks akumulasi presensi dan perolehan nilai kriteria SPK per kelas"
-        icon={BarChart3}
-      >
+    <ModulePageShell
+      title="Rekapitulasi Kehadiran & Nilai"
+      eyebrow="Analitik Kelas | Portal Admin"
+      description="Pantau matriks akumulasi presensi dan perolehan nilai kriteria SPK per kelas."
+      icon={BarChart3}
+      theme="navy"
+      tabsLabel="Pilih kelas rekapitulasi"
+      tabs={classes.map((c) => ({
+        key: c.namaKelas,
+        label: `Kelas ${c.namaKelas}`,
+      }))}
+      activeTab={selectedClass}
+      onTabChange={setSelectedClass}
+      stats={[
+        {
+          label: selectedClass ? `Siswa Kelas ${selectedClass}` : "Total Siswa",
+          value: loadingRekap ? "..." : rekapData.length,
+          sublabel: "Peserta didik terdaftar",
+        },
+        {
+          label: "Rata-rata Kehadiran",
+          value: loadingRekap ? "..." : `${avgPersen}%`,
+          sublabel: `${totalHadir} total presensi hadir`,
+          tone: "emerald",
+        },
+        {
+          label: "Total Ketidakhadiran",
+          value: loadingRekap ? "..." : totalAbsen,
+          sublabel: "Gabungan Izin, Sakit & Alfa",
+          tone: totalAbsen > 0 ? "amber" : "default",
+        },
+      ]}
+      actions={
         <Button
           variant="outline"
           size="sm"
@@ -284,61 +308,23 @@ export default function AdminRekapPage() {
           onClick={handleExport}
           disabled={rekapData.length === 0}
         >
-          <Download className="h-3.5 w-3.5 text-slate-500" /> Ekspor Rekap Excel
+          <Download className="h-3.5 w-3.5" /> Ekspor Rekap Excel
         </Button>
-      </PageHeader>
-
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
       {classes.length === 0 ? (
-        <div className="border border-slate-200 py-12 text-center text-xs text-slate-500">
+        <div className="py-12 text-center text-xs text-slate-500">
           Belum ada data kelas terdaftar.
         </div>
+      ) : loadingRekap ? (
+        <div className="flex py-16 justify-center">
+          <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
+        </div>
       ) : (
-        <Tabs value={selectedClass} onValueChange={setSelectedClass}>
-          <TabsList className="flex flex-wrap h-auto">
-            {classes.map((c) => (
-              <TabsTrigger key={c.id} value={c.namaKelas}>
-                Kelas {c.namaKelas}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value={selectedClass} className="space-y-6 mt-4">
-            {loadingRekap ? (
-              <div className="flex py-16 justify-center">
-                <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
-              </div>
-            ) : (
-              <>
-                {/* KPI Row */}
-                <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white overflow-hidden shadow-xs">
-                  <StatCard
-                    title={`Siswa Kelas ${selectedClass}`}
-                    value={rekapData.length}
-                    icon={Users}
-                    color="blue"
-                    footerLeft="Peserta didik terdaftar"
-                    footerRight="Kelas Aktif"
-                  />
-                  <StatCard
-                    title="Rata-rata Kehadiran"
-                    value={`${avgPersen}%`}
-                    icon={CheckCircle2}
-                    color="emerald"
-                    footerLeft={`${totalHadir} total presensi hadir`}
-                    footerRight="Akumulasi"
-                  />
-                  <StatCard
-                    title="Total Ketidakhadiran"
-                    value={totalAbsen}
-                    icon={BarChart3}
-                    color="amber"
-                    footerLeft="Gabungan Izin, Sakit & Alfa"
-                    footerRight="Log Sesi"
-                  />
-                </div>
-
-                {/* Chart */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-3">
+        <>
+          {/* Chart */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-3">
                   <div className="pb-3.5 border-b border-slate-100 transition-colors">
                     <CardTitle className="text-base font-semibold text-slate-900 tracking-tight transition-colors">
                       Distribusi Status Kehadiran Tersimpan
@@ -539,11 +525,8 @@ export default function AdminRekapPage() {
                     </Table>
                   </div>
                 </div>
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
+        </>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

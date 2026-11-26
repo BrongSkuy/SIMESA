@@ -11,13 +11,10 @@ import {
   Loader2,
   Trash2,
   AlertCircle,
-  FileSpreadsheet,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getTodayWIB, cn } from "@/lib/utils";
-import { PageHeader } from "@/components/shared/page-header";
+import { getTodayWIB } from "@/lib/utils";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { AttendanceHistoryMatrix } from "@/components/absensi/attendance-history-matrix";
 import {
@@ -538,15 +535,65 @@ export default function AdminAbsensiPage() {
     setDateWindowIndex((prev) => Math.min(maxStartIndex, prev + WINDOW_SIZE));
   };
 
+  const attendanceSummary = useMemo(() => {
+    const values = Object.values(attendanceData);
+    return {
+      hadir: values.filter((s) => s === "Hadir").length,
+      izinSakit: values.filter((s) => s === "Izin" || s === "Sakit").length,
+      alfa: values.filter((s) => s === "Alfa").length,
+    };
+  }, [attendanceData]);
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Presensi & Absensi Siswa"
-        badge="Operasional"
-        description="Input dan kelola kehadiran harian siswa per kelas dan mata pelajaran"
-        icon={ClipboardCheck}
-      >
-        {showGrid && (
+    <ModulePageShell
+      title="Presensi & Absensi Siswa"
+      eyebrow="Operasional | Portal Admin"
+      description="Input dan kelola kehadiran harian siswa per kelas dan mata pelajaran."
+      icon={ClipboardCheck}
+      theme="navy"
+      stats={
+        showGrid
+          ? [
+              {
+                label: "Total Siswa",
+                value: siswaList.length,
+                sublabel: `Kelas ${selectedKelas}`,
+              },
+              {
+                label: "Hadir",
+                value: attendanceSummary.hadir,
+                sublabel: "Tercatat hadir",
+                tone: "emerald",
+              },
+              {
+                label: "Izin & Sakit",
+                value: attendanceSummary.izinSakit,
+                sublabel: "Tidak hadir berizin",
+                tone: attendanceSummary.izinSakit > 0 ? "amber" : "default",
+              },
+              {
+                label: "Alfa",
+                value: attendanceSummary.alfa,
+                sublabel: "Tanpa keterangan",
+                tone: attendanceSummary.alfa > 0 ? "rose" : "default",
+              },
+            ]
+          : [
+              {
+                label: "Kelas Tersedia",
+                value: classes.length,
+                sublabel: "Siap dicatat",
+              },
+              {
+                label: "Tanggal Aktif",
+                value: formatTanggalID(tanggal),
+                sublabel: "WIB",
+                tone: "blue",
+              },
+            ]
+      }
+      actions={
+        showGrid ? (
           <>
             <Button
               variant="outline"
@@ -554,7 +601,7 @@ export default function AdminAbsensiPage() {
               className="gap-1.5"
               onClick={handleDownloadTemplate}
             >
-              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+              <Download className="h-3.5 w-3.5" /> Template
             </Button>
             <Button
               variant="outline"
@@ -562,7 +609,7 @@ export default function AdminAbsensiPage() {
               className="gap-1.5"
               onClick={handleExportData}
             >
-              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+              <Save className="h-3.5 w-3.5" /> Ekspor Excel
             </Button>
             <Button
               variant="outline"
@@ -574,7 +621,7 @@ export default function AdminAbsensiPage() {
               {importing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-3.5 w-3.5 text-slate-500" />
+                <Upload className="h-3.5 w-3.5" />
               )}
               Impor Excel
             </Button>
@@ -586,8 +633,24 @@ export default function AdminAbsensiPage() {
               onChange={handleImport}
             />
           </>
-        )}
-      </PageHeader>
+        ) : undefined
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+      afterSheet={
+        <ConfirmDialog
+          open={confirmChangeSessionOpen}
+          onOpenChange={setConfirmChangeSessionOpen}
+          title="Ganti Sesi Presensi?"
+          description="Perubahan presensi pada sesi ini belum disimpan. Tetap ganti sesi dan abaikan perubahan?"
+          confirmLabel="Ya, Ganti Sesi"
+          variant="default"
+          onConfirm={() => {
+            setConfirmChangeSessionOpen(false);
+            setShowGrid(false);
+          }}
+        />
+      }
+    >
 
       {/* Step 1: Select class, mapel & date */}
       <SessionSetup
@@ -879,19 +942,6 @@ export default function AdminAbsensiPage() {
           />
         </>
       )}
-
-      <ConfirmDialog
-        open={confirmChangeSessionOpen}
-        onOpenChange={setConfirmChangeSessionOpen}
-        title="Ganti Sesi Presensi?"
-        description="Perubahan presensi pada sesi ini belum disimpan. Tetap ganti sesi dan abaikan perubahan?"
-        confirmLabel="Ya, Ganti Sesi"
-        variant="default"
-        onConfirm={() => {
-          setConfirmChangeSessionOpen(false);
-          setShowGrid(false);
-        }}
-      />
-    </div>
+    </ModulePageShell>
   );
 }

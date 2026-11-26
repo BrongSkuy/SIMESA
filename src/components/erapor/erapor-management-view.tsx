@@ -6,10 +6,8 @@ import {
   Printer,
   Edit3,
   CheckCircle2,
-  AlertCircle,
   Search,
   Users,
-  GraduationCap,
   Loader2,
   Eye,
   RotateCcw,
@@ -18,8 +16,7 @@ import {
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
-import { StatCard } from "@/components/shared/stat-card";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardDescription, CardTitle } from "@/components/ui/card";
@@ -473,162 +470,186 @@ export function EraporManagementView({
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Laporan Hasil Belajar Siswa (E-Rapor)"
-        badge={portal === "admin" ? "Portal Admin" : "Portal Guru"}
-        description="Rekap nilai akhir, catatan wali kelas, dan pencetakan rapor resmi semester"
-        icon={FileSpreadsheet}
-        bottomContent={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Total Siswa"
-              value={stats.total}
-              icon={Users}
-              color="blue"
-              footerLeft="Siswa aktif"
-              footerRight="Kelas terpilih"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Tuntas KKM"
-              value={stats.tuntas}
-              icon={CheckCircle2}
-              color="emerald"
-              footerLeft={`Standar KKM ${activeDefaultKkm}`}
-              footerRight="KKM tercapai"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Perlu Perbaikan"
-              value={stats.remidi}
-              icon={AlertCircle}
-              color="amber"
-              footerLeft="Nilai di bawah KKM"
-              footerRight="Perlu remidi"
-            />
-            <StatCard
-              variant="dark"
-              className="rounded-xl border border-white/10"
-              title="Rapor Disahkan"
-              value={`${stats.disahkan} dari ${stats.total}`}
-              icon={GraduationCap}
-              color="blue"
-              footerLeft={`${stats.adaCatatan} siswa bercatatan`}
-              footerRight="Terverifikasi"
-            />
-          </div>
-        }
-      >
-        <button
-          type="button"
-          onClick={() => {
-            if (filteredStudents.length > 0) {
-              handlePreviewReport(filteredStudents[0].studentId);
-            } else {
-              toast.info("Belum ada data siswa untuk pratinjau rapor");
+    <ModulePageShell
+      title="Laporan Hasil Belajar Siswa (E-Rapor)"
+      eyebrow={`Laporan Hasil Belajar | ${portal === "admin" ? "Portal Admin" : "Portal Guru"}`}
+      description="Rekap nilai akhir, catatan wali kelas, dan pencetakan rapor resmi semester."
+      icon={FileSpreadsheet}
+      theme="emerald"
+      tabsLabel="Pilih kelas E-Rapor"
+      tabs={kelasList.map((c) => ({
+        key: c.namaKelas,
+        label: `Kelas ${c.namaKelas}`,
+      }))}
+      activeTab={selectedKelas}
+      onTabChange={setSelectedKelas}
+      stats={[
+        {
+          label: "Total Siswa",
+          value: stats.total,
+          sublabel: selectedKelas ? `Kelas ${selectedKelas}` : "Kelas terpilih",
+        },
+        {
+          label: "Tuntas KKM",
+          value: stats.tuntas,
+          sublabel: `Standar KKM ${activeDefaultKkm}`,
+          tone: "emerald",
+        },
+        {
+          label: "Perlu Perbaikan",
+          value: stats.remidi,
+          sublabel: "Nilai di bawah KKM",
+          tone: stats.remidi > 0 ? "amber" : "default",
+        },
+        {
+          label: "Rapor Disahkan",
+          value: `${stats.disahkan}/${stats.total}`,
+          sublabel: `${stats.adaCatatan} siswa bercatatan`,
+          tone: "blue",
+        },
+      ]}
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              if (filteredStudents.length > 0) {
+                handlePreviewReport(filteredStudents[0].studentId);
+              } else {
+                toast.info("Belum ada data siswa untuk pratinjau rapor");
+              }
+            }}
+            disabled={
+              loadingPrint || !summaryData || filteredStudents.length === 0
             }
-          }}
-          disabled={
-            loadingPrint || !summaryData || filteredStudents.length === 0
-          }
-          className="inline-flex items-center gap-1.5 bg-white/[0.07] hover:bg-white/[0.13] border border-white/15 rounded-lg px-3.5 py-2 text-xs font-semibold text-slate-100 transition-colors cursor-pointer disabled:opacity-50"
-        >
-          {loadingPrint ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-300" />
-          ) : (
-            <Eye className="w-3.5 h-3.5 text-blue-300" />
-          )}
-          Pratinjau Contoh
-        </button>
-
-        <button
-          type="button"
-          onClick={openBulkPrintModal}
-          disabled={loadingClasses || kelasList.length === 0}
-          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
-        >
-          <Printer className="w-3.5 h-3.5" />
-          Cetak Massal
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPublishModalOpen(true)}
-          disabled={!selectedKelas || loadingSummary || stats.total === 0}
-          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/25 rounded-lg px-3.5 py-2 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
-        >
-          <Send className="w-3.5 h-3.5" />
-          Terbitkan Rapor
-        </button>
-      </PageHeader>
-
-      {/* 2. Container Konten Utama */}
-      <div className="space-y-6">
-        {/* Class Selection & Homeroom Info */}
-        {kelasList.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
-              <Users className="h-5 w-5" />
-            </div>
-            <p className="text-xs font-semibold text-slate-700 ">
-              Belum Ada Data Kelas Terdaftar
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs font-semibold text-slate-500 mr-1 shrink-0">
-                Pilih Kelas:
-              </span>
-              {kelasList.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setSelectedKelas(c.namaKelas)}
-                  className={`px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer ${
-                    selectedKelas === c.namaKelas
-                      ? "bg-[#1F4E78] text-white shadow-xs"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  Kelas {c.namaKelas}
-                </button>
-              ))}
-            </div>
-
-            {summaryData && (
-              <div className="flex items-center gap-2 text-xs bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-xs shrink-0">
-                <span className="text-slate-500 font-medium">
-                  Wali Kelas:
-                </span>
-                <span className="font-semibold text-slate-900 ">
-                  {summaryData.waliKelas}
-                </span>
-                <span className="text-slate-300 ">|</span>
-                <span className="text-slate-500 font-medium">
-                  Periode:
-                </span>
-                <span className="font-semibold text-blue-700 ">
-                  {summaryData.periode.replace("-", " ")}
-                </span>
-              </div>
+            className="inline-flex items-center gap-1.5 bg-white/[0.08] hover:bg-white/15 border border-white/20 rounded-xl px-3.5 py-2 text-xs font-semibold text-white backdrop-blur-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            {loadingPrint ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-300" />
+            ) : (
+              <Eye className="w-3.5 h-3.5 text-emerald-300" />
             )}
-          </div>
-        )}
+            Pratinjau Contoh
+          </button>
 
-        {/* 3. DETAIL MATRIKS RAPOR SISWA TABLE */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="space-y-3 pb-3 border-b border-slate-100 ">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={openBulkPrintModal}
+            disabled={loadingClasses || kelasList.length === 0}
+            className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/25 rounded-xl px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            Cetak Massal
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPublishModalOpen(true)}
+            disabled={!selectedKelas || loadingSummary || stats.total === 0}
+            className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 rounded-xl px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Send className="w-3.5 h-3.5" />
+            Terbitkan Rapor
+          </button>
+        </>
+      }
+      afterSheet={
+        <>
+          {/* MODAL CETAK SEMUA (MASSAL) */}
+          <EraporBulkPrintModal
+            open={bulkModalOpen}
+            onOpenChange={setBulkModalOpen}
+            selectedKelas={selectedKelas}
+            kelasList={kelasList}
+            bulkScope={bulkScope}
+            onBulkScopeChange={setBulkScope}
+            bulkSelectedClasses={bulkSelectedClasses}
+            onBulkSelectedClassesChange={setBulkSelectedClasses}
+            bulkStatusRapor={bulkStatusRapor}
+            onBulkStatusRaporChange={setBulkStatusRapor}
+            bulkKetuntasan={bulkKetuntasan}
+            onBulkKetuntasanChange={setBulkKetuntasan}
+            bulkSortBy={bulkSortBy}
+            onBulkSortByChange={setBulkSortBy}
+            loadingBulkPrint={loadingBulkPrint}
+            onExecuteBulkPrint={handleExecuteBulkPrint}
+          />
+
+          {/* MODAL TERBITKAN RAPOR KELAS */}
+          <EraporPublishClassModal
+            open={publishModalOpen}
+            onOpenChange={setPublishModalOpen}
+            selectedKelas={selectedKelas}
+            stats={stats}
+            publishingClass={publishingClass}
+            onPublishClass={handlePublishClass}
+          />
+
+          {/* MODAL INPUT CATATAN WALI KELAS DAN EKSKUL */}
+          <EraporNoteModal
+            open={noteModalOpen}
+            onOpenChange={setNoteModalOpen}
+            selectedKelas={selectedKelas}
+            selectedStudent={selectedStudentForNote}
+            noteForm={noteForm}
+            onNoteFormChange={setNoteForm}
+            savingNote={savingNote}
+            onSaveNote={handleSaveNote}
+          />
+
+          {/* MODAL PRATINJAU CETAK E-RAPOR INTERNAL (SERAGAM DENGAN SP DAN DISPENSASI) */}
+          <Dialog
+            open={Boolean(activeReportData)}
+            onOpenChange={(open) => {
+              if (!open) setActiveReportData(null);
+            }}
+          >
+            <DialogContent
+              showCloseButton={false}
+              className="sm:max-w-5xl gap-0 p-0 overflow-hidden bg-slate-100 border border-slate-200"
+            >
+              <DialogTitle className="sr-only">
+                Pratinjau E-Rapor Internal
+              </DialogTitle>
+              {activeReportData && (
+                <ReportCardPrintView
+                  data={activeReportData}
+                  onBack={() => setActiveReportData(null)}
+                  inModal
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </>
+      }
+    >
+      {/* Container Konten Utama di dalam White Sheet */}
+      {kelasList.length === 0 ? (
+        <div className="p-10 text-center space-y-2">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
+            <Users className="h-5 w-5" />
+          </div>
+          <p className="text-xs font-semibold text-slate-700">
+            Belum Ada Data Kelas Terdaftar
+          </p>
+        </div>
+      ) : (
+        <div className="p-5 sm:p-6 space-y-4">
+          <div className="space-y-3 pb-3 border-b border-slate-100">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-base font-bold text-slate-900 tracking-tight">
-                  Rekapitulasi Rapor Siswa Kelas {selectedKelas}
-                </CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <CardTitle className="text-base font-bold text-slate-900 tracking-tight">
+                    Rekapitulasi Rapor Siswa Kelas {selectedKelas}
+                  </CardTitle>
+                  {summaryData && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-0.5 text-slate-600">
+                      <span>Wali Kelas: <strong className="text-slate-900">{summaryData.waliKelas}</strong></span>
+                      <span className="text-slate-300">|</span>
+                      <strong className="text-emerald-700">{summaryData.periode.replace("-", " ")}</strong>
+                    </span>
+                  )}
+                </div>
                 <CardDescription className="text-xs text-slate-500 mt-0.5">
                   Menampilkan {filteredStudents.length} dari{" "}
                   {summaryData?.students.length || 0} siswa | Nilai akhir
@@ -973,73 +994,7 @@ export function EraporManagementView({
             </div>
           )}
         </div>
-      </div>
-
-      {/* MODAL CETAK SEMUA (MASSAL) */}
-      <EraporBulkPrintModal
-        open={bulkModalOpen}
-        onOpenChange={setBulkModalOpen}
-        selectedKelas={selectedKelas}
-        kelasList={kelasList}
-        bulkScope={bulkScope}
-        onBulkScopeChange={setBulkScope}
-        bulkSelectedClasses={bulkSelectedClasses}
-        onBulkSelectedClassesChange={setBulkSelectedClasses}
-        bulkStatusRapor={bulkStatusRapor}
-        onBulkStatusRaporChange={setBulkStatusRapor}
-        bulkKetuntasan={bulkKetuntasan}
-        onBulkKetuntasanChange={setBulkKetuntasan}
-        bulkSortBy={bulkSortBy}
-        onBulkSortByChange={setBulkSortBy}
-        loadingBulkPrint={loadingBulkPrint}
-        onExecuteBulkPrint={handleExecuteBulkPrint}
-      />
-
-      {/* MODAL TERBITKAN RAPOR KELAS */}
-      <EraporPublishClassModal
-        open={publishModalOpen}
-        onOpenChange={setPublishModalOpen}
-        selectedKelas={selectedKelas}
-        stats={stats}
-        publishingClass={publishingClass}
-        onPublishClass={handlePublishClass}
-      />
-
-      {/* MODAL INPUT CATATAN WALI KELAS DAN EKSKUL */}
-      <EraporNoteModal
-        open={noteModalOpen}
-        onOpenChange={setNoteModalOpen}
-        selectedKelas={selectedKelas}
-        selectedStudent={selectedStudentForNote}
-        noteForm={noteForm}
-        onNoteFormChange={setNoteForm}
-        savingNote={savingNote}
-        onSaveNote={handleSaveNote}
-      />
-
-      {/* MODAL PRATINJAU CETAK E-RAPOR INTERNAL (SERAGAM DENGAN SP DAN DISPENSASI) */}
-      <Dialog
-        open={Boolean(activeReportData)}
-        onOpenChange={(open) => {
-          if (!open) setActiveReportData(null);
-        }}
-      >
-        <DialogContent
-          showCloseButton={false}
-          className="sm:max-w-5xl gap-0 p-0 overflow-hidden bg-slate-100 border border-slate-200"
-        >
-          <DialogTitle className="sr-only">
-            Pratinjau E-Rapor Internal
-          </DialogTitle>
-          {activeReportData && (
-            <ReportCardPrintView
-              data={activeReportData}
-              onBack={() => setActiveReportData(null)}
-              inModal
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+      )}
+    </ModulePageShell>
   );
 }

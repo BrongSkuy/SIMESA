@@ -20,7 +20,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import * as XLSX from "xlsx";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { SessionSetup } from "@/components/shared/session-setup";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Label } from "@/components/ui/label";
@@ -401,13 +401,49 @@ export default function AdminNilaiSayaPage() {
   const selectedStudentObj = students.find((s) => s.id === selectedStudent);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Pratinjau Transkrip & Skor Siswa"
-        badge="Inspeksi Akademik"
-        description="Pilih siswa untuk meninjau rincian penilaian seluruh kriteria dan akumulasi skor SPK SAW"
-        icon={ClipboardList}
-      />
+    <ModulePageShell
+      title="Pratinjau Transkrip & Skor Siswa"
+      eyebrow="Inspeksi Akademik | Portal Admin"
+      description="Pilih siswa untuk meninjau rincian penilaian seluruh kriteria dan akumulasi skor SPK SAW."
+      icon={ClipboardList}
+      theme="navy"
+      stats={
+        data
+          ? [
+              {
+                label: "Siswa Terpilih",
+                value: data.student.namaLengkap,
+                sublabel: `NIS ${data.student.nis}`,
+              },
+              {
+                label: "Kelas",
+                value: data.student.kelas,
+                sublabel: data.periode || "Aktif",
+                tone: "blue",
+              },
+              {
+                label: "Total Skor SPK SAW",
+                value: data.totalSkorSPK,
+                sublabel: "Akumulasi kriteria",
+                tone: "emerald",
+              },
+            ]
+          : [
+              {
+                label: "Kelas Tersedia",
+                value: classes.length,
+                sublabel: "Siap ditinjau",
+              },
+              {
+                label: "Status Inspeksi",
+                value: "Pilih Siswa",
+                sublabel: "Langkah 1 dari 2",
+                tone: "blue",
+              },
+            ]
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
 
       <SessionSetup
         active={Boolean(data)}
@@ -1371,6 +1407,6 @@ export default function AdminNilaiSayaPage() {
           )}
         </div>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

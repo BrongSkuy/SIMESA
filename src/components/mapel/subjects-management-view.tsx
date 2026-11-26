@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   BookOpen,
-  Plus,
   Search,
   Filter,
   RotateCcw,
@@ -12,13 +11,11 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle,
   SlidersHorizontal,
-  Save,
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,16 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -531,30 +518,85 @@ export function SubjectsManagementView({
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={
-          viewMode === "kkm"
-            ? "Mata Pelajaran & Standar KKM"
-            : "Mata Pelajaran"
-        }
-        badge={
-          viewMode === "kkm"
-            ? `${uniqueMapelKkmList.length} Mapel Unik`
-            : `${subjects.length} Alokasi Mapel`
-        }
-        description={
-          canManage
-            ? "Kelola kurikulum mata pelajaran, distribusi pengampu, serta penetapan KKM default dan KKM per mata pelajaran."
-            : "Daftar mata pelajaran sekolah dan standar Kriteria Ketuntasan Minimal (mode hanya baca)."
-        }
-        icon={BookOpen}
-      >
-        {canManage && (
-          <SubjectCreateDialog
-            open={dialogOpen}
+    <ModulePageShell
+      title={
+        viewMode === "kkm"
+          ? "Mata Pelajaran & Standar KKM"
+          : "Mata Pelajaran"
+      }
+      eyebrow={`Kurikulum | ${portal === "admin" ? "Portal Admin" : "Portal Guru"}`}
+      description={
+        canManage
+          ? "Kelola kurikulum mata pelajaran, distribusi pengampu, serta penetapan KKM default dan KKM per mata pelajaran."
+          : "Daftar mata pelajaran sekolah dan standar Kriteria Ketuntasan Minimal (mode hanya baca)."
+      }
+      icon={BookOpen}
+      theme="navy"
+      tabsLabel="Mode tampilan mata pelajaran"
+      tabs={[
+        { key: "all", label: "Semua Mapel" },
+        { key: "kkm", label: "Standar KKM" },
+      ]}
+      activeTab={viewMode}
+      onTabChange={(k) => setViewMode(k as "all" | "kkm")}
+      stats={[
+        {
+          label: "Alokasi Mapel",
+          value: subjects.length,
+          sublabel: "Total penugasan",
+        },
+        {
+          label: "Mapel Unik",
+          value: uniqueMapelKkmList.length,
+          sublabel: "Kurikulum aktif",
+          tone: "blue",
+        },
+        {
+          label: "KKM Default",
+          value: defaultKkm,
+          sublabel: "Standar minimal",
+          tone: "emerald",
+        },
+      ]}
+      actions={
+        <>
+          {canManage && (
+            <SubjectCreateDialog
+              open={dialogOpen}
+              onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (!open) resetForm();
+              }}
+              formName={formName}
+              onFormNameChange={setFormName}
+              formGuru={formGuru}
+              onFormGuruChange={setFormGuru}
+              teachers={teachers}
+              classMultiSelect={renderClassMultiSelect()}
+              saving={saving}
+              onCancel={() => {
+                setDialogOpen(false);
+                resetForm();
+              }}
+              onSubmit={handleCreate}
+            />
+          )}
+
+          {!canManage && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-blue-100">
+              <Eye className="h-3.5 w-3.5 text-amber-300" />
+              Mode Hanya Baca
+            </span>
+          )}
+        </>
+      }
+      sheetClassName="p-5 sm:p-6 space-y-5"
+      afterSheet={
+        <>
+          <SubjectEditDialog
+            open={editOpen}
             onOpenChange={(open) => {
-              setDialogOpen(open);
+              setEditOpen(open);
               if (!open) resetForm();
             }}
             formName={formName}
@@ -565,43 +607,46 @@ export function SubjectsManagementView({
             classMultiSelect={renderClassMultiSelect()}
             saving={saving}
             onCancel={() => {
-              setDialogOpen(false);
+              setEditOpen(false);
               resetForm();
             }}
-            onSubmit={handleCreate}
+            onSubmit={handleEdit}
           />
-        )}
 
-        {!canManage && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-blue-100">
-            <Eye className="h-3.5 w-3.5 text-amber-300" />
-            Mode Hanya Baca
-          </span>
-        )}
-      </PageHeader>
+          <DefaultKkmDialog
+            open={defaultKkmDialogOpen}
+            onOpenChange={setDefaultKkmDialogOpen}
+            value={defaultKkmInput}
+            onValueChange={setDefaultKkmInput}
+            saving={savingDefaultKkm}
+            onSubmit={handleSaveDefaultKkm}
+          />
 
-      <SubjectEditDialog
-        open={editOpen}
-        onOpenChange={(open) => {
-          setEditOpen(open);
-          if (!open) resetForm();
-        }}
-        formName={formName}
-        onFormNameChange={setFormName}
-        formGuru={formGuru}
-        onFormGuruChange={setFormGuru}
-        teachers={teachers}
-        classMultiSelect={renderClassMultiSelect()}
-        saving={saving}
-        onCancel={() => {
-          setEditOpen(false);
-          resetForm();
-        }}
-        onSubmit={handleEdit}
-      />
+          <SubjectKkmDialog
+            open={kkmDialogOpen}
+            onOpenChange={setKkmDialogOpen}
+            targetItem={kkmTargetItem}
+            defaultKkm={defaultKkm}
+            kkmInputValue={kkmInputValue}
+            onKkmInputChange={setKkmInputValue}
+            capaianValue={kkmCapaianValue}
+            onCapaianChange={setKkmCapaianValue}
+            saving={savingMapelKkm}
+            onResetToDefault={handleResetMapelKkmToDefault}
+            onSubmit={handleSaveMapelKkm}
+          />
 
-      {/* Toolbar Pencarian + Switch "Semua Mapel" & "KKM" di Sebelah Search */}
-      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <DeleteSubjectDialog
+            target={deleteTarget}
+            deleting={deleting}
+            onClose={() => setDeleteTarget(null)}
+            onConfirm={confirmDelete}
+          />
+        </>
+      }
+    >
+      {/* Toolbar Pencarian & Filter */}
+      <div className="pb-3.5 border-b border-slate-200 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
@@ -615,42 +660,6 @@ export function SubjectsManagementView({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </div>
-
-          {/* Tombol Switch "Semua Mapel" dan "KKM" tepat di sebelah Search */}
-          <div
-            role="tablist"
-            aria-label="Mode tampilan mata pelajaran"
-            className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/80 shrink-0 self-start sm:self-auto"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={viewMode === "all"}
-              onClick={() => setViewMode("all")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-                viewMode === "all"
-                  ? "bg-[#0d1e38] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              Semua Mapel
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={viewMode === "kkm"}
-              onClick={() => setViewMode("kkm")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-                viewMode === "kkm"
-                  ? "bg-[#0d1e38] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              KKM
-            </button>
           </div>
         </div>
 
@@ -1037,36 +1046,6 @@ export function SubjectsManagementView({
           </div>
         )}
       </div>
-
-      <DefaultKkmDialog
-        open={defaultKkmDialogOpen}
-        onOpenChange={setDefaultKkmDialogOpen}
-        value={defaultKkmInput}
-        onValueChange={setDefaultKkmInput}
-        saving={savingDefaultKkm}
-        onSubmit={handleSaveDefaultKkm}
-      />
-
-      <SubjectKkmDialog
-        open={kkmDialogOpen}
-        onOpenChange={setKkmDialogOpen}
-        targetItem={kkmTargetItem}
-        defaultKkm={defaultKkm}
-        kkmInputValue={kkmInputValue}
-        onKkmInputChange={setKkmInputValue}
-        capaianValue={kkmCapaianValue}
-        onCapaianChange={setKkmCapaianValue}
-        saving={savingMapelKkm}
-        onResetToDefault={handleResetMapelKkmToDefault}
-        onSubmit={handleSaveMapelKkm}
-      />
-
-      <DeleteSubjectDialog
-        target={deleteTarget}
-        deleting={deleting}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-      />
-    </div>
+    </ModulePageShell>
   );
 }

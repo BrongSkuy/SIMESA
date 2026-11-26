@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getTodayWIB } from "@/lib/utils";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { AttendanceHistoryMatrix } from "@/components/absensi/attendance-history-matrix";
 import {
   SessionSetup,
@@ -607,6 +607,15 @@ export default function GuruAbsensiPage() {
     setDateWindowIndex((prev) => Math.min(maxStartIndex, prev + WINDOW_SIZE));
   };
 
+  const attendanceSummary = useMemo(() => {
+    const values = Object.values(attendanceData);
+    return {
+      hadir: values.filter((s) => s === "Hadir").length,
+      izinSakit: values.filter((s) => s === "Izin" || s === "Sakit").length,
+      alfa: values.filter((s) => s === "Alfa").length,
+    };
+  }, [attendanceData]);
+
   if (loadingInitial) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -616,14 +625,55 @@ export default function GuruAbsensiPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Presensi & Absensi Siswa"
-        badge="Portal Guru"
-        description="Input kehadiran siswa spesifik pada mata pelajaran dan kelas yang Anda ampu"
-        icon={ClipboardCheck}
-      >
-        {showGrid && (
+    <ModulePageShell
+      title="Presensi & Absensi Siswa"
+      eyebrow="Operasional | Portal Guru"
+      description="Input kehadiran siswa spesifik pada mata pelajaran dan kelas yang Anda ampu."
+      icon={ClipboardCheck}
+      theme="navy"
+      stats={
+        showGrid
+          ? [
+            {
+              label: "Total Siswa",
+              value: siswaList.length,
+              sublabel: `Kelas ${selectedKelas}`,
+            },
+            {
+              label: "Hadir",
+              value: attendanceSummary.hadir,
+              sublabel: "Tercatat hadir",
+              tone: "emerald",
+            },
+            {
+              label: "Izin & Sakit",
+              value: attendanceSummary.izinSakit,
+              sublabel: "Tidak hadir berizin",
+              tone: attendanceSummary.izinSakit > 0 ? "amber" : "default",
+            },
+            {
+              label: "Alfa",
+              value: attendanceSummary.alfa,
+              sublabel: "Tanpa keterangan",
+              tone: attendanceSummary.alfa > 0 ? "rose" : "default",
+            },
+          ]
+          : [
+            {
+              label: "Kelas Diampu",
+              value: classes.length,
+              sublabel: `${subjects.length} mapel aktif`,
+            },
+            {
+              label: "Tanggal Aktif",
+              value: formatTanggalID(tanggal),
+              sublabel: "WIB",
+              tone: "blue",
+            },
+          ]
+      }
+      actions={
+        showGrid ? (
           <>
             <Button
               variant="outline"
@@ -631,7 +681,7 @@ export default function GuruAbsensiPage() {
               className="gap-1.5"
               onClick={handleDownloadTemplate}
             >
-              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+              <Download className="h-3.5 w-3.5" /> Template
             </Button>
             <Button
               variant="outline"
@@ -639,7 +689,7 @@ export default function GuruAbsensiPage() {
               className="gap-1.5"
               onClick={handleExportData}
             >
-              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+              <Save className="h-3.5 w-3.5" /> Ekspor Excel
             </Button>
             <Button
               variant="outline"
@@ -651,7 +701,7 @@ export default function GuruAbsensiPage() {
               {importing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-3.5 w-3.5 text-slate-500" />
+                <Upload className="h-3.5 w-3.5" />
               )}
               Impor Excel
             </Button>
@@ -663,8 +713,38 @@ export default function GuruAbsensiPage() {
               onChange={handleImport}
             />
           </>
-        )}
-      </PageHeader>
+        ) : undefined
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+      afterSheet={
+        showGrid && siswaList.length > 0 ? (
+          <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl md:hidden flex items-center justify-between gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-10 text-xs gap-1.5 shrink-0 border-slate-300"
+              onClick={handleMarkAllPresent}
+            >
+              <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+              Semua Hadir
+            </Button>
+            <Button
+              size="sm"
+              className="h-10 text-xs font-semibold gap-1.5 flex-1 bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white shadow-xs"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )}
+              {saving ? "Menyimpan..." : "Simpan Presensi"}
+            </Button>
+          </div>
+        ) : undefined
+      }
+    >
 
       {classes.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-3">
@@ -1044,34 +1124,6 @@ export default function GuruAbsensiPage() {
                 </Button>
               </div>
 
-              {/* Floating Mobile Sticky Save Bar (Visible only on mobile < md when students are present) */}
-              {siswaList.length > 0 && (
-                <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl md:hidden flex items-center justify-between gap-2.5">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 text-xs gap-1.5 shrink-0 border-slate-300"
-                    onClick={handleMarkAllPresent}
-                  >
-                    <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    Semua Hadir
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-10 text-xs font-semibold gap-1.5 flex-1 bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 text-white shadow-xs"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5" />
-                    )}
-                    {saving ? "Menyimpan..." : "Simpan Presensi"}
-                  </Button>
-                </div>
-              )}
-
               {/* History Table */}
               <AttendanceHistoryMatrix
                 selectedMapel={selectedMapel}
@@ -1097,6 +1149,6 @@ export default function GuruAbsensiPage() {
           )}
         </>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

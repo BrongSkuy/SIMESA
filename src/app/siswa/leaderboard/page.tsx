@@ -2,17 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Trophy,
   Medal,
   Loader2,
-  Users,
-  School,
   Lock,
   Calendar,
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import LeaderboardCard, {
   LeaderboardPagination,
   LEADERBOARD_ITEMS_PER_PAGE,
@@ -25,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SpkResult {
   studentId: string;
@@ -209,14 +205,54 @@ export default function SiswaLeaderboardPage() {
     currentPage * LEADERBOARD_ITEMS_PER_PAGE
   );
 
+  const myRankEntry = myData
+    ? data.find((d) => d.studentId === myData.studentId)
+    : undefined;
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Peringkat Siswa Berprestasi"
-        badge="Portal Siswa"
-        description="Daftar resmi siswa berprestasi berdasarkan rekap penilaian semester aktif"
-        icon={Trophy}
-      />
+    <ModulePageShell
+      theme="royal"
+      eyebrow="SPK SAW | Portal Siswa"
+      title="Peringkat Siswa Berprestasi"
+      description="Daftar resmi siswa berprestasi berdasarkan rekap penilaian semester aktif."
+      stats={[
+        { label: "Periode Aktif", value: activePeriodeName },
+        {
+          label: "Status Rilis",
+          value:
+            isPublished === false
+              ? "Belum Dirilis"
+              : isPublished
+                ? "Terpublikasi"
+                : "Memuat...",
+          tone: isPublished ? "emerald" : "amber",
+        },
+        ...(isPublished ? [{ label: "Total Peserta", value: data.length }] : []),
+        ...(myRankEntry
+          ? [
+              {
+                label: "Peringkat Kamu",
+                value: `#${myRankEntry.rank}`,
+                sublabel: `${myRankEntry.persentase}%`,
+                tone: "amber" as const,
+              },
+            ]
+          : []),
+      ]}
+      tabs={
+        isPublished
+          ? [
+              { key: "umum", label: "Peringkat Umum" },
+              ...(myData?.kelas
+                ? [{ key: "kelas", label: `Kelas Saya (${myData.kelas})` }]
+                : []),
+            ]
+          : undefined
+      }
+      activeTab={filterType}
+      onTabChange={handleFilterChange}
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
 
       {isPublished === null && loading ? (
         <div className="flex py-20 justify-center">
@@ -369,32 +405,7 @@ export default function SiswaLeaderboardPage() {
                 subtitle="Hasil resmi pemeringkatan siswa berprestasi semester aktif"
                 period={activePeriodeName}
                 showTabs={false}
-              >
-                <div className="relative w-full pt-2 flex justify-center">
-                  <Tabs
-                    value={filterType}
-                    onValueChange={handleFilterChange}
-                    className="w-auto"
-                  >
-                    <TabsList className="flex flex-wrap items-center justify-center h-auto p-1 bg-white/90 backdrop-blur-xs rounded-full border border-amber-200/80 shadow-2xs gap-1">
-                      <TabsTrigger
-                        value="umum"
-                        className="rounded-full text-xs font-medium px-3.5 py-1.5 gap-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all cursor-pointer"
-                      >
-                        <School className="h-3.5 w-3.5" /> Peringkat Umum
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="kelas"
-                        disabled={!myData?.kelas}
-                        className="rounded-full text-xs font-medium px-3.5 py-1.5 gap-1.5 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-xs transition-all cursor-pointer"
-                      >
-                        <Users className="h-3.5 w-3.5" /> Kelas Saya{" "}
-                        {myData?.kelas ? `(${myData.kelas})` : ""}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              </LeaderboardCard>
+              />
 
               <div className="overflow-x-auto">
                 {loading ? (
@@ -538,6 +549,6 @@ export default function SiswaLeaderboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

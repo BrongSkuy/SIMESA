@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
-import { BarChart3, Loader2, Download, Users, CheckCircle2 } from "lucide-react";
+import { BarChart3, Loader2, Download, Users } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -14,8 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardDescription, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -365,13 +363,39 @@ export default function GuruRekapPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Rekapitulasi Kelas Diampu"
-        badge="Portal Guru"
-        description="Ringkasan kehadiran dan capaian nilai siswa pada kelas binaan Anda"
-        icon={BarChart3}
-      >
+    <ModulePageShell
+      title="Rekapitulasi Kelas Diampu"
+      eyebrow="Analitik Kelas | Portal Guru"
+      description="Ringkasan kehadiran dan capaian nilai siswa pada kelas binaan Anda."
+      icon={BarChart3}
+      theme="navy"
+      tabsLabel="Pilih kelas binaan"
+      tabs={classes.map((c) => ({
+        key: c.namaKelas,
+        label: `Kelas ${c.namaKelas}`,
+      }))}
+      activeTab={selectedClass}
+      onTabChange={handleClassTabChange}
+      stats={[
+        {
+          label: selectedClass ? `Siswa Kelas ${selectedClass}` : "Total Siswa",
+          value: loadingRekap ? "..." : rekapData.length,
+          sublabel: "Peserta didik terdaftar",
+        },
+        {
+          label: "Rata-rata Kehadiran",
+          value: loadingRekap ? "..." : `${avgPersen}%`,
+          sublabel: `${totalHadir} total presensi hadir`,
+          tone: "emerald",
+        },
+        {
+          label: "Total Ketidakhadiran",
+          value: loadingRekap ? "..." : totalAbsen,
+          sublabel: "Gabungan Izin, Sakit & Alfa",
+          tone: totalAbsen > 0 ? "amber" : "default",
+        },
+      ]}
+      actions={
         <Button
           variant="outline"
           size="sm"
@@ -379,12 +403,13 @@ export default function GuruRekapPage() {
           onClick={handleExport}
           disabled={rekapData.length === 0}
         >
-          <Download className="h-3.5 w-3.5 text-slate-500" /> Ekspor Rekap Excel
+          <Download className="h-3.5 w-3.5" /> Ekspor Rekap Excel
         </Button>
-      </PageHeader>
-
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
       {classes.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-2">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400">
             <Users className="h-5 w-5" />
           </div>
@@ -396,53 +421,14 @@ export default function GuruRekapPage() {
             terdaftar.
           </p>
         </div>
+      ) : loadingRekap ? (
+        <div className="flex py-16 justify-center">
+          <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
+        </div>
       ) : (
-        <Tabs value={selectedClass} onValueChange={handleClassTabChange}>
-          <TabsList className="flex flex-wrap h-auto">
-            {classes.map((c) => (
-              <TabsTrigger key={c.id} value={c.namaKelas} className="cursor-pointer">
-                Kelas {c.namaKelas}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value={selectedClass} className="space-y-6 mt-4">
-            {loadingRekap ? (
-              <div className="flex py-16 justify-center">
-                <Loader2 className="animate-spin h-7 w-7 text-blue-600" />
-              </div>
-            ) : (
-              <>
-                {/* KPI Row */}
-                <div className="rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-3 bg-white overflow-hidden shadow-xs">
-                  <StatCard
-                    title={`Siswa Kelas ${selectedClass}`}
-                    value={rekapData.length}
-                    icon={Users}
-                    color="blue"
-                    footerLeft="Peserta didik terdaftar"
-                    footerRight="Kelas Aktif"
-                  />
-                  <StatCard
-                    title="Rata-rata Kehadiran"
-                    value={`${avgPersen}%`}
-                    icon={CheckCircle2}
-                    color="emerald"
-                    footerLeft={`${totalHadir} total presensi hadir`}
-                    footerRight="Akumulasi"
-                  />
-                  <StatCard
-                    title="Total Ketidakhadiran"
-                    value={totalAbsen}
-                    icon={BarChart3}
-                    color="amber"
-                    footerLeft="Gabungan Izin, Sakit & Alfa"
-                    footerRight="Total Pertemuan"
-                  />
-                </div>
-
-                {/* Chart */}
-                <div className="rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-3">
+        <>
+          {/* Chart */}
+          <div className="rounded-xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-slate-100 transition-colors">
                     <div>
                       <CardTitle className="text-base font-semibold text-slate-900 tracking-tight transition-colors">
@@ -720,11 +706,8 @@ export default function GuruRekapPage() {
                     </Table>
                   </div>
                 </div>
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
+        </>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

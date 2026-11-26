@@ -16,7 +16,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { SessionSetup } from "@/components/shared/session-setup";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Button } from "@/components/ui/button";
@@ -541,14 +541,56 @@ export default function GuruNilaiPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Input Nilai Multi-Kategori"
-        badge="Portal Guru"
-        description="Kelola penilaian Tugas, UTS, UAS, Praktik, dan aspek penilaian sikap siswa"
-        icon={PenLine}
-      >
-        {showGrid && (
+    <ModulePageShell
+      title="Input Nilai Multi-Kategori"
+      eyebrow="Akademik | Portal Guru"
+      description="Kelola penilaian Tugas, UTS, UAS, Praktik, dan aspek penilaian sikap siswa."
+      icon={PenLine}
+      theme="navy"
+      stats={
+        showGrid
+          ? [
+              {
+                label: "Total Siswa",
+                value: siswaList.length,
+                sublabel: `Kelas ${selectedKelas}`,
+              },
+              {
+                label: "Kategori Penilaian",
+                value: categories.length,
+                sublabel: isAkademik ? "Kolom nilai aktif" : "Aspek penilaian",
+                tone: "blue",
+              },
+              {
+                label: "Mata Pelajaran",
+                value: selectedMapel || "-",
+                sublabel: "Mapel diampu",
+              },
+              {
+                label: "Bobot Kriteria",
+                value: activeCriteriaObj
+                  ? `${formatBobotPct(activeCriteriaObj.bobot)}%`
+                  : "-",
+                sublabel: activeCriteriaObj?.namaKriteria || "SPK SAW",
+                tone: "emerald",
+              },
+            ]
+          : [
+              {
+                label: "Kelas Diampu",
+                value: classes.length,
+                sublabel: "Penugasan aktif",
+              },
+              {
+                label: "Kriteria Penilaian",
+                value: criteria.length,
+                sublabel: "Parameter evaluasi",
+                tone: "blue",
+              },
+            ]
+      }
+      actions={
+        showGrid ? (
           <>
             <Button
               variant="outline"
@@ -556,7 +598,7 @@ export default function GuruNilaiPage() {
               className="gap-1.5"
               onClick={handleDownloadTemplate}
             >
-              <Download className="h-3.5 w-3.5 text-slate-500" /> Template
+              <Download className="h-3.5 w-3.5" /> Template
             </Button>
             <Button
               variant="outline"
@@ -564,7 +606,7 @@ export default function GuruNilaiPage() {
               className="gap-1.5"
               onClick={handleExportExcel}
             >
-              <Save className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
+              <Save className="h-3.5 w-3.5" /> Ekspor Excel
             </Button>
             <Button
               variant="outline"
@@ -576,7 +618,7 @@ export default function GuruNilaiPage() {
               {importing ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-3.5 w-3.5 text-slate-500" />
+                <Upload className="h-3.5 w-3.5" />
               )}
               Impor Excel
             </Button>
@@ -588,8 +630,10 @@ export default function GuruNilaiPage() {
               onChange={handleImportExcel}
             />
           </>
-        )}
-      </PageHeader>
+        ) : undefined
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
 
       {classes.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-10 text-center space-y-3">
@@ -990,6 +1034,6 @@ export default function GuruNilaiPage() {
           )}
         </>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

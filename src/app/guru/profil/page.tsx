@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  User,
   KeyRound,
   Loader2,
   Eye,
@@ -16,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -296,14 +295,18 @@ export default function ProfilGuruPage() {
     !displayName.trim() || displayName.trim() === sessionName.trim();
 
   return (
-    <div className="space-y-6 w-full">
-      <PageHeader
-        title="Profil & Keamanan Akun Guru"
-        badge="Portal Guru"
-        description="Kelola identitas, foto profil pengajar, dan perbarui kata sandi akun Anda"
-        icon={User}
-      />
-
+    <ModulePageShell
+      theme="obsidian"
+      eyebrow="Akun Saya | Portal Guru"
+      title="Profil & Keamanan Akun Guru"
+      description="Kelola identitas, foto profil pengajar, dan perbarui kata sandi akun Anda."
+      stats={[
+        { label: "Peran Aktif", value: appRole },
+        { label: "Portal", value: "Dewan Guru", tone: "blue" },
+        { label: "Status Akun", value: "Aktif", tone: "emerald" },
+      ]}
+      sheetClassName="p-5 sm:p-6"
+    >
       <div className="grid gap-6 md:grid-cols-5">
         {/* Kolom Identitas & Foto */}
         <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 space-y-6">
@@ -699,6 +702,6 @@ export default function ProfilGuruPage() {
           </div>
         </div>
       </div>
-    </div>
+    </ModulePageShell>
   );
 }

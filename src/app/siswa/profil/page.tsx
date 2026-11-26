@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  User,
   KeyRound,
   Loader2,
   Eye,
@@ -20,7 +19,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -288,14 +287,18 @@ export default function ProfilSiswaPage() {
   const strength = calculateStrength(newPassword);
 
   return (
-    <div className="space-y-6 w-full">
-      <PageHeader
-        title="Profil & Keamanan Akun Siswa"
-        badge="Portal Siswa"
-        description="Kelola foto profil akun peserta didik dan perbarui kata sandi login Anda"
-        icon={User}
-      />
-
+    <ModulePageShell
+      theme="navy"
+      eyebrow="Akun Saya | Portal Siswa"
+      title="Profil & Keamanan Akun Siswa"
+      description="Kelola foto profil akun peserta didik dan perbarui kata sandi login Anda."
+      stats={[
+        { label: "NIS / Username", value: username },
+        { label: "Kelas", value: studentMeta?.kelas || "Aktif", tone: "blue" },
+        { label: "Status Akun", value: "Aktif", tone: "emerald" },
+      ]}
+      sheetClassName="p-5 sm:p-6"
+    >
       <div className="grid gap-6 md:grid-cols-5">
         {/* Kolom Identitas & Foto */}
         <div className="md:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-6">
@@ -655,6 +658,6 @@ export default function ProfilSiswaPage() {
           </div>
         </div>
       </div>
-    </div>
+    </ModulePageShell>
   );
 }

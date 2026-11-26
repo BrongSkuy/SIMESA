@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  Database,
   Download,
   Trash2,
   Loader2,
@@ -18,7 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getTodayWIB } from "@/lib/utils";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -301,14 +300,23 @@ export default function ManajemenDataPage() {
     academicYears.filter((y) => y.isActive).length === 1;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Manajemen Data & Periode Akademik"
-        badge="Administrasi Sistem"
-        description="Kelola siklus tahun ajaran aktif, ekspor cadangan basis data Excel, dan pemeliharaan sistem"
-        icon={Database}
-      />
-
+    <ModulePageShell
+      theme="obsidian"
+      eyebrow="Administrasi Sistem | Portal Admin"
+      title="Manajemen Data & Periode Akademik"
+      description="Kelola siklus tahun ajaran aktif, ekspor cadangan basis data Excel, dan pemeliharaan sistem."
+      stats={[
+        {
+          label: "Periode Aktif",
+          value: activePeriod
+            ? `${activePeriod.tahunAjaran} (${activePeriod.semester})`
+            : "Belum diatur",
+          tone: activePeriod ? "emerald" : "amber",
+        },
+        { label: "Total Periode", value: academicYears.length },
+      ]}
+      sheetClassName="p-5 sm:p-6"
+    >
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column: Academic Years Management */}
         <div className="lg:col-span-2">
@@ -896,6 +904,6 @@ export default function ManajemenDataPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </ModulePageShell>
   );
 }

@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -111,39 +111,63 @@ export default function AdminSpkPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Konfigurasi Bobot Kriteria SPK"
-        badge="Metode SAW"
-        description="Atur distribusi bobot persentase evaluasi untuk pemeringkatan siswa terbaik"
-        icon={Settings2}
-      >
-        {hasChanges && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            disabled={saving}
-            onClick={handleResetChanges}
-          >
-            <RotateCcw className="h-3.5 w-3.5 text-slate-500" />
-            Kembalikan Awal
-          </Button>
-        )}
-        <Button
-          className="gap-1.5"
-          size="sm"
-          disabled={!isValid || saving || !hasChanges}
-          onClick={handleSave}
-        >
-          {saving ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Save className="h-3.5 w-3.5" />
+    <ModulePageShell
+      title="Konfigurasi Bobot Kriteria SPK"
+      eyebrow="Konfigurasi SPK | Metode SAW"
+      description="Atur distribusi bobot persentase evaluasi untuk pemeringkatan siswa terbaik."
+      icon={Settings2}
+      theme="royal"
+      stats={[
+        {
+          label: "Total Akumulasi Bobot",
+          value: `${totalBobot}%`,
+          sublabel: isValid ? "Tepat 100%" : "Harus tepat 100%",
+          tone: isValid ? "emerald" : "amber",
+        },
+        {
+          label: "Status Validasi",
+          value: isValid ? "Valid (100%)" : "Belum Seimbang",
+          sublabel: hasChanges && !saved ? "Ada perubahan belum disimpan" : "Tersinkron",
+          tone: isValid ? "emerald" : "amber",
+        },
+        {
+          label: "Jumlah Kriteria",
+          value: `${criteria.length} Parameter`,
+          sublabel: "Otomatis & manual",
+          tone: "blue",
+        },
+      ]}
+      actions={
+        <>
+          {hasChanges && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              disabled={saving}
+              onClick={handleResetChanges}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Kembalikan Awal
+            </Button>
           )}
-          {saving ? "Menyimpan..." : "Simpan Konfigurasi"}
-        </Button>
-      </PageHeader>
+          <Button
+            className="gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold border border-amber-300/40"
+            size="sm"
+            disabled={!isValid || saving || !hasChanges}
+            onClick={handleSave}
+          >
+            {saving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
+            {saving ? "Menyimpan..." : "Simpan Konfigurasi"}
+          </Button>
+        </>
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
 
       {/* Total Weight Validation Banner */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group">
@@ -308,6 +332,6 @@ export default function AdminSpkPage() {
           </p>
         </div>
       </div>
-    </div>
+    </ModulePageShell>
   );
 }

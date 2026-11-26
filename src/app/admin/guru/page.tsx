@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import { GraduationCap, Plus, Search, Filter, RotateCcw, Edit, Trash2, Loader2, Camera, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { compressImage } from "@/lib/image-compress";
@@ -264,28 +264,52 @@ export default function AdminGuruPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Data Guru"
-        badge={`${teachers.length} Pengajar`}
-        description="Daftar dewan guru, nomor induk pegawai (NIP), dan status keaktifan staf pengajar."
-        icon={GraduationCap}
-      >
-        <Dialog
-          open={dialogOpen}
-          onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) resetForm();
-          }}
-        >
-          <DialogTrigger
-            render={
-              <Button size="sm">
-                <Plus className="h-3.5 w-3.5" />
-                Tambah Guru
-              </Button>
-            }
-          />
+    <ModulePageShell
+      title="Data Guru"
+      eyebrow="Data Master | Portal Admin"
+      description="Daftar dewan guru, nomor induk pegawai (NIP), dan status keaktifan staf pengajar."
+      icon={GraduationCap}
+      theme="navy"
+      stats={[
+        {
+          label: "Total Pengajar",
+          value: teachers.length,
+          sublabel: "Terdaftar di sistem",
+        },
+        {
+          label: "Guru Aktif",
+          value: teachers.filter((t) => t.status === "aktif").length,
+          sublabel: "Sedang bertugas",
+          tone: "emerald",
+        },
+        {
+          label: "Nonaktif",
+          value: teachers.filter((t) => t.status !== "aktif").length,
+          sublabel: "Tidak aktif",
+          tone:
+            teachers.filter((t) => t.status !== "aktif").length > 0
+              ? "amber"
+              : "default",
+        },
+      ]}
+      sheetClassName="p-5 sm:p-6 space-y-5"
+      actions={
+        <>
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
+            <DialogTrigger
+              render={
+                <Button size="sm">
+                  <Plus className="h-3.5 w-3.5" />
+                  Tambah Guru
+                </Button>
+              }
+            />
           <DialogContent className="max-w-lg rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
@@ -583,10 +607,12 @@ export default function AdminGuruPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </PageHeader>
+        </>
+      }
+    >
 
       {/* Enterprise Filter Toolbar */}
-      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="pb-3.5 border-b border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
@@ -924,6 +950,6 @@ export default function AdminGuruPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </ModulePageShell>
   );
 }

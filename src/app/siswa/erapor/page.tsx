@@ -3,22 +3,14 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  BookMarked,
   Printer,
   Loader2,
-  CheckCircle2,
   AlertCircle,
-  GraduationCap,
   ArrowLeft,
-  CalendarCheck,
-  TrendingUp,
   Lock,
-  Eye,
-  LayoutList,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -39,7 +31,6 @@ import {
   getStudentEraporGateInfo,
   type EraporStatus,
 } from "@/lib/erapor-utils";
-import { cn } from "@/lib/utils";
 
 interface LockedEraporResponse {
   locked: true;
@@ -145,22 +136,30 @@ export default function SiswaEraporPage() {
   if (response.locked) {
     const gate = getStudentEraporGateInfo(response.statusRapor);
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="E-Rapor Siswa"
-          badge="Portal Siswa"
-          description={`Periode ${response.periodeDisplay}`}
-          icon={BookMarked}
-        >
+      <ModulePageShell
+        theme="emerald"
+        eyebrow="Laporan Hasil Belajar | Portal Siswa"
+        title="E-Rapor Siswa"
+        description={`Laporan hasil belajar periode ${response.periodeDisplay}.`}
+        stats={[
+          { label: "Status Rapor", value: response.statusRapor, tone: "amber" },
+          {
+            label: "Progres Nilai",
+            value: `${response.jumlahMapelTerisi}/${response.totalMapel} Mapel`,
+          },
+          { label: "Wali Kelas", value: response.waliKelas.nama },
+        ]}
+        actions={
           <Link href="/siswa/nilai">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <ArrowLeft className="h-3.5 w-3.5" />
               Kembali ke Nilai Saya
             </Button>
           </Link>
-        </PageHeader>
-
-        <div className="max-w-lg mx-auto rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 text-center space-y-4 shadow-xs">
+        }
+        sheetClassName="p-6 sm:p-10"
+      >
+        <div className="max-w-lg mx-auto text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
             <Lock className="w-5 h-5" />
           </div>
@@ -201,7 +200,7 @@ export default function SiswaEraporPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </ModulePageShell>
     );
   }
 
@@ -217,14 +216,39 @@ export default function SiswaEraporPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="print:hidden">
-        <PageHeader
-          title="E-Rapor Siswa"
-          badge={data.statusRapor}
-          description={`Laporan hasil belajar resmi periode ${data.periodeDisplay}`}
-          icon={BookMarked}
-        >
+    <ModulePageShell
+      theme="emerald"
+      eyebrow="Laporan Hasil Belajar | Portal Siswa"
+      title="E-Rapor Siswa"
+      description={`Laporan hasil belajar resmi periode ${data.periodeDisplay}.`}
+      stats={[
+        {
+          label: "Rata-rata Rapor",
+          value: data.rekapNilai.rataRata.toFixed(2),
+          sublabel: `Predikat ${data.rekapNilai.predikatUmum}`,
+          tone: "blue",
+        },
+        {
+          label: "Ketuntasan KKM",
+          value: `${data.rekapNilai.jumlahTuntas}/${data.rekapNilai.jumlahMapel}`,
+          sublabel: `KKM ${activeKkm}`,
+          tone:
+            data.rekapNilai.jumlahBelumTuntas === 0 ? "emerald" : "amber",
+        },
+        {
+          label: "Presensi Semester",
+          value: `${data.presensi.persentase}%`,
+          sublabel: `H:${data.presensi.hadir} S:${data.presensi.sakit} I:${data.presensi.izin} A:${data.presensi.alfa}`,
+        },
+        {
+          label: "Status Rapor",
+          value: data.statusRapor,
+          sublabel: data.waliKelas.nama,
+          tone: "emerald",
+        },
+      ]}
+      actions={
+        <>
           <Link href="/siswa/nilai">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <ArrowLeft className="h-3.5 w-3.5" />
@@ -235,94 +259,21 @@ export default function SiswaEraporPage() {
           <Button
             onClick={handlePrint}
             size="sm"
-            className="gap-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
+            className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer"
           >
             <Printer className="h-3.5 w-3.5" />
             Cetak Rapor (A4)
           </Button>
-        </PageHeader>
-      </div>
-
-      {/* KPI Ringkas */}
-      <div className="print:hidden rounded-2xl border border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 grid sm:grid-cols-4 bg-white overflow-hidden shadow-xs">
-        <StatCard
-          title="Rata-rata Rapor"
-          value={data.rekapNilai.rataRata.toFixed(2)}
-          icon={TrendingUp}
-          color="blue"
-          footerLeft={`Predikat: ${data.rekapNilai.predikatUmum}`}
-          footerRight="Bagi Rata"
-        />
-        <StatCard
-          title="Ketuntasan KKM"
-          value={`${data.rekapNilai.jumlahTuntas} dari ${data.rekapNilai.jumlahMapel}`}
-          icon={CheckCircle2}
-          color="emerald"
-          footerLeft={
-            data.rekapNilai.jumlahBelumTuntas === 0
-              ? "Semua Mapel Tuntas"
-              : `${data.rekapNilai.jumlahBelumTuntas} Perlu Perbaikan`
-          }
-          footerRight={`KKM ${activeKkm}`}
-        />
-        <StatCard
-          title="Presensi Semester"
-          value={`${data.presensi.persentase}%`}
-          icon={CalendarCheck}
-          color="navy"
-          footerLeft={`H:${data.presensi.hadir} S:${data.presensi.sakit} I:${data.presensi.izin} A:${data.presensi.alfa}`}
-          footerRight="Kehadiran"
-        />
-        <StatCard
-          title="Status Rapor"
-          value={data.statusRapor}
-          icon={GraduationCap}
-          color="amber"
-          footerLeft={`Wali: ${data.waliKelas.nama}`}
-          footerRight="Resmi"
-        />
-      </div>
-
-      {/* Switch Ringkasan vs Pratinjau A4 */}
-      <div className="print:hidden flex items-center justify-between gap-3">
-        <div
-          role="tablist"
-          aria-label="Mode tampilan rapor siswa"
-          className="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200/80"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === "summary"}
-            onClick={() => setViewMode("summary")}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-              viewMode === "summary"
-                ? "bg-[#0d1e38] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
-          >
-            <LayoutList className="h-3.5 w-3.5" />
-            Ringkasan Rapor
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === "preview"}
-            onClick={() => setViewMode("preview")}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-              viewMode === "preview"
-                ? "bg-[#0d1e38] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            )}
-          >
-            <Eye className="h-3.5 w-3.5" />
-            Pratinjau Lembar A4
-          </button>
-        </div>
-      </div>
-
+        </>
+      }
+      tabs={[
+        { key: "summary", label: "Ringkasan Rapor" },
+        { key: "preview", label: "Pratinjau Lembar A4" },
+      ]}
+      activeTab={viewMode}
+      onTabChange={(key) => setViewMode(key as "summary" | "preview")}
+      sheetClassName="p-5 sm:p-6 print:p-0 print:border-0 print:shadow-none"
+    >
       {viewMode === "summary" ? (
         <div className="space-y-5">
           {/* Tabel Capaian Mata Pelajaran */}
@@ -436,6 +387,6 @@ export default function SiswaEraporPage() {
       ) : (
         <ReportCardPrintView data={data} hideToolbar />
       )}
-    </div>
+    </ModulePageShell>
   );
 }

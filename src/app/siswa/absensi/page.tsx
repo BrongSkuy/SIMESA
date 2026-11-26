@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import {
-  CalendarCheck,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -11,7 +10,7 @@ import {
   List,
   X,
 } from "lucide-react";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
@@ -29,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -289,16 +287,37 @@ export default function SiswaAbsensiPage() {
     summary.total > 0 ? Math.round((summary.hadir / summary.total) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Riwayat Kehadiran & Presensi"
-        badge="Portal Siswa"
-        description="Rekam jejak kehadiran Anda per tanggal dan per mata pelajaran sepanjang semester"
-        icon={CalendarCheck}
-      />
-
-      {/* Controls: Filter + View Toggle */}
-      <div className="py-3.5 border-y border-slate-200 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+    <ModulePageShell
+      theme="navy"
+      eyebrow="Kehadiran | Portal Siswa"
+      title="Riwayat Kehadiran & Presensi"
+      description="Rekam jejak kehadiran Anda per tanggal dan per mata pelajaran sepanjang semester."
+      stats={[
+        { label: "Hadir", value: summary.hadir, tone: "emerald" },
+        { label: "Izin", value: summary.izin, tone: "amber" },
+        { label: "Sakit", value: summary.sakit, tone: "blue" },
+        { label: "Alfa", value: summary.alfa, tone: "rose" },
+        {
+          label: "% Kehadiran",
+          value: `${attendancePct}%`,
+          tone:
+            summary.total > 0
+              ? attendancePct >= 75
+                ? "emerald"
+                : "rose"
+              : "default",
+        },
+      ]}
+      tabs={[
+        { key: "kalender", label: "Kalender Bulanan" },
+        { key: "grafik", label: "Grafik Per Mapel" },
+      ]}
+      activeTab={viewMode}
+      onTabChange={(key) => setViewMode(key as "kalender" | "grafik")}
+      sheetClassName="p-5 sm:p-6 space-y-5"
+    >
+      {/* Controls: Filter + Legend */}
+      <div className="pb-4 border-b border-slate-100 flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
         <div className="flex items-center gap-2.5 flex-wrap">
           <BookOpen className="h-4 w-4 text-slate-400" />
           <Select
@@ -329,94 +348,28 @@ export default function SiswaAbsensiPage() {
           )}
         </div>
 
-        <Tabs
-          value={viewMode}
-          onValueChange={(v) => setViewMode(v as "kalender" | "grafik")}
-        >
-          <TabsList>
-            <TabsTrigger value="kalender" className="gap-1.5 cursor-pointer">
-              <CalendarCheck className="h-3.5 w-3.5" /> Kalender Bulanan
-            </TabsTrigger>
-            <TabsTrigger value="grafik" className="gap-1.5 cursor-pointer">
-              <BarChart3 className="h-3.5 w-3.5" /> Grafik Per Mapel
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* Summary Stats - 5 Interactive Dark Hover Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
-            Hadir
-          </p>
-          <p className="text-2xl font-bold tabular-nums text-emerald-600 mt-1 transition-colors">
-            {summary.hadir}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
-            Izin
-          </p>
-          <p className="text-2xl font-bold tabular-nums text-amber-600 mt-1 transition-colors">
-            {summary.izin}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
-            Sakit
-          </p>
-          <p className="text-2xl font-bold tabular-nums text-blue-600 mt-1 transition-colors">
-            {summary.sakit}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
-            Alfa
-          </p>
-          <p className="text-2xl font-bold tabular-nums text-rose-600 mt-1 transition-colors">
-            {summary.alfa}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all duration-300 hover:border-slate-300/90 hover:shadow-sm group cursor-pointer col-span-2 sm:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors">
-            % Kehadiran
-          </p>
-          <p
-            className={`text-2xl font-bold tabular-nums mt-1 transition-colors ${
-              summary.total > 0
-                ? attendancePct >= 75
-                  ? "text-emerald-600 "
-                  : "text-rose-600 "
-                : "text-slate-500 "
-            }`}
-          >
-            {attendancePct}%
-          </p>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-emerald-500" />
-          <span>Hadir</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-amber-500" />
-          <span>Izin</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-blue-500" />
-          <span>Sakit</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-rose-500" />
-          <span>Alfa</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-xs bg-slate-200" />
-          <span>Belum Ada / Akhir Pekan</span>
+        {/* Legend */}
+        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-xs bg-emerald-500" />
+            <span>Hadir</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-xs bg-amber-500" />
+            <span>Izin</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-xs bg-blue-500" />
+            <span>Sakit</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-xs bg-rose-500" />
+            <span>Alfa</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-xs bg-slate-200" />
+            <span>Belum Ada / Akhir Pekan</span>
+          </div>
         </div>
       </div>
 
@@ -763,6 +716,6 @@ export default function SiswaAbsensiPage() {
           </div>
         </div>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

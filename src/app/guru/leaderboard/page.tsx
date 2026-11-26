@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import LeaderboardCard, {
   LeaderboardPagination,
   LEADERBOARD_ITEMS_PER_PAGE,
@@ -120,7 +120,7 @@ export default function GuruLeaderboardPage() {
     fetch("/api/classes")
       .then((r) => r.json())
       .then((d) => setClasses(Array.isArray(d) ? d : []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -135,8 +135,8 @@ export default function GuruLeaderboardPage() {
       try {
         const targetKelas =
           activeTab === "umum" ||
-          activeTab === "kelas" ||
-          activeTab === "angkatan"
+            activeTab === "kelas" ||
+            activeTab === "angkatan"
             ? "umum"
             : activeTab;
         const res = await fetch(
@@ -215,37 +215,79 @@ export default function GuruLeaderboardPage() {
   const visibleRows = isPrinting
     ? data
     : data.slice(
-        (currentPage - 1) * LEADERBOARD_ITEMS_PER_PAGE,
-        currentPage * LEADERBOARD_ITEMS_PER_PAGE
-      );
+      (currentPage - 1) * LEADERBOARD_ITEMS_PER_PAGE,
+      currentPage * LEADERBOARD_ITEMS_PER_PAGE
+    );
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Peringkat Siswa Berprestasi"
-        badge="Portal Guru"
-        description="Daftar peringkat resmi siswa berprestasi berdasarkan rekap penilaian semester aktif"
-        icon={Trophy}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 hide-on-print"
-          onClick={handleExport}
-          disabled={data.length === 0 || isPublished !== true}
-        >
-          <Download className="h-3.5 w-3.5 text-slate-500" /> Ekspor Excel
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 hide-on-print"
-          onClick={handleExportPDF}
-          disabled={data.length === 0 || isPublished !== true}
-        >
-          <Printer className="h-3.5 w-3.5 text-slate-500" /> Cetak PDF
-        </Button>
-      </PageHeader>
+    <ModulePageShell
+      title="Peringkat Siswa Berprestasi"
+      eyebrow="SPK SAW | Portal Guru"
+      description="Daftar peringkat resmi siswa berprestasi berdasarkan rekap penilaian semester aktif."
+      icon={Trophy}
+      theme="royal"
+      tabsLabel="Filter peringkat per kelas"
+      tabs={
+        isPublished === true
+          ? [
+            { key: "umum", label: "Peringkat Umum" },
+            ...classes.map((c) => ({
+              key: c.namaKelas,
+              label: `Kelas ${c.namaKelas}`,
+            })),
+          ]
+          : undefined
+      }
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+      stats={[
+        {
+          label: "Periode Aktif",
+          value: activePeriodeName || "Aktif",
+          sublabel: "Semester berjalan",
+        },
+        {
+          label: "Status Publikasi",
+          value:
+            isPublished === true
+              ? "Terpublikasi"
+              : isPublished === false
+                ? "Menunggu Rilis"
+                : "Memuat...",
+          sublabel: isPublished ? "Peringkat resmi" : "Validasi admin",
+          tone: isPublished ? "emerald" : "amber",
+        },
+        {
+          label: "Siswa Terperingkat",
+          value: loading ? "..." : data.length,
+          sublabel: activeTab === "umum" ? "Semua kelas" : `Kelas ${activeTab}`,
+          tone: "blue",
+        },
+      ]}
+      actions={
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 hide-on-print"
+            onClick={handleExport}
+            disabled={data.length === 0 || isPublished !== true}
+          >
+            <Download className="h-3.5 w-3.5" /> Ekspor Excel
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 hide-on-print"
+            onClick={handleExportPDF}
+            disabled={data.length === 0 || isPublished !== true}
+          >
+            <Printer className="h-3.5 w-3.5" /> Cetak PDF
+          </Button>
+        </>
+      }
+      sheetClassName="p-5 sm:p-6 space-y-6"
+    >
 
       <style
         dangerouslySetInnerHTML={{
@@ -347,13 +389,12 @@ export default function GuruLeaderboardPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${
-                          i === 0
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border transition-colors ${i === 0
                             ? "bg-amber-50 text-amber-800 border-amber-200"
                             : i === 1
                               ? "bg-slate-100 text-slate-700 border-slate-200"
                               : "bg-amber-50 text-amber-700 border-amber-200"
-                        }`}
+                          }`}
                       >
                         Peringkat #{student.rank}
                       </span>
@@ -365,11 +406,10 @@ export default function GuruLeaderboardPage() {
                       </p>
                     </div>
                     <div
-                      className={`p-2.5 rounded-xl border shrink-0 transition-colors ${
-                        i === 0
+                      className={`p-2.5 rounded-xl border shrink-0 transition-colors ${i === 0
                           ? "bg-amber-50 border-amber-200 text-amber-700"
                           : "bg-slate-50 border-slate-200 text-slate-600 "
-                      }`}
+                        }`}
                     >
                       <Medal className="h-5 w-5" />
                     </div>
@@ -487,13 +527,12 @@ export default function GuruLeaderboardPage() {
                                   </span>
                                   <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden hidden sm:block transition-colors">
                                     <div
-                                      className={`h-full rounded-full transition-all ${
-                                        entry.rank === 1
+                                      className={`h-full rounded-full transition-all ${entry.rank === 1
                                           ? "bg-gradient-to-r from-amber-400 to-amber-600"
                                           : entry.rank <= 3
                                             ? "bg-gradient-to-r from-blue-600 to-amber-500"
                                             : "bg-[#1e3a8a] "
-                                      }`}
+                                        }`}
                                       style={{ width: `${pct}%` }}
                                     />
                                   </div>
@@ -538,6 +577,6 @@ export default function GuruLeaderboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </ModulePageShell>
   );
 }

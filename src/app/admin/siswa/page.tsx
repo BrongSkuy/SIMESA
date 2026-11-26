@@ -19,7 +19,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { compressImage } from "@/lib/image-compress";
@@ -402,57 +402,78 @@ export default function AdminSiswaPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Data Siswa"
-        badge={`${students.length} Terdaftar`}
-        description="Profil lengkap, biodata, NIS, dan alokasi kelas seluruh siswa."
-        icon={Users}
-      >
-        <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>
-          <Download className="h-3.5 w-3.5 text-slate-500" />
-          Template
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => importRef.current?.click()}
-          disabled={importing}
-        >
-          {importing ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Upload className="h-3.5 w-3.5 text-blue-600" />
-          )}
-          Import Excel
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleExportData}>
-          <Download className="h-3.5 w-3.5 text-emerald-600" />
-          Export Data
-        </Button>
-        <input
-          ref={importRef}
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={handleImport}
-        />
-
-        <Dialog
-          open={dialogOpen}
-          onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) resetForm();
-          }}
-        >
-          <DialogTrigger
-            render={
-              <Button size="sm">
-                <Plus className="h-3.5 w-3.5" />
-                Tambah Siswa
-              </Button>
-            }
+    <ModulePageShell
+      title="Data Siswa"
+      eyebrow="Data Master | Portal Admin"
+      description="Profil lengkap, biodata, NIS, dan alokasi kelas seluruh siswa."
+      icon={Users}
+      theme="navy"
+      stats={[
+        {
+          label: "Total Siswa",
+          value: students.length,
+          sublabel: "Terdaftar di sistem",
+        },
+        {
+          label: "Siswa Aktif",
+          value: students.filter((s) => s.status === "aktif").length,
+          sublabel: "Status aktif belajar",
+          tone: "emerald",
+        },
+        {
+          label: "Total Kelas",
+          value: classes.length,
+          sublabel: "Rombel tersedia",
+          tone: "blue",
+        },
+      ]}
+      sheetClassName="p-5 sm:p-6 space-y-5"
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>
+            <Download className="h-3.5 w-3.5" />
+            Template
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => importRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+            Import Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportData}>
+            <Download className="h-3.5 w-3.5" />
+            Export Data
+          </Button>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={handleImport}
           />
+
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
+            <DialogTrigger
+              render={
+                <Button size="sm">
+                  <Plus className="h-3.5 w-3.5" />
+                  Tambah Siswa
+                </Button>
+              }
+            />
           <DialogContent className="max-w-lg rounded-lg border-slate-200">
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900">
@@ -793,10 +814,12 @@ export default function AdminSiswaPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </PageHeader>
+        </>
+      }
+    >
 
       {/* Enterprise Filter Toolbar */}
-      <div className="py-3.5 border-y border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="pb-3.5 border-b border-slate-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <Input
@@ -1137,6 +1160,6 @@ export default function AdminSiswaPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </ModulePageShell>
   );
 }

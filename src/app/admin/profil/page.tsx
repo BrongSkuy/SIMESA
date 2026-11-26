@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  User,
   KeyRound,
   Loader2,
   Eye,
@@ -16,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/shared/page-header";
+import { ModulePageShell } from "@/components/shared/module-page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -295,14 +294,21 @@ export default function AdminProfilPage() {
   const strength = calculateStrength(newPassword);
 
   return (
-    <div className="space-y-6 w-full">
-      <PageHeader
-        title="Profil & Keamanan Administrator"
-        badge="Akun Saya"
-        description="Kelola identitas, foto profil, dan perbarui kata sandi otentikasi administrator"
-        icon={User}
-      />
-
+    <ModulePageShell
+      theme="obsidian"
+      eyebrow="Akun Saya | Portal Admin"
+      title="Profil & Keamanan Administrator"
+      description="Kelola identitas, foto profil, dan perbarui kata sandi otentikasi administrator."
+      stats={[
+        {
+          label: "Peran Aktif",
+          value: ROLE_CONFIGS[appRole as AppRole]?.label || appRole,
+        },
+        { label: "Username", value: username },
+        { label: "Status Akun", value: "Aktif", tone: "emerald" },
+      ]}
+      sheetClassName="p-5 sm:p-6"
+    >
       <div className="grid gap-6 md:grid-cols-5">
         {/* Kolom Identitas & Foto */}
         <div className="md:col-span-2 md:border-r border-slate-200 md:pr-8 space-y-6">
@@ -648,6 +654,6 @@ export default function AdminProfilPage() {
           </div>
         </div>
       </div>
-    </div>
+    </ModulePageShell>
   );
 }
