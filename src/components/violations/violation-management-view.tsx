@@ -181,28 +181,11 @@ type BookTabKey = "students" | "logs" | "letters" | "rules";
 const BOOK_TABS: Array<{
   key: BookTabKey;
   label: string;
-  inactiveBg: string;
 }> = [
-  {
-    key: "students",
-    label: "Rekap Siswa",
-    inactiveBg: "bg-slate-200/95 text-slate-800 hover:bg-slate-100",
-  },
-  {
-    key: "logs",
-    label: "Riwayat",
-    inactiveBg: "bg-[#e5a852] text-slate-950 hover:bg-[#ebb568]",
-  },
-  {
-    key: "letters",
-    label: "Arsip SP",
-    inactiveBg: "bg-[#65a9d6] text-slate-950 hover:bg-[#7bb7df]",
-  },
-  {
-    key: "rules",
-    label: "Aturan",
-    inactiveBg: "bg-[#b97797] text-white hover:bg-[#c58aa6]",
-  },
+  { key: "students", label: "Rekap Siswa" },
+  { key: "logs", label: "Riwayat" },
+  { key: "letters", label: "Arsip SP" },
+  { key: "rules", label: "Aturan" },
 ];
 
 export function ViolationManagementView({ portal }: ViolationManagementViewProps) {
@@ -729,7 +712,7 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
 
       {/* 2. BUKU SAKU TERBUKA 2 HALAMAN (OVERLAP KE TEPI BAWAH HEADER NAVY) */}
       <div className="relative z-20 max-w-7xl mx-auto px-0 sm:px-2 lg:px-4 -mt-11 sm:-mt-12">
-        {/* Pembatas Indeks Kertas Berwarna di Atas Sisi Kanan Buku */}
+        {/* Tab Senada di Kanan Atas (Transparan Gelap saat Nonaktif, Menyatu Kertas Gading saat Aktif) */}
         <div className="flex flex-wrap items-end justify-end pr-4 sm:pr-7 gap-1.5">
           {BOOK_TABS.map((tab) => {
             const isActive = activeTab === tab.key;
@@ -739,10 +722,10 @@ export function ViolationManagementView({ portal }: ViolationManagementViewProps
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "px-3.5 sm:px-4 py-2 rounded-t-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
+                  "px-4 py-2 rounded-t-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap select-none border-t border-x",
                   isActive
-                    ? "bg-[#FCFBF7] text-slate-900 border-t border-x border-[#dfd6c3] translate-y-[2px] relative z-30 shadow-2xs"
-                    : `${tab.inactiveBg} translate-y-[1px] opacity-95 hover:opacity-100 shadow-xs`
+                    ? "bg-[#FCFBF7] text-slate-900 border-[#dfd6c3] translate-y-[2px] relative z-30 font-bold"
+                    : "bg-white/[0.08] text-blue-100/85 border-white/10 hover:bg-white/15 hover:border-white/20 hover:text-white backdrop-blur-xs"
                 )}
               >
                 {tab.label}

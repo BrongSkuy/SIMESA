@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Download,
   UserCheck,
-  Layers,
   Clock,
   GraduationCap,
   Search,
@@ -41,7 +40,6 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -529,6 +527,38 @@ export default function AdminNilaiSayaPage() {
       description="Pilih siswa untuk meninjau rincian penilaian seluruh kriteria dan akumulasi skor SPK SAW."
       icon={ClipboardList}
       theme="navy"
+      actions={
+        data ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportTranscript}
+            className="gap-1.5 cursor-pointer text-xs"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Unduh Transkrip (.xlsx)
+          </Button>
+        ) : undefined
+      }
+      tabs={
+        data
+          ? [
+              {
+                key: "mapel",
+                label: "Rincian Per Mapel",
+                badge: subjectsList.length,
+              },
+              {
+                key: "kriteria",
+                label: "Evaluasi SPK SAW",
+                badge: data.criteria.length,
+              },
+            ]
+          : undefined
+      }
+      activeTab={activeTab}
+      onTabChange={(k) => setActiveTab(k as "mapel" | "kriteria")}
       stats={
         data
           ? [
@@ -754,43 +784,6 @@ export default function AdminNilaiSayaPage() {
               </div>
             </div>
           )}
-
-          {/* Dual-View Tabs Switcher & Unduh Transkrip Button */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">
-                Mode Tampilan Transkrip Evaluasi
-              </h3>
-              <p className="text-xs text-slate-500">
-                Pilih tampilan berdasarkan rincian per mata pelajaran atau per kriteria SPK SAW
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Tabs
-                value={activeTab}
-                onValueChange={(v) => setActiveTab(v as "mapel" | "kriteria")}
-              >
-                <TabsList>
-                  <TabsTrigger value="mapel" className="gap-1.5 cursor-pointer">
-                    <GraduationCap className="h-3.5 w-3.5" /> Rincian Per Mapel ({subjectsList.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="kriteria" className="gap-1.5 cursor-pointer">
-                    <Layers className="h-3.5 w-3.5" /> Evaluasi SPK SAW ({data.criteria.length})
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleExportTranscript}
-                className="gap-1.5 cursor-pointer text-xs h-8"
-              >
-                <Download className="h-3.5 w-3.5 text-blue-600" />
-                Unduh Transkrip (.xlsx)
-              </Button>
-            </div>
-          </div>
 
           {activeTab === "mapel" ? (
             <div className="space-y-6">

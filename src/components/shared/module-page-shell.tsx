@@ -52,7 +52,6 @@ const THEME_TOKENS: Record<
     desc: string;
     statLabel: string;
     tabInactive: string;
-    tabActiveAfter: string;
   }
 > = {
   navy: {
@@ -64,8 +63,7 @@ const THEME_TOKENS: Record<
     desc: "text-blue-100/75",
     statLabel: "text-blue-100/70",
     tabInactive:
-      "bg-white/[0.08] text-blue-100/85 border-white/10 hover:bg-white/15 hover:text-white",
-    tabActiveAfter: "after:border-blue-600",
+      "bg-white/[0.08] text-blue-100/85 border-white/10 hover:bg-white/15 hover:border-white/20 hover:text-white",
   },
   emerald: {
     sectionBg: "bg-[#061c17]",
@@ -76,8 +74,7 @@ const THEME_TOKENS: Record<
     desc: "text-emerald-100/75",
     statLabel: "text-emerald-100/70",
     tabInactive:
-      "bg-white/[0.08] text-emerald-100/85 border-white/10 hover:bg-white/15 hover:text-white",
-    tabActiveAfter: "after:border-emerald-600",
+      "bg-white/[0.08] text-emerald-100/85 border-white/10 hover:bg-white/15 hover:border-white/20 hover:text-white",
   },
   royal: {
     sectionBg: "bg-[#0c1229]",
@@ -88,8 +85,7 @@ const THEME_TOKENS: Record<
     desc: "text-indigo-100/75",
     statLabel: "text-indigo-100/70",
     tabInactive:
-      "bg-white/[0.08] text-indigo-100/85 border-white/10 hover:bg-white/15 hover:text-white",
-    tabActiveAfter: "after:border-amber-500",
+      "bg-white/[0.08] text-indigo-100/85 border-white/10 hover:bg-white/15 hover:border-white/20 hover:text-white",
   },
   obsidian: {
     sectionBg: "bg-[#0c1017]",
@@ -100,8 +96,7 @@ const THEME_TOKENS: Record<
     desc: "text-slate-300/80",
     statLabel: "text-slate-300/70",
     tabInactive:
-      "bg-white/[0.08] text-slate-200/85 border-white/10 hover:bg-white/15 hover:text-white",
-    tabActiveAfter: "after:border-slate-700",
+      "bg-white/[0.08] text-slate-200/85 border-white/10 hover:bg-white/15 hover:border-white/20 hover:text-white",
   },
 };
 
@@ -329,12 +324,9 @@ export function ModulePageShell({
                   onClick={() => handleSelectTab(tab.key)}
                   onKeyDown={(e) => handleTabKeyDown(e, idx)}
                   className={cn(
-                    "relative flex-none snap-start px-4 py-2 rounded-t-xl text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap select-none border-t border-x focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-400",
+                    "relative flex-none snap-start px-4 py-2 rounded-t-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap select-none border-t border-x focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-400",
                     isActive
-                      ? cn(
-                          "bg-white text-slate-900 border-slate-200/90 translate-y-[1px] z-30 after:content-[''] after:absolute after:inset-x-3 after:top-0 after:border-t-2 after:rounded-full",
-                          t.tabActiveAfter
-                        )
+                      ? "bg-white text-slate-900 border-slate-200/90 translate-y-[1px] z-30 font-bold"
                       : cn(t.tabInactive, "backdrop-blur-xs")
                   )}
                 >
